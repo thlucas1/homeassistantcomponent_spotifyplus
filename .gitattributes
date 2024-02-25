@@ -1,0 +1,32 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# correct GitHub "Languages" detection behavior.
+# without this, GitHub reports the repository as an HTML application.
+.github/** linguist-documentation
+.vscode/** linguist-documentation
+config/** linguist-documentation
+scripts/** linguist-documentation
+*.bat linguist-detectable=false
+*.yaml linguist-detectable=false
+*.txt linguist-detectable=false
+
+# handle files with specified extensions as described.
+*.doc    diff=astextplain
+*.DOC    diff=astextplain
+*.docx   diff=astextplain
+*.DOCX   diff=astextplain
+*.dot    diff=astextplain
+*.DOT    diff=astextplain
+*.pdf    diff=astextplain
+*.PDF    diff=astextplain
+*.rtf    diff=astextplain
+*.RTF    diff=astextplain
+*.jpg    binary
+*.png    binary
+*.gif    binary
+*.csproj text=auto merge=union 
+*.vbproj text=auto merge=union 
+*.fsproj text=auto merge=union 
+*.dbproj text=auto merge=union 
+*.sln    -text merge=union

@@ -1,0 +1,18 @@
+{
+  "domain": "spotifyplus",
+  "name": "SpotifyPlus",
+  "codeowners": [ "@thlucas1" ],
+  "config_flow": true,
+  "dependencies": [ "application_credentials" ],
+  "documentation": "https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/thlucas1/homeassistantcomponent_spotifyplus/issues",
+  "requirements": [
+    "smartinspectPython==3.0.33",
+    "spotifywebapiPython==1.0.30",
+    "urllib3>=1.21.1,<1.27"
+  ],
+  "version": "1.0.1",
+  "zeroconf": [ "_spotify-connect._tcp.local." ]
+}

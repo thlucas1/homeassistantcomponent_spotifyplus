@@ -1,0 +1,101 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>48CF340A-3E98-409E-89A1-FBBDDCCC21BF</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>
+    </StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>spotifyplus</Name>
+    <RootNamespace>spotifyplus</RootNamespace>
+    <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
+    <SuppressEnvironmentCreationPrompt>True</SuppressEnvironmentCreationPrompt>
+    <SuppressPackageInstallationPrompt>True</SuppressPackageInstallationPrompt>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="custom_components\spotifyplus\application_credentials.py" />
+    <Compile Include="custom_components\spotifyplus\appmessages.py" />
+    <Compile Include="custom_components\spotifyplus\browse_media.py" />
+    <Compile Include="custom_components\spotifyplus\config_flow.py" />
+    <Compile Include="custom_components\spotifyplus\const.py" />
+    <Compile Include="custom_components\spotifyplus\instancedata_spotifyplus.py" />
+    <Compile Include="custom_components\spotifyplus\media_player.py" />
+    <Compile Include="custom_components\spotifyplus\system_health.py" />
+    <Compile Include="custom_components\spotifyplus\__init__.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include=".github\" />
+    <Folder Include=".github\ISSUE_TEMPLATE\" />
+    <Folder Include=".github\workflows\" />
+    <Folder Include=".vscode\" />
+    <Folder Include="config\" />
+    <Folder Include="custom_components\" />
+    <Folder Include="custom_components\spotifyplus\" />
+    <Folder Include="custom_components\spotifyplus\translations\" />
+    <Folder Include="scripts\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include=".devcontainer.json" />
+    <Content Include=".gitattributes" />
+    <Content Include=".github\dependabot.yml" />
+    <Content Include=".github\ISSUE_TEMPLATE\bug.yml" />
+    <Content Include=".github\ISSUE_TEMPLATE\config.yml" />
+    <Content Include=".github\ISSUE_TEMPLATE\feature_request.yml" />
+    <Content Include=".github\workflows\lint.yml" />
+    <Content Include=".github\workflows\release.yml" />
+    <Content Include=".github\workflows\validate.yml" />
+    <Content Include=".gitignore" />
+    <Content Include=".ruff.toml" />
+    <Content Include=".vscode\tasks.json" />
+    <Content Include="CHANGELOG.md" />
+    <Content Include="config\configuration.yaml" />
+    <Content Include="config\smartinspect.cfg" />
+    <Content Include="CONTRIBUTING.md" />
+    <Content Include="custom_components\spotifyplus\manifest.json" />
+    <Content Include="custom_components\spotifyplus\services.yaml" />
+    <Content Include="custom_components\spotifyplus\strings.json" />
+    <Content Include="custom_components\spotifyplus\translations\en.json" />
+    <Content Include="custom_components\spotifyplus\zzz_Publish.cmd" />
+    <Content Include="developer_notes.txt" />
+    <Content Include="hacs.json" />
+    <Content Include="LICENSE" />
+    <Content Include="New_Release_Instructions.txt" />
+    <Content Include="README.md" />
+    <Content Include="requirements.txt" />
+    <Content Include="scripts\develop" />
+    <Content Include="scripts\lint" />
+    <Content Include="scripts\setup" />
+  </ItemGroup>
+  <ItemGroup>
+    <Interpreter Include="env\">
+      <Id>env</Id>
+      <Version>3.11</Version>
+      <Description>env (Python 3.11 (64-bit))</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X64</Architecture>
+    </Interpreter>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>

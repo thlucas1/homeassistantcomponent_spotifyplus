@@ -1,0 +1,507 @@
+{
+  "config": {
+    "step": {
+      "pick_implementation": {
+        "title": "Select SpotifyPlus OAuth Credential"
+      },
+      "reauth_confirm": {
+        "title": "SpotifyPlus Re-Authentication Required",
+        "description": "The Spotify integration needs to re-authenticate with Spotify for account: {account}"
+      }
+    },
+    "abort": {
+      "authorize_url_timeout": "Timeout generating authorize URL.",
+      "missing_configuration": "The Spotify integration is not configured. Please follow the documentation.",
+      "no_url_available": "[%key:common::config_flow::abort::oauth2_no_url_available%]",
+      "reauth_account_mismatch": "The Spotify account authenticated with, does not match the account needed re-authentication."
+    },
+    "create_entry": { "default": "Successfully authenticated with Spotify." }
+  },
+  "system_health": {
+    "info": {
+      "api_endpoint_reachable": "Spotify API endpoint reachable"
+    }
+  },
+  "issues": {
+    "removed_yaml": {
+      "title": "The Spotify YAML configuration has been removed",
+      "description": "Configuring Spotify using YAML has been removed.\n\nYour existing YAML configuration is not used by Home Assistant.\n\nRemove the YAML configuration from your configuration.yaml file and restart Home Assistant to fix this issue."
+    }
+  },
+  "services": {
+    "get_album": {
+      "name": "Get Album",
+      "description": "Get Spotify catalog information for a single album.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "album_id": {
+          "name": "Album Id",
+          "description": "The Spotify ID of the album."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter."
+        }
+      }
+    },
+    "get_album_favorites": {
+      "name": "Get Album Favorites",
+      "description": "Get a list of the albums saved in the current Spotify user's 'Your Library'.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        }
+      }
+    },
+    "get_album_new_releases": {
+      "name": "Get Album New Releases",
+      "description": "Get a list of new album releases featured in Spotify.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
+        },
+        "country": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        }
+      }
+    },
+    "get_artist": {
+      "name": "Get Artist",
+      "description": "Get Spotify catalog information for a single artist.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "artist_id": {
+          "name": "Artist Id",
+          "description": "The Spotify ID of the artist."
+        }
+      }
+    },
+    "get_artist_albums": {
+      "name": "Get Artist Albums",
+      "description": "Get Spotify catalog information about an artist's albums.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "artist_id": {
+          "name": "Artist Id",
+          "description": "The Spotify ID of the artist."
+        },
+        "include_groups": {
+          "name": "Include Groups",
+          "description": "A comma-separated list of keywords that will be used to filter the response.  If not supplied, all album types will be returned. Valid values are `album`, `single`, `appears_on`, `compilation`."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        }
+      }
+    },
+    "get_artists_followed": {
+      "name": "Get Artists Followed",
+      "description": "Get the current user's followed artists.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "after": {
+          "name": "After Artist ID",
+          "description": "The last artist ID retrieved from the previous request, or null for the first request."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        }
+      }
+    },
+    "get_browse_categorys": {
+      "name": "Get Browse Categorys",
+      "description": "Get a sorted list of ALL categories used to tag items in Spotify.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "country": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter."
+        },
+        "locale": {
+          "name": "Locale",
+          "description": "The desired language, consisting of a lowercase ISO 639-1 language code and an uppercase ISO 3166-1 alpha-2 country code, joined by an underscore.  For example `es_MX`, meaning `Spanish (Mexico)`.  Provide this parameter if you want the results returned in a particular language (where available).  Note that if locale is not supplied, or if the specified language is not available, all strings will be returned in the Spotify default language (American English)."
+        },
+        "refresh": {
+          "name": "Refresh Cache",
+          "description": "True to return real-time information from the spotify web api and update the cache; otherwise, False to just return the cached value."
+        }
+      }
+    },
+    "get_category_playlists": {
+      "name": "Get Category Playlists",
+      "description": "Get a list of Spotify playlists tagged with a particular category.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "category_id": {
+          "name": "Category ID",
+          "description": "The Spotify category ID (not name) for the category."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
+        },
+        "country": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        }
+      }
+    },
+    "get_featured_playlists": {
+      "name": "Get Featured Playlists",
+      "description": "Get a list of Spotify featured playlists.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
+        },
+        "country": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter."
+        },
+        "locale": {
+          "name": "Locale",
+          "description": "The desired language, consisting of a lowercase ISO 639-1 language code and an uppercase ISO 3166-1 alpha-2 country code, joined by an underscore.  For example `es_MX`, meaning `Spanish (Mexico)`.  Provide this parameter if you want the results returned in a particular language (where available).  Note that if locale is not supplied, or if the specified language is not available, all strings will be returned in the Spotify default language (American English)."
+        },
+        "timestamp": {
+          "name": "Timestamp",
+          "description": "A timestamp in ISO 8601 format (yyyy-MM-ddTHH:mm:ss). Use this parameter to specify the user's local time to get results tailored for that specific date and time in the day. If not provided, the response defaults to the current UTC time."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        }
+      }
+    },
+    "get_player_recent_tracks": {
+      "name": "Get Player Recent Tracks",
+      "description": "Get tracks from the current user's recently played tracks; currently doesn't support podcast episodes, and only 50 items may be returned due to spotify limits.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "after": {
+          "name": "After Time MS",
+          "description": "Returns all items after (but not including) this cursor position, which is a Unix timestamp in milliseconds.  If `after` is specified, `before` must not be specified.  Use with limit to get the next set of items.  Default is `0` (the first item)."
+        },
+        "before": {
+          "name": "Before Time MS",
+          "description": "Returns all items before (but not including) this cursor position, which is a Unix timestamp in milliseconds.  If `before` is specified, `after` must not be specified.  Use with limit to get the next set of items.  Default is `0` (the first item)."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        }
+      }
+    },
+    "get_playlist": {
+      "name": "Get Playlist",
+      "description": "Get a playlist owned by a Spotify user.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "playlist_id": {
+          "name": "Playlist Id",
+          "description": "The Spotify ID of the playlist."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter."
+        },
+        "fields": {
+          "name": "Fields",
+          "description": "A comma-separated list of fields to return from the Spotify Web API. All fields are returned if omitted."
+        },
+        "additional_types": {
+          "name": "Additional Types",
+          "description": "A comma-separated list of item types that your client supports besides the default track type. Valid types are 'track' and 'episode'."
+        }
+      }
+    },
+    "get_playlist_favorites": {
+      "name": "Get Playlist Favorites",
+      "description": "Get a list of the playlists owned or followed by the current Spotify user.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        }
+      }
+    },
+    "get_show": {
+      "name": "Get Show",
+      "description": "Get Spotify catalog information for a single show.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "show_id": {
+          "name": "Show Id",
+          "description": "The Spotify ID of the show."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter."
+        }
+      }
+    },
+    "get_show_episodes": {
+      "name": "Get Show Episodes",
+      "description": "Get Spotify catalog information about a show's episodes.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "show_id": {
+          "name": "Show ID",
+          "description": "The Spotify ID for the show."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter."
+        }
+      }
+    },
+    "get_show_favorites": {
+      "name": "Get Show Favorites",
+      "description": "Get a list of the shows saved in the current Spotify user's 'Your Library'.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        }
+      }
+    },
+    "get_track_favorites": {
+      "name": "Get Track Favorites",
+      "description": "Get a list of the tracks saved in the current Spotify user's 'Your Library'.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        }
+      }
+    },
+    "get_users_top_artists": {
+      "name": "Get Users Top Artists",
+      "description": "Get the current user's top artists based on calculated affinity.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "time_range": {
+          "name": "Time Range",
+          "description": "Over what time frame the affinities are computed. Valid values are `long_term` (calculated from several years of data and including all new data as it becomes available), `medium_term` (approximately last 6 months), and `short_term` (approximately last 4 weeks)."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        }
+      }
+    },
+    "get_users_top_tracks": {
+      "name": "Get Users Top Tracks",
+      "description": "Get the current user's top tracks based on calculated affinity.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "time_range": {
+          "name": "Time Range",
+          "description": "Over what time frame the affinities are computed. Valid values are `long_term` (calculated from several years of data and including all new data as it becomes available), `medium_term` (approximately last 6 months), and `short_term` (approximately last 4 weeks)."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        }
+      }
+    },
+    "search_playlists": {
+      "name": "Search Playlists",
+      "description": "Get Spotify catalog information about Playlists that match a keyword string.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "criteria": {
+          "name": "Search Criteria",
+          "description": "The criteria to search for (e.g. \"Daily Mix\")."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        },
+        "spotify_owned_only": {
+          "name": "Spotify Owned Only?",
+          "description": "True to return only found items that are owned by spotify (e.g. content generated for you by the spotify AI engine); otherwise, False to return all found items.  Default is False."
+        }
+      }
+    }
+  }
+}
