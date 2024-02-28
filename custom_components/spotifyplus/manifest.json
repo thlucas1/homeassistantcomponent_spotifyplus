@@ -10,7 +10,7 @@
   "issue_tracker": "https://github.com/thlucas1/homeassistantcomponent_spotifyplus/issues",
   "requirements": [
     "smartinspectPython==3.0.33",
-    "spotifywebapiPython==1.0.30",
+    "spotifywebapiPython==1.0.31",
     "urllib3>=1.21.1,<1.27"
   ],
   "version": "1.0.1",

@@ -22,6 +22,7 @@ config/*
 
 # GIT support files to ignore.
 /Git*.cmd
+/Git*.txt
 
 # Local project files to ignore.
 /custom_components/spotifyplus/zzz_Publish.cmd

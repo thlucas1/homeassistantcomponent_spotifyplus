@@ -149,7 +149,7 @@ SPOTIFY_LIBRARY_MAP = {
     BrowsableMedia.SPOTIFY_CATEGORY_PLAYLISTS_MADEFORYOU.value:  {
         "title": "Made For You",
         "title_node": "Spotify Playlists Made For You",
-        "image": f"/local/images/{DOMAIN}_medialib_spotify_category_playlists_madeforyou.png",
+        "image": f"/local/images/{DOMAIN}_medialib_spotify_category_playlists_made_for_you.png",
         "parent": MediaClass.DIRECTORY,
         "children": MediaClass.PLAYLIST,
     },
@@ -217,6 +217,9 @@ SPOTIFY_LIBRARY_MAP = {
 
 BROWSE_LIMIT = 50
 """ Max number of items to return from a Spotify Web API query. """
+
+SPOTIFY_BROWSE_LIMIT_TOTAL = 100
+""" Max number of items to return from a SpotifyPlus integration request that supports paging. """
 
 CATEGORY_BASE64:str = "category_base64::"
 """ Eye-catcher used to denote a serialized ContentItem. """
@@ -460,53 +463,53 @@ def browse_media_node(hass:HomeAssistant,
         # - image: the image (if any) to display in the media browser (can be none).
         if media_content_type == BrowsableMedia.SPOTIFY_USER_PLAYLISTS:
             _logsi.LogVerbose("'%s': querying spotify for Playlist Favorites" % playerName)
-            media:PlaylistPageSimplified = client.GetPlaylistFavorites(limit=BROWSE_LIMIT)
+            media:PlaylistPageSimplified = client.GetPlaylistFavorites(limitTotal=BROWSE_LIMIT)
             items = media.Items
             
         elif media_content_type == BrowsableMedia.SPOTIFY_USER_FOLLOWED_ARTISTS:
             _logsi.LogVerbose("'%s': querying spotify for Artists Followed" % playerName)
-            media:ArtistPage = client.GetArtistsFollowed(limit=BROWSE_LIMIT)
+            media:ArtistPage = client.GetArtistsFollowed(limitTotal=BROWSE_LIMIT)
             items = media.Items
             
         elif media_content_type == BrowsableMedia.SPOTIFY_USER_SAVED_ALBUMS:
             _logsi.LogVerbose("Getting Spotify user Album favorites")
-            media:AlbumPageSaved = client.GetAlbumFavorites(limit=BROWSE_LIMIT)
+            media:AlbumPageSaved = client.GetAlbumFavorites(limitTotal=BROWSE_LIMIT)
             items = media.GetAlbums()
             
         elif media_content_type == BrowsableMedia.SPOTIFY_USER_SAVED_TRACKS:
             _logsi.LogVerbose("Getting Spotify user Track favorites")
-            media:TrackPageSaved = client.GetTrackFavorites(limit=BROWSE_LIMIT)
+            media:TrackPageSaved = client.GetTrackFavorites(limitTotal=BROWSE_LIMIT)
             items = media.GetTracks()
             
         elif media_content_type == BrowsableMedia.SPOTIFY_USER_SAVED_SHOWS:
             _logsi.LogVerbose("Getting Spotify user Show favorites")
-            media:ShowPageSaved = client.GetShowFavorites(limit=BROWSE_LIMIT)
+            media:ShowPageSaved = client.GetShowFavorites(limitTotal=BROWSE_LIMIT)
             items = media.GetShows()
             
         elif media_content_type == BrowsableMedia.SPOTIFY_USER_RECENTLY_PLAYED:
             _logsi.LogVerbose("Getting Spotify user Recently Played Tracks")
-            media:PlayHistoryPage = client.GetPlayerRecentTracks(limit=BROWSE_LIMIT)
+            media:PlayHistoryPage = client.GetPlayerRecentTracks(limitTotal=BROWSE_LIMIT)
             items = media.GetTracks()
             
         elif media_content_type == BrowsableMedia.SPOTIFY_USER_TOP_ARTISTS:
             _logsi.LogVerbose("Getting Spotify user Top Artists")
-            media:ArtistPage = client.GetUsersTopArtists(limit=BROWSE_LIMIT)
+            media:ArtistPage = client.GetUsersTopArtists(limitTotal=BROWSE_LIMIT)
             items = media.Items
             
         elif media_content_type == BrowsableMedia.SPOTIFY_USER_TOP_TRACKS:
             _logsi.LogVerbose("Getting Spotify user Top Tracks")
-            media:TrackPage = client.GetUsersTopTracks(limit=BROWSE_LIMIT)
+            media:TrackPage = client.GetUsersTopTracks(limitTotal=BROWSE_LIMIT)
             items = media.Items
             
         elif media_content_type == BrowsableMedia.SPOTIFY_FEATURED_PLAYLISTS:
-            _logsi.LogVerbose("Getting Spotify Featured Playlists for country (%s)" % client.UserProfile.Country)
+            _logsi.LogVerbose("Getting Spotify Featured Playlists")
             media:PlaylistPageSimplified
-            media, message = client.GetFeaturedPlaylists(limit=BROWSE_LIMIT, country=client.UserProfile.Country)
+            media, message = client.GetFeaturedPlaylists(limitTotal=BROWSE_LIMIT)
             items = media.Items
             
         elif media_content_type == BrowsableMedia.SPOTIFY_CATEGORYS:
-            _logsi.LogVerbose("Getting Spotify Categories for country (%s)" % client.UserProfile.Country)
-            media:list[Category] = client.GetBrowseCategorysList(country=client.UserProfile.Country, refresh=False)
+            _logsi.LogVerbose("Getting Spotify Categories")
+            media:list[Category] = client.GetBrowseCategorysList(refresh=False)
             items = media
             
             # add a "Uri" attribute to each category in the cached category list.
@@ -521,7 +524,7 @@ def browse_media_node(hass:HomeAssistant,
                 _logsi.LogVerbose("Category Uri set: Name='%s', Id='%s', Uri='%s'" % (category.Name, category.Id, category.Uri))
             
         elif media_content_type == BrowsableMedia.SPOTIFY_CATEGORY_PLAYLISTS:
-            _logsi.LogVerbose("Getting Spotify Category Playlist for country (%s)" % client.UserProfile.Country)
+            _logsi.LogVerbose("Getting Spotify Category Playlist")
             
             # was a base64 encoded category object supplied?  if not, then it's a problem! 
             if not media_content_id.startswith(CATEGORY_BASE64):
@@ -536,20 +539,20 @@ def browse_media_node(hass:HomeAssistant,
 
             # get the playlists for the category id.
             media:PlaylistPageSimplified
-            media, message = client.GetCategoryPlaylists(media_content_id, limit=BROWSE_LIMIT, country=client.UserProfile.Country)
+            media, message = client.GetCategoryPlaylists(media_content_id, limitTotal=BROWSE_LIMIT)
             items = media.Items
             title = category.Name
             image = category.ImageUrl
                             
         elif media_content_type == BrowsableMedia.SPOTIFY_CATEGORY_PLAYLISTS_MADEFORYOU:
-            _logsi.LogVerbose("Getting Spotify 'Made For You' Category Playlist for country (%s)" % client.UserProfile.Country)
+            _logsi.LogVerbose("Getting Spotify 'Made For You' Category Playlist")
             media_content_id = '0JQ5DAt0tbjZptfcdMSKl3'   # special hidden category "Made For You"
-            media, message = client.GetCategoryPlaylists(media_content_id, limit=BROWSE_LIMIT, country=client.UserProfile.Country)
+            media, message = client.GetCategoryPlaylists(media_content_id, limitTotal=BROWSE_LIMIT)
             items = media.Items
 
         elif media_content_type == BrowsableMedia.SPOTIFY_NEW_RELEASES:
-            _logsi.LogVerbose("Getting Spotify Album New Releases for country (%s)" % client.UserProfile.Country)
-            media:AlbumPageSimplified = client.GetAlbumNewReleases(limit=BROWSE_LIMIT, country=client.UserProfile.Country)
+            _logsi.LogVerbose("Getting Spotify Album New Releases")
+            media:AlbumPageSimplified = client.GetAlbumNewReleases(limitTotal=BROWSE_LIMIT)
             items = media.Items
 
         # elif media_content_type == BrowsableMedia.SPOTIFY_USER_DAILY_MIXES:
@@ -569,7 +572,7 @@ def browse_media_node(hass:HomeAssistant,
             _logsi.LogVerbose("Getting Spotify Artist Albums")
             spotifyId:str = SpotifyClient.GetIdFromUri(media_content_id)
             artist:Artist = client.GetArtist(spotifyId)      # for cover image
-            media:AlbumPageSimplified = client.GetArtistAlbums(spotifyId, include_groups='album', limit=BROWSE_LIMIT)
+            media:AlbumPageSimplified = client.GetArtistAlbums(spotifyId, include_groups='album', limitTotal=BROWSE_LIMIT)
             items = media.Items
             title = artist.Name
             image = artist.ImageUrl
