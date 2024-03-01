@@ -98,7 +98,13 @@ SERVICE_SPOTIFY_GET_SHOW_FAVORITES:str = 'get_show_favorites'
 SERVICE_SPOTIFY_GET_TRACK_FAVORITES:str = 'get_track_favorites'
 SERVICE_SPOTIFY_GET_USERS_TOP_ARTISTS:str = 'get_users_top_artists'
 SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS:str = 'get_users_top_tracks'
+SERVICE_SPOTIFY_SEARCH_ALBUMS:str = 'search_albums'
+SERVICE_SPOTIFY_SEARCH_ARTISTS:str = 'search_artists'
+SERVICE_SPOTIFY_SEARCH_AUDIOBOOKS:str = 'search_audiobooks'
+SERVICE_SPOTIFY_SEARCH_EPISODES:str = 'search_episodes'
 SERVICE_SPOTIFY_SEARCH_PLAYLISTS:str = 'search_playlists'
+SERVICE_SPOTIFY_SEARCH_SHOWS:str = 'search_shows'
+SERVICE_SPOTIFY_SEARCH_TRACKS:str = 'search_tracks'
 
 
 SERVICE_SPOTIFY_GET_ALBUM_SCHEMA = vol.Schema(
@@ -289,6 +295,54 @@ SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS_SCHEMA = vol.Schema(
     }
 )
 
+SERVICE_SPOTIFY_SEARCH_ALBUMS_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("criteria"): cv.string,
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
+        vol.Optional("market"): cv.string,
+        vol.Optional("include_external"): cv.string,
+        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+    }
+)
+
+SERVICE_SPOTIFY_SEARCH_ARTISTS_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("criteria"): cv.string,
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
+        vol.Optional("market"): cv.string,
+        vol.Optional("include_external"): cv.string,
+        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+    }
+)
+
+SERVICE_SPOTIFY_SEARCH_AUDIOBOOKS_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("criteria"): cv.string,
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
+        vol.Optional("market"): cv.string,
+        vol.Optional("include_external"): cv.string,
+        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+    }
+)
+
+SERVICE_SPOTIFY_SEARCH_EPISODES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("criteria"): cv.string,
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
+        vol.Optional("market"): cv.string,
+        vol.Optional("include_external"): cv.string,
+        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+    }
+)
+
 SERVICE_SPOTIFY_SEARCH_PLAYLISTS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
@@ -298,7 +352,30 @@ SERVICE_SPOTIFY_SEARCH_PLAYLISTS_SCHEMA = vol.Schema(
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
-        vol.Optional("spotify_owned_only"): cv.boolean,
+    }
+)
+
+SERVICE_SPOTIFY_SEARCH_SHOWS_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("criteria"): cv.string,
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
+        vol.Optional("market"): cv.string,
+        vol.Optional("include_external"): cv.string,
+        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+    }
+)
+
+SERVICE_SPOTIFY_SEARCH_TRACKS_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("criteria"): cv.string,
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
+        vol.Optional("market"): cv.string,
+        vol.Optional("include_external"): cv.string,
+        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
     }
 )
 
@@ -570,6 +647,54 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_get_users_top_tracks, time_range, limit, offset, limit_total)
 
+                elif service.service == SERVICE_SPOTIFY_SEARCH_ALBUMS:
+
+                    # search Spotify for specified criteria.
+                    criteria = service.data.get("criteria")
+                    limit = service.data.get("limit")
+                    offset = service.data.get("offset")
+                    market = service.data.get("market")
+                    include_external = service.data.get("include_external")
+                    limit_total = service.data.get("limit_total")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_search_albums, criteria, limit, offset, market, include_external, limit_total)
+                    
+                elif service.service == SERVICE_SPOTIFY_SEARCH_ARTISTS:
+
+                    # search Spotify for specified criteria.
+                    criteria = service.data.get("criteria")
+                    limit = service.data.get("limit")
+                    offset = service.data.get("offset")
+                    market = service.data.get("market")
+                    include_external = service.data.get("include_external")
+                    limit_total = service.data.get("limit_total")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_search_artists, criteria, limit, offset, market, include_external, limit_total)
+                    
+                elif service.service == SERVICE_SPOTIFY_SEARCH_AUDIOBOOKS:
+
+                    # search Spotify for specified criteria.
+                    criteria = service.data.get("criteria")
+                    limit = service.data.get("limit")
+                    offset = service.data.get("offset")
+                    market = service.data.get("market")
+                    include_external = service.data.get("include_external")
+                    limit_total = service.data.get("limit_total")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_search_audiobooks, criteria, limit, offset, market, include_external, limit_total)
+                    
+                elif service.service == SERVICE_SPOTIFY_SEARCH_EPISODES:
+
+                    # search Spotify for specified criteria.
+                    criteria = service.data.get("criteria")
+                    limit = service.data.get("limit")
+                    offset = service.data.get("offset")
+                    market = service.data.get("market")
+                    include_external = service.data.get("include_external")
+                    limit_total = service.data.get("limit_total")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_search_episodes, criteria, limit, offset, market, include_external, limit_total)
+                    
                 elif service.service == SERVICE_SPOTIFY_SEARCH_PLAYLISTS:
 
                     # search Spotify for specified criteria.
@@ -579,18 +704,47 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     market = service.data.get("market")
                     include_external = service.data.get("include_external")
                     limit_total = service.data.get("limit_total")
-                    spotify_owned_only = service.data.get("spotify_owned_only")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_search_playlists, criteria, limit, offset, market, include_external, limit_total, spotify_owned_only)
+                    response = await hass.async_add_executor_job(entity.service_spotify_search_playlists, criteria, limit, offset, market, include_external, limit_total)
+                    
+                elif service.service == SERVICE_SPOTIFY_SEARCH_SHOWS:
+
+                    # search Spotify for specified criteria.
+                    criteria = service.data.get("criteria")
+                    limit = service.data.get("limit")
+                    offset = service.data.get("offset")
+                    market = service.data.get("market")
+                    include_external = service.data.get("include_external")
+                    limit_total = service.data.get("limit_total")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_search_shows, criteria, limit, offset, market, include_external, limit_total)
+                    
+                elif service.service == SERVICE_SPOTIFY_SEARCH_TRACKS:
+
+                    # search Spotify for specified criteria.
+                    criteria = service.data.get("criteria")
+                    limit = service.data.get("limit")
+                    offset = service.data.get("offset")
+                    market = service.data.get("market")
+                    include_external = service.data.get("include_external")
+                    limit_total = service.data.get("limit_total")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_search_tracks, criteria, limit, offset, market, include_external, limit_total)
                     
                 else:
-                    raise ValueError("Unrecognized service identifier '%s' in method service_handle_spotify_serviceresponse" % service.service)
+                    
+                    raise HomeAssistantError("Unrecognized service identifier '%s' in method service_handle_spotify_serviceresponse" % service.service)
 
                 # return the response.
                 _logsi.LogDictionary(SILevel.Verbose, "Service Response data: '%s'" % (service.service), response, prettyPrint=True)
                 return response 
 
-            except HomeAssistantError: raise    # pass handled exception on through.
+            except HomeAssistantError as ex: 
+                
+                # log error, but not to system logger as HA will take care of it.
+                _logsi.LogError(str(ex), logToSystemLogger=False)
+                raise
+            
             except Exception as ex:
 
                 # log exception, but not to system logger as HA will take care of it.
@@ -642,8 +796,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
             # did we resolve it? if not, then log a message.
             if player is None:
-                _logsi.LogError("Entity id value of '%s' could not be resolved to a MediaPlayerEntity instance for the '%s' method call" % (str(entity_id), service.service))
-                return None
+                raise HomeAssistantError("Entity id value of '%s' could not be resolved to a MediaPlayerEntity instance for the '%s' method call" % (str(entity_id), service.service))
 
             # return the MediaPlayerEntity instance.
             _logsi.LogVerbose("Entity id value of '%s' was resolved to MediaPlayerEntity instance for the '%s' method call" % (str(entity_id), service.service))
@@ -831,12 +984,66 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             supports_response=SupportsResponse.ONLY,
         )
 
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_SEARCH_ALBUMS, SERVICE_SPOTIFY_SEARCH_ALBUMS_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_SEARCH_ALBUMS,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_SEARCH_ALBUMS_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_SEARCH_ARTISTS, SERVICE_SPOTIFY_SEARCH_ARTISTS_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_SEARCH_ARTISTS,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_SEARCH_ARTISTS_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_SEARCH_AUDIOBOOKS, SERVICE_SPOTIFY_SEARCH_AUDIOBOOKS_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_SEARCH_AUDIOBOOKS,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_SEARCH_AUDIOBOOKS_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_SEARCH_EPISODES, SERVICE_SPOTIFY_SEARCH_EPISODES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_SEARCH_EPISODES,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_SEARCH_EPISODES_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
         _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_SEARCH_PLAYLISTS, SERVICE_SPOTIFY_SEARCH_PLAYLISTS_SCHEMA)
         hass.services.async_register(
             DOMAIN,
             SERVICE_SPOTIFY_SEARCH_PLAYLISTS,
             service_handle_spotify_serviceresponse,
             schema=SERVICE_SPOTIFY_SEARCH_PLAYLISTS_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_SEARCH_SHOWS, SERVICE_SPOTIFY_SEARCH_SHOWS_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_SEARCH_SHOWS,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_SEARCH_SHOWS_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_SEARCH_TRACKS, SERVICE_SPOTIFY_SEARCH_TRACKS_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_SEARCH_TRACKS,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_SEARCH_TRACKS_SCHEMA,
             supports_response=SupportsResponse.ONLY,
         )
 

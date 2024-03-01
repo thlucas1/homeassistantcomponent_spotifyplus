@@ -501,6 +501,110 @@
         }
       }
     },
+    "search_albums": {
+      "name": "Search Albums",
+      "description": "Get Spotify catalog information about Albums that match a keyword string.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "criteria": {
+          "name": "Search Criteria",
+          "description": "The criteria to search for."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        }
+      }
+    },
+    "search_artists": {
+      "name": "Search Artists",
+      "description": "Get Spotify catalog information about Artists that match a keyword string.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "criteria": {
+          "name": "Search Criteria",
+          "description": "The criteria to search for."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        }
+      }
+    },
+    "search_ausiobooks": {
+      "name": "Search Audiobooks",
+      "description": "Get Spotify catalog information about Audiobooks that match a keyword string.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "criteria": {
+          "name": "Search Criteria",
+          "description": "The criteria to search for."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        }
+      }
+    },
+    "search_episodes": {
+      "name": "Search Episodes",
+      "description": "Get Spotify catalog information about Episodes that match a keyword string.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "criteria": {
+          "name": "Search Criteria",
+          "description": "The criteria to search for."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        }
+      }
+    },
     "search_playlists": {
       "name": "Search Playlists",
       "description": "Get Spotify catalog information about Playlists that match a keyword string.",
@@ -511,7 +615,7 @@
         },
         "criteria": {
           "name": "Search Criteria",
-          "description": "The criteria to search for (e.g. \"Daily Mix\")."
+          "description": "The criteria to search for."
         },
         "limit": {
           "name": "Limit",
@@ -528,6 +632,58 @@
         "spotify_owned_only": {
           "name": "Spotify Owned Only?",
           "description": "True to return only found items that are owned by spotify (e.g. content generated for you by the spotify AI engine); otherwise, False to return all found items.  Default is False."
+        }
+      }
+    },
+    "search_shows": {
+      "name": "Search Shows",
+      "description": "Get Spotify catalog information about Shows that match a keyword string.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "criteria": {
+          "name": "Search Criteria",
+          "description": "The criteria to search for."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        }
+      }
+    },
+    "search_tracks": {
+      "name": "Search Tracks",
+      "description": "Get Spotify catalog information about Tracks that match a keyword string.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "criteria": {
+          "name": "Search Criteria",
+          "description": "The criteria to search for."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
         }
       }
     }

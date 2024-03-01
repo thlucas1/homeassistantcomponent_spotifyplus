@@ -6,6 +6,16 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.4 ] - 2024/03/01
+
+  * Added service `search_albums` to search the Spotify catalog for matching album criteria.
+  * Added service `search_artists` to search the Spotify catalog for matching artist criteria.
+  * Added service `search_audiobooks` to search the Spotify catalog for matching audiobook criteria.
+  * Added service `search_episodes` to search the Spotify catalog for matching episode criteria.
+  * Added service `search_shows` to search the Spotify catalog for matching show (aka podcast) criteria.
+  * Added service `search_tracks` to search the Spotify catalog for matching track criteria.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.32.
+
 ###### [ 1.0.3 ] - 2024/02/28
 
   * Updated service `get_show_episodes` to include the `limit_total` argument.

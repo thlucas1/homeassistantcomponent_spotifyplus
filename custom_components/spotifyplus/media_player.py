@@ -2103,19 +2103,16 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_search_playlists(self, 
-                                         criteria:str, 
-                                         limit:int, 
-                                         offset:int, 
-                                         market:str,
-                                         includeExternal:str,
-                                         limitTotal:int,
-                                         spotifyOwnedOnly:bool
-                                         ) -> dict:
+    def service_spotify_search_albums(self, 
+                                      criteria:str, 
+                                      limit:int, 
+                                      offset:int, 
+                                      market:str,
+                                      includeExternal:str,
+                                      limitTotal:int,
+                                      ) -> dict:
         """
-        Get Spotify catalog information about albums, artists, playlists, tracks, shows, episodes 
-        or audiobooks that match a keyword string. Audiobooks are only available within the US, UK, 
-        Canada, Ireland, New Zealand and Australia markets.
+        Get Spotify catalog information about albums that match a keyword string.
 
         Args:
             criteria (str):
@@ -2157,10 +2154,390 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 and paging is automatically used to retrieve all available items up to the
                 maximum number specified.  
                 Default: None (disabled)
-            spotifyOwnedOnly (bool):
-                True to return only found items that are owned by spotify (e.g. content generated for you by the spotify AI engine); 
-                otherwise, False to return all found items.   
-                Default is False.
+
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: An `AlbumPageSimplified` object of matching results.            
+        """
+        apiMethodName:str = 'service_spotify_search_albums'
+        apiMethodParms:SIMethodParmListContext = None
+        result:SearchResponse = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("criteria", criteria)
+            apiMethodParms.AppendKeyValue("limit", limit)
+            apiMethodParms.AppendKeyValue("offset", offset)
+            apiMethodParms.AppendKeyValue("market", market)
+            apiMethodParms.AppendKeyValue("includeExternal", includeExternal)
+            apiMethodParms.AppendKeyValue("limitTotal", limitTotal)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Search Albums Service", apiMethodParms)
+                
+            # get Spotify catalog information about Albums that match a keyword string.
+            _logsi.LogVerbose("Searching Spotify Albums for criteria")
+            searchResponse:SearchResponse = self.data.spotifyClient.SearchAlbums(criteria, limit, offset, market, includeExternal, limitTotal)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": searchResponse.Albums.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_search_artists(self, 
+                                       criteria:str, 
+                                       limit:int, 
+                                       offset:int, 
+                                       market:str,
+                                       includeExternal:str,
+                                       limitTotal:int,
+                                       ) -> dict:
+        """
+        Get Spotify catalog information about artists that match a keyword string.
+
+        Args:
+            criteria (str):
+                Your search query.  
+                You can narrow down your search using field filters.  
+                The available filters are album, artist, track, year, upc, tag:hipster, tag:new, 
+                isrc, and genre. Each field filter only applies to certain result types.  
+                The artist and year filters can be used while searching albums, artists and tracks.
+                You can filter on a single year or a range (e.g. 1955-1960).  
+                The album filter can be used while searching albums and tracks.  
+                The genre filter can be used while searching artists and tracks.  
+                The isrc and track filters can be used while searching tracks.  
+                The upc, tag:new and tag:hipster filters can only be used while searching albums. 
+                The tag:new filter will return albums released in the past two weeks and tag:hipster 
+                can be used to return only albums with the lowest 10% popularity.
+            limit (int):
+                The maximum number of items to return in a page of items.  
+                Default: 20, Range: 1 to 50.  
+            offset (int):
+                The page index offset of the first item to return.  
+                Use with limit to get the next set of items.  
+                Default: 0 (the first item).  Range: 0 to 1000.  
+            market (str):
+                An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that 
+                is available in that market will be returned.  If a valid user access token is specified 
+                in the request header, the country associated with the user account will take priority over 
+                this parameter.  
+                Note: If neither market or user country are provided, the content is considered unavailable for the client.  
+                Users can view the country that is associated with their account in the account settings.  
+                Example: `ES`
+            includeExternal (str):
+                If "audio" is specified it signals that the client can play externally hosted audio content, and 
+                marks the content as playable in the response. By default externally hosted audio content is marked 
+                as unplayable in the response.  
+                Allowed values: "audio"
+            limitTotal (int):
+                The maximum number of items to return for the request.  
+                If specified, this argument overrides the limit and offset argument values
+                and paging is automatically used to retrieve all available items up to the
+                maximum number specified.  
+                Default: None (disabled)
+
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: An `ArtistPage` object of matching results.            
+        """
+        apiMethodName:str = 'service_spotify_search_artists'
+        apiMethodParms:SIMethodParmListContext = None
+        result:SearchResponse = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("criteria", criteria)
+            apiMethodParms.AppendKeyValue("limit", limit)
+            apiMethodParms.AppendKeyValue("offset", offset)
+            apiMethodParms.AppendKeyValue("market", market)
+            apiMethodParms.AppendKeyValue("includeExternal", includeExternal)
+            apiMethodParms.AppendKeyValue("limitTotal", limitTotal)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Search Artists Service", apiMethodParms)
+                
+            # get Spotify catalog information about Artists that match a keyword string.
+            _logsi.LogVerbose("Searching Spotify Artists for criteria")
+            searchResponse:SearchResponse = self.data.spotifyClient.SearchArtists(criteria, limit, offset, market, includeExternal, limitTotal)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": searchResponse.Artists.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_search_audiobooks(self, 
+                                          criteria:str, 
+                                          limit:int, 
+                                          offset:int, 
+                                          market:str,
+                                          includeExternal:str,
+                                          limitTotal:int,
+                                          ) -> dict:
+        """
+        Get Spotify catalog information about audiobooks that match a keyword string.
+
+        Args:
+            criteria (str):
+                Your search query.  
+                You can narrow down your search using field filters.  
+                The available filters are album, artist, track, year, upc, tag:hipster, tag:new, 
+                isrc, and genre. Each field filter only applies to certain result types.  
+                The artist and year filters can be used while searching albums, artists and tracks.
+                You can filter on a single year or a range (e.g. 1955-1960).  
+                The album filter can be used while searching albums and tracks.  
+                The genre filter can be used while searching artists and tracks.  
+                The isrc and track filters can be used while searching tracks.  
+                The upc, tag:new and tag:hipster filters can only be used while searching albums. 
+                The tag:new filter will return albums released in the past two weeks and tag:hipster 
+                can be used to return only albums with the lowest 10% popularity.
+            limit (int):
+                The maximum number of items to return in a page of items.  
+                Default: 20, Range: 1 to 50.  
+            offset (int):
+                The page index offset of the first item to return.  
+                Use with limit to get the next set of items.  
+                Default: 0 (the first item).  Range: 0 to 1000.  
+            market (str):
+                An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that 
+                is available in that market will be returned.  If a valid user access token is specified 
+                in the request header, the country associated with the user account will take priority over 
+                this parameter.  
+                Note: If neither market or user country are provided, the content is considered unavailable for the client.  
+                Users can view the country that is associated with their account in the account settings.  
+                Example: `ES`
+            includeExternal (str):
+                If "audio" is specified it signals that the client can play externally hosted audio content, and 
+                marks the content as playable in the response. By default externally hosted audio content is marked 
+                as unplayable in the response.  
+                Allowed values: "audio"
+            limitTotal (int):
+                The maximum number of items to return for the request.  
+                If specified, this argument overrides the limit and offset argument values
+                and paging is automatically used to retrieve all available items up to the
+                maximum number specified.  
+                Default: None (disabled)
+
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: An `AudiobookPageSimplified` object of matching results.            
+        """
+        apiMethodName:str = 'service_spotify_search_audiobooks'
+        apiMethodParms:SIMethodParmListContext = None
+        result:SearchResponse = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("criteria", criteria)
+            apiMethodParms.AppendKeyValue("limit", limit)
+            apiMethodParms.AppendKeyValue("offset", offset)
+            apiMethodParms.AppendKeyValue("market", market)
+            apiMethodParms.AppendKeyValue("includeExternal", includeExternal)
+            apiMethodParms.AppendKeyValue("limitTotal", limitTotal)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Search Audiobooks Service", apiMethodParms)
+                
+            # get Spotify catalog information about Audiobooks that match a keyword string.
+            _logsi.LogVerbose("Searching Spotify Audiobooks for criteria")
+            searchResponse:SearchResponse = self.data.spotifyClient.SearchAudiobooks(criteria, limit, offset, market, includeExternal, limitTotal)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": searchResponse.Audiobooks.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_search_episodes(self, 
+                                        criteria:str, 
+                                        limit:int, 
+                                        offset:int, 
+                                        market:str,
+                                        includeExternal:str,
+                                        limitTotal:int,
+                                        ) -> dict:
+        """
+        Get Spotify catalog information about episodes that match a keyword string.
+
+        Args:
+            criteria (str):
+                Your search query.  
+                You can narrow down your search using field filters.  
+                The available filters are album, artist, track, year, upc, tag:hipster, tag:new, 
+                isrc, and genre. Each field filter only applies to certain result types.  
+                The artist and year filters can be used while searching albums, artists and tracks.
+                You can filter on a single year or a range (e.g. 1955-1960).  
+                The album filter can be used while searching albums and tracks.  
+                The genre filter can be used while searching artists and tracks.  
+                The isrc and track filters can be used while searching tracks.  
+                The upc, tag:new and tag:hipster filters can only be used while searching albums. 
+                The tag:new filter will return albums released in the past two weeks and tag:hipster 
+                can be used to return only albums with the lowest 10% popularity.
+            limit (int):
+                The maximum number of items to return in a page of items.  
+                Default: 20, Range: 1 to 50.  
+            offset (int):
+                The page index offset of the first item to return.  
+                Use with limit to get the next set of items.  
+                Default: 0 (the first item).  Range: 0 to 1000.  
+            market (str):
+                An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that 
+                is available in that market will be returned.  If a valid user access token is specified 
+                in the request header, the country associated with the user account will take priority over 
+                this parameter.  
+                Note: If neither market or user country are provided, the content is considered unavailable for the client.  
+                Users can view the country that is associated with their account in the account settings.  
+                Example: `ES`
+            includeExternal (str):
+                If "audio" is specified it signals that the client can play externally hosted audio content, and 
+                marks the content as playable in the response. By default externally hosted audio content is marked 
+                as unplayable in the response.  
+                Allowed values: "audio"
+            limitTotal (int):
+                The maximum number of items to return for the request.  
+                If specified, this argument overrides the limit and offset argument values
+                and paging is automatically used to retrieve all available items up to the
+                maximum number specified.  
+                Default: None (disabled)
+
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: An `EpisodePageSimplified` object of matching results.            
+        """
+        apiMethodName:str = 'service_spotify_search_episodes'
+        apiMethodParms:SIMethodParmListContext = None
+        result:SearchResponse = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("criteria", criteria)
+            apiMethodParms.AppendKeyValue("limit", limit)
+            apiMethodParms.AppendKeyValue("offset", offset)
+            apiMethodParms.AppendKeyValue("market", market)
+            apiMethodParms.AppendKeyValue("includeExternal", includeExternal)
+            apiMethodParms.AppendKeyValue("limitTotal", limitTotal)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Search Episodes Service", apiMethodParms)
+                
+            # get Spotify catalog information about Episodes that match a keyword string.
+            _logsi.LogVerbose("Searching Spotify Episodes for criteria")
+            searchResponse:SearchResponse = self.data.spotifyClient.SearchEpisodes(criteria, limit, offset, market, includeExternal, limitTotal)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": searchResponse.Episodes.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_search_playlists(self, 
+                                         criteria:str, 
+                                         limit:int, 
+                                         offset:int, 
+                                         market:str,
+                                         includeExternal:str,
+                                         limitTotal:int,
+                                         ) -> dict:
+        """
+        Get Spotify catalog information about playlists that match a keyword string.
+
+        Args:
+            criteria (str):
+                Your search query.  
+                You can narrow down your search using field filters.  
+                The available filters are album, artist, track, year, upc, tag:hipster, tag:new, 
+                isrc, and genre. Each field filter only applies to certain result types.  
+                The artist and year filters can be used while searching albums, artists and tracks.
+                You can filter on a single year or a range (e.g. 1955-1960).  
+                The album filter can be used while searching albums and tracks.  
+                The genre filter can be used while searching artists and tracks.  
+                The isrc and track filters can be used while searching tracks.  
+                The upc, tag:new and tag:hipster filters can only be used while searching albums. 
+                The tag:new filter will return albums released in the past two weeks and tag:hipster 
+                can be used to return only albums with the lowest 10% popularity.
+            limit (int):
+                The maximum number of items to return in a page of items.  
+                Default: 20, Range: 1 to 50.  
+            offset (int):
+                The page index offset of the first item to return.  
+                Use with limit to get the next set of items.  
+                Default: 0 (the first item).  Range: 0 to 1000.  
+            market (str):
+                An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that 
+                is available in that market will be returned.  If a valid user access token is specified 
+                in the request header, the country associated with the user account will take priority over 
+                this parameter.  
+                Note: If neither market or user country are provided, the content is considered unavailable for the client.  
+                Users can view the country that is associated with their account in the account settings.  
+                Example: `ES`
+            includeExternal (str):
+                If "audio" is specified it signals that the client can play externally hosted audio content, and 
+                marks the content as playable in the response. By default externally hosted audio content is marked 
+                as unplayable in the response.  
+                Allowed values: "audio"
+            limitTotal (int):
+                The maximum number of items to return for the request.  
+                If specified, this argument overrides the limit and offset argument values
+                and paging is automatically used to retrieve all available items up to the
+                maximum number specified.  
+                Default: None (disabled)
 
         Returns:
             A dictionary that contains the following keys:
@@ -2181,21 +2558,208 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("market", market)
             apiMethodParms.AppendKeyValue("includeExternal", includeExternal)
             apiMethodParms.AppendKeyValue("limitTotal", limitTotal)
-            apiMethodParms.AppendKeyValue("spotifyOwnedOnly", spotifyOwnedOnly)
-            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Search Service", apiMethodParms)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Search Playlists Service", apiMethodParms)
                 
             # get Spotify catalog information about Playlists that match a keyword string.
             _logsi.LogVerbose("Searching Spotify Playlists for criteria")
-            searchResponse:SearchResponse = self.data.spotifyClient.SearchPlaylists(criteria, limit, offset, market, includeExternal, limitTotal, spotifyOwnedOnly)
-
-            # # sort items on Name property, ascending order.
-            # if len(searchResponse.Playlists.Items) > 0:
-            #     searchResponse.Playlists.Items.sort(key=lambda x: (x.Name or "").lower(), reverse=False)
+            searchResponse:SearchResponse = self.data.spotifyClient.SearchPlaylists(criteria, limit, offset, market, includeExternal, limitTotal)
 
             # return the (partial) user profile that retrieved the result, as well as the result itself.
             return {
                 "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
                 "result": searchResponse.Playlists.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_search_shows(self, 
+                                     criteria:str, 
+                                     limit:int, 
+                                     offset:int, 
+                                     market:str,
+                                     includeExternal:str,
+                                     limitTotal:int,
+                                     ) -> dict:
+        """
+        Get Spotify catalog information about shows (aka. podcasts) that match a keyword string.
+
+        Args:
+            criteria (str):
+                Your search query.  
+                You can narrow down your search using field filters.  
+                The available filters are album, artist, track, year, upc, tag:hipster, tag:new, 
+                isrc, and genre. Each field filter only applies to certain result types.  
+                The artist and year filters can be used while searching albums, artists and tracks.
+                You can filter on a single year or a range (e.g. 1955-1960).  
+                The album filter can be used while searching albums and tracks.  
+                The genre filter can be used while searching artists and tracks.  
+                The isrc and track filters can be used while searching tracks.  
+                The upc, tag:new and tag:hipster filters can only be used while searching albums. 
+                The tag:new filter will return albums released in the past two weeks and tag:hipster 
+                can be used to return only albums with the lowest 10% popularity.
+            limit (int):
+                The maximum number of items to return in a page of items.  
+                Default: 20, Range: 1 to 50.  
+            offset (int):
+                The page index offset of the first item to return.  
+                Use with limit to get the next set of items.  
+                Default: 0 (the first item).  Range: 0 to 1000.  
+            market (str):
+                An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that 
+                is available in that market will be returned.  If a valid user access token is specified 
+                in the request header, the country associated with the user account will take priority over 
+                this parameter.  
+                Note: If neither market or user country are provided, the content is considered unavailable for the client.  
+                Users can view the country that is associated with their account in the account settings.  
+                Example: `ES`
+            includeExternal (str):
+                If "audio" is specified it signals that the client can play externally hosted audio content, and 
+                marks the content as playable in the response. By default externally hosted audio content is marked 
+                as unplayable in the response.  
+                Allowed values: "audio"
+            limitTotal (int):
+                The maximum number of items to return for the request.  
+                If specified, this argument overrides the limit and offset argument values
+                and paging is automatically used to retrieve all available items up to the
+                maximum number specified.  
+                Default: None (disabled)
+
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: An `ShowPageSimplified` object of matching results.            
+        """
+        apiMethodName:str = 'service_spotify_search_shows'
+        apiMethodParms:SIMethodParmListContext = None
+        result:SearchResponse = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("criteria", criteria)
+            apiMethodParms.AppendKeyValue("limit", limit)
+            apiMethodParms.AppendKeyValue("offset", offset)
+            apiMethodParms.AppendKeyValue("market", market)
+            apiMethodParms.AppendKeyValue("includeExternal", includeExternal)
+            apiMethodParms.AppendKeyValue("limitTotal", limitTotal)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Search Shows Service", apiMethodParms)
+                
+            # get Spotify catalog information about Episodes that match a keyword string.
+            _logsi.LogVerbose("Searching Spotify Shows for criteria")
+            searchResponse:SearchResponse = self.data.spotifyClient.SearchShows(criteria, limit, offset, market, includeExternal, limitTotal)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": searchResponse.Shows.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_search_tracks(self, 
+                                      criteria:str, 
+                                      limit:int, 
+                                      offset:int, 
+                                      market:str,
+                                      includeExternal:str,
+                                      limitTotal:int,
+                                      ) -> dict:
+        """
+        Get Spotify catalog information about tracks that match a keyword string.
+
+        Args:
+            criteria (str):
+                Your search query.  
+                You can narrow down your search using field filters.  
+                The available filters are album, artist, track, year, upc, tag:hipster, tag:new, 
+                isrc, and genre. Each field filter only applies to certain result types.  
+                The artist and year filters can be used while searching albums, artists and tracks.
+                You can filter on a single year or a range (e.g. 1955-1960).  
+                The album filter can be used while searching albums and tracks.  
+                The genre filter can be used while searching artists and tracks.  
+                The isrc and track filters can be used while searching tracks.  
+                The upc, tag:new and tag:hipster filters can only be used while searching albums. 
+                The tag:new filter will return albums released in the past two weeks and tag:hipster 
+                can be used to return only albums with the lowest 10% popularity.
+            limit (int):
+                The maximum number of items to return in a page of items.  
+                Default: 20, Range: 1 to 50.  
+            offset (int):
+                The page index offset of the first item to return.  
+                Use with limit to get the next set of items.  
+                Default: 0 (the first item).  Range: 0 to 1000.  
+            market (str):
+                An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that 
+                is available in that market will be returned.  If a valid user access token is specified 
+                in the request header, the country associated with the user account will take priority over 
+                this parameter.  
+                Note: If neither market or user country are provided, the content is considered unavailable for the client.  
+                Users can view the country that is associated with their account in the account settings.  
+                Example: `ES`
+            includeExternal (str):
+                If "audio" is specified it signals that the client can play externally hosted audio content, and 
+                marks the content as playable in the response. By default externally hosted audio content is marked 
+                as unplayable in the response.  
+                Allowed values: "audio"
+            limitTotal (int):
+                The maximum number of items to return for the request.  
+                If specified, this argument overrides the limit and offset argument values
+                and paging is automatically used to retrieve all available items up to the
+                maximum number specified.  
+                Default: None (disabled)
+
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A `TrackPage` object of matching results.            
+        """
+        apiMethodName:str = 'service_spotify_search_tracks'
+        apiMethodParms:SIMethodParmListContext = None
+        result:SearchResponse = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("criteria", criteria)
+            apiMethodParms.AppendKeyValue("limit", limit)
+            apiMethodParms.AppendKeyValue("offset", offset)
+            apiMethodParms.AppendKeyValue("market", market)
+            apiMethodParms.AppendKeyValue("includeExternal", includeExternal)
+            apiMethodParms.AppendKeyValue("limitTotal", limitTotal)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Search Tracks Service", apiMethodParms)
+                
+            # get Spotify catalog information about Playlists that match a keyword string.
+            _logsi.LogVerbose("Searching Spotify Tracks for criteria")
+            searchResponse:SearchResponse = self.data.spotifyClient.SearchTracks(criteria, limit, offset, market, includeExternal, limitTotal)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": searchResponse.Tracks.ToDictionary()
             }
 
         # the following exceptions have already been logged, so we just need to
