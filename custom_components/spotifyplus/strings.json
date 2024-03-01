@@ -255,6 +255,30 @@
         }
       }
     },
+    "get_player_devices": {
+      "name": "Get Player Devices",
+      "description": "Get information about a user's available Spotify Connect player devices.  Some device models are not supported and will not be listed in the API response.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "refresh": {
+          "name": "Refresh?",
+          "description": "True to return real-time information from the spotify web api and update the cache; otherwise, False to just return the cached value."
+        }
+      }
+    },
+    "get_player_queue_info": {
+      "name": "Get Player Queue Info",
+      "description": "Get the list of objects that make up the user's playback queue.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        }
+      }
+    },
     "get_player_recent_tracks": {
       "name": "Get Player Recent Tracks",
       "description": "Get tracks from the current user's recently played tracks; currently doesn't support podcast episodes, and only 50 items may be returned due to spotify limits.",
@@ -370,6 +394,10 @@
         "market": {
           "name": "Market / Country Code",
           "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
         }
       }
     },

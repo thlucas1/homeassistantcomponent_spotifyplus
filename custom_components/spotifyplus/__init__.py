@@ -87,6 +87,8 @@ SERVICE_SPOTIFY_GET_ARTISTS_FOLLOWED:str = 'get_artists_followed'
 SERVICE_SPOTIFY_GET_BROWSE_CATEGORYS_LIST:str = 'get_browse_categorys_list'
 SERVICE_SPOTIFY_GET_CATEGORY_PLAYLISTS:str = 'get_category_playlists'
 SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS:str = 'get_featured_playlists'
+SERVICE_SPOTIFY_GET_PLAYER_DEVICES:str = 'get_player_devices'
+SERVICE_SPOTIFY_GET_PLAYER_QUEUE_INFO:str = 'get_player_queue_info'
 SERVICE_SPOTIFY_GET_PLAYER_RECENT_TRACKS:str = 'get_player_recent_tracks'
 SERVICE_SPOTIFY_GET_PLAYLIST:str = 'get_playlist'
 SERVICE_SPOTIFY_GET_PLAYLIST_FAVORITES:str = 'get_playlist_favorites'
@@ -187,6 +189,19 @@ SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS_SCHEMA = vol.Schema(
     }
 )
 
+SERVICE_SPOTIFY_GET_PLAYER_DEVICES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("refresh"): cv.boolean,
+    }
+)
+
+SERVICE_SPOTIFY_GET_PLAYER_QUEUE_INFO_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+    }
+)
+
 SERVICE_SPOTIFY_GET_PLAYER_RECENT_TRACKS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
@@ -231,6 +246,7 @@ SERVICE_SPOTIFY_GET_SHOW_EPISODES_SCHEMA = vol.Schema(
         vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("market"): cv.string,
+        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
     }
 )
 
@@ -454,6 +470,19 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_get_featured_playlists, limit, offset, country, locale, timestamp, limit_total)
 
+                elif service.service == SERVICE_SPOTIFY_GET_PLAYER_DEVICES:
+
+                    # get spotify connect device list.
+                    refresh = service.data.get("refresh")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_player_devices, refresh)
+
+                elif service.service == SERVICE_SPOTIFY_GET_PLAYER_QUEUE_INFO:
+
+                    # get spotify queue info.
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_player_queue_info)
+
                 elif service.service == SERVICE_SPOTIFY_GET_PLAYER_RECENT_TRACKS:
 
                     # get spotify playlist favorites.
@@ -498,8 +527,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     limit = service.data.get("limit")
                     offset = service.data.get("offset")
                     market = service.data.get("market")
+                    limit_total = service.data.get("limit_total")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_show_episodes, show_id, limit, offset, market)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_show_episodes, show_id, limit, offset, market, limit_total)
 
                 elif service.service == SERVICE_SPOTIFY_GET_SHOW_FAVORITES:
 
@@ -699,6 +729,24 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS,
             service_handle_spotify_serviceresponse,
             schema=SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_PLAYER_DEVICES, SERVICE_SPOTIFY_GET_PLAYER_DEVICES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_GET_PLAYER_DEVICES,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_GET_PLAYER_DEVICES_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_PLAYER_QUEUE_INFO, SERVICE_SPOTIFY_GET_PLAYER_QUEUE_INFO_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_GET_PLAYER_QUEUE_INFO,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_GET_PLAYER_QUEUE_INFO_SCHEMA,
             supports_response=SupportsResponse.ONLY,
         )
 

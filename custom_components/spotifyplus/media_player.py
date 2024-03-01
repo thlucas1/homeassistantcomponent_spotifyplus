@@ -13,8 +13,6 @@ from spotifywebapipython.models import (
     Album,
     AlbumPageSaved,
     AlbumPageSimplified,
-    AlbumSaved,
-    AlbumSimplified,
     Artist,
     ArtistPage,
     Category,
@@ -24,18 +22,15 @@ from spotifywebapipython.models import (
     Episode, 
     EpisodePageSimplified,
     PlayerPlayState, 
+    PlayerQueueInfo,
     PlayHistoryPage,
     Playlist, 
     PlaylistPageSimplified, 
-    PlaylistSimplified,
     SearchResponse, 
     Show,
     ShowPageSaved,
-    ShowSaved,
-    Track,
     TrackPage,
     TrackPageSaved,
-    TrackSaved,
     UserProfile
 )
 
@@ -270,6 +265,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             if self.data.spotifyClient.UserProfile.Product == "premium":
                 _logsi.LogVerbose("'%s': MediaPlayer is setting supported features for Spotify Premium user" % self.name)
                 self._attr_supported_features = MediaPlayerEntityFeature.BROWSE_MEDIA \
+                                              | MediaPlayerEntityFeature.MEDIA_ENQUEUE \
                                               | MediaPlayerEntityFeature.NEXT_TRACK \
                                               | MediaPlayerEntityFeature.PAUSE \
                                               | MediaPlayerEntityFeature.PLAY \
@@ -524,9 +520,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             #media_type = media_type.removeprefix(MEDIA_PLAYER_PREFIX)
 
             # get enqueue keyword arguments (if any).
-            enqueue: MediaPlayerEnqueue = kwargs.get(
-                ATTR_MEDIA_ENQUEUE, MediaPlayerEnqueue.REPLACE
-            )
+            enqueue: MediaPlayerEnqueue = kwargs.get(ATTR_MEDIA_ENQUEUE, MediaPlayerEnqueue.REPLACE)
         
             # resolve the device id.
             # if now playing media does not have a device id set, then use the first device
@@ -817,7 +811,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Returns:
             A dictionary that contains the following keys:
             - user_profile: A (partial) user profile that retrieved the result.
-            - result: A `AlbumPageSaved` object that contains playlist information.
+            - result: A `AlbumPageSaved` object that contains album information.
         """
         apiMethodName:str = 'service_spotify_get_album_favorites'
         apiMethodParms:SIMethodParmListContext = None
@@ -888,7 +882,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Returns:
             A dictionary that contains the following keys:
             - user_profile: A (partial) user profile that retrieved the result.
-            - result: A `AlbumPageSimplified` object that contains playlist information.
+            - result: A `AlbumPageSimplified` object that contains album information.
         """
         apiMethodName:str = 'service_spotify_get_album_new_releases'
         apiMethodParms:SIMethodParmListContext = None
@@ -940,7 +934,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Returns:
             A dictionary that contains the following keys:
             - user_profile: A (partial) user profile that retrieved the result.
-            - result: An `Album` object that contains the artist details.
+            - result: An `Artist` object that contains the artist details.
         """
         apiMethodName:str = 'service_spotify_get_artist'
         apiMethodParms:SIMethodParmListContext = None
@@ -1378,6 +1372,109 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
+    def service_spotify_get_player_devices(self,
+                                           refresh:bool=True
+                                           ) -> dict:
+        """
+        Get information about a user's available Spotify Connect player devices. 
+        
+        Some device models are not supported and will not be listed in the API response.
+        
+        This method requires the `user-read-playback-state` scope.
+
+        Args:
+            refresh (bool):
+                True (default) to return real-time information from the spotify web api and
+                update the cache; otherwise, False to just return the cached value.
+        
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A list of `Device` objects that contain the device details, sorted by name.
+        """
+        apiMethodName:str = 'service_spotify_get_player_devices'
+        apiMethodParms:SIMethodParmListContext = None
+        result:PlayerQueueInfo = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Player Queue Info", apiMethodParms)
+                
+            # request information from Spotify Web API.
+            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
+            result = self.data.spotifyClient.GetPlayerDevices(refresh)
+            
+            # build dictionary result from array.
+            resultArray:list = []
+            item:Device
+            for item in result: 
+                resultArray.append(item.ToDictionary())
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": resultArray
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_get_player_queue_info(self) -> dict:
+        """
+        Get the list of objects that make up the user's playback queue.
+        
+        This method requires the `user-read-currently-playing` and `user-read-playback-state` scope.
+        
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A `PlayerQueueInfo` object that contains the player queue information.
+        """
+        apiMethodName:str = 'service_spotify_get_player_queue_info'
+        apiMethodParms:SIMethodParmListContext = None
+        result:PlayerQueueInfo = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Player Queue Info", apiMethodParms)
+                
+            # request information from Spotify Web API.
+            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
+            result = self.data.spotifyClient.GetPlayerQueueInfo()
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
     def service_spotify_get_player_recent_tracks(self, 
                                                  limit:int, 
                                                  after:int, 
@@ -1652,6 +1749,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                                           limit:int, 
                                           offset:int,
                                           market:str=None,
+                                          limitTotal:int=None
                                           ) -> dict:
         """
         Get Spotify catalog information about a show's episodes.
@@ -1659,7 +1757,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             showId (str):  
                 The Spotify ID for the show.
-                Example: `38bS44xjbVVZ3No3ByF1dJ`
+                Example: `6kAsbP8pxwaU2kPibKTuHE`
             limit (int):  
                 The maximum number of items to return in a page of items.  
                 Default: 20, Range: 1 to 50.  
@@ -1674,6 +1772,12 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 Note: If neither market or user country are provided, the content is considered unavailable for the client.  
                 Users can view the country that is associated with their account in the account settings.  
                 Example: `ES`
+            limitTotal (int):
+                The maximum number of items to return for the request.
+                If specified, this argument overrides the limit and offset argument values
+                and paging is automatically used to retrieve all available items up to the
+                maximum count specified.
+                Default: None (disabled)
                 
         Returns:
             A dictionary that contains the following keys:
@@ -1692,11 +1796,12 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("limit", limit)
             apiMethodParms.AppendKeyValue("additionaoffsetlTypes", offset)
             apiMethodParms.AppendKeyValue("market", market)
+            apiMethodParms.AppendKeyValue("limitTotal", limitTotal)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Show Episodes Service", apiMethodParms)
                 
             # request information from Spotify Web API.
             _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
-            result = self.data.spotifyClient.GetShowEpisodes(showId, limit, offset, market)
+            result = self.data.spotifyClient.GetShowEpisodes(showId, limit, offset, market, limitTotal)
 
             # return the (partial) user profile that retrieved the result, as well as the result itself.
             return {
@@ -1960,7 +2065,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Returns:
             A dictionary that contains the following keys:
             - user_profile: A (partial) user profile that retrieved the result.
-            - result: An `TrackPage` object of matching results.
+            - result: A `TrackPage` object of matching results.
         """
         apiMethodName:str = 'service_spotify_get_users_top_tracks'
         apiMethodParms:SIMethodParmListContext = None
@@ -2058,7 +2163,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 Default is False.
 
         Returns:
-            A dictionary representation of a `SearchResponse` object that contain the results.
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A `PlaylistPageSimplified` object of matching results.            
         """
         apiMethodName:str = 'service_spotify_search_playlists'
         apiMethodParms:SIMethodParmListContext = None
