@@ -18,7 +18,7 @@ from spotifywebapipython.models import (
     Category,
     CategoryPage,
     Context, 
-    Device, 
+    Device as PlayerDevice, 
     Episode, 
     EpisodePageSimplified,
     PlayerPlayState, 
@@ -528,7 +528,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             deviceId:str = None
             if (self._nowPlaying is not None and self._nowPlaying.Device is None and self.data.devices.data):
                 _logsi.LogVerbose("NowPlaying media has no device set - using first device in the available list of devices")
-                device:Device = self.data.devices.data[0]
+                device:PlayerDevice = self.data.devices.data[0]
                 deviceId = device.Id
 
             # is this an enqueue add request?
@@ -717,6 +717,45 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
     # -----------------------------------------------------------------------------------
     # Custom Services
     # -----------------------------------------------------------------------------------
+
+    def _GetUserProfilePartialDictionary(self, userProfile:UserProfile) -> dict:
+        """
+        Returns a dictionary of a partial UserProfile object that can be returned with 
+        selected service results.  This allows the caller to know exactly what Spotify
+        user made the given request.
+        """
+        # return the user profile that retrieved the result, as well as the result.
+        return {
+            "country": userProfile.Country,
+            "display_name": userProfile.DisplayName,
+            "email": userProfile.EMail,
+            "id": userProfile.Id,
+            "product": userProfile.Product,
+            "type": userProfile.Type,
+            "uri": userProfile.Uri,
+        }
+
+
+    def _VerifyDeviceId(self, deviceId:str) -> str:
+        """
+        Verifies that a device id was specified.  If not supplied, the user's currently 
+        active device is the target.  If no device is active (or an "*" is specified), then 
+        the SpotifyPlus default device is activated.
+        """
+        if deviceId is None:
+    
+            # if device not specified, then ensure we have an active device.
+            _logsi.LogVerbose("Verifying active Spotify Connect device")
+            self.data.spotifyClient.PlayerVerifyDeviceDefault(PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault), False)
+
+        elif deviceId == "*":
+                
+            # if default spotifyplus device was specified, then use it.
+            _logsi.LogVerbose("Using SpotifyPlus default device: '%s'" % self.data.OptionDeviceDefault)
+            deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
+
+        return deviceId
+
 
     def service_spotify_get_album(self, 
                                   albumId:str, 
@@ -1408,7 +1447,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             
             # build dictionary result from array.
             resultArray:list = []
-            item:Device
+            item:PlayerDevice
             for item in result: 
                 resultArray.append(item.ToDictionary())
 
@@ -2103,6 +2142,197 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
+    def service_spotify_player_media_play_context(self, 
+                                                  contextUri:str, 
+                                                  offsetUri:str, 
+                                                  offsetPosition:int, 
+                                                  positionMS:int, 
+                                                  deviceId:str, 
+                                                  ) -> None:
+        """
+        Start playing one or more tracks of the specified context on a Spotify Connect device.
+        
+        Args:
+            contextUri (str):
+                Spotify URI of the context to play.  
+                Valid contexts are albums, artists & playlists.  
+                Example: `spotify:album:6vc9OTcyd3hyzabCmsdnwE`.   
+            offsetUri (str):
+                Indicates from what Uri in the context playback should start.  
+                Only available when contextUri corresponds to an artist, album or playlist.  
+                The offsetPosition argument will be used if this value is null.  
+                Default is null.  
+                Example: `spotify:track:1301WleyT98MSxVHPZCA6M` start playing at the specified track Uri.  
+            offsetPosition (int):
+                Indicates from what position in the context playback should start.  
+                The value is zero-based, and can't be negative.  
+                Only available when contextUri corresponds to an album or playlist.  
+                Default is `0`.  
+                Example: `3`  start playing at track number 4.
+            positionMS (int):
+                The position in milliseconds to seek to; must be a positive number.  
+                Passing in a position that is greater than the length of the track will cause the 
+                player to start playing the next track.  
+                Default is `0`.  
+                Example: `25000`  
+            deviceId (str):
+                The id of the device this command is targeting.  
+                If not supplied, the user's currently active device is the target.  
+                Example: `0d1841b0976bae2a3a310dd74c0f3df354899bc8`
+        """
+        apiMethodName:str = 'service_spotify_player_media_play_context'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("contextUri", contextUri)
+            apiMethodParms.AppendKeyValue("offsetUri", offsetUri)
+            apiMethodParms.AppendKeyValue("offsetPosition", offsetPosition)
+            apiMethodParms.AppendKeyValue("positionMS", positionMS)
+            apiMethodParms.AppendKeyValue("deviceId", deviceId)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Media Play Context Service", apiMethodParms)
+            
+            # verify device id (specific device, active device, or default).
+            deviceId = self._VerifyDeviceId(deviceId)
+
+            # issue transfer playback in case it needs it.
+            if deviceId is not None:
+                _logsi.LogVerbose("Transferring Spotify Playback to device")
+                self.data.spotifyClient.PlayerTransferPlayback(deviceId, False)
+
+            # start playing one or more tracks of the specified context on a Spotify Connect device.
+            _logsi.LogVerbose("Playing Media Context on device")
+            self.data.spotifyClient.PlayerMediaPlayContext(contextUri, offsetUri, offsetPosition, positionMS, deviceId)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_player_media_play_tracks(self, 
+                                                 uris:str, 
+                                                 positionMS:int, 
+                                                 deviceId:str, 
+                                                 ) -> None:
+        """
+        Start playing one or more tracks on the specified Spotify Connect device.
+        
+        Args:
+            uris (str):
+                A list of Spotify track URIs to play; can be track or episode URIs.  
+                Example: [`spotify:track:4iV5W9uYEdYUVa79Axb7Rh` ,`spotify:episode:512ojhOuo1ktJprKbVcKyQ`].  
+                It can also be specified as a comma-delimited string.  
+                Example: `spotify:track:4iV5W9uYEdYUVa79Axb7Rh,spotify:episode:512ojhOuo1ktJprKbVcKyQ`.  
+                A maximum of 50 items can be added in one request.
+            positionMS (int):
+                The position in milliseconds to seek to; must be a positive number.  
+                Passing in a position that is greater than the length of the track will cause the 
+                player to start playing the next track.  
+                Default is `0`.  
+                Example: `25000`  
+            deviceId (str):
+                The id of the device this command is targeting.  
+                If not supplied, the user's currently active device is the target.  
+                Example: `0d1841b0976bae2a3a310dd74c0f3df354899bc8`
+        """
+        apiMethodName:str = 'service_spotify_player_media_play_tracks'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("uris", uris)
+            apiMethodParms.AppendKeyValue("positionMS", positionMS)
+            apiMethodParms.AppendKeyValue("deviceId", deviceId)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Media Play Tracks Service", apiMethodParms)
+            
+            # verify device id (specific device, active device, or default).
+            deviceId = self._VerifyDeviceId(deviceId)
+
+            # issue transfer playback in case it needs it.
+            if deviceId is not None:
+                _logsi.LogVerbose("Transferring Spotify Playback to device")
+                self.data.spotifyClient.PlayerTransferPlayback(deviceId, False)
+
+            # start playing one or more tracks on the specified Spotify Connect device.
+            _logsi.LogVerbose("Playing Media Tracks on device")
+            self.data.spotifyClient.PlayerMediaPlayTracks(uris, positionMS, deviceId)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_player_transfer_playback(self, 
+                                                 deviceId:str, 
+                                                 play:bool=True, 
+                                                 ) -> None:
+        """
+        Transfer playback to a new Spotify Connect device and optionally begin playback.
+        
+        Args:
+            deviceId (str):
+                The id of the device on which playback should be started/transferred.
+                Example: `0d1841b0976bae2a3a310dd74c0f3df354899bc8`
+            play (bool):
+                The transfer method:  
+                - `True`  - ensure playback happens on new device.   
+                - `False` - keep the current playback state.  
+                Default: `True`  
+        """
+        apiMethodName:str = 'service_spotify_player_transfer_playback'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("deviceId", deviceId)
+            apiMethodParms.AppendKeyValue("play", play)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Transfer Playback Service", apiMethodParms)
+            
+            # validations.
+            if play is None:
+                play = True
+            if deviceId is None or deviceId == "*":
+                deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
+                
+            # transfer playback to the specified Spotify Connect device.
+            _logsi.LogVerbose("Transferring Spotify Playback to device")
+            self.data.spotifyClient.PlayerTransferPlayback(deviceId, play)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
     def service_spotify_search_albums(self, 
                                       criteria:str, 
                                       limit:int, 
@@ -2773,24 +3003,6 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         
             # trace.
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
-
-
-    def _GetUserProfilePartialDictionary(self, userProfile:UserProfile) -> dict:
-        """
-        Returns a dictionary of a partial UserProfile object that can be returned with 
-        selected service results.  This allows the caller to know exactly what Spotify
-        user made the given request.
-        """
-        # return the user profile that retrieved the result, as well as the result.
-        return {
-            "country": userProfile.Country,
-            "display_name": userProfile.DisplayName,
-            "email": userProfile.EMail,
-            "id": userProfile.Id,
-            "product": userProfile.Product,
-            "type": userProfile.Type,
-            "uri": userProfile.Uri,
-        }
 
 
     async def async_added_to_hass(self) -> None:

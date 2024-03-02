@@ -847,6 +847,127 @@ get_users_top_tracks:
         number:
           mode: box
 
+player_media_play_context:
+  name: Player Media Play Context
+  description: Start playing one or more tracks of the specified context on a Spotify Connect device.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    context_uri:
+      name: Context Uri
+      description: Spotify URI of the context to play.  Valid contexts are albums, artists & playlists.  
+      example: "spotify:album:6vc9OTcyd3hyzabCmsdnwE"
+      required: true
+      selector:
+        text:
+    offset_uri:
+      name: Offset Uri
+      description: Indicates from what Uri in the context playback should start.  Only available when contextUri corresponds to an artist, album or playlist.  The offsetPosition argument will be used if this value is null.
+      example: "spotify:track:1301WleyT98MSxVHPZCA6M"
+      required: false
+      selector:
+        text:
+    offset_position:
+      name: Offset Position
+      description: Indicates from what position in the context playback should start.  The value is zero-based, and can't be negative.  Only available when contextUri corresponds to an album or playlist.
+      example: 3
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 500
+          mode: box
+    position_ms:
+      name: Seek Position
+      description: The position (in milliseconds) to seek to; must be a positive number.  Passing in a position that is greater than the length of the track will cause the player to start playing the next track.
+      example: 0
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 999999999
+          mode: box
+    device_id:
+      name: Device ID
+      description: The id of the device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an "*" is specified), then the SpotifyPlus default device is activated.
+      example: "0d1841b0976bae2a3a310dd74c0f337465899bc8"
+      required: false
+      selector:
+        text:
+
+player_media_play_tracks:
+  name: Player Media Play Tracks
+  description: Start playing one or more tracks on the specified Spotify Connect device.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    uris:
+      name: Uri's
+      description: A comma-separated list of Spotify track URIs to play; can be track or episode URIs.  A maximum of 50 items can be specified.
+      example: "spotify:track:6zd8T1PBe9JFHmuVnurdRp,spotify:track:1kWUud3vY5ij5r62zxpTRy"
+      required: true
+      selector:
+        text:
+    position_ms:
+      name: Seek Position
+      description: The position (in milliseconds) to seek to; must be a positive number.  Passing in a position that is greater than the length of the track will cause the player to start playing the next track.
+      example: 0
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 999999999
+          mode: box
+    device_id:
+      name: Device ID
+      description: The id of the device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an "*" is specified), then the SpotifyPlus default device is activated.
+      example: "0d1841b0976bae2a3a310dd74c0f337465899bc8"
+      required: false
+      selector:
+        text:
+
+player_transfer_playback:
+  name: Player Transfer Playback
+  description: Transfer playback to a new Spotify Connect device and optionally begin playback.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    device_id:
+      name: Device ID
+      description: The id of the device on which playback should be started/transferred.  If no device is specified, then the SpotifyPlus default device is activated.
+      example: "0d1841b0976bae2a3a310dd74c0f337465899bc8"
+      required: false
+      selector:
+        text:
+    play:
+      name: Start Play?
+      description: True (default) to start playback on the new device; otherise, False to keep the current playback state on the existing device.
+      example: "True"
+      required: false
+      selector:
+        boolean:
+
 search_albums:
   name: Search Albums
   description: Get Spotify catalog information about Albums that match a keyword string. 
@@ -1161,13 +1282,6 @@ search_playlists:
       selector:
         number:
           mode: box
-    spotify_owned_only:
-      name: Spotify Owned Only?
-      description: True to return only found items that are owned by spotify (e.g. content generated for you by the spotify AI engine); otherwise, False to return all found items.  Default is False.
-      example: "False"
-      required: false
-      selector:
-        boolean:
   
 search_shows:
   name: Search Shows (aka Podcasts)

@@ -98,6 +98,9 @@ SERVICE_SPOTIFY_GET_SHOW_FAVORITES:str = 'get_show_favorites'
 SERVICE_SPOTIFY_GET_TRACK_FAVORITES:str = 'get_track_favorites'
 SERVICE_SPOTIFY_GET_USERS_TOP_ARTISTS:str = 'get_users_top_artists'
 SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS:str = 'get_users_top_tracks'
+SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT:str = 'player_media_play_context'
+SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS:str = 'player_media_play_tracks'
+SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK:str = 'player_transfer_playback'
 SERVICE_SPOTIFY_SEARCH_ALBUMS:str = 'search_albums'
 SERVICE_SPOTIFY_SEARCH_ARTISTS:str = 'search_artists'
 SERVICE_SPOTIFY_SEARCH_AUDIOBOOKS:str = 'search_audiobooks'
@@ -295,6 +298,34 @@ SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS_SCHEMA = vol.Schema(
     }
 )
 
+SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("context_uri"): cv.string,
+        vol.Optional("offset_uri"): cv.string,
+        vol.Optional("offset_position", default=0): vol.All(vol.Range(min=0,max=500)),
+        vol.Optional("position_ms", default=0): vol.All(vol.Range(min=0,max=999999999)),
+        vol.Optional("device_id"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("uris"): cv.string,
+        vol.Optional("position_ms", default=0): vol.All(vol.Range(min=0,max=999999999)),
+        vol.Optional("device_id"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("device_id"): cv.string,
+        vol.Optional("play"): cv.boolean,
+    }
+)
+
 SERVICE_SPOTIFY_SEARCH_ALBUMS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
@@ -434,6 +465,80 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 severity=IssueSeverity.WARNING,
                 translation_key="removed_yaml",
             )
+
+
+        async def service_handle_spotify_command(service: ServiceCall) -> None:
+            """
+            Handle service requests that do not return service response data from Spotify endpoints.
+
+            Args:
+                service (ServiceCall):
+                    ServiceCall instance that contains service data (requested service name, field parameters, etc).
+            """
+            try:
+
+                _logsi.EnterMethod(SILevel.Debug)
+                _logsi.LogVerbose(STAppMessages.MSG_SERVICE_CALL_START, service.service, 'service_handle_spotify_command')
+                _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_CALL_PARM, service)
+                _logsi.LogDictionary(SILevel.Verbose, STAppMessages.MSG_SERVICE_CALL_DATA, service.data)
+
+                # get player instance from service parameter; if not found, then we are done.
+                entity = _GetEntityFromServiceData(hass, service, "entity_id")
+                if entity is None:
+                    return
+
+                # process service request.
+                if service.service == SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT:
+
+                    # start playing one or more tracks of the specified context.
+                    context_uri = service.data.get("context_uri")
+                    offset_uri = service.data.get("offset_uri")
+                    offset_position = service.data.get("offset_position")
+                    position_ms = service.data.get("position_ms")
+                    device_id = service.data.get("device_id")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_player_media_play_context, context_uri, offset_uri, offset_position, position_ms, device_id)
+
+                elif service.service == SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS:
+
+                    # start playing one or more tracks.
+                    uris = service.data.get("uris")
+                    position_ms = service.data.get("position_ms")
+                    device_id = service.data.get("device_id")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_player_media_play_tracks, uris, position_ms, device_id)
+
+                elif service.service == SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK:
+
+                    # transfer playback to a new Spotify Connect device.
+                    device_id = service.data.get("device_id")
+                    play = service.data.get("play")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_player_transfer_playback, device_id, play)
+
+                else:
+                    
+                    raise HomeAssistantError("Unrecognized service identifier '%s' in method service_handle_spotify_command" % service.service)
+
+                # return (no response).
+                return
+
+            except HomeAssistantError as ex: 
+                
+                # log error, but not to system logger as HA will take care of it.
+                _logsi.LogError(str(ex), logToSystemLogger=False)
+                raise
+            
+            except Exception as ex:
+
+                # log exception, but not to system logger as HA will take care of it.
+                _logsi.LogException(STAppMessages.MSG_SERVICE_REQUEST_EXCEPTION % (service.service, "service_handle_getlist"), ex, logToSystemLogger=False)
+                raise
+
+            finally:
+            
+                # trace.
+                _logsi.LeaveMethod(SILevel.Debug)
 
 
         async def service_handle_spotify_serviceresponse(service: ServiceCall) -> ServiceResponse:
@@ -984,6 +1089,33 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             supports_response=SupportsResponse.ONLY,
         )
 
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT, SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS, SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK, SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
         _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_SEARCH_ALBUMS, SERVICE_SPOTIFY_SEARCH_ALBUMS_SCHEMA)
         hass.services.async_register(
             DOMAIN,
@@ -1264,7 +1396,8 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
             devices=device_coordinator,
             session=session,
             spotifyClient=spotifyClient,
-            media_player=None
+            media_player=None,
+            options=entry.options
         )
         _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry media player platform instance data object" % entry.title, hass.data[DOMAIN][entry.entry_id])
 

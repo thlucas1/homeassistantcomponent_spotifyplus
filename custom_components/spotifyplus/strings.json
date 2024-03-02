@@ -17,6 +17,21 @@
     },
     "create_entry": { "default": "Successfully authenticated with Spotify." }
   },
+  "options": {
+    "step": {
+      "init": {
+        "title": "{name} Options",
+        "description": "Configure SpotifyPlus integration options that control functionality.",
+        "data": {
+          "device_default": "Default Spotify Connect Player Device ID when none are active."
+        },
+        "submit": "Save"
+      }
+    },
+    "error": {
+      "no_player_devices": "Per Spotify Web API, there are currently no Spotify Connect devices active.  Please close the configuration options, play a track on any Spotify Connect player for a minute or two, and then open the configuration options again."
+    }
+  },
   "system_health": {
     "info": {
       "api_endpoint_reachable": "Spotify API endpoint reachable"
@@ -501,6 +516,76 @@
         }
       }
     },
+    "player_media_play_context": {
+      "name": "Player Media Play Context",
+      "description": "Start playing one or more tracks of the specified context on a Spotify Connect device.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "context_uri": {
+          "name": "Context Uri",
+          "description": "Spotify URI of the context to play.  Valid contexts are albums, artists & playlists."
+        },
+        "offset_uri": {
+          "name": "Offset Uri",
+          "description": "Indicates from what Uri in the context playback should start.  Only available when contextUri corresponds to an artist, album or playlist.  The offsetPosition argument will be used if this value is null."
+        },
+        "offset_position": {
+          "name": "Offset Position",
+          "description": "Indicates from what position in the context playback should start.  The value is zero-based, and can't be negative.  Only available when contextUri corresponds to an album or playlist."
+        },
+        "position_ms": {
+          "name": "Seek Position",
+          "description": "The position (in milliseconds) to seek to; must be a positive number.  Passing in a position that is greater than the length of the track will cause the player to start playing the next track."
+        },
+        "device_id": {
+          "name": "Device ID",
+          "description": "The id of the device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an '*' is specified), then the SpotifyPlus default device is activated."
+        }
+      }
+    },
+    "player_media_play_tracks": {
+      "name": "Player Media Play Tracks",
+      "description": "Start playing one or more tracks on the specified Spotify Connect device.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "uris": {
+          "name": "Uri's",
+          "description": "A list of Spotify track URIs to play; can be track or episode URIs.  A maximum of 50 items can be added in one request."
+        },
+        "position_ms": {
+          "name": "Seek Position",
+          "description": "The position (in milliseconds) to seek to; must be a positive number.  Passing in a position that is greater than the length of the track will cause the player to start playing the next track."
+        },
+        "device_id": {
+          "name": "Device ID",
+          "description": "The id of the device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an '*' is specified), then the SpotifyPlus default device is activated."
+        }
+      }
+    },
+    "player_transfer_playback": {
+      "name": "Player Transfer Playback",
+      "description": "Transfer playback to a new Spotify Connect device and optionally begin playback.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "device_id": {
+          "name": "Device ID",
+          "description": "The id of the device on which playback should be started/transferred.  If no device is specified, then the SpotifyPlus default device is activated."
+        },
+        "play": {
+          "name": "Start Play?",
+          "description": "True (default) to start playback on the new device; otherise, False to keep the current playback state on the existing device."
+        }
+      }
+    },
     "search_albums": {
       "name": "Search Albums",
       "description": "Get Spotify catalog information about Albums that match a keyword string.",
@@ -553,7 +638,7 @@
         }
       }
     },
-    "search_ausiobooks": {
+    "search_audiobooks": {
       "name": "Search Audiobooks",
       "description": "Get Spotify catalog information about Audiobooks that match a keyword string.",
       "fields": {
@@ -628,10 +713,6 @@
         "limit_total": {
           "name": "Limit Total",
           "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
-        },
-        "spotify_owned_only": {
-          "name": "Spotify Owned Only?",
-          "description": "True to return only found items that are owned by spotify (e.g. content generated for you by the spotify AI engine); otherwise, False to return all found items.  Default is False."
         }
       }
     },

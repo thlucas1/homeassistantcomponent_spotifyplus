@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from types import MappingProxyType
+from typing import Any
 
 from spotifywebapipython import SpotifyClient
 from spotifywebapipython.models import Device
@@ -8,6 +10,10 @@ from homeassistant.helpers.config_entry_oauth2_flow import (
     OAuth2Session
 )
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+
+from .const import (
+    CONF_OPTION_DEVICE_DEFAULT,
+)
 
 @dataclass
 class InstanceDataSpotifyPlus:
@@ -30,6 +36,11 @@ class InstanceDataSpotifyPlus:
     The media player instance used to control media playback.
     """
     
+    options: MappingProxyType[str, Any]
+    """
+    Configuration entry options.
+    """
+
     session: OAuth2Session
     """
     The OAuth2 session used to communicate with the Spotify Web API.
@@ -39,3 +50,11 @@ class InstanceDataSpotifyPlus:
     """
     The SpotifyClient instance used to interface with the Spotify Web API.
     """
+
+
+    @property
+    def OptionDeviceDefault(self) -> str | None:
+        """
+        The default Spotify Connect player device.
+        """
+        return self.options.get(CONF_OPTION_DEVICE_DEFAULT, None)

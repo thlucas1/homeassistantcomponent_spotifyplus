@@ -6,6 +6,14 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.5 ] - 2024/03/02
+
+  * Added configuration option `default_device` to allow a user to specify a default Spotify Connect device to use when one is not active.
+  * Added service `player_media_play_context` to start playing one or more tracks of the specified context on a Spotify Connect device.
+  * Added service `player_media_play_tracks` to start playing one or more tracks on a Spotify Connect device.
+  * Added service `player_transfer_playback` to transfer playback to a new Spotify Connect device and optionally begin playback.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.33.
+
 ###### [ 1.0.4 ] - 2024/03/01
 
   * Added service `search_albums` to search the Spotify catalog for matching album criteria.

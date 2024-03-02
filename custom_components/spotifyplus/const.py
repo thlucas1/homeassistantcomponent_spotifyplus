@@ -9,6 +9,8 @@ DOMAIN = "spotifyplus"
 
 LOGGER = logging.getLogger(__package__)
 
+CONF_OPTION_DEVICE_DEFAULT = "device_default"
+
 # security scopes required by various Spotify Web API endpoints.
 SPOTIFY_SCOPES:list = \
 [
