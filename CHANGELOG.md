@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.6 ] - 2024/03/05
+
+  * Updated service `player_transfer_playback` schema to make the `device_id` argument optional instead of required.  This allows the active spotify connect player to be used (if desired) when transferring playback.
+  * commented out the `ignore: "brands"` in validate.yaml, as brands have been added for the integration.
+
 ###### [ 1.0.5 ] - 2024/03/02
 
   * Added configuration option `default_device` to allow a user to specify a default Spotify Connect device to use when one is not active.

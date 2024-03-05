@@ -321,7 +321,7 @@ SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Required("device_id"): cv.string,
+        vol.Optional("device_id"): cv.string,
         vol.Optional("play"): cv.boolean,
     }
 )
