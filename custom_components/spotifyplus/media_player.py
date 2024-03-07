@@ -176,6 +176,10 @@ def spotify_exception_handler(
             # give spotify some time to process the command before the update check.
             time.sleep(0.25)
             
+            # update player status.
+            _logsi.LogVerbose('Calling update method to update player status')
+            self.update()
+
             # inform Home Assistant of status updates.
             _logsi.LogVerbose('Calling async_write_ha_state to inform HA of any updates')
             self.async_write_ha_state()
@@ -2197,14 +2201,37 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # verify device id (specific device, active device, or default).
             deviceId = self._VerifyDeviceId(deviceId)
 
+            # pause playback on Spotify Connect device.
+            _logsi.LogVerbose("Pausing Spotify Playback on device")
+            self.data.spotifyClient.PlayerMediaPause(deviceId)
+
             # issue transfer playback in case it needs it.
             if deviceId is not None:
                 _logsi.LogVerbose("Transferring Spotify Playback to device")
-                self.data.spotifyClient.PlayerTransferPlayback(deviceId, False)
+                self.data.spotifyClient.PlayerTransferPlayback(deviceId, True)
+
+                # give spotify some time to process the previous command before we issue the next one.
+                time.sleep(1.0)
 
             # start playing one or more tracks of the specified context on a Spotify Connect device.
             _logsi.LogVerbose("Playing Media Context on device")
             self.data.spotifyClient.PlayerMediaPlayContext(contextUri, offsetUri, offsetPosition, positionMS, deviceId)
+
+            # give spotify some time to process the command before the update check.
+            time.sleep(1.0)
+
+            # resume playback on the Spotify Connect device.
+            _logsi.LogVerbose("Resuming Spotify Playback on device")
+            self.data.spotifyClient.PlayerMediaResume(deviceId)
+
+            # give spotify some time to process the command before the update check.
+            time.sleep(0.50)
+
+            # inform Home Assistant of status updates.
+            _logsi.LogVerbose('Calling update method to update player status')
+            self.update()
+            _logsi.LogVerbose('Calling async_write_ha_state to inform HA of any updates')
+            self.async_write_ha_state()
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
@@ -2260,14 +2287,37 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # verify device id (specific device, active device, or default).
             deviceId = self._VerifyDeviceId(deviceId)
 
+            # pause playback on Spotify Connect device.
+            _logsi.LogVerbose("Pausing Spotify Playback on device")
+            self.data.spotifyClient.PlayerMediaPause(deviceId)
+
             # issue transfer playback in case it needs it.
             if deviceId is not None:
                 _logsi.LogVerbose("Transferring Spotify Playback to device")
-                self.data.spotifyClient.PlayerTransferPlayback(deviceId, False)
+                self.data.spotifyClient.PlayerTransferPlayback(deviceId, True)
+
+                # give spotify some time to process the previous command before we issue the next one.
+                time.sleep(1.0)
 
             # start playing one or more tracks on the specified Spotify Connect device.
             _logsi.LogVerbose("Playing Media Tracks on device")
             self.data.spotifyClient.PlayerMediaPlayTracks(uris, positionMS, deviceId)
+
+            # give spotify some time to process the command before the update check.
+            time.sleep(1.0)
+
+            # resume playback on the Spotify Connect device.
+            _logsi.LogVerbose("Resuming Spotify Playback on device")
+            self.data.spotifyClient.PlayerMediaResume(deviceId)
+
+            # give spotify some time to process the command before the update check.
+            time.sleep(0.50)
+
+            # inform Home Assistant of status updates.
+            _logsi.LogVerbose('Calling update method to update player status')
+            self.update()
+            _logsi.LogVerbose('Calling async_write_ha_state to inform HA of any updates')
+            self.async_write_ha_state()
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
@@ -2319,6 +2369,15 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # transfer playback to the specified Spotify Connect device.
             _logsi.LogVerbose("Transferring Spotify Playback to device")
             self.data.spotifyClient.PlayerTransferPlayback(deviceId, play)
+
+            # give spotify some time to process the command before the update check.
+            time.sleep(0.50)
+
+            # inform Home Assistant of status updates.
+            _logsi.LogVerbose('Calling update method to update player status')
+            self.update()
+            _logsi.LogVerbose('Calling async_write_ha_state to inform HA of any updates')
+            self.async_write_ha_state()
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).

@@ -6,6 +6,12 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.7 ] - 2024/03/07
+
+  * Updated service `service_spotify_player_media_play_context` to pause the Spotify Connect device before switching play context, and resuming after.
+  * Updated service `service_spotify_player_media_play_tracks` to pause the Spotify Connect device before switching play context, and resuming after.
+  * Updated media_player to inform HA of manual status updates as they happen (e.g. pause, resume, next track, etc).
+
 ###### [ 1.0.6 ] - 2024/03/05
 
   * Updated service `player_transfer_playback` schema to make the `device_id` argument optional instead of required.  This allows the active spotify connect player to be used (if desired) when transferring playback.
