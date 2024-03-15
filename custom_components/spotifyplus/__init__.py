@@ -101,6 +101,7 @@ SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS:str = 'get_users_top_tracks'
 SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT:str = 'player_media_play_context'
 SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS:str = 'player_media_play_tracks'
 SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK:str = 'player_transfer_playback'
+SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD:str = 'playlist_items_add'
 SERVICE_SPOTIFY_SEARCH_ALBUMS:str = 'search_albums'
 SERVICE_SPOTIFY_SEARCH_ARTISTS:str = 'search_artists'
 SERVICE_SPOTIFY_SEARCH_AUDIOBOOKS:str = 'search_audiobooks'
@@ -326,6 +327,15 @@ SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK_SCHEMA = vol.Schema(
     }
 )
 
+SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("playlist_id"): cv.string,
+        vol.Optional("uris"): cv.string,
+        vol.Optional("position"): vol.All(vol.Range(min=0,max=9999)),
+    }
+)
+
 SERVICE_SPOTIFY_SEARCH_ALBUMS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
@@ -515,6 +525,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     play = service.data.get("play")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     await hass.async_add_executor_job(entity.service_spotify_player_transfer_playback, device_id, play)
+
+                elif service.service == SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD:
+
+                    # add items to playlist.
+                    playlist_id = service.data.get("playlist_id")
+                    uris = service.data.get("uris")
+                    position = service.data.get("position")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_playlist_items_add, playlist_id, uris, position)
 
                 else:
                     
@@ -1113,6 +1132,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK,
             service_handle_spotify_command,
             schema=SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD, SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD_SCHEMA,
             supports_response=SupportsResponse.NONE,
         )
 

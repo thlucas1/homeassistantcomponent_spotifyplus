@@ -2392,6 +2392,73 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
+    def service_spotify_playlist_items_add(self, 
+                                           playlistId:str, 
+                                           uris:str, 
+                                           position:int,
+                                           ) -> None:
+        """
+        Add one or more items to a user's playlist.
+        
+        Args:
+        
+            playlistId (str):  
+                The Spotify ID of the playlist.
+                Example: `5AC9ZXA7nJ7oGWO911FuDG`
+            uris (str):  
+                A comma-separated list of Spotify URIs to add; can be track or episode URIs.  
+                Example: `spotify:track:4iV5W9uYEdYUVa79Axb7Rh,spotify:episode:512ojhOuo1ktJprKbVcKyQ`.  
+                A maximum of 100 items can be added in one request.
+                If nothing is specified, then the track (or episode) uri currently playing is used.
+            position (int):  
+                The position to insert the items, a zero-based index.  
+                For example, to insert the items in the first position: position=0;  
+                to insert the items in the third position: position=2.  
+                If omitted, the items will be appended to the playlist.  
+                Items are added in the order they are listed in the `uris` argument.
+        """
+        apiMethodName:str = 'service_spotify_playlist_items_add'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("playlistId", playlistId)
+            apiMethodParms.AppendKeyValue("uris", uris)
+            apiMethodParms.AppendKeyValue("position", position)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Playlist Add Items Service", apiMethodParms)
+            
+            # validation - if position is -1 then set it to None (treat as append).
+            if isinstance(position, int) and position == -1:
+                position = None
+
+            # validations - if uris is null, then use currently playing uri value.
+            if uris is None or uris.strip() == '':
+                _logsi.LogVerbose("Querying NowPlaying status of Spotify player")
+                nowPlaying:PlayerPlayState = self.data.spotifyClient.GetPlayerNowPlaying()
+                if nowPlaying is not None:
+                    _logsi.LogVerbose("NowPlaying data: %s" % str(nowPlaying))
+                    if nowPlaying.Item is not None:
+                        uris = nowPlaying.Item.Uri
+                
+            # add items to Spotify playlist.
+            _logsi.LogVerbose("Adding item(s) to Spotify playlist")
+            self.data.spotifyClient.AddPlaylistItems(playlistId, uris, position)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
     def service_spotify_search_albums(self, 
                                       criteria:str, 
                                       limit:int, 

@@ -586,6 +586,28 @@
         }
       }
     },
+    "playlist_items_add": {
+      "name": "Playlist Items Add",
+      "description": "Add one or more items to a user's playlist.  Items are added in the order they are listed in the `uris` argument.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "playlist_id": {
+          "name": "Playlist ID",
+          "description": "The Spotify ID of the playlist (e.g. 5AC9ZXA7nJ7oGWO911FuDG)."
+        },
+        "uris": {
+          "name": "URI's",
+          "description": "A comma-separated list of Spotify URIs to add; can be track or episode URIs (e.g. spotify:track:4iV5W9uYEdYUVa79Axb7Rh).  A maximum of 100 items can be added in one request.  If nothing is specified, then the track (or episode) uri currently playing is used."
+        },
+        "position": {
+          "name": "Position",
+          "description": "The position to insert the items, a zero-based index.  For example, to insert the items in the first position use a value of 0; to insert the items in the third position use a value of 2.  Omit the parameter to append the items to the end of the playlist."
+        }
+      }
+    },
     "search_albums": {
       "name": "Search Albums",
       "description": "Get Spotify catalog information about Albums that match a keyword string.",
