@@ -6,6 +6,17 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.9 ] - 2024/03/19
+
+  * Added service `playlist_create` to create a new Spotify playlist.
+  * Added service `playlist_change` to change the details for an existing Spotify playlist.
+  * Added service `playlist_cover_image_add` to replace the image displayed for a specified playlist ID.
+  * Added service `playlist_items_clear` to remove (clear) all items from a user's playlist.
+  * Added service `playlist_items_remove` to remove one or more items from a user's playlist.
+  * Added service `save_track_favorites` to save one or more items to the current user's track favorites.
+  * Added service `remove_track_favorites` to remove one or more items from the current user's track favorites.
+  * Updated `media_player.play_media` method to better support `play_media` service enqueue features.
+
 ###### [ 1.0.8 ] - 2024/03/15
 
   * Added service `playlist_items_add` to add one or more items to a user's playlist.  Items are added in the order they are listed in the `uris` argument.

@@ -101,7 +101,14 @@ SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS:str = 'get_users_top_tracks'
 SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT:str = 'player_media_play_context'
 SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS:str = 'player_media_play_tracks'
 SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK:str = 'player_transfer_playback'
+SERVICE_SPOTIFY_PLAYLIST_CHANGE:str = 'playlist_change'
+SERVICE_SPOTIFY_PLAYLIST_COVER_IMAGE_ADD:str = 'playlist_cover_image_add'
+SERVICE_SPOTIFY_PLAYLIST_CREATE:str = 'playlist_create'
 SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD:str = 'playlist_items_add'
+SERVICE_SPOTIFY_PLAYLIST_ITEMS_CLEAR:str = 'playlist_items_clear'
+SERVICE_SPOTIFY_PLAYLIST_ITEMS_REMOVE:str = 'playlist_items_remove'
+SERVICE_SPOTIFY_REMOVE_TRACK_FAVORITES:str = 'remove_track_favorites'
+SERVICE_SPOTIFY_SAVE_TRACK_FAVORITES:str = 'save_track_favorites'
 SERVICE_SPOTIFY_SEARCH_ALBUMS:str = 'search_albums'
 SERVICE_SPOTIFY_SEARCH_ARTISTS:str = 'search_artists'
 SERVICE_SPOTIFY_SEARCH_AUDIOBOOKS:str = 'search_audiobooks'
@@ -327,12 +334,72 @@ SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK_SCHEMA = vol.Schema(
     }
 )
 
+SERVICE_SPOTIFY_PLAYLIST_CHANGE_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("playlist_id"): cv.string,
+        vol.Required("name"): cv.string,
+        vol.Required("description"): cv.string,
+        vol.Required("public"): cv.boolean,
+        vol.Required("collaborative"): cv.boolean,
+    }
+)
+
+SERVICE_SPOTIFY_PLAYLIST_COVER_IMAGE_ADD_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("playlist_id"): cv.string,
+        vol.Required("image_path"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_PLAYLIST_CREATE_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("user_id"): cv.string,
+        vol.Required("name"): cv.string,
+        vol.Required("description"): cv.string,
+        vol.Required("public"): cv.boolean,
+        vol.Required("collaborative"): cv.boolean,
+    }
+)
+
 SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("playlist_id"): cv.string,
         vol.Optional("uris"): cv.string,
         vol.Optional("position"): vol.All(vol.Range(min=0,max=9999)),
+    }
+)
+
+SERVICE_SPOTIFY_PLAYLIST_ITEMS_CLEAR_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("playlist_id"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_PLAYLIST_ITEMS_REMOVE_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("playlist_id"): cv.string,
+        vol.Optional("uris"): cv.string,
+        vol.Optional("snapshot_id"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_REMOVE_TRACK_FAVORITES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("ids"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_SAVE_TRACK_FAVORITES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("ids"): cv.string,
     }
 )
 
@@ -526,6 +593,25 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     await hass.async_add_executor_job(entity.service_spotify_player_transfer_playback, device_id, play)
 
+                elif service.service == SERVICE_SPOTIFY_PLAYLIST_CHANGE:
+
+                    # update details of an existing playlist.
+                    playlist_id = service.data.get("playlist_id")
+                    name = service.data.get("name")
+                    description = service.data.get("description")
+                    public = service.data.get("public")
+                    collaborative = service.data.get("collaborative")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_playlist_change, playlist_id, name, description, public, collaborative)
+                    
+                elif service.service == SERVICE_SPOTIFY_PLAYLIST_COVER_IMAGE_ADD:
+
+                    # add playlist cover image.
+                    playlist_id = service.data.get("playlist_id")
+                    image_path = service.data.get("image_path")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_playlist_cover_image_add, playlist_id, image_path)
+
                 elif service.service == SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD:
 
                     # add items to playlist.
@@ -534,6 +620,36 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     position = service.data.get("position")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     await hass.async_add_executor_job(entity.service_spotify_playlist_items_add, playlist_id, uris, position)
+
+                elif service.service == SERVICE_SPOTIFY_PLAYLIST_ITEMS_CLEAR:
+
+                    # clear all items from playlist.
+                    playlist_id = service.data.get("playlist_id")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_playlist_items_clear, playlist_id)
+
+                elif service.service == SERVICE_SPOTIFY_PLAYLIST_ITEMS_REMOVE:
+
+                    # add items to playlist.
+                    playlist_id = service.data.get("playlist_id")
+                    uris = service.data.get("uris")
+                    snapshot_id = service.data.get("snapshot_id")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_playlist_items_remove, playlist_id, uris, snapshot_id)
+
+                elif service.service == SERVICE_SPOTIFY_REMOVE_TRACK_FAVORITES:
+
+                    # remove track(s) from favorites.
+                    ids = service.data.get("ids")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_remove_track_favorites, ids)
+
+                elif service.service == SERVICE_SPOTIFY_SAVE_TRACK_FAVORITES:
+
+                    # save track(s) to favorites.
+                    ids = service.data.get("ids")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_save_track_favorites, ids)
 
                 else:
                     
@@ -771,6 +887,17 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_get_users_top_tracks, time_range, limit, offset, limit_total)
 
+                elif service.service == SERVICE_SPOTIFY_PLAYLIST_CREATE:
+
+                    # create a new playlist.
+                    user_id = service.data.get("user_id")
+                    name = service.data.get("name")
+                    description = service.data.get("description")
+                    public = service.data.get("public")
+                    collaborative = service.data.get("collaborative")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_playlist_create, user_id, name, description, public, collaborative)
+                    
                 elif service.service == SERVICE_SPOTIFY_SEARCH_ALBUMS:
 
                     # search Spotify for specified criteria.
@@ -1135,12 +1262,75 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             supports_response=SupportsResponse.NONE,
         )
 
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_PLAYLIST_COVER_IMAGE_ADD, SERVICE_SPOTIFY_PLAYLIST_COVER_IMAGE_ADD_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_PLAYLIST_COVER_IMAGE_ADD,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_PLAYLIST_COVER_IMAGE_ADD_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_PLAYLIST_CHANGE, SERVICE_SPOTIFY_PLAYLIST_CHANGE_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_PLAYLIST_CHANGE,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_PLAYLIST_CHANGE_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_PLAYLIST_CREATE, SERVICE_SPOTIFY_PLAYLIST_CREATE_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_PLAYLIST_CREATE,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_PLAYLIST_CREATE_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
         _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD, SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD_SCHEMA)
         hass.services.async_register(
             DOMAIN,
             SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD,
             service_handle_spotify_command,
             schema=SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_PLAYLIST_ITEMS_CLEAR, SERVICE_SPOTIFY_PLAYLIST_ITEMS_CLEAR_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_PLAYLIST_ITEMS_CLEAR,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_PLAYLIST_ITEMS_CLEAR_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_PLAYLIST_ITEMS_REMOVE, SERVICE_SPOTIFY_PLAYLIST_ITEMS_REMOVE_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_PLAYLIST_ITEMS_REMOVE,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_PLAYLIST_ITEMS_REMOVE_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_REMOVE_TRACK_FAVORITES, SERVICE_SPOTIFY_REMOVE_TRACK_FAVORITES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_REMOVE_TRACK_FAVORITES,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_REMOVE_TRACK_FAVORITES_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_SAVE_TRACK_FAVORITES, SERVICE_SPOTIFY_SAVE_TRACK_FAVORITES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_SAVE_TRACK_FAVORITES,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_SAVE_TRACK_FAVORITES_SCHEMA,
             supports_response=SupportsResponse.NONE,
         )
 

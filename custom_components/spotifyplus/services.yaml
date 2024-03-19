@@ -968,6 +968,132 @@ player_transfer_playback:
       selector:
         boolean:
 
+playlist_cover_image_add:
+  name: Playlist Cover Image Add
+  description: Replace the image used to represent a specific playlist.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    playlist_id:
+      name: Playlist ID
+      description: The Spotify ID of the playlist (e.g. 5v5ETK9WFXAnGQ3MRubKuE).
+      example: "5v5ETK9WFXAnGQ3MRubKuE"
+      required: true
+      selector:
+        text:
+    image_path:
+      name: Image Path
+      description: The fully-qualified path of the image to be uploaded (e.g. `www/images/spotify_playlist_default_image.png`).  The image must be in PNG or JPEG format, and cannot exceed 256KB in Base64 encoded size.
+      example: "www/images/spotify_playlist_default_image.png"
+      required: true
+      selector:
+        text:
+
+playlist_change:
+  name: Playlist Change
+  description: Change a playlists details (name, description, and public / private state).
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    playlist_id:
+      name: Playlist ID
+      description: The Spotify ID of the playlist (e.g. `5AC9ZXA7nJ7oGWO911FuDG`).
+      example: "5AC9ZXA7nJ7oGWO911FuDG"
+      required: true
+      selector:
+        text:
+    name:
+      name: Name
+      description: The updated name for the playlist (e.g. `My Updated Playlist`).  This name does not need to be unique; a user may have several playlists with the same name.
+      example: "My Updated Playlist"
+      required: true
+      selector:
+        text:
+    description:
+      name: Description
+      description: The playlist description, as displayed in Spotify Clients and in the Web API.
+      example: "A Playlist updated by the SpotifyPlus integration"
+      required: true
+      selector:
+        text:
+    public:
+      name: Public?
+      description: If true, the playlist will be public; if false, it will be private.
+      example: "False"
+      required: true
+      selector:
+        boolean:
+    collaborative:
+      name: Collaborative?
+      description: If true, the playlist will be collaborative (other users can modify it).  To create a collaborative playlist you must also set the public argument to false.
+      example: "False"
+      required: true
+      selector:
+        boolean:
+
+playlist_create:
+  name: Playlist Create
+  description: Create an empty playlist for a Spotify user.  The playlist will remain empty until you add tracks.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    user_id:
+      name: User ID
+      description: The user's Spotify user ID (e.g. 32k99y2kg5lnn3mxhtmd2bpdkjfu).  Omit this argument to use the Spotify User ID of the player entity_id.
+      example: "32k99y2kg5lnn3mxhtmd2bpdkjfu"
+      required: false
+      selector:
+        text:
+    name:
+      name: Name
+      description: The name for the new playlist (e.g. `My New Playlist`).  This name does not need to be unique; a user may have several playlists with the same name.
+      example: "My New Playlist"
+      required: true
+      selector:
+        text:
+    description:
+      name: Description
+      description: The playlist description, as displayed in Spotify Clients and in the Web API.
+      example: "A Playlist created by the SpotifyPlus integration"
+      required: true
+      selector:
+        text:
+    public:
+      name: Public?
+      description: If true, the playlist will be public; if false, it will be private.
+      example: "False"
+      required: true
+      selector:
+        boolean:
+    collaborative:
+      name: Collaborative?
+      description: If true, the playlist will be collaborative (other users can modify it).  To create a collaborative playlist you must also set the public argument to false.
+      example: "False"
+      required: true
+      selector:
+        boolean:
+
 playlist_items_add:
   name: Playlist Items Add
   description: Add one or more items to a user's playlist.  Items are added in the order they are listed in the `uris` argument.
@@ -990,7 +1116,7 @@ playlist_items_add:
         text:
     uris:
       name: URI's
-      description: A comma-separated list of Spotify URIs to add; can be track or episode URIs (e.g. spotify:track:4iV5W9uYEdYUVa79Axb7Rh).  A maximum of 100 items can be added in one request.  If nothing is specified, then the track (or episode) uri currently playing is used.
+      description: A comma-separated list of Spotify URIs to add; can be track or episode URIs (e.g. spotify:track:4iV5W9uYEdYUVa79Axb7Rh).  A maximum of 100 items can be specified in one request.  If nothing is specified, then the track (or episode) uri currently playing is used.
       example: "spotify:track:4iV5W9uYEdYUVa79Axb7Rh,spotify:episode:512ojhOuo1ktJprKbVcKyQ"
       required: false
       selector:
@@ -1005,6 +1131,104 @@ playlist_items_add:
           min: 0
           max: 9999
           mode: box
+
+playlist_items_clear:
+  name: Playlist Items Clear
+  description: Removes (clears) all items from a user's playlist.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    playlist_id:
+      name: Playlist ID
+      description: The Spotify ID of the playlist (e.g. 5AC9ZXA7nJ7oGWO911FuDG).
+      example: "5AC9ZXA7nJ7oGWO911FuDG"
+      required: true
+      selector:
+        text:
+
+playlist_items_remove:
+  name: Playlist Items Remove
+  description: Remove one or more items from a user's playlist.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    playlist_id:
+      name: Playlist ID
+      description: The Spotify ID of the playlist (e.g. 5AC9ZXA7nJ7oGWO911FuDG).
+      example: "5AC9ZXA7nJ7oGWO911FuDG"
+      required: true
+      selector:
+        text:
+    uris:
+      name: URI's
+      description: A comma-separated list of Spotify URIs to remove; can be track or episode URIs (e.g. spotify:track:4iV5W9uYEdYUVa79Axb7Rh).  A maximum of 100 items can be specified in one request.  If nothing is specified, then the track (or episode) uri currently playing is used.
+      example: "spotify:track:4iV5W9uYEdYUVa79Axb7Rh,spotify:episode:512ojhOuo1ktJprKbVcKyQ"
+      required: false
+      selector:
+        text:
+    snapshot_id:
+      name: Snapshot ID
+      description: The playlist's snapshot ID against which you want to make the changes (e.g. `MzgsMWVkNDY3MTQ5YjVjYWE0MzAyNjkyZWMyOThjNjE3YWMwOTY0ZmJjYg==`).  The API will validate that the specified items exist and make the changes, even if more recent changes have been made to the playlist.  If omitted, the current playlist is updated.
+      example: "MzgsMWVkNDY3MTQ5YjVjYWE0MzAyNjkyZWMyOThjNjE3YWMwOTY0ZmJjYg=="
+      required: false
+      selector:
+        text:
+
+remove_track_favorites:
+  name: Remove Track Favorites
+  description: Remove one or more tracks from the current user's 'Your Library'.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    ids:
+      name: ID's
+      description: A comma-separated list of Spotify track id's (e.g. `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`).  A maximum of 50 id's may be specified.  If omitted, the currently playing context uri id value is used.
+      example: "1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK"
+      required: false
+      selector:
+        text:
+
+save_track_favorites:
+  name: Save Track Favorites
+  description: Save one or more tracks to the current user's 'Your Library'.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    ids:
+      name: ID's
+      description: A comma-separated list of Spotify track id's (e.g. `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`).  A maximum of 50 id's may be specified.  If omitted, the currently playing context uri id value is used.
+      example: "1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK"
+      required: false
+      selector:
+        text:
 
 search_albums:
   name: Search Albums

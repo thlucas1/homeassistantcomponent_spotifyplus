@@ -174,7 +174,7 @@ def spotify_exception_handler(
             self._attr_available = True
 
             # give spotify some time to process the command before the update check.
-            time.sleep(0.25)
+            time.sleep(0.50)
             
             # update player status.
             _logsi.LogVerbose('Calling update method to update player status')
@@ -524,34 +524,44 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             #media_type = media_type.removeprefix(MEDIA_PLAYER_PREFIX)
 
             # get enqueue keyword arguments (if any).
-            enqueue: MediaPlayerEnqueue = kwargs.get(ATTR_MEDIA_ENQUEUE, MediaPlayerEnqueue.REPLACE)
-        
-            # resolve the device id.
-            # if now playing media does not have a device id set, then use the first device
-            # found in the device list (courtesy of the data update coordinator).
-            deviceId:str = None
-            if (self._nowPlaying is not None and self._nowPlaying.Device is None and self.data.devices.data):
-                _logsi.LogVerbose("NowPlaying media has no device set - using first device in the available list of devices")
-                device:PlayerDevice = self.data.devices.data[0]
-                deviceId = device.Id
+            enqueue:MediaPlayerEnqueue = kwargs.get(ATTR_MEDIA_ENQUEUE, None)
 
-            # is this an enqueue add request?
-            if enqueue == MediaPlayerEnqueue.ADD:
-                if media_type not in {
-                    MediaType.TRACK,
-                    MediaType.EPISODE,
-                    MediaType.MUSIC,
-                }:
-                    raise ValueError(f"Media type {media_type} is not supported when enqueue is ADD")
-                
-                _logsi.LogVerbose("Adding uri to player queue: uri='%s', deviceId='%s'" % (media_id, deviceId))
-                self.data.spotifyClient.AddPlayerQueueItem(media_id, deviceId)
-                return
-       
+            # verify device id (specific device, active device, or default).
+            deviceId:str = self._VerifyDeviceId(None)
+            
             # spotify can't handle URI's with query strings or anchors
             # yet, they do generate those types of URI in their official clients.
             media_id:str = str(URL(media_id).with_query(None).with_fragment(None))
 
+            # is this an enqueue request?
+            if enqueue is not None:
+
+                _logsi.LogVerbose("Enqueue command received for this play media request: '%s', deviceId='%s'" % (enqueue, deviceId))
+                
+                if enqueue == MediaPlayerEnqueue.ADD:
+                    # add to queue request.
+                    _logsi.LogVerbose("Adding uri to Spotify Player Queue: '%s', deviceId='%s'" % (media_id, deviceId))
+                    self.data.spotifyClient.AddPlayerQueueItem(media_id, deviceId)
+                    return
+
+                elif enqueue == MediaPlayerEnqueue.NEXT:
+                    # play next request.
+                    _logsi.LogVerbose("Playing next item in the player queue: deviceId='%s'" % (deviceId))
+                    self.data.spotifyClient.PlayerMediaSkipNext(deviceId)
+                    return
+            
+                elif enqueue == MediaPlayerEnqueue.PLAY:
+                    # play request.
+                    pass   # we will handle this below.
+            
+                elif enqueue == MediaPlayerEnqueue.REPLACE:
+                    # play now and clear queue request.
+                    pass   # we will handle this below.
+
+                else:
+                    _logsi.LogWarning("Spotify Connect Player does not support '%s' enqueue requests; request ignored" % enqueue)
+                    return
+                       
             # start play based upon the media type.
             if media_type in {MediaType.TRACK, MediaType.EPISODE, MediaType.MUSIC}:
                 
@@ -750,7 +760,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
     
             # if device not specified, then ensure we have an active device.
             _logsi.LogVerbose("Verifying active Spotify Connect device")
-            self.data.spotifyClient.PlayerVerifyDeviceDefault(PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault), False)
+            result:PlayerPlayState = self.data.spotifyClient.PlayerVerifyDeviceDefault(PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault), False)
+            if result is not None and result.Device is not None:
+                _logsi.LogVerbose("Using SpotifyPlus active device: '%s'" % result.Device.Id)
+                deviceId = result.Device.Id
 
         elif deviceId == "*":
                 
@@ -2392,6 +2405,186 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
+    def service_spotify_playlist_cover_image_add(self, 
+                                                 playlistId:str, 
+                                                 imagePath:str, 
+                                                 ) -> None:
+        """
+        Replace the image used to represent a specific playlist.
+        
+        Args:
+            playlistId (str):  
+                The Spotify ID of the playlist.  
+                Example: `5v5ETK9WFXAnGQ3MRubKuE`
+            imagePath (str):
+                The fully-qualified path of the image to be uploaded.  
+                The image must be in JPEG format, and cannot exceed 256KB in Base64 encoded size.  
+        """
+        apiMethodName:str = 'service_spotify_playlist_cover_image_add'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("playlistId", playlistId)
+            apiMethodParms.AppendKeyValue("imagePath", imagePath)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Playlist Add Cover Image Service", apiMethodParms)
+            
+            # add playlist cover image.
+            _logsi.LogVerbose("Adding cover image to Spotify playlist")
+            self.data.spotifyClient.AddPlaylistCoverImage(playlistId, imagePath)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_playlist_change(self, 
+                                        playlistId:str, 
+                                        name:str=None,
+                                        description:str=None,
+                                        public:bool=True,
+                                        collaborative:bool=False
+                                        ) -> None:
+        """
+        Change a playlist's details (name, description, and public / private state).
+        
+        Args:
+        
+            playlistId (str):  
+                The Spotify ID of the playlist.
+                Example: `5AC9ZXA7nJ7oGWO911FuDG`
+            name (str):
+                The updated name for the playlist, for example "My New Playlist Title"
+                This name does not need to be unique; a user may have several playlists with 
+                the same name.
+            description (str):
+                The updated playlist description, as displayed in Spotify Clients and in the Web API.
+            public (bool):
+                If true, the playlist will be public; if false, it will be private.  
+            collaborative (bool):
+                If true, the playlist will become collaborative and other users will be able to modify 
+                the playlist in their Spotify client.  
+                Note: You can only set collaborative to true on non-public playlists.
+        """
+        apiMethodName:str = 'service_spotify_playlist_change'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("playlistId", playlistId)
+            apiMethodParms.AppendKeyValue("name", name)
+            apiMethodParms.AppendKeyValue("description", description)
+            apiMethodParms.AppendKeyValue("public", public)
+            apiMethodParms.AppendKeyValue("collaborative", collaborative)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Playlist Change Service", apiMethodParms)
+                
+            # create Spotify playlist.
+            _logsi.LogVerbose("Changing Spotify Playlist Details")
+            self.data.spotifyClient.ChangePlaylistDetails(playlistId, name, description, public, collaborative)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_playlist_create(self, 
+                                        userId:str, 
+                                        name:str=None,
+                                        description:str=None,
+                                        public:bool=True,
+                                        collaborative:bool=False
+                                        ) -> dict:
+        """
+        Create an empty playlist for a Spotify user.  
+        
+        This method requires the `playlist-modify-public` and `playlist-modify-private` scope.
+        
+        Args:
+        
+            userId (str):  
+                The user's Spotify user ID.
+                Example: `32k99y2kg5lnn3mxhtmd2bpdkjfu`
+            name (str):
+                The name for the new playlist, for example "My Playlist".  
+                This name does not need to be unique; a user may have several playlists with 
+                the same name.
+            description (str):
+                The playlist description, as displayed in Spotify Clients and in the Web API.
+            public (bool):
+                If true, the playlist will be public; if false, it will be private.  
+                To be able to create private playlists, the user must have granted the 
+                `playlist-modify-private` scope.  
+                Defaults to true. 
+            collaborative (bool):
+                If true, the playlist will be collaborative.  
+                Note: to create a collaborative playlist you must also set public to false. 
+                To create collaborative playlists you must have granted `playlist-modify-private`
+                and `playlist-modify-public` scope.  
+                Defaults to false.
+
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A `Playlist` object that contains the playlist details.  
+        """
+        apiMethodName:str = 'service_spotify_playlist_create'
+        apiMethodParms:SIMethodParmListContext = None
+        result:Playlist = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("userId", userId)
+            apiMethodParms.AppendKeyValue("name", name)
+            apiMethodParms.AppendKeyValue("description", description)
+            apiMethodParms.AppendKeyValue("public", public)
+            apiMethodParms.AppendKeyValue("collaborative", collaborative)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Playlist Create Service", apiMethodParms)
+                
+            # create Spotify playlist.
+            _logsi.LogVerbose("Creating Spotify Playlist")
+            result = self.data.spotifyClient.CreatePlaylist(userId, name, description, public, collaborative)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
     def service_spotify_playlist_items_add(self, 
                                            playlistId:str, 
                                            uris:str, 
@@ -2408,7 +2601,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             uris (str):  
                 A comma-separated list of Spotify URIs to add; can be track or episode URIs.  
                 Example: `spotify:track:4iV5W9uYEdYUVa79Axb7Rh,spotify:episode:512ojhOuo1ktJprKbVcKyQ`.  
-                A maximum of 100 items can be added in one request.
+                A maximum of 100 items can be specified in one request.
                 If nothing is specified, then the track (or episode) uri currently playing is used.
             position (int):  
                 The position to insert the items, a zero-based index.  
@@ -2432,19 +2625,183 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # validation - if position is -1 then set it to None (treat as append).
             if isinstance(position, int) and position == -1:
                 position = None
-
-            # validations - if uris is null, then use currently playing uri value.
-            if uris is None or uris.strip() == '':
-                _logsi.LogVerbose("Querying NowPlaying status of Spotify player")
-                nowPlaying:PlayerPlayState = self.data.spotifyClient.GetPlayerNowPlaying()
-                if nowPlaying is not None:
-                    _logsi.LogVerbose("NowPlaying data: %s" % str(nowPlaying))
-                    if nowPlaying.Item is not None:
-                        uris = nowPlaying.Item.Uri
-                
+               
             # add items to Spotify playlist.
             _logsi.LogVerbose("Adding item(s) to Spotify playlist")
             self.data.spotifyClient.AddPlaylistItems(playlistId, uris, position)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_playlist_items_clear(self, 
+                                             playlistId:str, 
+                                             ) -> None:
+        """
+        Removes (clears) all items from a user's playlist.
+        
+        Args:
+        
+            playlistId (str):  
+                The Spotify ID of the playlist.
+                Example: `5AC9ZXA7nJ7oGWO911FuDG`
+        """
+        apiMethodName:str = 'service_spotify_playlist_items_clear'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("playlistId", playlistId)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Playlist Clear Items Service", apiMethodParms)
+            
+            # clear items from Spotify playlist.
+            _logsi.LogVerbose("Clearing item(s) from Spotify playlist")
+            self.data.spotifyClient.ClearPlaylistItems(playlistId)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_playlist_items_remove(self, 
+                                              playlistId:str, 
+                                              uris:str, 
+                                              snapshotId:str,
+                                              ) -> None:
+        """
+        Remove one or more items from a user's playlist.
+        
+        Args:
+        
+            playlistId (str):  
+                The Spotify ID of the playlist.
+                Example: `5AC9ZXA7nJ7oGWO911FuDG`
+            uris (str):  
+                A comma-separated list of Spotify URIs to remove; can be track or episode URIs.  
+                Example: `spotify:track:4iV5W9uYEdYUVa79Axb7Rh,spotify:episode:512ojhOuo1ktJprKbVcKyQ`.  
+                A maximum of 100 items can be specified in one request.
+                If nothing is specified, then the track (or episode) uri currently playing is used.
+            snapshotId (str):  
+                The playlist's snapshot ID against which you want to make the changes.  
+                The API will validate that the specified items exist and in the specified positions and 
+                make the changes, even if more recent changes have been made to the playlist.
+                If null, the current playlist is updated.  
+                Default is null.
+        """
+        apiMethodName:str = 'service_spotify_playlist_items_remove'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("playlistId", playlistId)
+            apiMethodParms.AppendKeyValue("uris", uris)
+            apiMethodParms.AppendKeyValue("snapshotId", snapshotId)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Playlist Remove Items Service", apiMethodParms)
+                           
+            # remove items from Spotify playlist.
+            _logsi.LogVerbose("Removing item(s) from Spotify playlist")
+            self.data.spotifyClient.RemovePlaylistItems(playlistId, uris, snapshotId)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_remove_track_favorites(self, 
+                                               ids:str=None, 
+                                               ) -> None:
+        """
+        Remove one or more tracks from the current user's 'Your Library'.
+        
+        Args:
+            ids (str):  
+                A comma-separated list of the Spotify IDs for the tracks.  
+                Maximum: 50 IDs.  
+                Example: `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`
+                If null, the currently playing context uri id value is used.
+        """
+        apiMethodName:str = 'service_spotify_remove_track_favorites'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("ids", ids)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Playlist Remove Track Favorites Service", apiMethodParms)
+                           
+            # remove items from Spotify track favorites.
+            _logsi.LogVerbose("Removing items(s) from Spotify Track Favorites")
+            self.data.spotifyClient.RemoveTrackFavorites(ids)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_save_track_favorites(self, 
+                                             ids:str=None, 
+                                             ) -> None:
+        """
+        Save one or more tracks to the current user's 'Your Library'.
+        
+        Args:
+            ids (str):  
+                A comma-separated list of the Spotify IDs for the tracks.  
+                Maximum: 50 IDs.  
+                Example: `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`
+                If null, the currently playing context uri id value is used.
+        """
+        apiMethodName:str = 'service_spotify_save_track_favorites'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("ids", ids)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Playlist Save Track Favorites Service", apiMethodParms)
+                           
+            # save items to Spotify track favorites.
+            _logsi.LogVerbose("Saving items(s) to Spotify Track Favorites")
+            self.data.spotifyClient.SaveTrackFavorites(ids)
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
