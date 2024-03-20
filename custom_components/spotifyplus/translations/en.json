@@ -631,6 +631,10 @@
         "collaborative": {
           "name": "Collaborative?",
           "description": "If true, the playlist will be collaborative (other users can modify it).  To create a collaborative playlist you must also set the public argument to false."
+        },
+        "image_path": {
+          "name": "Image Path",
+          "description": "The fully-qualified path of the image to be uploaded (e.g. `www/images/spotify_playlist_default_image.png`).  The image must be in PNG or JPEG format, and cannot exceed 256KB in Base64 encoded size.  Omit this parameter if you do not wish to update the existing playlist image."
         }
       }
     },
@@ -661,6 +665,10 @@
         "collaborative": {
           "name": "Collaborative?",
           "description": "If true, the playlist will be collaborative (other users can modify it).  To create a collaborative playlist you must also set the public argument to false."
+        },
+        "image_path": {
+          "name": "Image Path",
+          "description": "The fully-qualified path of the image to be uploaded (e.g. `www/images/spotify_playlist_default_image.png`).  The image must be in PNG or JPEG format, and cannot exceed 256KB in Base64 encoded size.  Omit this parameter if you do not wish to add a playlist image."
         }
       }
     },
@@ -722,6 +730,20 @@
         }
       }
     },
+    "remove_album_favorites": {
+      "name": "Remove Album Favorites",
+      "description": "Remove one or more albums from the current user's 'Your Library'.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "ids": {
+          "name": "ID's",
+          "description": "A comma-separated list of Spotify album id's (e.g. `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track album uri id value is used."
+        }
+      }
+    },
     "remove_track_favorites": {
       "name": "Remove Track Favorites",
       "description": "Remove one or more tracks from the current user's 'Your Library'.",
@@ -733,6 +755,20 @@
         "ids": {
           "name": "ID's",
           "description": "A comma-separated list of Spotify track id's (e.g. `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`).  A maximum of 50 id's may be specified.  If omitted, the currently playing context uri id value is used."
+        }
+      }
+    },
+    "save_album_favorites": {
+      "name": "Save Album Favorites",
+      "description": "Save one or more albums to the current user's 'Your Library'.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "ids": {
+          "name": "ID's",
+          "description": "A comma-separated list of Spotify album id's (e.g. `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track album uri id value is used."
         }
       }
     },

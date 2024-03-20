@@ -1,3 +1,24 @@
+follow_artists:
+  name: Follow Artists
+  description: Add the current user as a follower of one or more artists.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    ids:
+      name: ID's
+      description: A comma-separated list of Spotify artist id's (e.g. `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track artist uri id value is used.
+      example: "2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk"
+      required: false
+      selector:
+        text:
+
 get_album:
   name: Get Album
   description: Get Spotify catalog information for a single album.
@@ -1044,6 +1065,13 @@ playlist_change:
       required: true
       selector:
         boolean:
+    image_path:
+      name: Image Path
+      description: The fully-qualified path of the image to be uploaded (e.g. `www/images/spotify_playlist_default_image.png`).  The image must be in PNG or JPEG format, and cannot exceed 256KB in Base64 encoded size.  Omit this parameter if you do not wish to update the existing playlist image.
+      example: "www/images/spotify_playlist_default_image.png"
+      required: false
+      selector:
+        text:
 
 playlist_create:
   name: Playlist Create
@@ -1093,6 +1121,13 @@ playlist_create:
       required: true
       selector:
         boolean:
+    image_path:
+      name: Image Path
+      description: The fully-qualified path of the image to be uploaded (e.g. `www/images/spotify_playlist_default_image.png`).  The image must be in PNG or JPEG format, and cannot exceed 256KB in Base64 encoded size.  Omit this parameter if you do not wish to add a playlist image.
+      example: "www/images/spotify_playlist_default_image.png"
+      required: false
+      selector:
+        text:
 
 playlist_items_add:
   name: Playlist Items Add
@@ -1188,6 +1223,27 @@ playlist_items_remove:
       selector:
         text:
 
+remove_album_favorites:
+  name: Remove Album Favorites
+  description: Remove one or more albums from the current user's 'Your Library'.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    ids:
+      name: ID's
+      description: A comma-separated list of Spotify album id's (e.g. `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track album uri id value is used.
+      example: "6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX"
+      required: false
+      selector:
+        text:
+
 remove_track_favorites:
   name: Remove Track Favorites
   description: Remove one or more tracks from the current user's 'Your Library'.
@@ -1205,6 +1261,27 @@ remove_track_favorites:
       name: ID's
       description: A comma-separated list of Spotify track id's (e.g. `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`).  A maximum of 50 id's may be specified.  If omitted, the currently playing context uri id value is used.
       example: "1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK"
+      required: false
+      selector:
+        text:
+
+save_album_favorites:
+  name: Save Album Favorites
+  description: Save one or more albums to the current user's 'Your Library'.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    ids:
+      name: ID's
+      description: A comma-separated list of Spotify album id's (e.g. `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track album uri id value is used.
+      example: "6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX"
       required: false
       selector:
         text:
@@ -1670,3 +1747,24 @@ search_tracks:
       selector:
         number:
           mode: box
+
+unfollow_artists:
+  name: Unfollow Artists
+  description: Remove the current user as a follower of one or more artists.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    ids:
+      name: ID's
+      description: A comma-separated list of Spotify artist id's (e.g. `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track artist uri id value is used.
+      example: "2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk"
+      required: false
+      selector:
+        text:

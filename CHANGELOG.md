@@ -6,6 +6,16 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.10 ] - 2024/03/20
+
+  * Added service `follow_artist` to add the current user as a follower of one or more artists.
+  * Added service `unfollow_artist` to remove the current user as a follower of one or more artists.
+  * Added service `save_album_favorites` to save one or more items to the current user's album favorites.
+  * Added service `remove_album_favorites` to remove one or more items from the current user's album favorites.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.37.
+  * Updated service `playlist_create` to add the `image_path` argument to allow a cover art image to be assigned when a playlist is created.
+  * Updated service `playlist_change` to add the `image_path` argument to allow a cover art image to be updated when a playlist details are updated.
+
 ###### [ 1.0.9 ] - 2024/03/19
 
   * Added service `playlist_create` to create a new Spotify playlist.
@@ -16,6 +26,7 @@ Change are listed in reverse chronological order (newest to oldest).
   * Added service `save_track_favorites` to save one or more items to the current user's track favorites.
   * Added service `remove_track_favorites` to remove one or more items from the current user's track favorites.
   * Updated `media_player.play_media` method to better support `play_media` service enqueue features.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.36.
 
 ###### [ 1.0.8 ] - 2024/03/15
 
