@@ -6,10 +6,20 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.11 ] - 2024/03/24
+
+  * Updated media_player SCAN_INTERVAL to 1 second to inform HA of Spotify status updates in near real time (e.g. pause, resume, next track, etc).
+  * Updated `media_player.update` logic to only call the spotifywebapiPython `SpotifyClient.GetPlayerNowPlaying` every 30 seconds OR if a player command is issued (e.g. pause, play, next / previous track, seek, volume, etc) OR if the current track is nearing the end of play (e.g. next track in a playlist or queue).
+  * This update adds a few more calls to the Spotify Web API, but not many.  The trade-off is near real-time updates of player status.
+  * Added service `follow_playlist` to add the current user as a follower of a playlist.
+  * Added service `unfollow_playlist` to remove the current user as a follower of a playlist
+  * Added service `follow_users` to add the current user as a follower of one or more users.
+  * Added service `unfollow_users` to remove the current user as a follower of one or more users.
+
 ###### [ 1.0.10 ] - 2024/03/20
 
-  * Added service `follow_artist` to add the current user as a follower of one or more artists.
-  * Added service `unfollow_artist` to remove the current user as a follower of one or more artists.
+  * Added service `follow_artists` to add the current user as a follower of one or more artists.
+  * Added service `unfollow_artists` to remove the current user as a follower of one or more artists.
   * Added service `save_album_favorites` to save one or more items to the current user's album favorites.
   * Added service `remove_album_favorites` to remove one or more items from the current user's album favorites.
   * Updated underlying `spotifywebapiPython` package requirement to version 1.0.37.

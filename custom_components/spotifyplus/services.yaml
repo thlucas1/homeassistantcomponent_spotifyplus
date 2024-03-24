@@ -19,6 +19,55 @@ follow_artists:
       selector:
         text:
 
+follow_playlist:
+  name: Follow Playlist
+  description: Add the current user as a follower of a playlist.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    playlist_id:
+      name: Playlist ID
+      description: The Spotify ID of the playlist (e.g. `3cEYpjA9oz9GiPac4AsH4n`).
+      example: "3cEYpjA9oz9GiPac4AsH4n"
+      required: true
+      selector:
+        text:
+    public:
+      name: Public?
+      description: If true the playlist will be included in user's public playlists, if false it will remain private. 
+      example: "True"
+      required: false
+      selector:
+        boolean:
+
+follow_users:
+  name: Follow Users
+  description: Add the current user as a follower of one or more users.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    ids:
+      name: ID's
+      description: A comma-separated list of the Spotify user IDs (e.g. 'smedjan,3758dfdsfjk435hjk6k79lm0n3c4').  A maximum of 50 IDs can be sent in one request.
+      example: "smedjan,3758dfdsfjk435hjk6k79lm0n3c4"
+      required: true
+      selector:
+        text:
+
 get_album:
   name: Get Album
   description: Get Spotify catalog information for a single album.
@@ -1766,5 +1815,47 @@ unfollow_artists:
       description: A comma-separated list of Spotify artist id's (e.g. `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track artist uri id value is used.
       example: "2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk"
       required: false
+      selector:
+        text:
+
+unfollow_playlist:
+  name: Unfollow Playlist
+  description: Remove the current user as a follower of a playlist.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    playlist_id:
+      name: Playlist ID
+      description: The Spotify ID of the playlist (e.g. `3cEYpjA9oz9GiPac4AsH4n`).  
+      example: "3cEYpjA9oz9GiPac4AsH4n"
+      required: true
+      selector:
+        text:
+
+unfollow_users:
+  name: Unfollow Users
+  description: Remove the current user as a follower of one or more users.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    ids:
+      name: ID's
+      description: A comma-separated list of Spotify user IDs (e.g. `smedjan,3758dfdsfjk435hjk6k79lm0n3c4`).  A maximum of 50 IDs can be sent in one request.
+      example: "smedjan,3758dfdsfjk435hjk6k79lm0n3c4"
+      required: true
       selector:
         text:

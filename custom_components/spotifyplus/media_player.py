@@ -29,6 +29,7 @@ from spotifywebapipython.models import (
     SearchResponse, 
     Show,
     ShowPageSaved,
+    Track,
     TrackPage,
     TrackPageSaved,
     UserProfile
@@ -69,8 +70,7 @@ from .const import (
 )
 
 # get smartinspect logger reference; create a new session for this module name.
-from smartinspectpython.siauto import SIAuto, SILevel, SISession, SIColors, SIMethodParmListContext
-import logging
+from smartinspectpython.siauto import SIAuto, SILevel, SISession, SIMethodParmListContext, SIColors
 _logsi:SISession = SIAuto.Si.GetSession(__name__)
 if (_logsi == None):
     _logsi = SIAuto.Si.AddSession(__name__, True)
@@ -83,9 +83,30 @@ _R = TypeVar("_R")
 _P = ParamSpec("_P")
 
 
-#SCAN_INTERVAL = timedelta(seconds=15)
-SCAN_INTERVAL = timedelta(seconds=30)
-""" Time interval (in seconds) to scan for player status updates. """
+SCAN_INTERVAL = timedelta(seconds=1)
+""" 
+Time interval (in seconds) for HA to scan for status updates. 
+Note that the Spotify Web API does not get called every time HA update method is called
+though; check update method for logic that controls this.
+"""
+
+SPOTIFY_SCAN_INTERVAL:int = 30
+""" 
+Time interval (in seconds) to scan spotify connect player for updates. 
+"""
+
+SPOTIFY_SCAN_INTERVAL_TRACK_ENDSTART:int = 3
+""" 
+Time interval (in seconds) to scan spotify connect player for updates
+due to a track ending / starting.
+"""
+
+SPOTIFY_SCAN_INTERVAL_COMMAND:int = 6
+""" 
+Time interval (in seconds) to scan spotify connect player for updates
+due to a player command.  This gives the Spotify Connect Player time to
+update its PlayState status.
+"""
 
 
 REPEAT_MODE_MAPPING_TO_HA = {
@@ -173,17 +194,6 @@ def spotify_exception_handler(
             # if no exception, then assume it was successful.
             self._attr_available = True
 
-            # give spotify some time to process the command before the update check.
-            time.sleep(0.50)
-            
-            # update player status.
-            _logsi.LogVerbose('Calling update method to update player status')
-            self.update()
-
-            # inform Home Assistant of status updates.
-            _logsi.LogVerbose('Calling async_write_ha_state to inform HA of any updates')
-            self.async_write_ha_state()
-            
             # return function result to caller.
             return result
 
@@ -198,6 +208,12 @@ def spotify_exception_handler(
             self._attr_available = False
             _logsi.LogException(None, ex)
             raise HomeAssistantError(str(ex)) from ex
+        
+        finally:
+            
+            # media player command was processed, so force a scan at the next interval.
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a nowPlaying scan for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
 
     return wrapper
 
@@ -233,6 +249,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self._nowPlaying:PlayerPlayState = None
             self._playlist:Playlist = None
             self.data = data
+            self._currentScanInterval:int = 0
+            self._commandScanInterval:int = 0
+            self._lastKnownTimeRemainingSeconds:int = 0
 
             # initialize base class attributes (MediaPlayerEntity).
             self._attr_icon = "mdi:spotify"
@@ -477,14 +496,14 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
     def media_play(self) -> None:
         """ Start or resume playback. """
         self.data.spotifyClient.PlayerMediaResume()
-        self._nowPlaying._IsPlaying = True
+        self._nowPlaying.IsPlaying = True
 
 
     @spotify_exception_handler
     def media_pause(self) -> None:
         """ Pause playback. """
         self.data.spotifyClient.PlayerMediaPause()
-        self._nowPlaying._IsPlaying = False
+        self._nowPlaying.IsPlaying = False
 
 
     @spotify_exception_handler
@@ -567,13 +586,13 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 
                 _logsi.LogVerbose("Playing via PlayerMediaPlayTracks: uris='%s', deviceId='%s'" % (media_id, deviceId))
                 self.data.spotifyClient.PlayerMediaPlayTracks([media_id], deviceId=deviceId)
-                self._nowPlaying._IsPlaying = True
+                self._nowPlaying.IsPlaying = True
                 
             elif media_type in PLAYABLE_MEDIA_TYPES:
                 
                 _logsi.LogVerbose("Playing via PlayerMediaPlayContext: contextUri='%s', deviceId='%s'" % (media_id, deviceId))
                 self.data.spotifyClient.PlayerMediaPlayContext(media_id, deviceId=deviceId)
-                self._nowPlaying._IsPlaying = True
+                self._nowPlaying.IsPlaying = True
                 
             else:
                 
@@ -616,9 +635,47 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # trace.
             _logsi.EnterMethod(SILevel.Debug)
         
+            # is the media player enabled?  if not, then there is nothing to do.
             if not self.enabled:
-                _logsi.LogVerbose("Integration is disabled - nothing to update")
+                _logsi.LogVerbose("'%s': Integration is disabled - nothing to update" % self.name)
                 return
+
+            # have we reached a scan interval?
+            if not ((self._currentScanInterval % SPOTIFY_SCAN_INTERVAL) == 0):
+
+                _logsi.LogVerbose("'%s': Scan interval %d check - commandScanInterval=%d, currentScanInterval=%d, lastKnownTimeRemainingSeconds=%d, state=%s" % (self.name, SPOTIFY_SCAN_INTERVAL, self._commandScanInterval, self._currentScanInterval, self._lastKnownTimeRemainingSeconds, str(self._attr_state)))
+                
+                # no - decrement the current scan interval counts.
+                self._currentScanInterval = self._currentScanInterval - 1
+                self._commandScanInterval = self._commandScanInterval - 1
+
+                # ensure command scan interval does not go negative.
+                if self._commandScanInterval < 0:
+                    self._commandScanInterval = 0
+
+                # if last known time remaining value is less than current scan interval then
+                # use the lesser last known time remaining value as the current scan interval.
+                # this can happen when a user seeks to a new position, and the track time
+                # remaining is less than the current scan interval.  we will also check the
+                # last known time remaining value for greater than zero, as it is zero at startup.
+                if (self._lastKnownTimeRemainingSeconds > 0) \
+                and (self._lastKnownTimeRemainingSeconds < self._currentScanInterval) \
+                and (self._attr_state == MediaPlayerState.PLAYING):
+                    self._currentScanInterval = self._lastKnownTimeRemainingSeconds
+                    _logsi.LogVerbose("'%s': Resetting current scan interval to last known time remaining value - currentScanInterval=%d, lastKnownTimeRemainingSeconds=%d, state=%s" % (self.name, self._currentScanInterval, self._lastKnownTimeRemainingSeconds, str(self._attr_state)))
+
+                # we will query Spotify Connect Player for nowplaying status if ANY of the following:
+                # - we reached a scan interval (e.g. 30 seconds).
+                # - within specified seconds of an issued command (e.g. 5 seconds).
+                # - within specified seconds of a playing track ending.
+                if (self._currentScanInterval == 0) \
+                or (self._commandScanInterval > 0) \
+                or ((self._lastKnownTimeRemainingSeconds <= SPOTIFY_SCAN_INTERVAL_TRACK_ENDSTART) and (self._attr_state == MediaPlayerState.PLAYING)):
+                    # yes - allow the update
+                    pass
+                else:
+                    # no - keep waiting to update.
+                    return
 
             # # TEST TODO - force token expire!!!
             # _logsi.LogWarning("TEST TODO - Forcing token expiration in 60 seconds for testing purposes", colorValue=SIColors.Red)
@@ -633,6 +690,28 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogVerbose("'%s': update method - getting nowPlaying status" % self.name)
             self._nowPlaying = self.data.spotifyClient.GetPlayerPlaybackState(additionalTypes=MediaType.EPISODE.value)
             self._UpdateNowPlayingData(self._nowPlaying)
+            
+            #_logsi.LogObject(SILevel.Verbose, "'%s': update method - self object" % self.name, self)
+
+            # inform Home Assistant of status updates.
+            # ensure we have an entity_id set first, as it is not set during initial setup.
+            if self.entity_id is not None:
+                _logsi.LogVerbose('Calling async_write_ha_state to inform HA of any updates')
+                self.async_write_ha_state()
+            
+            # update the scan interval for next time.
+            self._currentScanInterval = SPOTIFY_SCAN_INTERVAL - 1
+
+            # calculate the time (in seconds) remaining on the nowplaying track.
+            if self._nowPlaying is not None:
+                if self._nowPlaying.Item is not None:
+                    track:Track = self._nowPlaying.Item
+                    self._lastKnownTimeRemainingSeconds = track.DurationMS - self._nowPlaying.ProgressMS
+                    if self._lastKnownTimeRemainingSeconds > 1000:
+                        self._lastKnownTimeRemainingSeconds = int(self._lastKnownTimeRemainingSeconds / 1000)  # convert MS to Seconds
+                    else:
+                        self._lastKnownTimeRemainingSeconds = 0
+                    _logsi.LogVerbose("'%s': NowPlaying track ProgressMS=%s, DurationMS=%d, lastKnownTimeRemainingSeconds=%d" % (self.name, self._nowPlaying.ProgressMS, track.DurationMS, self._lastKnownTimeRemainingSeconds))
 
             # did the now playing context change?
             context:Context = self._nowPlaying.Context
@@ -797,9 +876,92 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("ids", ids)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Follow Artists Service", apiMethodParms)
                            
-            # unfollow artist(s).
+            # follow artist(s).
             _logsi.LogVerbose("Adding items(s) to Spotify Artist Favorites")
             self.data.spotifyClient.FollowArtists(ids)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_follow_playlist(self, 
+                                        playlistId:str=None, 
+                                        public:bool=True, 
+                                        ) -> None:
+        """
+        Add the current user as a follower of a playlist.
+
+        Args:
+            playlistId (str):  
+                The Spotify ID of the playlist.  
+                Example: `3cEYpjA9oz9GiPac4AsH4n`
+            public (bool):
+                If true the playlist will be included in user's public playlists, if false it 
+                will remain private.  
+                Default = True. 
+        """
+        apiMethodName:str = 'service_spotify_follow_playlist'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("playlistId", playlistId)
+            apiMethodParms.AppendKeyValue("public", public)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Follow Playlist Service", apiMethodParms)
+                           
+            # follow playlist.
+            _logsi.LogVerbose("Adding items to Spotify Playlist Favorites")
+            self.data.spotifyClient.FollowPlaylist(playlistId, public)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_follow_users(self, 
+                                     ids:str=None, 
+                                     ) -> None:
+        """
+        Add the current user as a follower of one or more users.
+
+        Args:
+            ids (str):  
+                A comma-separated list of the Spotify user IDs.  
+                A maximum of 50 IDs can be sent in one request.
+                Example: `smedjan`
+        """
+        apiMethodName:str = 'service_spotify_follow_users'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("ids", ids)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Follow Artists Service", apiMethodParms)
+                           
+            # follow user(s).
+            _logsi.LogVerbose("Adding items(s) to Spotify User Favorites")
+            self.data.spotifyClient.FollowUsers(ids)
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
@@ -3646,6 +3808,83 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # unfollow artist(s).
             _logsi.LogVerbose("Removing items(s) from Spotify Artist Favorites")
             self.data.spotifyClient.UnfollowArtists(ids)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_unfollow_playlist(self, 
+                                          playlistId:str=None, 
+                                          ) -> None:
+        """
+        Remove the current user as a follower of a playlist.
+
+        Args:
+            playlistId (str):  
+                The Spotify ID of the playlist.  
+                Example: `3cEYpjA9oz9GiPac4AsH4n`
+        """
+        apiMethodName:str = 'service_spotify_unfollow_playlist'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("playlistId", playlistId)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Unfollow Playlist Service", apiMethodParms)
+                           
+            # unfollow playlist.
+            _logsi.LogVerbose("Removing items from Spotify Playlist Favorites")
+            self.data.spotifyClient.UnfollowPlaylist(playlistId)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_unfollow_users(self, 
+                                       ids:str=None, 
+                                       ) -> None:
+        """
+        Remove the current user as a follower of one or more users.
+
+        Args:
+            ids (str):  
+                A comma-separated list of Spotify user IDs.  
+                A maximum of 50 IDs can be sent in one request.
+                Example: `smedjan`
+        """
+        apiMethodName:str = 'service_spotify_unfollow_users'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("ids", ids)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Unfollow Users Service", apiMethodParms)
+                           
+            # unfollow user(s).
+            _logsi.LogVerbose("Removing items(s) from Spotify Users Favorites")
+            self.data.spotifyClient.UnfollowUsers(ids)
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).

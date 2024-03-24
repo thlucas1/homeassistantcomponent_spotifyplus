@@ -79,6 +79,8 @@ CONFIG_SCHEMA = cv.removed(DOMAIN, raise_if_present=False)
 # Custom Service Schemas.
 # -----------------------------------------------------------------------------------
 SERVICE_SPOTIFY_FOLLOW_ARTISTS:str = 'follow_artists'
+SERVICE_SPOTIFY_FOLLOW_PLAYLIST:str = 'follow_playlist'
+SERVICE_SPOTIFY_FOLLOW_USERS:str = 'follow_users'
 SERVICE_SPOTIFY_GET_ALBUM:str = 'get_album'
 SERVICE_SPOTIFY_GET_ALBUM_FAVORITES:str = 'get_album_favorites'
 SERVICE_SPOTIFY_GET_ALBUM_NEW_RELEASES:str = 'get_album_new_releases'
@@ -120,12 +122,29 @@ SERVICE_SPOTIFY_SEARCH_PLAYLISTS:str = 'search_playlists'
 SERVICE_SPOTIFY_SEARCH_SHOWS:str = 'search_shows'
 SERVICE_SPOTIFY_SEARCH_TRACKS:str = 'search_tracks'
 SERVICE_SPOTIFY_UNFOLLOW_ARTISTS:str = 'unfollow_artists'
+SERVICE_SPOTIFY_UNFOLLOW_PLAYLIST:str = 'unfollow_playlist'
+SERVICE_SPOTIFY_UNFOLLOW_USERS:str = 'unfollow_users'
 
 
 SERVICE_SPOTIFY_FOLLOW_ARTISTS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("ids"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_FOLLOW_PLAYLIST_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("playlist_id"): cv.string,
+        vol.Optional("public"): cv.boolean,
+    }
+)
+
+SERVICE_SPOTIFY_FOLLOW_USERS_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("ids"): cv.string,
     }
 )
 
@@ -521,6 +540,20 @@ SERVICE_SPOTIFY_UNFOLLOW_ARTISTS_SCHEMA = vol.Schema(
     }
 )
 
+SERVICE_SPOTIFY_UNFOLLOW_PLAYLIST_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("playlist_id"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_UNFOLLOW_USERS_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("ids"): cv.string,
+    }
+)
+
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """
@@ -605,6 +638,21 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     ids = service.data.get("ids")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     await hass.async_add_executor_job(entity.service_spotify_follow_artists, ids)
+
+                elif service.service == SERVICE_SPOTIFY_FOLLOW_PLAYLIST:
+
+                    # follow playlist.
+                    playlist_id = service.data.get("playlist_id")
+                    public = service.data.get("public")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_follow_playlist, playlist_id, public)
+
+                elif service.service == SERVICE_SPOTIFY_FOLLOW_USERS:
+
+                    # follow user(s).
+                    ids = service.data.get("ids")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_follow_users, ids)
 
                 elif service.service == SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT:
 
@@ -713,6 +761,20 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     ids = service.data.get("ids")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     await hass.async_add_executor_job(entity.service_spotify_unfollow_artists, ids)
+
+                elif service.service == SERVICE_SPOTIFY_UNFOLLOW_PLAYLIST:
+
+                    # unfollow playlist.
+                    playlist_id = service.data.get("playlist_id")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_unfollow_playlist, playlist_id)
+
+                elif service.service == SERVICE_SPOTIFY_UNFOLLOW_USERS:
+
+                    # unfollow user(s).
+                    ids = service.data.get("ids")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_unfollow_users, ids)
 
                 else:
                     
@@ -1128,6 +1190,24 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             supports_response=SupportsResponse.NONE,
         )
 
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_FOLLOW_PLAYLIST, SERVICE_SPOTIFY_FOLLOW_PLAYLIST_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_FOLLOW_PLAYLIST,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_FOLLOW_PLAYLIST_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_FOLLOW_USERS, SERVICE_SPOTIFY_FOLLOW_USERS_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_FOLLOW_USERS,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_FOLLOW_USERS_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
         _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_ALBUM, SERVICE_SPOTIFY_GET_ALBUM_SCHEMA)
         hass.services.async_register(
             DOMAIN,
@@ -1494,6 +1574,24 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             SERVICE_SPOTIFY_UNFOLLOW_ARTISTS,
             service_handle_spotify_command,
             schema=SERVICE_SPOTIFY_UNFOLLOW_ARTISTS_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_UNFOLLOW_PLAYLIST, SERVICE_SPOTIFY_UNFOLLOW_PLAYLIST_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_UNFOLLOW_PLAYLIST,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_UNFOLLOW_PLAYLIST_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_UNFOLLOW_USERS, SERVICE_SPOTIFY_UNFOLLOW_USERS_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_UNFOLLOW_USERS,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_UNFOLLOW_USERS_SCHEMA,
             supports_response=SupportsResponse.NONE,
         )
 

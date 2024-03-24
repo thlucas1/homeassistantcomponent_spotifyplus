@@ -58,6 +58,38 @@
         }
       }
     },
+    "follow_playlist": {
+      "name": "Follow Playlist",
+      "description": "Add the current user as a follower of a playlist.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "playlist_id": {
+          "name": "ID's",
+          "description": "The Spotify ID of the playlist (e.g. `3cEYpjA9oz9GiPac4AsH4n`)."
+        },
+        "public": {
+          "name": "Public?",
+          "description": "If true the playlist will be included in user's public playlists, if false it will remain private."
+        }
+      }
+    },
+    "follow_users": {
+      "name": "Follow Users",
+      "description": "Add the current user as a follower of one or more users.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "ids": {
+          "name": "ID's",
+          "description": "A comma-separated list of the Spotify user IDs (e.g. 'smedjan,3758dfdsfjk435hjk6k79lm0n3c4').  A maximum of 50 IDs can be sent in one request."
+        }
+      }
+    },
     "get_album": {
       "name": "Get Album",
       "description": "Get Spotify catalog information for a single album.",
@@ -993,6 +1025,34 @@
         "ids": {
           "name": "ID's",
           "description": "A comma-separated list of Spotify artist id's (e.g. `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track artist uri id value is used."
+        }
+      }
+    },
+    "unfollow_playlist": {
+      "name": "Unfollow Playlist",
+      "description": "Remove the current user as a follower of a playlist.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "playlist_id": {
+          "name": "Playlist ID",
+          "description": "The Spotify ID of the playlist (e.g. `3cEYpjA9oz9GiPac4AsH4n`)."
+        }
+      }
+    },
+    "unfollow_users": {
+      "name": "Unfollow Users",
+      "description": "Remove the current user as a follower of one or more users.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "ids": {
+          "name": "ID's",
+          "description": "A comma-separated list of Spotify user IDs (e.g. `smedjan,3758dfdsfjk435hjk6k79lm0n3c4`).  A maximum of 50 IDs can be sent in one request."
         }
       }
     }
