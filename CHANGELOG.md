@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.13 ] - 2024/03/28
+
+  * Updated `_CallScriptPower` method to use the script uniqueid value instead of the (entity_id value) when calling the `turn_on` and `turn_off` scripts.
+
 ###### [ 1.0.12 ] - 2024/03/27
 
   * Updated underlying `spotifywebapiPython` package requirement to version 1.0.40.

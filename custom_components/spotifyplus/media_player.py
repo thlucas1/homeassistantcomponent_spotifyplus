@@ -1026,8 +1026,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogVerbose("'%s': MediaPlayer is verifying SpotifyPlus '%s' integration script configuration" % (self.name, title))
 
             # # if SpotifyPlus integration is NOT installed, then log the services that ARE installed in case we need it.
-            # serviceAll = self.hass.services.async_services()
-            # _logsi.LogDictionary(SILevel.Verbose, "'%s': MediaPlayer ALL services list" % self.name, serviceAll, prettyPrint=True)
+            #serviceAll = self.hass.services.async_services()
+            #_logsi.LogDictionary(SILevel.Verbose, "'%s': MediaPlayer ALL services list" % self.name, serviceAll, prettyPrint=True)
 
             # if no script name was selected in config options then there is nothing else to do.
             if scriptEntityId is None:
@@ -1048,16 +1048,16 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 raise HomeAssistantError("'%s': MediaPlayer '%s' script entity '%s' is currently disabled; re-enable the script to continue" % (self.name, title, scriptEntityId))
 
             # drop the domain suffix from the script entity id.
-            scriptEntityIdNoDomain:str = scriptEntityId[len(DOMAIN_SCRIPT)+1:]
+            #scriptEntityIdNoDomain:str = scriptEntityId[len(DOMAIN_SCRIPT)+1:]
 
             # call the script syncronously, so we wait until it returns.
-            _logsi.LogVerbose("'%s': MediaPlayer is calling the '%s' script entity '%s'" % (self.name, title, scriptEntityIdNoDomain))
+            _logsi.LogVerbose("'%s': MediaPlayer is calling the '%s' script '%s' (entityid='%s', uniqueid='%s')" % (self.name, title, registry_entry.name or registry_entry.original_name, registry_entry.entity_id, registry_entry.unique_id))
             self.hass.services.call(
                 DOMAIN_SCRIPT,
-                scriptEntityIdNoDomain,
-                {},                     # no parameters
-                blocking=True,          # wait for service to complete before returning
-                return_response=False   # does not return service response data.
+                registry_entry.unique_id,   # use the uniqueid
+                {},                         # no parameters
+                blocking=True,              # wait for service to complete before returning
+                return_response=False       # does not return service response data.
             )
 
         finally:
