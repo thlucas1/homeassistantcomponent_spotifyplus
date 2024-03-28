@@ -932,15 +932,15 @@ player_media_play_context:
           domain: media_player
     context_uri:
       name: Context Uri
-      description: Spotify URI of the context to play.  Valid contexts are albums, artists & playlists.  
+      description: Spotify URI of the context to play (e.g. `spotify:album:6vc9OTcyd3hyzabCmsdnwE`).  Valid contexts are albums, artists & playlists.  
       example: "spotify:album:6vc9OTcyd3hyzabCmsdnwE"
       required: true
       selector:
         text:
     offset_uri:
       name: Offset Uri
-      description: Indicates from what Uri in the context playback should start.  Only available when contextUri corresponds to an artist, album or playlist.  The offsetPosition argument will be used if this value is null.
-      example: "spotify:track:1301WleyT98MSxVHPZCA6M"
+      description: Indicates from what Uri in the context playback should start (e.g. `1kWUud3vY5ij5r62zxpTRy`.  Only available when contextUri corresponds to an artist, album or playlist.  The offsetPosition argument will be used if this value is null.
+      example: "spotify:track:1kWUud3vY5ij5r62zxpTRy"
       required: false
       selector:
         text:

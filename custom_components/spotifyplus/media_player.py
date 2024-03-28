@@ -3,11 +3,9 @@ from __future__ import annotations
 
 import datetime as dt
 from datetime import timedelta, datetime
-import time
 from typing import Any, Callable, Concatenate, ParamSpec, TypeVar, Tuple
 from yarl import URL
 
-import spotipy
 from spotifywebapipython import SpotifyClient, SpotifyApiError, SpotifyWebApiError
 from spotifywebapipython.models import (
     Album,
@@ -35,7 +33,6 @@ from spotifywebapipython.models import (
     UserProfile
 )
 
-from homeassistant.components import media_source
 from homeassistant.components.media_player import (
     ATTR_MEDIA_ENQUEUE,
     BrowseMedia,
@@ -47,12 +44,13 @@ from homeassistant.components.media_player import (
     RepeatMode,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_ID
-from homeassistant.core import HomeAssistant, callback, Service
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.device_registry import DeviceEntryType
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_registry import EntityRegistry, RegistryEntry
 from homeassistant.util.dt import utcnow
 
 from .appmessages import STAppMessages
@@ -66,6 +64,7 @@ from .browse_media import (
 from .instancedata_spotifyplus import InstanceDataSpotifyPlus
 from .const import (
     DOMAIN, 
+    DOMAIN_SCRIPT,
     LOGGER,
 )
 
@@ -188,31 +187,35 @@ def spotify_exception_handler(
         
         try:
 
+            # indicate we are in a command event.
+            self._isInCommandEvent = True
+            _logsi.WatchDateTime(SILevel.Debug, "HASpotifyCommandEventLastDT", datetime.now())
+
             # call the function.
             result = func(self, *args, **kwargs)
             
-            # if no exception, then assume it was successful.
-            self._attr_available = True
-
+            # do not update HA state in this handler!  doing so causes UI buttons
+            # pressed to "toggle" between states.  the "self.async_write_ha_state()" 
+            # call should be done in the individual methods.
+            
             # return function result to caller.
             return result
 
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
         except SpotifyWebApiError as ex:
-            
-            self._attr_available = False
-            _logsi.LogException(None, ex)
-            raise HomeAssistantError(ex.Message) from ex
-        
+            raise HomeAssistantError(ex.Message)
         except Exception as ex:
-
-            self._attr_available = False
             _logsi.LogException(None, ex)
             raise HomeAssistantError(str(ex)) from ex
         
         finally:
             
-            # media player command was processed, so force a scan at the next interval.
-            _logsi.LogVerbose("'%s': Processed a media player command - forcing a nowPlaying scan for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            # indicate we are NOT in a command event.
+            self._isInCommandEvent = False
+
+            # media player command was processed, so force a scan window at the next interval.
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
             self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
 
     return wrapper
@@ -246,17 +249,18 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
             # initialize instance storage.
             self._id = data.spotifyClient.UserProfile.Id
-            self._nowPlaying:PlayerPlayState = None
+            self._playerState:PlayerPlayState = PlayerPlayState()
             self._playlist:Playlist = None
             self.data = data
             self._currentScanInterval:int = 0
             self._commandScanInterval:int = 0
             self._lastKnownTimeRemainingSeconds:int = 0
+            self._isInCommandEvent:bool = False
 
             # initialize base class attributes (MediaPlayerEntity).
             self._attr_icon = "mdi:spotify"
             self._attr_media_image_remotely_accessible = False
-            self._attr_state = MediaPlayerState.IDLE
+            self._attr_state = MediaPlayerState.OFF
             
             # A unique_id for this entity within this domain.
             # Note: This is NOT used to generate the user visible Entity ID used in automations.
@@ -298,6 +302,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                                               | MediaPlayerEntityFeature.SEEK \
                                               | MediaPlayerEntityFeature.SELECT_SOURCE \
                                               | MediaPlayerEntityFeature.SHUFFLE_SET \
+                                              | MediaPlayerEntityFeature.TURN_OFF \
+                                              | MediaPlayerEntityFeature.TURN_ON \
                                               | MediaPlayerEntityFeature.VOLUME_SET
             else:
                 _logsi.LogVerbose("'%s': MediaPlayer is setting supported features for Spotify Non-Premium user" % self.name)
@@ -308,11 +314,6 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogVerbose("'%s': MediaPlayer device polling is being enabled, as the device does not support websockets" % self.name)
             self._attr_should_poll = True
         
-            # load option: source_list - list of supported sources.
-            # in case we need it in the future ...
-            # self._attr_source_list = data.options.get(CONF_OPTION_SOURCE_LIST, None)
-            # _logsi.LogArray(SILevel.Verbose, "'%s': MediaPlayer configuration option: '%s' = '%s'" % (self.unique_id, CONF_OPTION_SOURCE_LIST, str(self._attr_source_list)), self._attr_source_list)
-
             # trace.
             _logsi.LogObject(SILevel.Verbose, "'%s': MediaPlayer SpotifyClient object" % self.name, self.data.spotifyClient)
             _logsi.LogObject(SILevel.Verbose, "'%s': MediaPlayer initialization complete" % self.name, self)
@@ -344,20 +345,14 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
     @property
     def media_content_id(self) -> str | None:
         """ Return the media URL. """
-        if self._nowPlaying is not None and self._nowPlaying.Item is not None:
-            return self._nowPlaying.Item.Uri
-        return None
+        return self._attr_media_content_id
 
 
     @property
     def media_content_type(self) -> str | None:
         """ Return the media type. """
-        if self._nowPlaying is not None and self._nowPlaying.Item is not None:
-            if self._nowPlaying.Item.Type == MediaType.EPISODE.value:
-                return MediaType.PODCAST 
-            return MediaType.MUSIC
-        return None
-
+        return self._attr_media_content_type
+    
 
     @property
     def media_duration(self) -> int | None:
@@ -369,7 +364,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
     def media_position(self) -> int | None:
         """ Position of current playing media in seconds. """
         return self._attr_media_position
-
+    
 
     @property
     def media_position_updated_at(self) -> dt.datetime | None:
@@ -384,67 +379,31 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
     @property
     def media_image_url(self) -> str | None:
         """ Return the media image URL. """
-        if self._nowPlaying is not None and self._nowPlaying.Item is not None:
-            
-            item = self._nowPlaying.Item
-        
-            # for episodes, use the episode image if there is one;
-            # otherwise, use the show image if there is one.
-            if item.Type == MediaType.EPISODE.value:
-                episode:Episode = item
-                if episode.ImageUrl is not None:
-                    return episode.ImageUrl
-                if episode.Show.ImageUrl is not None:
-                    return episode.Show.ImageUrl
-                return None
-
-            # for everything else, use the album image if there is one.
-            if item.Album.ImageUrl is not None:
-                return item.Album.ImageUrl
-        
-        return None
+        return self._attr_media_image_url
         
 
     @property
     def media_title(self) -> str | None:
         """ Return the media title. """
-        if self._nowPlaying is not None and self._nowPlaying.Item is not None:
-            return self._nowPlaying.Item.Name
-        return None
+        return self._attr_media_title
 
 
     @property
     def media_artist(self) -> str | None:
         """ Return the media artist. """
-        if self._nowPlaying is not None and self._nowPlaying.Item is not None:
-            item = self._nowPlaying.Item
-            if item.Type == MediaType.EPISODE.value:
-                return item.Show.Publisher
-
-            return ", ".join(artist.Name for artist in item.Artists)
-        return None
+        return self._attr_media_artist
 
 
     @property
     def media_album_name(self) -> str | None:
         """ Return the media album. """
-        if self._nowPlaying is not None and self._nowPlaying.Item is not None:
-            item = self._nowPlaying.Item
-            if item.Type == MediaType.EPISODE.value:
-                return item.Show.Name
-            return item.Album.Name
-        return None
+        return self._attr_media_album_name
 
 
     @property
     def media_track(self) -> int | None:
         """ Track number of current playing media, music track only. """
-        if self._nowPlaying is not None and self._nowPlaying.Item is not None:
-            item = self._nowPlaying.Item
-            if item.Type == MediaType.TRACK.value:
-                # TrackNumber will not exist for an episode.
-                return self._nowPlaying.Item.TrackNumber
-        return None
+        return self._attr_media_track
 
 
     @property
@@ -458,9 +417,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
     @property
     def source(self) -> str | None:
         """ Return the current playback device. """
-        if self._nowPlaying is not None and self._nowPlaying.Device is not None:
-            return self._nowPlaying.Device.Name
-        return None
+        return self._attr_source
 
 
     @property
@@ -475,9 +432,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
     @property
     def shuffle(self) -> bool | None:
         """Shuffling state."""
-        if self._nowPlaying is not None:
-            return self._nowPlaying.ShuffleState
-        return None
+        return self._attr_shuffle
 
 
     @property
@@ -487,47 +442,73 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
 
     @spotify_exception_handler
-    def set_volume_level(self, volume: float) -> None:
-        """ Set the volume level. """
-        self.data.spotifyClient.PlayerSetVolume(int(volume * 100))
-
-
-    @spotify_exception_handler
     def media_play(self) -> None:
         """ Start or resume playback. """
-        self.data.spotifyClient.PlayerMediaResume()
-        self._nowPlaying.IsPlaying = True
+        _logsi.LogVerbose(STAppMessages.MSG_MEDIAPLAYER_SERVICE, self.name, "media_play")
+        
+        # update ha state.
+        self._attr_state = MediaPlayerState.PLAYING
+        self.async_write_ha_state()
+
+        # resume playback.
+        deviceId:str = self._VerifyDeviceIdByName()
+        self.data.spotifyClient.PlayerMediaResume(deviceId)
 
 
     @spotify_exception_handler
     def media_pause(self) -> None:
         """ Pause playback. """
-        self.data.spotifyClient.PlayerMediaPause()
-        self._nowPlaying.IsPlaying = False
+        _logsi.LogVerbose(STAppMessages.MSG_MEDIAPLAYER_SERVICE, self.name, "media_pause")
+        
+        # update ha state.
+        self._attr_state = MediaPlayerState.PAUSED
+        self.async_write_ha_state()
+        
+        # pause playback.
+        deviceId:str = self._VerifyDeviceIdByName()
+        self.data.spotifyClient.PlayerMediaPause(deviceId)
 
 
     @spotify_exception_handler
     def media_previous_track(self) -> None:
         """ Skip to previous track. """
-        self.data.spotifyClient.PlayerMediaSkipPrevious()
+        _logsi.LogVerbose(STAppMessages.MSG_MEDIAPLAYER_SERVICE, self.name, "media_previous_track")
+        
+        # skip to previous track.
+        deviceId:str = self._VerifyDeviceIdByName()
+        self.data.spotifyClient.PlayerMediaSkipPrevious(deviceId)
 
 
     @spotify_exception_handler
     def media_next_track(self) -> None:
         """ Skip to next track. """
-        self.data.spotifyClient.PlayerMediaSkipNext()
+        _logsi.LogVerbose(STAppMessages.MSG_MEDIAPLAYER_SERVICE, self.name, "media_next_track")
+
+        # skip to next track.
+        deviceId:str = self._VerifyDeviceIdByName()
+        self.data.spotifyClient.PlayerMediaSkipNext(deviceId)
 
 
     @spotify_exception_handler
     def media_seek(self, position: float) -> None:
         """ Send seek command. """
-        self.data.spotifyClient.PlayerMediaSeek(int(position * 1000))
+        _logsi.LogVerbose(STAppMessages.MSG_MEDIAPLAYER_SERVICE_WITH_PARMS, self.name, "media_seek", "position='%s'" % (position))
 
+        # update ha state.
+        self._attr_media_position = position
+        self._attr_media_position_updated_at = utcnow()
+        self.async_schedule_update_ha_state()
+        
+        # seek to track position.
+        deviceId:str = self._VerifyDeviceIdByName()
+        self.data.spotifyClient.PlayerMediaSeek(int(position * 1000), deviceId)
+        
 
     @spotify_exception_handler
     def play_media(self, media_type: MediaType | str, media_id: str, **kwargs: Any) -> None:        
-
-        """ Play media. """
+        """ 
+        Play media; called by media browser when a browsed item is selected for playing.
+        """
         methodParms:SIMethodParmListContext = None
         
         try:
@@ -537,16 +518,18 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             methodParms.AppendKeyValue("media_type", media_type)
             methodParms.AppendKeyValue("media_id", media_id)
             methodParms.AppendKeyValue("**kwargs", kwargs)
-            _logsi.LogMethodParmList(SILevel.Verbose, "SpotifyMediaPlayer Play Media arguments", methodParms)
-
-            # remove prefix from media type.
-            #media_type = media_type.removeprefix(MEDIA_PLAYER_PREFIX)
+            _logsi.LogMethodParmList(SILevel.Verbose, STAppMessages.MSG_MEDIAPLAYER_SERVICE % (self.name, "play_media"), methodParms)
 
             # get enqueue keyword arguments (if any).
             enqueue:MediaPlayerEnqueue = kwargs.get(ATTR_MEDIA_ENQUEUE, None)
 
+            # are we currently powered off?  if so, then power on.
+            if self._attr_state == MediaPlayerState.OFF:
+                self.turn_on()
+                self._isInCommandEvent = True  # turn "in a command event" indicator back on
+
             # verify device id (specific device, active device, or default).
-            deviceId:str = self._VerifyDeviceId(None)
+            deviceId:str = self._VerifyDeviceIdByName()
             
             # spotify can't handle URI's with query strings or anchors
             # yet, they do generate those types of URI in their official clients.
@@ -584,15 +567,17 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # start play based upon the media type.
             if media_type in {MediaType.TRACK, MediaType.EPISODE, MediaType.MUSIC}:
                 
+                self._attr_state = MediaPlayerState.PLAYING
+                self.async_write_ha_state()
                 _logsi.LogVerbose("Playing via PlayerMediaPlayTracks: uris='%s', deviceId='%s'" % (media_id, deviceId))
                 self.data.spotifyClient.PlayerMediaPlayTracks([media_id], deviceId=deviceId)
-                self._nowPlaying.IsPlaying = True
                 
             elif media_type in PLAYABLE_MEDIA_TYPES:
                 
+                self._attr_state = MediaPlayerState.PLAYING
+                self.async_write_ha_state()
                 _logsi.LogVerbose("Playing via PlayerMediaPlayContext: contextUri='%s', deviceId='%s'" % (media_id, deviceId))
                 self.data.spotifyClient.PlayerMediaPlayContext(media_id, deviceId=deviceId)
-                self._nowPlaying.IsPlaying = True
                 
             else:
                 
@@ -608,6 +593,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
     @spotify_exception_handler
     def select_source(self, source: str) -> None:
         """ Select playback device. """
+        _logsi.LogVerbose(STAppMessages.MSG_MEDIAPLAYER_SERVICE_WITH_PARMS, self.name, "select_source", "source='%s'" % (source))
+
+        # search device list for matching device name.
         for device in self.data.devices.data:
             if device.Name == source:
                 self.data.spotifyClient.PlayerTransferPlayback(device.Id, (self.state == MediaPlayerState.PLAYING))
@@ -617,41 +605,181 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
     @spotify_exception_handler
     def set_shuffle(self, shuffle: bool) -> None:
         """ Enable/Disable shuffle mode. """
-        self.data.spotifyClient.PlayerSetShuffleMode(shuffle)
+        _logsi.LogVerbose(STAppMessages.MSG_MEDIAPLAYER_SERVICE_WITH_PARMS, self.name, "set_shuffle", "shuffle='%s'" % (shuffle))
+
+        # update ha state.
+        self._attr_shuffle = shuffle
+        self.async_schedule_update_ha_state()
+        
+        # set shuffle mode.
+        deviceId:str = self._VerifyDeviceIdByName()
+        self.data.spotifyClient.PlayerSetShuffleMode(shuffle, deviceId)
 
 
     @spotify_exception_handler
     def set_repeat(self, repeat: RepeatMode) -> None:
         """ Set repeat mode. """
+        _logsi.LogVerbose(STAppMessages.MSG_MEDIAPLAYER_SERVICE_WITH_PARMS, self.name, "set_repeat", "repeat='%s'" % (repeat))
+
+        # update ha state.
         if repeat not in REPEAT_MODE_MAPPING_TO_SPOTIFY:
             raise ValueError(f"Unsupported repeat mode: {repeat}")
-        self.data.spotifyClient.PlayerSetRepeatMode(REPEAT_MODE_MAPPING_TO_SPOTIFY[repeat])
+        self._attr_repeat = repeat
+        self.async_schedule_update_ha_state()
+
+        # set repeat mode.
+        deviceId:str = self._VerifyDeviceIdByName()
+        self.data.spotifyClient.PlayerSetRepeatMode(REPEAT_MODE_MAPPING_TO_SPOTIFY[repeat], deviceId)
+
+
+    @spotify_exception_handler
+    def set_volume_level(self, volume: float) -> None:
+        """ Set the volume level. """
+        _logsi.LogVerbose(STAppMessages.MSG_MEDIAPLAYER_SERVICE_WITH_PARMS, self.name, "set_volume_level", "volume='%s'" % (volume))
+
+        # update ha state.
+        self._attr_volume_level = volume
+        self.async_write_ha_state()
+
+        # set volume.
+        deviceId:str = self._VerifyDeviceIdByName()
+        self.data.spotifyClient.PlayerSetVolume(int(volume * 100), deviceId)
+
+
+    @spotify_exception_handler
+    def turn_off(self) -> None:
+        """ Turn off media player. """ 
+        try:
+
+            # trace.
+            _logsi.EnterMethod(SILevel.Debug)
+            _logsi.LogVerbose(STAppMessages.MSG_MEDIAPLAYER_SERVICE, self.name, "turn_off")
+            _logsi.LogVerbose("'%s': entity_id=%s" % (self.name, self.entity_id))
+
+            # set media player state and update ha state.
+            self._attr_state = MediaPlayerState.OFF
+            _logsi.LogVerbose("'%s': MediaPlayerState set to '%s'" % (self.name, self._attr_state))
+            self.async_write_ha_state()
+
+            # get current player state.
+            self._playerState = self.data.spotifyClient.GetPlayerPlaybackState(additionalTypes=MediaType.EPISODE.value)
+            _logsi.LogObject(SILevel.Verbose, "'%s': Spotify player state at power off" % self.name, self._playerState, excludeNonPublic=True)
+            
+            # if playing, then pause playback.
+            if self._playerState.IsPlaying:
+                _logsi.LogVerbose("'%s': Pausing Spotify playback on deviceId: %s" % (self.name, self._playerState.Device.Id))
+                self.data.spotifyClient.PlayerMediaPause(self._playerState.Device.Id)
+
+            # call script to power off device.
+            self._CallScriptPower(self.data.OptionScriptTurnOff, "turn_off")
+            
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except Exception as ex:
+            _logsi.LogException(None, ex)
+            raise HomeAssistantError(str(ex)) from ex
+        
+        finally:
+        
+            # update ha state.
+            self.async_write_ha_state()
+
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug)
+
+
+    @spotify_exception_handler
+    def turn_on(self) -> None:
+        """ Turn on media player. """
+        try:
+
+            # trace.
+            _logsi.EnterMethod(SILevel.Debug)
+            _logsi.LogVerbose(STAppMessages.MSG_MEDIAPLAYER_SERVICE, self.name, "turn_on")
+            
+            # if already powered on then we are done.
+            if self._attr_state is not MediaPlayerState.OFF:
+                _logsi.LogVerbose("'%s': MediaPlayer is already powered on (state=%s); nothing to do" % (self.name, self._attr_state))
+                return
+            
+            # set media player state and update ha state.
+            self._attr_state = MediaPlayerState.IDLE
+            _logsi.LogVerbose("'%s': MediaPlayerState set to '%s'" % (self.name, self._attr_state))
+            self.async_write_ha_state()
+
+            # call script to power on device.
+            self._CallScriptPower(self.data.OptionScriptTurnOn, "turn_on")
+
+            # get current Spotify Connect player state.
+            playerStateCurrent:PlayerPlayState = self.data.spotifyClient.GetPlayerPlaybackState()
+
+            # is playing content paused? if so, then resume play.
+            if (playerStateCurrent.Device.Id is not None) \
+            and (playerStateCurrent.Actions.Pausing):
+                
+                _logsi.LogVerbose("'%s': Resuming playing media" % self.name)
+                deviceId:str = self._VerifyDeviceIdByName()
+                self.data.spotifyClient.PlayerMediaResume(deviceId)
+            
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except Exception as ex:
+            _logsi.LogException(None, ex)
+            raise HomeAssistantError(str(ex)) from ex
+        
+        finally:
+        
+            # update ha state.
+            self.async_write_ha_state()
+
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug)
 
 
     def update(self) -> None:
         """ Update state and attributes. """
+
+        # trace.
+        _logsi.WatchDateTime(SILevel.Debug, "HASpotifyUpdateLastDT", datetime.now())
+        
+        # is the media player enabled?  if not, then there is nothing to do.
+        if not self.enabled:
+            _logsi.LogVerbose("'%s': Update - Integration is disabled; nothing to do" % self.name)
+            return
+
+        # is the media player powered off?  if so, then there is nothing to do.
+        if self._attr_state == MediaPlayerState.OFF:
+            _logsi.LogVerbose("'%s': Update - Integration is powered off; nothing to do" % self.name)
+            return
+
+        # is the media player in a command event?  if so, then exit as updates are
+        # happening that we don't want overridden just yet.  
+        if self._isInCommandEvent:
+            _logsi.LogVerbose("'%s': Update - Integration is in a command event; bypassing update" % self.name)
+            return
+
         try:
 
             # trace.
             _logsi.EnterMethod(SILevel.Debug)
         
-            # is the media player enabled?  if not, then there is nothing to do.
-            if not self.enabled:
-                _logsi.LogVerbose("'%s': Integration is disabled - nothing to update" % self.name)
-                return
-
+            _logsi.LogVerbose("'%s': Scan interval %d check - commandScanInterval=%d, currentScanInterval=%d, lastKnownTimeRemainingSeconds=%d, state=%s" % (self.name, SPOTIFY_SCAN_INTERVAL, self._commandScanInterval, self._currentScanInterval, self._lastKnownTimeRemainingSeconds, str(self._attr_state)))
+            
             # have we reached a scan interval?
             if not ((self._currentScanInterval % SPOTIFY_SCAN_INTERVAL) == 0):
 
-                _logsi.LogVerbose("'%s': Scan interval %d check - commandScanInterval=%d, currentScanInterval=%d, lastKnownTimeRemainingSeconds=%d, state=%s" % (self.name, SPOTIFY_SCAN_INTERVAL, self._commandScanInterval, self._currentScanInterval, self._lastKnownTimeRemainingSeconds, str(self._attr_state)))
-                
                 # no - decrement the current scan interval counts.
                 self._currentScanInterval = self._currentScanInterval - 1
-                self._commandScanInterval = self._commandScanInterval - 1
-
-                # ensure command scan interval does not go negative.
-                if self._commandScanInterval < 0:
-                    self._commandScanInterval = 0
+                if self._commandScanInterval > 0:
+                    self._commandScanInterval = self._commandScanInterval - 1
 
                 # if last known time remaining value is less than current scan interval then
                 # use the lesser last known time remaining value as the current scan interval.
@@ -664,12 +792,12 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                     self._currentScanInterval = self._lastKnownTimeRemainingSeconds
                     _logsi.LogVerbose("'%s': Resetting current scan interval to last known time remaining value - currentScanInterval=%d, lastKnownTimeRemainingSeconds=%d, state=%s" % (self.name, self._currentScanInterval, self._lastKnownTimeRemainingSeconds, str(self._attr_state)))
 
-                # we will query Spotify Connect Player for nowplaying status if ANY of the following:
+                # we will query Spotify for player state if ANY of the following:
                 # - we reached a scan interval (e.g. 30 seconds).
                 # - within specified seconds of an issued command (e.g. 5 seconds).
                 # - within specified seconds of a playing track ending.
                 if (self._currentScanInterval == 0) \
-                or (self._commandScanInterval > 0) \
+                or (self._commandScanInterval > 0 and self._commandScanInterval <= SPOTIFY_SCAN_INTERVAL_COMMAND) \
                 or ((self._lastKnownTimeRemainingSeconds <= SPOTIFY_SCAN_INTERVAL_TRACK_ENDSTART) and (self._attr_state == MediaPlayerState.PLAYING)):
                     # yes - allow the update
                     pass
@@ -687,34 +815,27 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # self.data.spotifyClient.AuthToken._ExpiresAt = self.data.spotifyClient.AuthToken._ExpiresAt + self.data.spotifyClient.AuthToken._ExpiresIn             # add ExpiresIn seconds
 
             # get now playing status.
-            _logsi.LogVerbose("'%s': update method - getting nowPlaying status" % self.name)
-            self._nowPlaying = self.data.spotifyClient.GetPlayerPlaybackState(additionalTypes=MediaType.EPISODE.value)
-            self._UpdateNowPlayingData(self._nowPlaying)
-            
-            #_logsi.LogObject(SILevel.Verbose, "'%s': update method - self object" % self.name, self)
-
-            # inform Home Assistant of status updates.
-            # ensure we have an entity_id set first, as it is not set during initial setup.
-            if self.entity_id is not None:
-                _logsi.LogVerbose('Calling async_write_ha_state to inform HA of any updates')
-                self.async_write_ha_state()
+            _logsi.LogVerbose("'%s': update method - getting Spotify Connect Player state" % self.name)
+            self._playerState = self.data.spotifyClient.GetPlayerPlaybackState(additionalTypes=MediaType.EPISODE.value)
+            self._UpdateHAFromPlayerPlayState(self._playerState)
+            _logsi.WatchDateTime(SILevel.Debug, "HASpotifyPlaystateLastUpdate", datetime.now())
             
             # update the scan interval for next time.
             self._currentScanInterval = SPOTIFY_SCAN_INTERVAL - 1
 
-            # calculate the time (in seconds) remaining on the nowplaying track.
-            if self._nowPlaying is not None:
-                if self._nowPlaying.Item is not None:
-                    track:Track = self._nowPlaying.Item
-                    self._lastKnownTimeRemainingSeconds = track.DurationMS - self._nowPlaying.ProgressMS
+            # calculate the time (in seconds) remaining on the playing track.
+            if self._playerState is not None:
+                if self._playerState.Item is not None:
+                    track:Track = self._playerState.Item
+                    self._lastKnownTimeRemainingSeconds = track.DurationMS - self._playerState.ProgressMS
                     if self._lastKnownTimeRemainingSeconds > 1000:
                         self._lastKnownTimeRemainingSeconds = int(self._lastKnownTimeRemainingSeconds / 1000)  # convert MS to Seconds
                     else:
                         self._lastKnownTimeRemainingSeconds = 0
-                    _logsi.LogVerbose("'%s': NowPlaying track ProgressMS=%s, DurationMS=%d, lastKnownTimeRemainingSeconds=%d" % (self.name, self._nowPlaying.ProgressMS, track.DurationMS, self._lastKnownTimeRemainingSeconds))
+                    _logsi.LogVerbose("'%s': playerState track ProgressMS=%s, DurationMS=%d, lastKnownTimeRemainingSeconds=%d" % (self.name, self._playerState.ProgressMS, track.DurationMS, self._lastKnownTimeRemainingSeconds))
 
             # did the now playing context change?
-            context:Context = self._nowPlaying.Context
+            context:Context = self._playerState.Context
             if context is not None and (self._playlist is None or self._playlist.Uri != context.Uri):
                 
                 # yes - if it's a playlist, then we need to update the stored playlist reference.
@@ -736,18 +857,13 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                     
                     self._playlist = None
                     
-            # if no exception, then assume it was successful.
-            self._attr_available = True
-
         except SpotifyWebApiError as ex:
             
-            self._attr_available = False
             _logsi.LogException(None, ex)
             raise HomeAssistantError(ex.Message) from ex
         
         except Exception as ex:
 
-            self._attr_available = False
             _logsi.LogException(None, ex)
             raise HomeAssistantError(str(ex)) from ex
 
@@ -769,43 +885,188 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         self.async_write_ha_state()
 
 
-    def _UpdateNowPlayingData(self, config:PlayerPlayState) -> None:
+    def _UpdateHAFromPlayerPlayState(self, playerPlayState:PlayerPlayState) -> None:
         """
         Updates all media_player attributes that have to do with now playing information.
         """
-        # update playing state.
-        if config.IsPlaying == True:
-            self._attr_state = MediaPlayerState.PLAYING
-        elif config.IsPlaying == False:
-            self._attr_state = MediaPlayerState.PAUSED
-        else:
-            self._attr_state = MediaPlayerState.IDLE
-        
-        # update volume level attribute.
-        self._attr_volume_level = None
-        if config.Device is not None:
-            self._attr_volume_level = float(config.Device.VolumePercent / 100)
+        try:
 
-        # update seek-related attributes.
-        if config.ProgressMS is not None:
-            self._attr_media_position = config.ProgressMS / 1000
-            self._attr_media_position_updated_at = utcnow()
-        self._attr_media_duration = None
-        if config.Item is not None:
-            self._attr_media_duration = config.Item.DurationMS / 1000
+            # trace.
+            _logsi.EnterMethod(SILevel.Debug)
+            _logsi.LogObject(SILevel.Verbose, "'%s': Updating HA state from Spotify PlayerPlayState object" % self.name, playerPlayState, excludeNonPublic=True)
         
-        # update shuffle related attributes.
-        self._attr_shuffle = config.IsShuffleEnabled
+            # initialize media attributes.
+            self._attr_media_album_name = None
+            self._attr_media_artist = None
+            self._attr_media_content_id = None
+            self._attr_media_content_type = None
+            self._attr_media_duration = None
+            self._attr_media_image_url = None
+            self._attr_media_position = None
+            self._attr_media_position_updated_at = None
+            self._attr_media_title = None
+            self._attr_media_track = None
+            self._attr_repeat = None
+            self._attr_shuffle = None
+            self._attr_source = None
+            self._attr_volume_level = None
         
-        # update repeat related attributes.
-        self._attr_repeat = None
-        if config.RepeatState is not None:
-            if config.RepeatState == 'context':
-                self._attr_repeat = RepeatMode.ALL.value
-            elif config.RepeatState == 'track':
-                self._attr_repeat = RepeatMode.ONE.value
-            else:
-                self._attr_repeat = RepeatMode.OFF.value
+            # does player state exist?  if not, then we are done.
+            if playerPlayState is None:
+                _logsi.LogVerbose("'%s': Spotify PlayerPlayState object was not set; nothing to do" % self.name)
+                return
+
+            # if player is not OFF, then update media player state.
+            if self._attr_state is not MediaPlayerState.OFF:
+                if self._isInCommandEvent:
+                    pass
+                elif playerPlayState.IsPlaying == True:
+                    self._attr_state = MediaPlayerState.PLAYING
+                elif playerPlayState.IsPlaying == False:
+                    self._attr_state = MediaPlayerState.PAUSED
+                else:
+                    self._attr_state = MediaPlayerState.IDLE
+                _logsi.LogVerbose("'%s': MediaPlayerState set to '%s'" % (self.name, self._attr_state))
+        
+            self._attr_shuffle = playerPlayState.ShuffleState
+               
+            # update item-related attributes (e.g. track? episode? etc)?
+            if playerPlayState.Item is not None:
+                item = playerPlayState.Item
+                episode:Episode = playerPlayState.Item
+                    
+                self._attr_media_content_id = item.Uri
+                self._attr_media_content_type = item.Type
+                self._attr_media_duration = item.DurationMS / 1000
+                self._attr_media_title = item.Name
+                    
+                # update media album name attribute.
+                if item.Type == MediaType.EPISODE.value:
+                    self._attr_media_album_name = episode.Show.Name
+                else:
+                    self._attr_media_album_name = item.Album.Name
+
+                # update media artist attribute.
+                if item.Type == MediaType.EPISODE.value:
+                    self._attr_media_artist = episode.Show.Publisher
+                else:
+                    self._attr_media_artist = ", ".join(artist.Name for artist in item.Artists)
+                        
+                # update media content type attribute.
+                if item.Type == MediaType.EPISODE.value:
+                    self._attr_media_content_type = MediaType.PODCAST 
+                else:
+                    self._attr_media_content_type = MediaType.MUSIC
+
+                # update media image url attribute.
+                # for episodes, use the episode image if present; otherwise use the show image if present.
+                # for everything else, use the album image if present.
+                if item.Type == MediaType.EPISODE.value:
+                    if episode.ImageUrl is not None:
+                        self._attr_media_image_url = episode.ImageUrl
+                    if episode.Show.ImageUrl is not None:
+                        self._attr_media_image_url = episode.Show.ImageUrl
+                elif item.Album.ImageUrl is not None:
+                    self._attr_media_image_url = item.Album.ImageUrl
+                        
+                # update media track attribute (will not exist for episodes).
+                if item.Type == MediaType.TRACK.value:
+                    self._attr_media_track = item.TrackNumber
+
+            # update device-related attributes.
+            if playerPlayState.Device is not None:
+                device = playerPlayState.Device
+                self._attr_source = device.Name
+                self._attr_volume_level = float(device.VolumePercent / 100)
+
+            # update seek-related attributes.
+            if playerPlayState.ProgressMS is not None:
+                self._attr_media_position = playerPlayState.ProgressMS / 1000
+                self._attr_media_position_updated_at = utcnow()
+        
+            # update repeat related attributes.
+            if playerPlayState.RepeatState is not None:
+                if playerPlayState.RepeatState == 'context':
+                    self._attr_repeat = RepeatMode.ALL.value
+                elif playerPlayState.RepeatState == 'track':
+                    self._attr_repeat = RepeatMode.ONE.value
+                else:
+                    self._attr_repeat = RepeatMode.OFF.value
+
+        except Exception as ex:
+
+            _logsi.LogException(None, ex)
+            raise HomeAssistantError(str(ex)) from ex
+
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug)
+            
+
+    def _CallScriptPower(self, scriptEntityId:str, title:str) -> None:
+        """
+        Calls the supplied script for a power on / off event.
+        
+        Args:
+            scriptEntityId (str):
+                Name of the script to execute.
+            title (str):
+                Title to use in trace logs and error messages.
+        
+        Verifies that the script is installed, and the media player entity id
+        is valid and available (not disabled).
+        """
+        entity_registry:EntityRegistry = None
+        
+        try:
+
+            # trace.
+            _logsi.EnterMethod(SILevel.Debug)
+            _logsi.LogVerbose("'%s': MediaPlayer is verifying SpotifyPlus '%s' integration script configuration" % (self.name, title))
+
+            # # if SpotifyPlus integration is NOT installed, then log the services that ARE installed in case we need it.
+            # serviceAll = self.hass.services.async_services()
+            # _logsi.LogDictionary(SILevel.Verbose, "'%s': MediaPlayer ALL services list" % self.name, serviceAll, prettyPrint=True)
+
+            # if no script name was selected in config options then there is nothing else to do.
+            if scriptEntityId is None:
+                _logsi.LogVerbose("'%s': MediaPlayer '%s' script is not configured - nothing to do" % (self.name, title))
+                return 
+
+            # is the specified script entity id in the hass entity registry?
+            # it will NOT be in the entity registry if it's deleted.
+            # it WILL be in the entity registry if it is disabled, with disabled property = True.
+            entity_registry = er.async_get(self.hass)
+            registry_entry:RegistryEntry = entity_registry.async_get(scriptEntityId)
+            _logsi.LogObject(SILevel.Verbose, "'%s': MediaPlayer RegistryEntry for entity_id: '%s'" % (self.name, scriptEntityId), registry_entry)
+
+            # raise exceptions if SpotifyPlus Entity is not configured or is disabled.
+            if registry_entry is None:
+                raise HomeAssistantError("'%s': MediaPlayer '%s' script entity '%s' does not exist (recently deleted or renamed maybe?)" % (self.name, title, scriptEntityId))
+            if registry_entry.disabled:
+                raise HomeAssistantError("'%s': MediaPlayer '%s' script entity '%s' is currently disabled; re-enable the script to continue" % (self.name, title, scriptEntityId))
+
+            # drop the domain suffix from the script entity id.
+            scriptEntityIdNoDomain:str = scriptEntityId[len(DOMAIN_SCRIPT)+1:]
+
+            # call the script syncronously, so we wait until it returns.
+            _logsi.LogVerbose("'%s': MediaPlayer is calling the '%s' script entity '%s'" % (self.name, title, scriptEntityIdNoDomain))
+            self.hass.services.call(
+                DOMAIN_SCRIPT,
+                scriptEntityIdNoDomain,
+                {},                     # no parameters
+                blocking=True,          # wait for service to complete before returning
+                return_response=False   # does not return service response data.
+            )
+
+        finally:
+
+            # free resources.
+            entity_registry = None
+
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug)
 
     # -----------------------------------------------------------------------------------
     # Custom Services
@@ -838,20 +1099,41 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         if deviceId is None:
     
             # if device not specified, then ensure we have an active device.
-            _logsi.LogVerbose("Verifying active Spotify Connect device")
+            _logsi.LogVerbose("'%s': Verifying active Spotify Connect device" % self.name)
             result:PlayerPlayState = self.data.spotifyClient.PlayerVerifyDeviceDefault(PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault), False)
-            if result is not None and result.Device is not None:
-                _logsi.LogVerbose("Using SpotifyPlus active device: '%s'" % result.Device.Id)
+            if result.Device.Id is not None:
+                _logsi.LogVerbose("'%s': Using SpotifyPlus active device: '%s'(%s)" % (self.name, result.Device.Id, result.Device.Name))
                 deviceId = result.Device.Id
 
-        elif deviceId == "*":
+        # if deviceId not found or an asterisk was specified, then use the default 
+        # device from configuration options.
+        if deviceId == "*" or deviceId is None:
                 
             # if default spotifyplus device was specified, then use it.
-            _logsi.LogVerbose("Using SpotifyPlus default device: '%s'" % self.data.OptionDeviceDefault)
+            _logsi.LogVerbose("'%s': Using SpotifyPlus default device: '%s'" % (self.name, self.data.OptionDeviceDefault))
             deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
 
         return deviceId
 
+
+    def _VerifyDeviceIdByName(self) -> str:
+        """ 
+        Verifies that a device name was selected from the source list.  If not selected, 
+        the SpotifyPlus default device is activated.
+        """ 
+        # find the source device in the devices list and return its id if found.
+        for device in self.data.devices.data:
+            if device.Name == self._attr_source:
+                return device.Id
+            
+        # if not found, then we will use our options default device.
+        self._attr_source = PlayerDevice.GetNameFromSelectItem(self.data.OptionDeviceDefault)
+        deviceId:str = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
+
+        # transfer playback to the device to ensure it's active.
+        _logsi.LogVerbose("'%s': Transferring playback to SpotifyPlus default device '%s' (%s)" %  (self.name, self._attr_source, deviceId))
+        self.data.spotifyClient.PlayerTransferPlayback(deviceId, (self.state == MediaPlayerState.PLAYING))
+        return deviceId
 
     def service_spotify_follow_artists(self, 
                                        ids:str=None, 
@@ -2361,6 +2643,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
+    @spotify_exception_handler
     def service_spotify_player_media_play_context(self, 
                                                   contextUri:str, 
                                                   offsetUri:str, 
@@ -2416,36 +2699,16 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # verify device id (specific device, active device, or default).
             deviceId = self._VerifyDeviceId(deviceId)
 
-            # pause playback on Spotify Connect device.
-            _logsi.LogVerbose("Pausing Spotify Playback on device")
-            self.data.spotifyClient.PlayerMediaPause(deviceId)
+            # start playing one or more tracks of the specified context on a Spotify Connect device.
+            _logsi.LogVerbose("Playing Media Context on device")
+            self.data.spotifyClient.PlayerMediaPlayContext(contextUri, offsetUri, offsetPosition, positionMS, deviceId)
 
             # issue transfer playback in case it needs it.
             if deviceId is not None:
                 _logsi.LogVerbose("Transferring Spotify Playback to device")
                 self.data.spotifyClient.PlayerTransferPlayback(deviceId, True)
 
-                # give spotify some time to process the previous command before we issue the next one.
-                time.sleep(1.0)
-
-            # start playing one or more tracks of the specified context on a Spotify Connect device.
-            _logsi.LogVerbose("Playing Media Context on device")
-            self.data.spotifyClient.PlayerMediaPlayContext(contextUri, offsetUri, offsetPosition, positionMS, deviceId)
-
-            # give spotify some time to process the command before the update check.
-            time.sleep(1.0)
-
-            # resume playback on the Spotify Connect device.
-            _logsi.LogVerbose("Resuming Spotify Playback on device")
-            self.data.spotifyClient.PlayerMediaResume(deviceId)
-
-            # give spotify some time to process the command before the update check.
-            time.sleep(0.50)
-
-            # inform Home Assistant of status updates.
-            _logsi.LogVerbose('Calling update method to update player status')
-            self.update()
-            _logsi.LogVerbose('Calling async_write_ha_state to inform HA of any updates')
+            # update ha state.
             self.async_write_ha_state()
 
         # the following exceptions have already been logged, so we just need to
@@ -2461,6 +2724,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
+    @spotify_exception_handler
     def service_spotify_player_media_play_tracks(self, 
                                                  uris:str, 
                                                  positionMS:int, 
@@ -2502,36 +2766,16 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # verify device id (specific device, active device, or default).
             deviceId = self._VerifyDeviceId(deviceId)
 
-            # pause playback on Spotify Connect device.
-            _logsi.LogVerbose("Pausing Spotify Playback on device")
-            self.data.spotifyClient.PlayerMediaPause(deviceId)
+            # start playing one or more tracks on the specified Spotify Connect device.
+            _logsi.LogVerbose("Playing Media Tracks on device")
+            self.data.spotifyClient.PlayerMediaPlayTracks(uris, positionMS, deviceId)
 
             # issue transfer playback in case it needs it.
             if deviceId is not None:
                 _logsi.LogVerbose("Transferring Spotify Playback to device")
                 self.data.spotifyClient.PlayerTransferPlayback(deviceId, True)
 
-                # give spotify some time to process the previous command before we issue the next one.
-                time.sleep(1.0)
-
-            # start playing one or more tracks on the specified Spotify Connect device.
-            _logsi.LogVerbose("Playing Media Tracks on device")
-            self.data.spotifyClient.PlayerMediaPlayTracks(uris, positionMS, deviceId)
-
-            # give spotify some time to process the command before the update check.
-            time.sleep(1.0)
-
-            # resume playback on the Spotify Connect device.
-            _logsi.LogVerbose("Resuming Spotify Playback on device")
-            self.data.spotifyClient.PlayerMediaResume(deviceId)
-
-            # give spotify some time to process the command before the update check.
-            time.sleep(0.50)
-
-            # inform Home Assistant of status updates.
-            _logsi.LogVerbose('Calling update method to update player status')
-            self.update()
-            _logsi.LogVerbose('Calling async_write_ha_state to inform HA of any updates')
+            # update ha state.
             self.async_write_ha_state()
 
         # the following exceptions have already been logged, so we just need to
@@ -2585,13 +2829,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogVerbose("Transferring Spotify Playback to device")
             self.data.spotifyClient.PlayerTransferPlayback(deviceId, play)
 
-            # give spotify some time to process the command before the update check.
-            time.sleep(0.50)
-
-            # inform Home Assistant of status updates.
-            _logsi.LogVerbose('Calling update method to update player status')
-            self.update()
-            _logsi.LogVerbose('Calling async_write_ha_state to inform HA of any updates')
+            # update ha state.
             self.async_write_ha_state()
 
         # the following exceptions have already been logged, so we just need to

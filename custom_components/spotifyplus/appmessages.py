@@ -61,3 +61,14 @@ class STAppMessages:
     """
     Retrieving information from the Spotify Web API
     """
+
+    MSG_MEDIAPLAYER_SERVICE:str = "'%s': MediaPlayer is executing service '%s'"
+    """
+    '%s': MediaPlayer is executing service '%s'
+    """
+
+    MSG_MEDIAPLAYER_SERVICE_WITH_PARMS:str = "'%s': MediaPlayer is executing service '%s' - parameters: %s"
+    """
+    '%s': MediaPlayer is executing service '%s' - parameters: %s
+    """
+

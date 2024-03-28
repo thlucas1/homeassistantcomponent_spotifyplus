@@ -13,6 +13,8 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
     CONF_OPTION_DEVICE_DEFAULT,
+    CONF_OPTION_SCRIPT_TURN_OFF,
+    CONF_OPTION_SCRIPT_TURN_ON,
 )
 
 @dataclass
@@ -58,3 +60,18 @@ class InstanceDataSpotifyPlus:
         The default Spotify Connect player device.
         """
         return self.options.get(CONF_OPTION_DEVICE_DEFAULT, None)
+
+    @property
+    def OptionScriptTurnOff(self) -> str | None:
+        """
+        Script entity id that will be called to power off the device that plays media content.
+        """
+        return self.options.get(CONF_OPTION_SCRIPT_TURN_OFF, None)
+    
+    @property
+    def OptionScriptTurnOn(self) -> str | None:
+        """
+        Script entity id that will be called to power on the device that plays media content.
+        """
+        return self.options.get(CONF_OPTION_SCRIPT_TURN_ON, None)
+    

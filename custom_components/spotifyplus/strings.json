@@ -23,7 +23,9 @@
         "title": "{name} Options",
         "description": "Configure SpotifyPlus integration options that control functionality.",
         "data": {
-          "device_default": "Default Spotify Connect Player Device ID when none are active."
+          "device_default": "Default Spotify Connect Player Device ID when none are active.",
+          "script_turn_on": "Script called to turn on device that plays media content.",
+          "script_turn_off": "Script called to turn off device that plays media content."
         },
         "submit": "Save"
       }
@@ -572,11 +574,11 @@
         },
         "context_uri": {
           "name": "Context Uri",
-          "description": "Spotify URI of the context to play.  Valid contexts are albums, artists & playlists."
+          "description": "Spotify URI of the context to play (e.g. `spotify:album:6vc9OTcyd3hyzabCmsdnwE`).  Valid contexts are albums, artists & playlists."
         },
         "offset_uri": {
           "name": "Offset Uri",
-          "description": "Indicates from what Uri in the context playback should start.  Only available when contextUri corresponds to an artist, album or playlist.  The offsetPosition argument will be used if this value is null."
+          "description": "Indicates from what Uri in the context playback should start (e.g. `1kWUud3vY5ij5r62zxpTRy`.  Only available when contextUri corresponds to an artist, album or playlist.  The offsetPosition argument will be used if this value is null."
         },
         "offset_position": {
           "name": "Offset Position",

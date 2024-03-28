@@ -24,10 +24,10 @@ from spotifywebapipython import SpotifyClient
 from spotifywebapipython.models import Device
 
 from homeassistant.config_entries import ConfigEntry, OptionsFlow
-from homeassistant.const import CONF_DESCRIPTION, CONF_ID, CONF_NAME
+from homeassistant.const import CONF_DESCRIPTION, CONF_ID, CONF_NAME, Platform
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
-from homeassistant.helpers import config_entry_oauth2_flow
+from homeassistant.helpers import config_entry_oauth2_flow, config_validation as cv, selector
 from homeassistant.helpers.selector import (
     SelectSelector,
     SelectSelectorConfig,
@@ -36,7 +36,10 @@ from homeassistant.helpers.selector import (
 
 from .const import (
     CONF_OPTION_DEVICE_DEFAULT, 
+    CONF_OPTION_SCRIPT_TURN_OFF,
+    CONF_OPTION_SCRIPT_TURN_ON,
     DOMAIN, 
+    DOMAIN_SCRIPT,
     SPOTIFY_SCOPES
 )
 from .instancedata_spotifyplus import InstanceDataSpotifyPlus
@@ -350,6 +353,8 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
             
                 # update config entry options from user input values.
                 self._Options[CONF_OPTION_DEVICE_DEFAULT] = user_input.get(CONF_OPTION_DEVICE_DEFAULT, None)
+                self._Options[CONF_OPTION_SCRIPT_TURN_OFF] = user_input.get(CONF_OPTION_SCRIPT_TURN_OFF, None)
+                self._Options[CONF_OPTION_SCRIPT_TURN_ON] = user_input.get(CONF_OPTION_SCRIPT_TURN_ON, None)
                 
                 # store the updated config entry options.
                 _logsi.LogDictionary(SILevel.Verbose, "'%s': OptionsFlow is updating configuration options - options" % self._name, self._Options)
@@ -381,6 +386,18 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                                     options=device_list,
                                     mode=SelectSelectorMode.DROPDOWN
                         )
+                    ),
+                    vol.Optional(CONF_OPTION_SCRIPT_TURN_ON, 
+                                 description={"suggested_value": self._Options.get(CONF_OPTION_SCRIPT_TURN_ON)},
+                                 ): selector.EntitySelector(selector.EntitySelectorConfig(integration=DOMAIN_SCRIPT, 
+                                                            #domain=Platform.SCENE, 
+                                                            multiple=False),
+                    ),
+                    vol.Optional(CONF_OPTION_SCRIPT_TURN_OFF, 
+                                 description={"suggested_value": self._Options.get(CONF_OPTION_SCRIPT_TURN_OFF)},
+                                 ): selector.EntitySelector(selector.EntitySelectorConfig(integration=DOMAIN_SCRIPT, 
+                                                            #domain=Platform.SCENE, 
+                                                            multiple=False),
                     ),
                 }
             )
