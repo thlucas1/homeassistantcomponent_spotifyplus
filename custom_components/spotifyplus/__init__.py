@@ -102,6 +102,7 @@ SERVICE_SPOTIFY_GET_TRACK_FAVORITES:str = 'get_track_favorites'
 SERVICE_SPOTIFY_GET_USERS_TOP_ARTISTS:str = 'get_users_top_artists'
 SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS:str = 'get_users_top_tracks'
 SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT:str = 'player_media_play_context'
+SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACK_FAVORITES:str = 'player_media_play_track_favorites'
 SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS:str = 'player_media_play_tracks'
 SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK:str = 'player_transfer_playback'
 SERVICE_SPOTIFY_PLAYLIST_CHANGE:str = 'playlist_change'
@@ -344,6 +345,15 @@ SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT_SCHEMA = vol.Schema(
         vol.Optional("offset_position", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("position_ms", default=0): vol.All(vol.Range(min=0,max=999999999)),
         vol.Optional("device_id"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACK_FAVORITES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("device_id"): cv.string,
+        vol.Optional("shuffle"): cv.boolean,
+        vol.Optional("delay", default=0.50): vol.All(vol.Range(min=0,max=10.0)),
     }
 )
 
@@ -664,6 +674,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     device_id = service.data.get("device_id")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     await hass.async_add_executor_job(entity.service_spotify_player_media_play_context, context_uri, offset_uri, offset_position, position_ms, device_id)
+
+                elif service.service == SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACK_FAVORITES:
+
+                    # start playing all track favorites.
+                    device_id = service.data.get("device_id")
+                    shuffle = service.data.get("shuffle")
+                    delay = service.data.get("delay")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_player_media_play_track_favorites, device_id, shuffle, delay)
 
                 elif service.service == SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS:
 
@@ -1394,6 +1413,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT,
             service_handle_spotify_command,
             schema=SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACK_FAVORITES, SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACK_FAVORITES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACK_FAVORITES,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACK_FAVORITES_SCHEMA,
             supports_response=SupportsResponse.NONE,
         )
 

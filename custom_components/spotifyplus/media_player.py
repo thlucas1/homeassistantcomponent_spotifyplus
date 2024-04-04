@@ -526,7 +526,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # are we currently powered off?  if so, then power on.
             if self._attr_state == MediaPlayerState.OFF:
                 self.turn_on()
-                self._isInCommandEvent = True  # turn "in a command event" indicator back on
+                self._isInCommandEvent = True  # turn "in a command event" indicator back on.
 
             # verify device id (specific device, active device, or default).
             deviceId:str = self._VerifyDeviceIdByName()
@@ -2725,6 +2725,68 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
 
     @spotify_exception_handler
+    def service_spotify_player_media_play_track_favorites(self, 
+                                                          deviceId:str, 
+                                                          shuffle:bool,
+                                                          delay:float
+                                                          ) -> None:
+        """
+        Start playing one or more tracks on the specified Spotify Connect device.
+        
+        Args:
+            deviceId (str):
+                The id of the device this command is targeting.  
+                If not supplied, the user's currently active device is the target.  
+                Example: `0d1841b0976bae2a3a310dd74c0f3df354899bc8`
+            shuffle (bool):
+                True to set player shuffle mode to on; otherwise, False for no shuffle.
+            delay (float):
+                Time delay (in seconds) to wait AFTER issuing the command to the player.  
+                This delay will give the spotify web api time to process the change before 
+                another command is issued.  
+                Default is 0.50; value range is 0 - 10.
+        """
+        apiMethodName:str = 'service_spotify_player_media_play_track_favorites'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("deviceId", deviceId)
+            apiMethodParms.AppendKeyValue("shuffle", shuffle)
+            apiMethodParms.AppendKeyValue("delay", delay)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Media Play Favorite Tracks Service", apiMethodParms)
+            
+            # verify device id (specific device, active device, or default).
+            deviceId = self._VerifyDeviceId(deviceId)
+
+            # start playing track favorites on the specified Spotify Connect device.
+            _logsi.LogVerbose("Playing Media Favorite Tracks on device")
+            self.data.spotifyClient.PlayerMediaPlayTrackFavorites(deviceId, shuffle, delay)
+
+            # issue transfer playback in case it needs it.
+            if deviceId is not None:
+                _logsi.LogVerbose("Transferring Spotify Playback to device")
+                self.data.spotifyClient.PlayerTransferPlayback(deviceId, True)
+
+            # update ha state.
+            self.async_write_ha_state()
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    @spotify_exception_handler
     def service_spotify_player_media_play_tracks(self, 
                                                  uris:str, 
                                                  positionMS:int, 
@@ -4206,7 +4268,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             methodParms = _logsi.EnterMethodParmList(SILevel.Debug)
             methodParms.AppendKeyValue("media_content_type", media_content_type)
             methodParms.AppendKeyValue("media_content_id", media_content_id)
-            _logsi.LogMethodParmList(SILevel.Verbose, "'%s': MediaPlayer is browsing for media" % self.name, methodParms)
+            _logsi.LogMethodParmList(SILevel.Verbose, "'%s': MediaPlayer is browsing for media content type '%s'" % (self.name, media_content_type), methodParms)
             
             # browse spotifysplus device media.
             if media_content_type is None and media_content_id is None:
@@ -4224,6 +4286,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                     media_content_id,
                 )
 
+            elif media_content_type == 'favorites':
+                # ignore Sonos-Card "favorites" node queries.
+                _logsi.LogVerbose("'%s': ignoring Sonos-Card favorites query (no SoundTouch equivalent)" % self.name)
+                return None
+                        
             else:
                 
                 # handle spotifysplus media library selection.

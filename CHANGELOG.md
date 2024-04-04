@@ -6,9 +6,16 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.14 ] - 2024/04/01
+
+  * Added service `player_media_play_track_favorites` to play all track favorites for the current user.
+  * Increased all browse media limits from 50 items to 150 items.
+  * Updated Media Browser logic to ignore Sonos-Card 'favorites' node requests, as there is no Spotify direct equivalent.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.41.
+
 ###### [ 1.0.13 ] - 2024/03/28
 
-  * Updated `_CallScriptPower` method to use the script uniqueid value instead of the (entity_id value) when calling the `turn_on` and `turn_off` scripts.
+  * Updated `_CallScriptPower` method to use the script uniqueid value (instead of the entity_id value) when calling the `turn_on` and `turn_off` scripts.
 
 ###### [ 1.0.12 ] - 2024/03/27
 
