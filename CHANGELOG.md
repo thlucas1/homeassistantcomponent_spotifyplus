@@ -6,7 +6,14 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
-###### [ 1.0.14 ] - 2024/04/01
+###### [ 1.0.15 ] - 2024/04/05
+
+  * Added `MediaPlayerEntityFeature.VOLUME_MUTE` support to handle volume mute requests.
+  * Added `MediaPlayerEntityFeature.VOLUME_STEP` support to handle volume step requests.
+  * Updated Media Browser logic to return an empty `BrowseMedia` object when ignoring Sonos-Card 'favorites' node requests, as a null object was causing numerous `Browse Media should use new BrowseMedia class` log warnings.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.42.
+
+###### [ 1.0.14 ] - 2024/04/04
 
   * Added service `player_media_play_track_favorites` to play all track favorites for the current user.
   * Increased all browse media limits from 50 items to 150 items.

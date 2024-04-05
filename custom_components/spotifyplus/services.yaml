@@ -1003,7 +1003,7 @@ player_media_play_track_favorites:
       name: Delay
       description: Time delay (in seconds) to wait AFTER issuing the command to the player.  This delay will give the spotify web api time to process the change before another command is issued.  Default is 0.50; value range is 0 - 10.
       example: "0.50"
-      required: true
+      required: false
       selector:
         text:
 
