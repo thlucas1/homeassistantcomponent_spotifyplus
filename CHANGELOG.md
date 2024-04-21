@@ -6,6 +6,12 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.16 ] - 2024/04/21
+
+  * Added extra state attribute `spotifyplus_device_id` that lists the Spotify Connect Player device id that is in use.
+  * Added extra state attribute `spotifyplus_device_name` that lists the Spotify Connect Player device name that is in use.
+  * Refer to the [wiki documentation](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Media-Player-Service-Enhancements#state-custom-variables) page for more details about custom state variables.
+
 ###### [ 1.0.15 ] - 2024/04/05
 
   * Added `MediaPlayerEntityFeature.VOLUME_MUTE` support to handle volume mute requests.

@@ -76,6 +76,11 @@ if (_logsi == None):
 _logsi.SystemLogger = LOGGER
 
 
+# our extra state attribute names.
+ATTR_SPOTIFYPLUS_DEVICE_ID = "spotifyplus_device_id"
+ATTR_SPOTIFYPLUS_DEVICE_NAME = "spotifyplus_device_name"
+
+
 # annotate the `spotify_exception_handler` callable.
 _SpotifyMediaPlayerT = TypeVar("_SpotifyMediaPlayerT", bound="SpotifyMediaPlayer")
 _R = TypeVar("_R")
@@ -331,6 +336,23 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
             # trace.
             _logsi.LeaveMethod(SILevel.Debug)
+
+
+    @property
+    def extra_state_attributes(self):
+        """ Return entity specific state attributes. """
+        # build list of our extra state attributes to return to HA UI.
+        attributes = {}
+        attributes[ATTR_SPOTIFYPLUS_DEVICE_ID] = "no_device"
+        attributes[ATTR_SPOTIFYPLUS_DEVICE_NAME] = "no_device"
+        
+        # get currently active device id.
+        if self._playerState is not None:
+            if self._playerState.Device is not None:
+                attributes[ATTR_SPOTIFYPLUS_DEVICE_ID] = self._playerState.Device.Id
+                attributes[ATTR_SPOTIFYPLUS_DEVICE_NAME] = self._playerState.Device.Name
+
+        return attributes
 
 
     @property

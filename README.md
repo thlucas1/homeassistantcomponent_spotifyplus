@@ -17,6 +17,7 @@ Platform | Description
 
 The following Home Assistant media_player Platform services are supplied by this integration.
 - BROWSE_MEDIA
+- MEDIA_ENQUEUE
 - NEXT_TRACK
 - PAUSE
 - PLAY
@@ -26,28 +27,60 @@ The following Home Assistant media_player Platform services are supplied by this
 - SEEK
 - SELECT_SOURCE
 - SHUFFLE_SET
+- TURN_OFF
+- TURN_ON
+- VOLUME_MUTE
 - VOLUME_SET
+- VOLUME_STEP
 
 The following custom services are also supplied by this integration.
-- Get Album: Get Spotify catalog information for a single album.
-- Get Album Favorites: Get a list of the albums saved in the current Spotify user's 'Your Library'.
-- Get Album New Releases: Get a list of new album releases featured in Spotify.
-- Get Artist: Get Spotify catalog information for a single artist.
-- Get Artist Albums: Get Spotify catalog information about an artist's albums.
-- Get Artists Followed: Get the current user's followed artists.
-- Get Browse Categorys: Get a sorted list of ALL categories used to tag items in Spotify.
-- Get Category Playlists: Get a list of Spotify playlists tagged with a particular category.
-- Get Featured Playlists: Get a list of Spotify featured playlists.
-- Get Player Recent Tracks: Get tracks from the current user's recently played tracks; currently doesn't support podcast episodes, and only 50 items may be returned due to spotify limits.
-- Get Playlist: Get a playlist owned by a Spotify user.
-- Get Playlist Favorites: Get a list of the playlists owned or followed by the current Spotify user.
-- Get Show: Get Spotify catalog information for a single show identified by its unique Spotify ID.
-- Get Show Episodes: Get Spotify catalog information about a show's episodes.
-- Get Show Favorites: Get a list of the shows saved in the current Spotify user's 'Your Library'.
-- Get Track Favorites: Get a list of the tracks saved in the current Spotify user's 'Your Library'.
-- Get Users Top Artists: Get the current user's top artists based on calculated affinity.
-- Get Users Top Tracks: Get the current user's top tracks based on calculated affinity.
-- Search Playlists: Get Spotify catalog information about Playlists that match a keyword string. 
+- Follow Artists
+- Follow Playlist
+- Follow Users
+- Get Album
+- Get Album Favorites
+- Get Album New Releases
+- Get Artist
+- Get Artists Albums
+- Get Artists Followed
+- Get Browse Categories
+- Get Category Playlists
+- Get Featured Playlists
+- Get Player Devices
+- Get Player Queue Info
+- Get Player Recent Tracks
+- Get Playlist
+- Get Playlist Favorites
+- Get Show
+- Get Show Episodes
+- Get Show Favorites
+- Get Track Favorites
+- Get Users Top Artists
+- Get Users Top Tracks
+- Player Media Play Context
+- Player Media Play Track Favorites
+- Player Media Play Tracks
+- Player Transfer Playback
+- Playlist Change
+- Playlist Cover Image Add
+- Playlist Create
+- Playlist Items Add
+- Playlist Items Clear
+- Playlist Items Remove
+- Save Album Favorites
+- Save Track Favorites
+- Remove Album Favorites
+- Remove Track Favorites
+- Search Albums
+- Search Artists
+- Search Audiobooks
+- Search Episodes
+- Search Playlists
+- Search Shows
+- Search Tracks
+- Unfollow Artists
+- Unfollow Playlist
+- Unfollow Users
 
 Check out the [Services Provided wiki](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Services-Provided) page for detailed explanations and YAML examples of the custom services provided by this integration.
 
