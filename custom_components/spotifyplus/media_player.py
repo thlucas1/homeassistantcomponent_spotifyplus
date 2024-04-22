@@ -1193,6 +1193,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         self.data.spotifyClient.PlayerTransferPlayback(deviceId, (self.state == MediaPlayerState.PLAYING))
         return deviceId
 
+
     def service_spotify_follow_artists(self, 
                                        ids:str=None, 
                                        ) -> None:
@@ -2944,6 +2945,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 play = True
             if deviceId is None or deviceId == "*":
                 deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
+                
+            # ensure spotify client has the most current device list.
+            # we don't do anything with them here, but it will refresh the cache which is
+            # what the PlayerTransferPlayback method uses to resolve device id from a device name.
+            self.data.spotifyClient.GetPlayerDevices(True)
                 
             # transfer playback to the specified Spotify Connect device.
             _logsi.LogVerbose("Transferring Spotify Playback to device")

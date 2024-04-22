@@ -590,7 +590,7 @@
         },
         "device_id": {
           "name": "Device ID",
-          "description": "The id of the device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an '*' is specified), then the SpotifyPlus default device is activated."
+          "description": "The id or name of the Spotify Connect Player device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an '*' is specified), then the SpotifyPlus default device is activated."
         }
       }
     },
@@ -604,7 +604,7 @@
         },
         "device_id": {
           "name": "Device ID",
-          "description": "The id of the device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an '*' is specified), then the SpotifyPlus default device is activated."
+          "description": "The id or name of the Spotify Connect Player device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an '*' is specified), then the SpotifyPlus default device is activated."
         },
         "shuffle": {
           "name": "Shuffle?",
@@ -634,7 +634,7 @@
         },
         "device_id": {
           "name": "Device ID",
-          "description": "The id of the device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an '*' is specified), then the SpotifyPlus default device is activated."
+          "description": "The id or name of the Spotify Connect Player device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an '*' is specified), then the SpotifyPlus default device is activated."
         }
       }
     },
@@ -648,7 +648,7 @@
         },
         "device_id": {
           "name": "Device ID",
-          "description": "The id of the device on which playback should be started/transferred.  If no device is specified, then the SpotifyPlus default device is activated."
+          "description": "The id or name of the Spotify Connect Player device on which playback should be started/transferred.  If no device is specified, then the SpotifyPlus default device is activated."
         },
         "play": {
           "name": "Start Play?",

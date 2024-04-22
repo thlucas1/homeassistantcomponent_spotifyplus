@@ -966,7 +966,7 @@ player_media_play_context:
           mode: box
     device_id:
       name: Device ID
-      description: The id of the device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an "*" is specified), then the SpotifyPlus default device is activated.
+      description: The id or name of the Spotify Connect Player device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an "*" is specified), then the SpotifyPlus default device is activated.
       example: "0d1841b0976bae2a3a310dd74c0f337465899bc8"
       required: false
       selector:
@@ -987,7 +987,7 @@ player_media_play_track_favorites:
           domain: media_player
     device_id:
       name: Device ID
-      description: The id of the device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an "*" is specified), then the SpotifyPlus default device is activated.
+      description: The id or name of the Spotify Connect Player device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an "*" is specified), then the SpotifyPlus default device is activated.
       example: "0d1841b0976bae2a3a310dd74c0f337465899bc8"
       required: false
       selector:
@@ -1039,7 +1039,7 @@ player_media_play_tracks:
           mode: box
     device_id:
       name: Device ID
-      description: The id of the device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an "*" is specified), then the SpotifyPlus default device is activated.
+      description: The id or name of the Spotify Connect Player device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an "*" is specified), then the SpotifyPlus default device is activated.
       example: "0d1841b0976bae2a3a310dd74c0f337465899bc8"
       required: false
       selector:
@@ -1060,7 +1060,7 @@ player_transfer_playback:
           domain: media_player
     device_id:
       name: Device ID
-      description: The id of the device on which playback should be started/transferred.  If no device is specified, then the SpotifyPlus default device is activated.
+      description: The id or name of the Spotify Connect Player device on which playback should be started/transferred.  If no device is specified, then the SpotifyPlus default device is activated.
       example: "0d1841b0976bae2a3a310dd74c0f337465899bc8"
       required: false
       selector:

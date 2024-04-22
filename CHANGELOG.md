@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.17 ] - 2024/04/21
+
+  * Added device name support to the following custom services that take a Spotify Connect Player `deviceId` argument for player functions.  You can now specify either a device id or device name in the `deviceId` argument to target a specific Spotify Connect Player device.  Services updated were: `player_media_play_context`, `player_media_play_track_favorites`, `player_media_play_tracks`, `player_transfer_playback`.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.43.
+
 ###### [ 1.0.16 ] - 2024/04/21
 
   * Added extra state attribute `spotifyplus_device_id` that lists the Spotify Connect Player device id that is in use.
