@@ -481,8 +481,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         self._attr_state = MediaPlayerState.PLAYING
         self.async_write_ha_state()
 
+        # verify that a spotify connect player device is active.
+        deviceId:str = self._VerifyDeviceActive()
+
         # resume playback.
-        deviceId:str = self._VerifyDeviceIdByName()
         self.data.spotifyClient.PlayerMediaResume(deviceId)
 
 
@@ -495,8 +497,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         self._attr_state = MediaPlayerState.PAUSED
         self.async_write_ha_state()
         
+        # verify that a spotify connect player device is active.
+        deviceId:str = self._VerifyDeviceActive()
+
         # pause playback.
-        deviceId:str = self._VerifyDeviceIdByName()
         self.data.spotifyClient.PlayerMediaPause(deviceId)
 
 
@@ -505,8 +509,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         """ Skip to previous track. """
         _logsi.LogVerbose(STAppMessages.MSG_MEDIAPLAYER_SERVICE, self.name, "media_previous_track")
         
+        # verify that a spotify connect player device is active.
+        deviceId:str = self._VerifyDeviceActive()
+
         # skip to previous track.
-        deviceId:str = self._VerifyDeviceIdByName()
         self.data.spotifyClient.PlayerMediaSkipPrevious(deviceId)
 
 
@@ -515,8 +521,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         """ Skip to next track. """
         _logsi.LogVerbose(STAppMessages.MSG_MEDIAPLAYER_SERVICE, self.name, "media_next_track")
 
+        # verify that a spotify connect player device is active.
+        deviceId:str = self._VerifyDeviceActive()
+
         # skip to next track.
-        deviceId:str = self._VerifyDeviceIdByName()
         self.data.spotifyClient.PlayerMediaSkipNext(deviceId)
 
 
@@ -530,8 +538,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         self._attr_media_position_updated_at = utcnow()
         self.async_write_ha_state()
         
+        # verify that a spotify connect player device is active.
+        deviceId:str = self._VerifyDeviceActive()
+
         # seek to track position.
-        deviceId:str = self._VerifyDeviceIdByName()
         self.data.spotifyClient.PlayerMediaSeek(int(position * 1000), deviceId)
         
 
@@ -580,9 +590,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 self.turn_on()
                 self._isInCommandEvent = True  # turn "in a command event" indicator back on.
 
-            # verify device id (specific device, active device, or default).
-            deviceId:str = self._VerifyDeviceIdByName()
-            
+            # verify that a spotify connect player device is active.
+            deviceId:str = self._VerifyDeviceActive()
+
             # spotify can't handle URI's with query strings or anchors
             # yet, they do generate those types of URI in their official clients.
             media_id:str = str(URL(media_id).with_query(None).with_fragment(None))
@@ -663,8 +673,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         self._attr_shuffle = shuffle
         self.async_write_ha_state()
         
+        # verify that a spotify connect player device is active.
+        deviceId:str = self._VerifyDeviceActive()
+
         # set shuffle mode.
-        deviceId:str = self._VerifyDeviceIdByName()
         self.data.spotifyClient.PlayerSetShuffleMode(shuffle, deviceId)
 
 
@@ -679,8 +691,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         self._attr_repeat = repeat
         self.async_write_ha_state()
 
+        # verify that a spotify connect player device is active.
+        deviceId:str = self._VerifyDeviceActive()
+
         # set repeat mode.
-        deviceId:str = self._VerifyDeviceIdByName()
         self.data.spotifyClient.PlayerSetRepeatMode(REPEAT_MODE_MAPPING_TO_SPOTIFY[repeat], deviceId)
 
 
@@ -697,8 +711,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         self._attr_volume_level = volume
         self.async_write_ha_state()
 
+        # verify that a spotify connect player device is active.
+        deviceId:str = self._VerifyDeviceActive()
+
         # set volume.
-        deviceId:str = self._VerifyDeviceIdByName()
         self.data.spotifyClient.PlayerSetVolume(int(volume * 100), deviceId)
 
 
@@ -773,13 +789,13 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # get current Spotify Connect player state.
             playerStateCurrent:PlayerPlayState = self.data.spotifyClient.GetPlayerPlaybackState()
 
-            # is playing content paused? if so, then resume play.
+            # is playing content paused?
             if (playerStateCurrent.Device.Id is not None) \
             and (playerStateCurrent.Actions.Pausing):
                 
+                # resume play.
                 _logsi.LogVerbose("'%s': Resuming playing media" % self.name)
-                deviceId:str = self._VerifyDeviceIdByName()
-                self.data.spotifyClient.PlayerMediaResume(deviceId)
+                self.data.spotifyClient.PlayerMediaResume(playerStateCurrent.Device.Id)
             
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
@@ -1148,49 +1164,34 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         }
 
 
-    def _VerifyDeviceId(self, deviceId:str) -> str:
+    def _VerifyDeviceActive(self, deviceId:str=None) -> str:
         """
         Verifies that a device id was specified.  If not supplied, the user's currently 
         active device is the target.  If no device is active (or an "*" is specified), then 
         the SpotifyPlus default device is activated.
         """
+        # if a device was not specified, then we will try to use the currently active
+        # spotify connect player device.
         if deviceId is None:
-    
-            # if device not specified, then ensure we have an active device.
+            
             _logsi.LogVerbose("'%s': Verifying active Spotify Connect device" % self.name)
             result:PlayerPlayState = self.data.spotifyClient.PlayerVerifyDeviceDefault(PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault), False)
             if result.Device.Id is not None:
                 _logsi.LogVerbose("'%s': Using SpotifyPlus active device: '%s'(%s)" % (self.name, result.Device.Id, result.Device.Name))
                 deviceId = result.Device.Id
 
-        # if deviceId not found or an asterisk was specified, then use the default 
-        # device from configuration options.
-        if deviceId == "*" or deviceId is None:
-                
-            # if default spotifyplus device was specified, then use it.
+        # if there was no active device, or the default device was specified (e.g. "*"),
+        # then we will force the configuration option default device to be used.
+        if deviceId is None or deviceId == "*":
+            
             _logsi.LogVerbose("'%s': Using SpotifyPlus default device: '%s'" % (self.name, self.data.OptionDeviceDefault))
             deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
-
-        return deviceId
-
-
-    def _VerifyDeviceIdByName(self) -> str:
-        """ 
-        Verifies that a device name was selected from the source list.  If not selected, 
-        the SpotifyPlus default device is activated.
-        """ 
-        # find the source device in the devices list and return its id if found.
-        for device in self.data.devices.data:
-            if device.Name == self._attr_source:
-                return device.Id
+            self._attr_source = PlayerDevice.GetNameFromSelectItem(self.data.OptionDeviceDefault)
             
-        # if not found, then we will use our options default device.
-        self._attr_source = PlayerDevice.GetNameFromSelectItem(self.data.OptionDeviceDefault)
-        deviceId:str = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
+            # transfer playback to the device to ensure it's active.
+            _logsi.LogVerbose("'%s': Transferring playback to SpotifyPlus default device '%s' (%s)" %  (self.name, self._attr_source, deviceId))
+            self.data.spotifyClient.PlayerTransferPlayback(deviceId, (self.state == MediaPlayerState.PLAYING))
 
-        # transfer playback to the device to ensure it's active.
-        _logsi.LogVerbose("'%s': Transferring playback to SpotifyPlus default device '%s' (%s)" %  (self.name, self._attr_source, deviceId))
-        self.data.spotifyClient.PlayerTransferPlayback(deviceId, (self.state == MediaPlayerState.PLAYING))
         return deviceId
 
 
@@ -2755,17 +2756,17 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("deviceId", deviceId)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Media Play Context Service", apiMethodParms)
             
-            # verify device id (specific device, active device, or default).
-            deviceId = self._VerifyDeviceId(deviceId)
+            # verify that a spotify connect player device is active.
+            deviceId = self._VerifyDeviceActive(deviceId)
 
             # start playing one or more tracks of the specified context on a Spotify Connect device.
             _logsi.LogVerbose("Playing Media Context on device")
             self.data.spotifyClient.PlayerMediaPlayContext(contextUri, offsetUri, offsetPosition, positionMS, deviceId)
 
-            # issue transfer playback in case it needs it.
-            if deviceId is not None:
-                _logsi.LogVerbose("Transferring Spotify Playback to device")
-                self.data.spotifyClient.PlayerTransferPlayback(deviceId, True)
+            # # issue transfer playback in case it needs it.
+            # if deviceId is not None:
+            #     _logsi.LogVerbose("Transferring Spotify Playback to device")
+            #     self.data.spotifyClient.PlayerTransferPlayback(deviceId, True)
 
             # update ha state.
             self.async_write_ha_state()
@@ -2817,17 +2818,17 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("delay", delay)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Media Play Favorite Tracks Service", apiMethodParms)
             
-            # verify device id (specific device, active device, or default).
-            deviceId = self._VerifyDeviceId(deviceId)
+            # verify that a spotify connect player device is active.
+            deviceId = self._VerifyDeviceActive(deviceId)
 
             # start playing track favorites on the specified Spotify Connect device.
             _logsi.LogVerbose("Playing Media Favorite Tracks on device")
             self.data.spotifyClient.PlayerMediaPlayTrackFavorites(deviceId, shuffle, delay)
 
-            # issue transfer playback in case it needs it.
-            if deviceId is not None:
-                _logsi.LogVerbose("Transferring Spotify Playback to device")
-                self.data.spotifyClient.PlayerTransferPlayback(deviceId, True)
+            # # issue transfer playback in case it needs it.
+            # if deviceId is not None:
+            #     _logsi.LogVerbose("Transferring Spotify Playback to device")
+            #     self.data.spotifyClient.PlayerTransferPlayback(deviceId, True)
 
             # update ha state.
             self.async_write_ha_state()
@@ -2884,17 +2885,17 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("deviceId", deviceId)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Media Play Tracks Service", apiMethodParms)
             
-            # verify device id (specific device, active device, or default).
-            deviceId = self._VerifyDeviceId(deviceId)
+            # verify that a spotify connect player device is active.
+            deviceId = self._VerifyDeviceActive(deviceId)
 
             # start playing one or more tracks on the specified Spotify Connect device.
             _logsi.LogVerbose("Playing Media Tracks on device")
             self.data.spotifyClient.PlayerMediaPlayTracks(uris, positionMS, deviceId)
 
-            # issue transfer playback in case it needs it.
-            if deviceId is not None:
-                _logsi.LogVerbose("Transferring Spotify Playback to device")
-                self.data.spotifyClient.PlayerTransferPlayback(deviceId, True)
+            # # issue transfer playback in case it needs it.
+            # if deviceId is not None:
+            #     _logsi.LogVerbose("Transferring Spotify Playback to device")
+            #     self.data.spotifyClient.PlayerTransferPlayback(deviceId, True)
 
             # update ha state.
             self.async_write_ha_state()
@@ -2952,7 +2953,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self.data.spotifyClient.GetPlayerDevices(True)
                 
             # transfer playback to the specified Spotify Connect device.
-            _logsi.LogVerbose("Transferring Spotify Playback to device")
+            _logsi.LogVerbose("'%s': Transferring Spotify Playback to device '%s'" % (self.name, deviceId))
             self.data.spotifyClient.PlayerTransferPlayback(deviceId, play)
 
             # update ha state.

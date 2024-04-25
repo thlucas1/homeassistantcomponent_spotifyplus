@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.18 ] - 2024/04/25
+
+  * Updated various `media_player` services that control playback to verify a Spotify Connect Player device is active.  If there is no active device, or the default device was specified (e.g. "*"), then we will force the configuration option default device to be used and transfer playback to it.  If an active device was found, then we will use it without transferring playback for services that do not specify a `deviceId` argument.  For services that can supply a `deviceId` argument, we will issue a transfer playback command if a device id (or name) was specified.
+
 ###### [ 1.0.17 ] - 2024/04/21
 
   * Added device name support to the following custom services that take a Spotify Connect Player `deviceId` argument for player functions.  You can now specify either a device id or device name in the `deviceId` argument to target a specific Spotify Connect Player device.  Services updated were: `player_media_play_context`, `player_media_play_track_favorites`, `player_media_play_tracks`, `player_transfer_playback`.
