@@ -1,4 +1,13 @@
 """Support for interacting with Spotify Connect."""
+
+# Important notes about HA State writes:
+#
+# `self.async_write_ha_state()` should always be used inside of the event loop (any method that is async itself or a callback). 
+# If you are in a `async def` method or one wrapped in `@callback`, use `async_write_ha_state` since you are inside of the event loop. 
+
+# `self.schedule_update_ha_state(force_refresh=True)` should be unsed when not inside of the event loop (e.g. for sync functions that are ran 
+# inside of the executor thread).  If you are in a `def` method (no async) then use `schedule_update_ha_state` since you are inside of the event loop.
+
 from __future__ import annotations
 
 import datetime as dt
@@ -200,7 +209,7 @@ def spotify_exception_handler(
             result = func(self, *args, **kwargs)
             
             # do not update HA state in this handler!  doing so causes UI buttons
-            # pressed to "toggle" between states.  the "self.async_write_ha_state()" 
+            # pressed to "toggle" between states.  the "self.schedule_update_ha_state(force_refresh=True)" 
             # call should be done in the individual methods.
             
             # return function result to caller.
@@ -479,7 +488,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         
         # update ha state.
         self._attr_state = MediaPlayerState.PLAYING
-        self.async_write_ha_state()
+        self.schedule_update_ha_state(force_refresh=True)
 
         # verify that a spotify connect player device is active.
         deviceId:str = self._VerifyDeviceActive()
@@ -495,7 +504,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         
         # update ha state.
         self._attr_state = MediaPlayerState.PAUSED
-        self.async_write_ha_state()
+        self.schedule_update_ha_state(force_refresh=True)
         
         # verify that a spotify connect player device is active.
         deviceId:str = self._VerifyDeviceActive()
@@ -536,7 +545,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # update ha state.
         self._attr_media_position = position
         self._attr_media_position_updated_at = utcnow()
-        self.async_write_ha_state()
+        self.schedule_update_ha_state(force_refresh=True)
         
         # verify that a spotify connect player device is active.
         deviceId:str = self._VerifyDeviceActive()
@@ -554,7 +563,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
         if mute:
             self._volume_level_saved = self._attr_volume_level
-            self.async_write_ha_state()
+            self.schedule_update_ha_state(force_refresh=True)
             self.set_volume_level(0.0)
         else:
             # did we save the volume on a previous mute request?  if not, then default volume.
@@ -562,7 +571,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 _logsi.LogVerbose("Previously saved volume was not set; defaulting to 0.10")
                 self._volume_level_saved = 0.10
             self._attr_volume_level = self._volume_level_saved
-            self.async_write_ha_state()
+            self.schedule_update_ha_state(force_refresh=True)
             self.set_volume_level(self._volume_level_saved)
             
 
@@ -630,14 +639,14 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             if media_type in {MediaType.TRACK, MediaType.EPISODE, MediaType.MUSIC}:
                 
                 self._attr_state = MediaPlayerState.PLAYING
-                self.async_write_ha_state()
+                self.schedule_update_ha_state(force_refresh=True)
                 _logsi.LogVerbose("Playing via PlayerMediaPlayTracks: uris='%s', deviceId='%s'" % (media_id, deviceId))
                 self.data.spotifyClient.PlayerMediaPlayTracks([media_id], deviceId=deviceId)
                 
             elif media_type in PLAYABLE_MEDIA_TYPES:
                 
                 self._attr_state = MediaPlayerState.PLAYING
-                self.async_write_ha_state()
+                self.schedule_update_ha_state(force_refresh=True)
                 _logsi.LogVerbose("Playing via PlayerMediaPlayContext: contextUri='%s', deviceId='%s'" % (media_id, deviceId))
                 self.data.spotifyClient.PlayerMediaPlayContext(media_id, deviceId=deviceId)
                 
@@ -671,7 +680,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
         # update ha state.
         self._attr_shuffle = shuffle
-        self.async_write_ha_state()
+        self.schedule_update_ha_state(force_refresh=True)
         
         # verify that a spotify connect player device is active.
         deviceId:str = self._VerifyDeviceActive()
@@ -689,7 +698,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         if repeat not in REPEAT_MODE_MAPPING_TO_SPOTIFY:
             raise ValueError(f"Unsupported repeat mode: {repeat}")
         self._attr_repeat = repeat
-        self.async_write_ha_state()
+        self.schedule_update_ha_state(force_refresh=True)
 
         # verify that a spotify connect player device is active.
         deviceId:str = self._VerifyDeviceActive()
@@ -709,7 +718,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
         # update ha state.
         self._attr_volume_level = volume
-        self.async_write_ha_state()
+        self.schedule_update_ha_state(force_refresh=True)
 
         # verify that a spotify connect player device is active.
         deviceId:str = self._VerifyDeviceActive()
@@ -731,7 +740,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # set media player state and update ha state.
             self._attr_state = MediaPlayerState.OFF
             _logsi.LogVerbose("'%s': MediaPlayerState set to '%s'" % (self.name, self._attr_state))
-            self.async_write_ha_state()
+            self.schedule_update_ha_state(force_refresh=True)
 
             # get current player state.
             self._playerState = self.data.spotifyClient.GetPlayerPlaybackState(additionalTypes=MediaType.EPISODE.value)
@@ -758,7 +767,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         finally:
         
             # update ha state.
-            self.async_write_ha_state()
+            self.schedule_update_ha_state(force_refresh=True)
 
             # trace.
             _logsi.LeaveMethod(SILevel.Debug)
@@ -781,7 +790,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # set media player state and update ha state.
             self._attr_state = MediaPlayerState.IDLE
             _logsi.LogVerbose("'%s': MediaPlayerState set to '%s'" % (self.name, self._attr_state))
-            self.async_write_ha_state()
+            self.schedule_update_ha_state(force_refresh=True)
 
             # call script to power on device.
             self._CallScriptPower(self.data.OptionScriptTurnOn, "turn_on")
@@ -810,7 +819,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         finally:
         
             # update ha state.
-            self.async_write_ha_state()
+            self.schedule_update_ha_state(force_refresh=True)
 
             # trace.
             _logsi.LeaveMethod(SILevel.Debug)
@@ -954,7 +963,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             return
         
         # inform HA of our current state.
-        self.async_write_ha_state()
+        self.schedule_update_ha_state(force_refresh=True)
 
 
     def _UpdateHAFromPlayerPlayState(self, playerPlayState:PlayerPlayState) -> None:
@@ -2769,7 +2778,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             #     self.data.spotifyClient.PlayerTransferPlayback(deviceId, True)
 
             # update ha state.
-            self.async_write_ha_state()
+            self.schedule_update_ha_state(force_refresh=True)
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
@@ -2831,7 +2840,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             #     self.data.spotifyClient.PlayerTransferPlayback(deviceId, True)
 
             # update ha state.
-            self.async_write_ha_state()
+            self.schedule_update_ha_state(force_refresh=True)
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
@@ -2898,7 +2907,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             #     self.data.spotifyClient.PlayerTransferPlayback(deviceId, True)
 
             # update ha state.
-            self.async_write_ha_state()
+            self.schedule_update_ha_state(force_refresh=True)
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
@@ -2957,7 +2966,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self.data.spotifyClient.PlayerTransferPlayback(deviceId, play)
 
             # update ha state.
-            self.async_write_ha_state()
+            self.schedule_update_ha_state(force_refresh=True)
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).

@@ -1,6 +1,7 @@
 """Support for Spotify media browsing."""
 from __future__ import annotations
 from functools import partial
+from enum import StrEnum
 import logging
 import base64
 import os
@@ -10,7 +11,6 @@ from typing import Any
 from spotifywebapipython import SpotifyClient
 from spotifywebapipython.models import *
 
-from homeassistant.backports.enum import StrEnum
 from homeassistant.components.media_player import (
     BrowseError,
     BrowseMedia,

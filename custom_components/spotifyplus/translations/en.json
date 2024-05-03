@@ -36,7 +36,9 @@
   },
   "system_health": {
     "info": {
-      "api_endpoint_reachable": "Spotify API endpoint reachable"
+      "integration_version": "Version",
+      "api_endpoint_reachable": "Spotify API endpoint reachable",
+      "clients_configured": "Clients Configured"
     }
   },
   "issues": {
