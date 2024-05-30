@@ -1763,11 +1763,12 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
 
                 # update token value in configuration entry data.
                 _logsi.LogVerbose("'%s': Component is updating configuration entry data with refreshed token" % entry.title)
-                session.hass.config_entries.async_update_entry(
-                    session.config_entry, 
-                    data={**session.config_entry.data, "token": token}
-                    )
-                
+                hass.async_create_task(
+                  session.hass.config_entries.async_update_entry(
+                      session.config_entry, 
+                      data={**session.config_entry.data, "token": token}
+                      )
+                )
                 # restore the update listener(s).
                 entry.update_listeners = listeners.copy()    # shallow copy, so we don't destroy object references
                 _logsi.LogArray(SILevel.Verbose, "'%s': Component update listeners (%d items) have been restored" % (entry.title, len(entry.update_listeners)), entry.update_listeners)
