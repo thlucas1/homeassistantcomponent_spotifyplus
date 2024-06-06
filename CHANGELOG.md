@@ -6,6 +6,12 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.20 ] - 2024/06/06
+
+  * Changed all `media_player.schedule_update_ha_state(force_refresh=True)` calls to `schedule_update_ha_state(force_refresh=False)` to improve performance.  Suggested by @bdraco, along with an explanation of why.  Thanks @bdraco!
+  * Changed logic to call `session.hass.config_entries.async_update_entry` via a `hass.add_job` call instead of calling directly.  This fixes the issue of `Detected that custom integration 'spotifyplus' calls hass.config_entries.async_update_entry from a thread other than the event loop, which may cause Home Assistant to crash or data to corrupt` that was introduced with HA 2024.6 release.
+  * Changed logic to access local file system files via a `hass.async_add_executor_job` call.  This fixes the issue of `Detected blocking call to open inside the event loop by custom integration 'X' ...` that was introduced with HA 2024.6 release.
+
 ###### [ 1.0.19 ] - 2024/05/03
 
   * Changed all `media_player.async_write_ha_state()` calls to `schedule_update_ha_state(force_refresh=True)` calls due to HA 2024.5 release requirements.  This fixes the issue of "Failed to call service X. Detected that custom integration 'Y' calls async_write_ha_state from a thread at Z. Please report it to the author of the 'Y' custom integration.".
