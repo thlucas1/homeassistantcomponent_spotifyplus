@@ -129,6 +129,10 @@ SERVICE_SPOTIFY_SEARCH_TRACKS:str = 'search_tracks'
 SERVICE_SPOTIFY_UNFOLLOW_ARTISTS:str = 'unfollow_artists'
 SERVICE_SPOTIFY_UNFOLLOW_PLAYLIST:str = 'unfollow_playlist'
 SERVICE_SPOTIFY_UNFOLLOW_USERS:str = 'unfollow_users'
+SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO:str = 'zeroconf_device_getinfo'
+SERVICE_SPOTIFY_ZEROCONF_DEVICE_RESETUSERS:str = 'zeroconf_device_resetusers'
+SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES:str = 'zeroconf_discover_devices'
+
 
 
 SERVICE_SPOTIFY_FOLLOW_ARTISTS_SCHEMA = vol.Schema(
@@ -565,6 +569,27 @@ SERVICE_SPOTIFY_UNFOLLOW_USERS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("ids"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("action_url"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_ZEROCONF_DEVICE_RESETUSERS_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("action_url"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("timeout", default=5): vol.All(vol.Range(min=1,max=10)),
     }
 )
 
@@ -1146,6 +1171,27 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_search_tracks, criteria, limit, offset, market, include_external, limit_total)
                     
+                elif service.service == SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO:
+
+                    # get zeroconf spotify connect device information.
+                    action_url = service.data.get("action_url")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_zeroconf_device_getinfo, action_url)
+                    
+                elif service.service == SERVICE_SPOTIFY_ZEROCONF_DEVICE_RESETUSERS:
+
+                    # zeroconf spotify connect device reset users.
+                    action_url = service.data.get("action_url")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_zeroconf_device_resetusers, action_url)
+                    
+                elif service.service == SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES:
+
+                    # zeroconf discover devices service.
+                    timeout = service.data.get("timeout")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_zeroconf_discover_devices, timeout)
+                    
                 else:
                     
                     raise HomeAssistantError("Unrecognized service identifier '%s' in method service_handle_spotify_serviceresponse" % service.service)
@@ -1640,6 +1686,33 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             service_handle_spotify_command,
             schema=SERVICE_SPOTIFY_UNFOLLOW_USERS_SCHEMA,
             supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO, SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_ZEROCONF_DEVICE_RESETUSERS, SERVICE_SPOTIFY_ZEROCONF_DEVICE_RESETUSERS_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_ZEROCONF_DEVICE_RESETUSERS,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_ZEROCONF_DEVICE_RESETUSERS_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES, SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
         )
 
         # indicate success.

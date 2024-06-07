@@ -6,6 +6,14 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.21 ] - 2024/06/07
+
+  * Fixed a bug that caused player state to return an error every 30 seconds when playing the Spotify DJ playlist.  As the Spotify Web API does not support retrieving the DJ playlist (`spotify:playlist:37i9dQZF1EYkqdzj48dyYq`), it simply returns a manually built representation of the Spotify DJ playlist with limited properties populated (uri, id, name, description, etc).  Note that Spotify DJ support is not supported (as of 2024/06/07) by the Spotify Web API (this includes starting play, retrieving playlist details, retrieving playlist items, etc).
+  * Added service `zeroconf_discover_devices` to discover Spotify Connect devices on the local network via the ZeroConf (aka MDNS) service, and return details about each device. 
+  * Added service `zeroconf_device_getinfo` to retrieve Spotify Connect device information from the Spotify Zeroconf API `getInfo` endpoint.
+  * Added service `zeroconf_device_resetusers` to reset users for a Spotify Connect device by calling the Spotify Zeroconf API `resetUsers` endpoint.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.44.
+
 ###### [ 1.0.20 ] - 2024/06/06
 
   * Changed all `media_player.schedule_update_ha_state(force_refresh=True)` calls to `schedule_update_ha_state(force_refresh=False)` to improve performance.  Suggested by @bdraco, along with an explanation of why.  Thanks @bdraco!

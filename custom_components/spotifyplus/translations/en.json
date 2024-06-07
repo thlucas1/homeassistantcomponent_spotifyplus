@@ -1081,6 +1081,48 @@
           "description": "A comma-separated list of Spotify user IDs (e.g. `smedjan,3758dfdsfjk435hjk6k79lm0n3c4`).  A maximum of 50 IDs can be sent in one request."
         }
       }
+    },
+    "zeroconf_device_getinfo": {
+      "name": "ZeroConf Device GetInformation",
+      "description": "Retrieve Spotify Connect device information from the Spotify Zeroconf API `getInfo` endpoint.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the ZeroConf service."
+        },
+        "action_url": {
+          "name": "Action URL",
+          "description": "The Zeroconf action url to issue the request to (e.g. http://192.168.1.80:8200/zc?action=getInfo)."
+        }
+      }
+    },
+    "zeroconf_device_resetUsers": {
+      "name": "ZeroConf Device ResetUsers",
+      "description": "Reset users for a Spotify Connect device by calling the Spotify Zeroconf API `resetUsers` endpoint.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the ZeroConf service."
+        },
+        "action_url": {
+          "name": "Action URL",
+          "description": "The Zeroconf action url to issue the request to (e.g. http://192.168.1.80:8200/zc?action=resetUsers)."
+        }
+      }
+    },
+    "zeroconf_discover_devices": {
+      "name": "ZeroConf Discover Devices",
+      "description": "Discover Spotify Connect devices on the local network via the ZeroConf (aka MDNS) service, and return details about each device.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the ZeroConf service."
+        },
+        "timeout": {
+          "name": "Timeout",
+          "description": "Maximum amount of time to wait (in seconds) for the discovery to complete. Default is 5, range is 1 thru 10."
+        }
+      }
     }
   }
 }

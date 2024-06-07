@@ -1894,3 +1894,70 @@ unfollow_users:
       required: true
       selector:
         text:
+
+zeroconf_device_getinfo:
+  name: ZeroConf Device GetInformation
+  description: Retrieve Spotify Connect device information from the Spotify Zeroconf API `getInfo` endpoint.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the ZeroConf service.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    action_url:
+      name: Action URL
+      description: The Zeroconf action url to issue the request to (e.g. http://192.168.1.80:8200/zc?action=getInfo).
+      example: "http://192.168.1.80:8200/zc?action=getInfo"
+      required: true
+      selector:
+        text:
+
+zeroconf_device_resetusers:
+  name: ZeroConf Device ResetUsers
+  description: Reset users for a Spotify Connect device by calling the Spotify Zeroconf API `resetUsers` endpoint.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the ZeroConf service.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    action_url:
+      name: Action URL
+      description: The Zeroconf action url to issue the request to (e.g. http://192.168.1.80:8200/zc?action=resetUsers).
+      example: "http://192.168.1.80:8200/zc?action=resetUsers"
+      required: true
+      selector:
+        text:
+
+zeroconf_discover_devices:
+  name: ZeroConf Discover Devices
+  description: Discover Spotify Connect devices on the local network via the ZeroConf (aka MDNS) service, and return details about each device. 
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the ZeroConf service.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    timeout:
+      name: Timeout
+      description: Maximum amount of time to wait (in seconds) for the discovery to complete.  Default is 5, range is 1 thru 10.
+      example: 5
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 10
+          step: 1
+          mode: slider

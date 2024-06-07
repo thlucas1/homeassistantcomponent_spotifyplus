@@ -15,7 +15,7 @@ from datetime import timedelta, datetime
 from typing import Any, Callable, Concatenate, ParamSpec, TypeVar, Tuple
 from yarl import URL
 
-from spotifywebapipython import SpotifyClient, SpotifyApiError, SpotifyWebApiError
+from spotifywebapipython import SpotifyClient, SpotifyDiscovery, SpotifyApiError, SpotifyWebApiError
 from spotifywebapipython.models import (
     Album,
     AlbumPageSaved,
@@ -39,7 +39,9 @@ from spotifywebapipython.models import (
     Track,
     TrackPage,
     TrackPageSaved,
-    UserProfile
+    UserProfile,
+    ZeroconfGetInfo,
+    ZeroconfResponse
 )
 
 from homeassistant.components.media_player import (
@@ -4262,6 +4264,160 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # unfollow user(s).
             _logsi.LogVerbose("Removing items(s) from Spotify Users Favorites")
             self.data.spotifyClient.UnfollowUsers(ids)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_zeroconf_device_getinfo(self, 
+                                                actionUrl:int=5, 
+                                                ) -> dict:
+        """
+        Retrieve Spotify Connect device information from the Spotify Zeroconf API `getInfo` endpoint.
+
+        Args:
+            actionUrl (str):  
+                The Zeroconf action url to issue the request to.  
+                Example: `http://192.168.1.80:8200/zc?action=getInfo`
+
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A `ZeroconfGetInfo` object that contains the response.
+        """
+        apiMethodName:str = 'service_spotify_zeroconf_getinfo'
+        apiMethodParms:SIMethodParmListContext = None
+        result:ZeroconfGetInfo = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("actionUrl", actionUrl)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Connect ZeroConf Device GetInformation Service", apiMethodParms)
+                
+            # get Spotify zeroconf api action "getInfo" response.
+            result = self.data.spotifyClient.ZeroconfGetInformation(actionUrl)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_zeroconf_device_resetusers(self, 
+                                                   actionUrl:int=5, 
+                                                   ) -> dict:
+        """
+        Reset users for a Spotify Connect device by calling the Spotify Zeroconf API `resetUsers` endpoint.
+
+        Args:
+            actionUrl (str):  
+                The Zeroconf action url to issue the request to.  
+                Example: `http://192.168.1.80:8200/zc?action=resetUsers`
+
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A `ZeroconfResponse` object that contains the response.
+        """
+        apiMethodName:str = 'service_spotify_zeroconf_getinfo'
+        apiMethodParms:SIMethodParmListContext = None
+        result:ZeroconfResponse = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("actionUrl", actionUrl)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Connect ZeroConf Device ResetUsers Service", apiMethodParms)
+                
+            # get Spotify zeroconf api action "resetUsers" response.
+            result = self.data.spotifyClient.ZeroconfResetUsers(actionUrl)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_zeroconf_discover_devices(self, 
+                                                  timeout:int=5, 
+                                                  ) -> dict:
+        """
+        Discover Spotify Connect devices on the local network via the 
+        ZeroConf (aka MDNS) service, and return details about each device. 
+
+        Args:
+            timeout (int):
+                Maximum amount of time to wait (in seconds) for the 
+                discovery to complete.  
+                Default is 5 seconds.
+
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: An array of `ZeroconfDiscoveryResult` objects of matching results.
+        """
+        apiMethodName:str = 'service_spotify_zeroconf_discover_devices'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("timeout", timeout)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify ZeroConf Discover Devices Service", apiMethodParms)
+                
+            # create a new instance of the discovery class.
+            # do not verify device connections;
+            # do not print device details to the console as they are discovered.
+            discovery:SpotifyDiscovery = SpotifyDiscovery(self.data.spotifyClient, False, printToConsole=False)
+
+            # discover Spotify Connect devices on the network, waiting up to the specified
+            # time in seconds for all devices to be discovered.
+            discovery.DiscoverDevices(timeout)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": [ item.ToDictionary() for item in discovery.DiscoveryResults ]
+            }
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
