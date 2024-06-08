@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.22 ] - 2024/06/07
+
+  * Re-updated underlying `spotifywebapiPython` package requirement to version 1.0.44.
+
 ###### [ 1.0.21 ] - 2024/06/07
 
   * Fixed a bug that caused player state to return an error every 30 seconds when playing the Spotify DJ playlist.  As the Spotify Web API does not support retrieving the DJ playlist (`spotify:playlist:37i9dQZF1EYkqdzj48dyYq`), it simply returns a manually built representation of the Spotify DJ playlist with limited properties populated (uri, id, name, description, etc).  Note that Spotify DJ support is not supported (as of 2024/06/07) by the Spotify Web API (this includes starting play, retrieving playlist details, retrieving playlist items, etc).
