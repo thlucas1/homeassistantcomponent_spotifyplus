@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.24 ] - 2024/06/07
+
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.46.
+  * Added the following requirements to manifest.json so that any dependency `ResolutionImpossible` errors can be quickly identified: 'oauthlib>=3.2.2', 'platformdirs>=4.1.0', 'requests>=2.31.0', 'requests_oauthlib>=1.3.1', 'zeroconf>=0.132.2'.  This bug bit me in the HA 2024.6.1 release when the HA devs upgraded the `requests` dependency to 2.32.3!  The System log was showing that the `spotifywebapiPython` library was the invalid dependency, but it was not - the REAL culprit was the `requests` dependency!
+
 ###### [ 1.0.23 ] - 2024/06/07
 
   * Re-updated underlying `spotifywebapiPython` package requirement to version 1.0.45.
