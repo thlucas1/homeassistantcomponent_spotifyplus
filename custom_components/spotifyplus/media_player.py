@@ -434,6 +434,12 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         """ Track number of current playing media, music track only. """
         return self._attr_media_track
 
+    @property
+    def media_playlist_uri(self):
+        """ Uri of Playlist currently playing. """
+        if self._playlist is not None:
+            return self._playlist.Uri
+        return None
 
     @property
     def media_playlist(self):
