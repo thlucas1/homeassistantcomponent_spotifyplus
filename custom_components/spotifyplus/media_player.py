@@ -16,6 +16,7 @@ from typing import Any, Callable, Concatenate, ParamSpec, TypeVar, Tuple
 from yarl import URL
 
 from spotifywebapipython import SpotifyClient, SpotifyDiscovery, SpotifyApiError, SpotifyWebApiError
+from spotifywebapipython.zeroconfapi import *
 from spotifywebapipython.models import (
     Album,
     AlbumPageSaved,
@@ -39,9 +40,7 @@ from spotifywebapipython.models import (
     Track,
     TrackPage,
     TrackPageSaved,
-    UserProfile,
-    ZeroconfGetInfo,
-    ZeroconfResponse
+    UserProfile
 )
 
 from homeassistant.components.media_player import (
@@ -4278,16 +4277,253 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_zeroconf_device_getinfo(self, 
-                                                actionUrl:int=5, 
-                                                ) -> dict:
+    def service_spotify_zeroconf_device_connect(
+            self, 
+            username:str,
+            password:str,
+            hostIpv4Address:str,
+            hostIpPort:str,
+            cpath:str,
+            version:str='1.0',
+            useSSL:bool=False,
+            preDisconnect:bool=False,
+            verifyDeviceListEntry:bool=False,
+        ) -> dict:
         """
-        Retrieve Spotify Connect device information from the Spotify Zeroconf API `getInfo` endpoint.
+        Calls the `addUser` Spotify Zeroconf API endpoint to issue a call to SpConnectionLoginBlob.  If successful,
+        the associated device id is added to the Spotify Connect active device list for the specified user account.
+        
+        Args:
+            username (str):
+                Spotify Connect user name to login with.  
+                This MUST match the account name (or one of them) that was used to configure Spotify Connect 
+                on the manufacturer device.
+            password (str):
+                Spotify Connect user password to login with.  
+            hostIpv4Address (str):
+                IPV4 address (as a string) at which the Spotify Connect Zeroconf API can be reached
+                on the Spotify Connect device (e.g. "192.168.1.81").
+            hostIpPort (int):
+                Port number (as an integer) at which the Spotify Connect Zeroconf API can be reached
+                on the Spotify Connect device (e.g. "8200").
+            cpath (str):
+                Spotify Connect Zeroconf API CPath property value (e.g. "/zc").
+            version (str):
+                Spotify Connect Zeroconf API version number that the device supports (e.g. "2.10.0").  
+                Default is '1.0'.
+            useSSL (bool):
+                True if the host device utilizes HTTPS Secure Sockets Layer (SSL) support; 
+                otherwise, False to utilize HTTP.  
+                Default is False (HTTP).
+            preDisconnect (bool):
+                True if a Disconnect should be made prior to the Connect call.  This will ensure that the
+                active user is logged out, which must be done if switching user accounts;
+                otherwise, False to not issue a Disconnect call.
+                Default is False.
+            verifyDeviceListEntry (bool):
+                True to ensure that the device id is present in the Spotify Connect device list before
+                issuing a call to Connect; otherwise, False to always call Connect to add the device.
+                Default is False.
+
+        The login (on the device) is performed asynchronously, so the return result only indicates whether the library 
+        is able to perform the login attempt.  You should issue a call to the Spotify Web API `Get Available Devices` 
+        endpoint to check the current device list to ensure that the device id was successfully added or not.
+
+        Use the `verifyDeviceListEntry` argument to check if the device is currently listed in the Spotify Connect
+        device list.  If True, a `GetInformation` call is issued to get the device id, and a `GetPlayerDevice` call
+        is made to check if the device id is in the Spotify Connect device list.  If the device id is found in the 
+        Spotify Connect device list then the Connect command is not issued; if the device id is NOT found in the Spotify 
+        Connect device list then the Connect command is issued
+        
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A `ZeroconfResponse` object that contains the response.
+        """
+        apiMethodName:str = 'service_spotify_zeroconf_device_connect'
+        apiMethodParms:SIMethodParmListContext = None
+        result:ZeroconfResponse = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("hostIpv4Address", hostIpv4Address)
+            apiMethodParms.AppendKeyValue("hostIpPort", hostIpPort)
+            apiMethodParms.AppendKeyValue("cpath", cpath)
+            apiMethodParms.AppendKeyValue("version", version)
+            apiMethodParms.AppendKeyValue("useSSL", useSSL)
+            apiMethodParms.AppendKeyValue("username", username)
+            apiMethodParms.AppendKeyValue("password", password)
+            apiMethodParms.AppendKeyValue("preDisconnect", preDisconnect)
+            apiMethodParms.AppendKeyValue("verifyDeviceListEntry", verifyDeviceListEntry)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Connect ZeroConf Device Connect Service", apiMethodParms)
+                
+            # create Spotify Zeroconf API connection object for the device.
+            zconn:ZeroconfConnect = ZeroconfConnect(hostIpv4Address, hostIpPort, cpath, version, useSSL)
+            
+            # are we verifying if the device id is already in the Spotify Connect device list?
+            if (verifyDeviceListEntry):
+
+                # trace.
+                _logsi.LogVerbose("'%s': Checking current Spotify Connect device list for Device ID (%s) ..." % (self.name, zconn.Uri))
+                           
+                # get the device id of the device.
+                info:ZeroconfGetInfo = zconn.GetInformation()
+                
+                # is the device in the current Spotify Connect device list?  if so, then we are done.
+                playerDevice:PlayerDevice = self.data.spotifyClient.GetPlayerDevice(info.DeviceId, True)
+                if playerDevice is not None:
+                    _logsi.LogVerbose("'%s': Device ID '%s' (%s) is already in the Spotify Connect device list; nothing to do" % (self.name, playerDevice.Id, playerDevice.Name))
+
+                    # return the (partial) user profile that retrieved the result, as well as the result itself.
+                    return {
+                        "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                        "result": info.ToDictionary()
+                    }
+
+                # trace.
+                _logsi.LogVerbose("'%s': Device ID '%s' (%s) was not found in the Spotify Connect device list; device will be activated" % (self.name, info.DeviceId, info.RemoteName))
+            
+            # disconnect the device from Spotify Connect.
+            if (preDisconnect == True):
+                result = zconn.Disconnect()
+
+            # connect the device to Spotify Connect, which should make it known to any available
+            # Spotify Connect player clients.
+            result = zconn.Connect(username, password)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyZeroconfApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except Exception as ex:
+            _logsi.LogException("'%s': MediaPlayer %s exception: %s" % (self.name, apiMethodName, str(ex)), ex, logToSystemLogger=False)
+            raise HomeAssistantError(str(ex)) from ex
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_zeroconf_device_disconnect(
+            self, 
+            hostIpv4Address:str,
+            hostIpPort:str,
+            cpath:str,
+            version:str='1.0',
+            useSSL:bool=False
+        ) -> dict:
+        """
+        Calls the `resetUsers` Spotify Zeroconf API endpoint to issue a call to SpConnectionLogout.
+        The currently logged in user (if any) will be logged out of Spotify Connect, and the 
+        device id removed from the active Spotify Connect device list.        
+        
+        Args:
+            hostIpv4Address (str):
+                IPV4 address (as a string) at which the Spotify Connect Zeroconf API can be reached
+                on the Spotify Connect device (e.g. "192.168.1.81").
+            hostIpPort (int):
+                Port number (as an integer) at which the Spotify Connect Zeroconf API can be reached
+                on the Spotify Connect device (e.g. "8200").
+            cpath (str):
+                Spotify Connect Zeroconf API CPath property value (e.g. "/zc").
+            version (str):
+                Spotify Connect Zeroconf API version number that the device supports (e.g. "2.10.0").  
+                Default is '1.0'.
+            useSSL (bool):
+                True if the host device utilizes HTTPS Secure Sockets Layer (SSL) support; 
+                otherwise, False to utilize HTTP.  
+                Default is False (HTTP).
+
+        The URI value consists of an IP Address, port, CPath, and version value that are used to send
+        requests to / receive responses from a headless Spotify Connect device.  These values can be
+        obtained from a Zeroconf discovery process.
+
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A `ZeroconfResponse` object that contains the response.
+        """
+        apiMethodName:str = 'service_spotify_zeroconf_device_disconnect'
+        apiMethodParms:SIMethodParmListContext = None
+        result:ZeroconfResponse = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("hostIpv4Address", hostIpv4Address)
+            apiMethodParms.AppendKeyValue("hostIpPort", hostIpPort)
+            apiMethodParms.AppendKeyValue("cpath", cpath)
+            apiMethodParms.AppendKeyValue("version", version)
+            apiMethodParms.AppendKeyValue("useSSL", useSSL)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Connect ZeroConf Device Disconnect Service", apiMethodParms)
+                
+            # create Spotify Zeroconf API connection object for the device.
+            zconn:ZeroconfConnect = ZeroconfConnect(hostIpv4Address, hostIpPort, cpath, version, useSSL)
+            
+            # disconnect the device from Spotify Connect.
+            result = zconn.Disconnect()
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyZeroconfApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except Exception as ex:
+            _logsi.LogException("'%s': MediaPlayer %s exception: %s" % (self.name, apiMethodName, str(ex)), ex, logToSystemLogger=False)
+            raise HomeAssistantError(str(ex)) from ex
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_zeroconf_device_getinfo(
+            self, 
+            hostIpv4Address:str,
+            hostIpPort:str,
+            cpath:str,
+            version:str='1.0',
+            useSSL:bool=False
+            ) -> dict:
+        """
+        Calls the `getInfo` Spotify Zeroconf API endpoint to return information about the device.
 
         Args:
-            actionUrl (str):  
-                The Zeroconf action url to issue the request to.  
-                Example: `http://192.168.1.80:8200/zc?action=getInfo`
+            hostIpv4Address (str):
+                IPV4 address (as a string) at which the Spotify Connect Zeroconf API can be reached
+                on the Spotify Connect device (e.g. "192.168.1.81").
+            hostIpPort (int):
+                Port number (as an integer) at which the Spotify Connect Zeroconf API can be reached
+                on the Spotify Connect device (e.g. "8200").
+            cpath (str):
+                Spotify Connect Zeroconf API CPath property value (e.g. "/zc").
+            version (str):
+                Spotify Connect Zeroconf API version number that the device supports (e.g. "2.10.0").  
+                Default is '1.0'.
+            useSSL (bool):
+                True if the host device utilizes HTTPS Secure Sockets Layer (SSL) support; 
+                otherwise, False to utilize HTTP.  
+                Default is False (HTTP).
 
         Returns:
             A dictionary that contains the following keys:
@@ -4302,12 +4538,19 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
             # trace.
             apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
-            apiMethodParms.AppendKeyValue("actionUrl", actionUrl)
-            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Connect ZeroConf Device GetInformation Service", apiMethodParms)
+            apiMethodParms.AppendKeyValue("hostIpv4Address", hostIpv4Address)
+            apiMethodParms.AppendKeyValue("hostIpPort", hostIpPort)
+            apiMethodParms.AppendKeyValue("cpath", cpath)
+            apiMethodParms.AppendKeyValue("version", version)
+            apiMethodParms.AppendKeyValue("useSSL", useSSL)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Connect ZeroConf Device Get Information Service", apiMethodParms)
                 
-            # get Spotify zeroconf api action "getInfo" response.
-            result = self.data.spotifyClient.ZeroconfGetInformation(actionUrl)
+            # create Spotify Zeroconf API connection object for the device.
+            zconn:ZeroconfConnect = ZeroconfConnect(hostIpv4Address, hostIpPort, cpath, version, useSSL)
 
+            # get Spotify Connect device information.
+            result = zconn.GetInformation()
+                
             # return the (partial) user profile that retrieved the result, as well as the result itself.
             return {
                 "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
@@ -4318,57 +4561,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
             raise HomeAssistantError(ex.Message)
-        except SpotifyWebApiError as ex:
+        except SpotifyZeroconfApiError as ex:
             raise HomeAssistantError(ex.Message)
-        
-        finally:
-        
-            # trace.
-            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
-
-
-    def service_spotify_zeroconf_device_resetusers(self, 
-                                                   actionUrl:int=5, 
-                                                   ) -> dict:
-        """
-        Reset users for a Spotify Connect device by calling the Spotify Zeroconf API `resetUsers` endpoint.
-
-        Args:
-            actionUrl (str):  
-                The Zeroconf action url to issue the request to.  
-                Example: `http://192.168.1.80:8200/zc?action=resetUsers`
-
-        Returns:
-            A dictionary that contains the following keys:
-            - user_profile: A (partial) user profile that retrieved the result.
-            - result: A `ZeroconfResponse` object that contains the response.
-        """
-        apiMethodName:str = 'service_spotify_zeroconf_getinfo'
-        apiMethodParms:SIMethodParmListContext = None
-        result:ZeroconfResponse = None
-
-        try:
-
-            # trace.
-            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
-            apiMethodParms.AppendKeyValue("actionUrl", actionUrl)
-            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Connect ZeroConf Device ResetUsers Service", apiMethodParms)
-                
-            # get Spotify zeroconf api action "resetUsers" response.
-            result = self.data.spotifyClient.ZeroconfResetUsers(actionUrl)
-
-            # return the (partial) user profile that retrieved the result, as well as the result itself.
-            return {
-                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
-                "result": result.ToDictionary()
-            }
-
-        # the following exceptions have already been logged, so we just need to
-        # pass them back to HA for display in the log (or service UI).
-        except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
-        except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+        except Exception as ex:
+            _logsi.LogException("'%s': MediaPlayer %s exception: %s" % (self.name, apiMethodName, str(ex)), ex, logToSystemLogger=False)
+            raise HomeAssistantError(str(ex)) from ex
         
         finally:
         
@@ -4425,6 +4622,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             raise HomeAssistantError(ex.Message)
         except SpotifyWebApiError as ex:
             raise HomeAssistantError(ex.Message)
+        except Exception as ex:
+            _logsi.LogException("'%s': MediaPlayer %s exception: %s" % (self.name, apiMethodName, str(ex)), ex, logToSystemLogger=False)
+            raise HomeAssistantError(str(ex)) from ex
         
         finally:
         

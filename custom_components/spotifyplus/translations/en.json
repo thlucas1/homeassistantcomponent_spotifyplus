@@ -1082,31 +1082,109 @@
         }
       }
     },
-    "zeroconf_device_getinfo": {
-      "name": "ZeroConf Device GetInformation",
-      "description": "Retrieve Spotify Connect device information from the Spotify Zeroconf API `getInfo` endpoint.",
+    "zeroconf_device_connect": {
+      "name": "ZeroConf Device Connect",
+      "description": "Calls the `addUser` Spotify Zeroconf API endpoint to issue a call to SpConnectionLoginBlob.  If successful, the associated device id is added to the Spotify Connect active device list for the specified user account.  This will also issue a `resetUsers` call prior to the `addUser` call.",
       "fields": {
         "entity_id": {
           "name": "Entity ID",
-          "description": "Entity ID of the SpotifyPlus device that will make the request to the ZeroConf service."
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify ZeroConf API service."
         },
-        "action_url": {
-          "name": "Action URL",
-          "description": "The Zeroconf action url to issue the request to (e.g. http://192.168.1.80:8200/zc?action=getInfo)."
+        "host_ipv4_address": {
+          "name": "Device IPV4 Address",
+          "description": "IPV4 address at which the Spotify Connect Zeroconf API can be reached on the Spotify Connect device (e.g. '192.168.1.81')."
+        },
+        "host_ip_port": {
+          "name": "Device IP Port",
+          "description": "Port number at which the Spotify Connect Zeroconf API can be reached on the Spotify Connect device (e.g. 8200)."
+        },
+        "cpath": {
+          "name": "CPath Identifier",
+          "description": "Spotify Connect Zeroconf API CPath property value (e.g. '/zc')."
+        },
+        "version": {
+          "name": "Version Indicator",
+          "description": "Spotify Connect Zeroconf API version number that the device supports (e.g. '1.0')."
+        },
+        "use_ssl": {
+          "name": "Use SSL?",
+          "description": "Spotify Connect Zeroconf API version number that the device supports (e.g. False)."
+        },
+        "username": {
+          "name": "Spotify User Name",
+          "description": "Spotify user name to login with; this can be a standard username (e.g. 'yourusername@mail.com') or a canonical userid (e.g. '31l77y75hfnhk79f7gk6jkk878mg').  This MUST match the account name (or one of them) that was used to configure Spotify Connect on the manufacturer device."
+        },
+        "password": {
+          "name": "Spotify Password",
+          "description": "Spotify user password to login with."
+        },
+        "pre_disconnect": {
+          "name": "Pre Disconnect?",
+          "description": "True if a Disconnect should be made prior to the Connect call.  This will ensure that the active user is logged out, which must be done if switching user accounts; otherwise, False to not issue a Disconnect call.  Default is False."
+        },
+        "verify_device_list_entry": {
+          "name": "Verify Device List Entry?",
+          "description": "True to ensure that the device id is present in the Spotify Connect device list before issuing a call to Connect; Connect will not be called if the device id is already in the list; otherwise, False to always call Connect to add the device.  Default is False."
         }
       }
     },
-    "zeroconf_device_resetUsers": {
-      "name": "ZeroConf Device ResetUsers",
-      "description": "Reset users for a Spotify Connect device by calling the Spotify Zeroconf API `resetUsers` endpoint.",
+    "zeroconf_device_disconnect": {
+      "name": "ZeroConf Device Disconnect",
+      "description": "Calls the `resetUsers` Spotify Zeroconf API endpoint to issue a call to SpConnectionLogout. The currently logged in user (if any) will be logged out of Spotify Connect, and the device id removed from the active Spotify Connect device list.",
       "fields": {
         "entity_id": {
           "name": "Entity ID",
-          "description": "Entity ID of the SpotifyPlus device that will make the request to the ZeroConf service."
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify ZeroConf API service."
         },
-        "action_url": {
-          "name": "Action URL",
-          "description": "The Zeroconf action url to issue the request to (e.g. http://192.168.1.80:8200/zc?action=resetUsers)."
+        "host_ipv4_address": {
+          "name": "Device IPV4 Address",
+          "description": "IPV4 address at which the Spotify Connect Zeroconf API can be reached on the Spotify Connect device (e.g. '192.168.1.81')."
+        },
+        "host_ip_port": {
+          "name": "Device IP Port",
+          "description": "Port number at which the Spotify Connect Zeroconf API can be reached on the Spotify Connect device (e.g. 8200)."
+        },
+        "cpath": {
+          "name": "CPath Identifier",
+          "description": "Spotify Connect Zeroconf API CPath property value (e.g. '/zc')."
+        },
+        "version": {
+          "name": "Version Indicator",
+          "description": "Spotify Connect Zeroconf API version number that the device supports (e.g. '1.0')."
+        },
+        "use_ssl": {
+          "name": "Use SSL?",
+          "description": "Spotify Connect Zeroconf API version number that the device supports (e.g. False)."
+        }
+      }
+    },
+    "zeroconf_device_getinfo": {
+      "name": "ZeroConf Device GetInformation",
+      "description": "Calls the `getInfo` Spotify Zeroconf API endpoint to return information about the device.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify ZeroConf API service."
+        },
+        "host_ipv4_address": {
+          "name": "Device IPV4 Address",
+          "description": "IPV4 address at which the Spotify Connect Zeroconf API can be reached on the Spotify Connect device (e.g. '192.168.1.81')."
+        },
+        "host_ip_port": {
+          "name": "Device IP Port",
+          "description": "Port number at which the Spotify Connect Zeroconf API can be reached on the Spotify Connect device (e.g. 8200)."
+        },
+        "cpath": {
+          "name": "CPath Identifier",
+          "description": "Spotify Connect Zeroconf API CPath property value (e.g. '/zc')."
+        },
+        "version": {
+          "name": "Version Indicator",
+          "description": "Spotify Connect Zeroconf API version number that the device supports (e.g. '1.0')."
+        },
+        "use_ssl": {
+          "name": "Use SSL?",
+          "description": "Spotify Connect Zeroconf API version number that the device supports (e.g. False)."
         }
       }
     },

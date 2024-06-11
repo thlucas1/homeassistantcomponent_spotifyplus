@@ -129,8 +129,9 @@ SERVICE_SPOTIFY_SEARCH_TRACKS:str = 'search_tracks'
 SERVICE_SPOTIFY_UNFOLLOW_ARTISTS:str = 'unfollow_artists'
 SERVICE_SPOTIFY_UNFOLLOW_PLAYLIST:str = 'unfollow_playlist'
 SERVICE_SPOTIFY_UNFOLLOW_USERS:str = 'unfollow_users'
+SERVICE_SPOTIFY_ZEROCONF_DEVICE_CONNECT:str = 'zeroconf_device_connect'
+SERVICE_SPOTIFY_ZEROCONF_DEVICE_DISCONNECT:str = 'zeroconf_device_disconnect'
 SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO:str = 'zeroconf_device_getinfo'
-SERVICE_SPOTIFY_ZEROCONF_DEVICE_RESETUSERS:str = 'zeroconf_device_resetusers'
 SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES:str = 'zeroconf_discover_devices'
 
 
@@ -572,17 +573,40 @@ SERVICE_SPOTIFY_UNFOLLOW_USERS_SCHEMA = vol.Schema(
     }
 )
 
-SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO_SCHEMA = vol.Schema(
+SERVICE_SPOTIFY_ZEROCONF_DEVICE_CONNECT_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Required("action_url"): cv.string,
+        vol.Required("host_ipv4_address"): cv.string,
+        vol.Required("host_ip_port", default=8200): vol.All(vol.Range(min=1,max=65535)),
+        vol.Required("cpath"): cv.string,
+        vol.Optional("version"): cv.string,
+        vol.Optional("use_ssl"): cv.boolean,
+        vol.Required("username"): cv.string,
+        vol.Required("password"): cv.string,
+        vol.Optional("pre_disconnect"): cv.boolean,
+        vol.Optional("verify_device_list_entry"): cv.boolean,
     }
 )
 
-SERVICE_SPOTIFY_ZEROCONF_DEVICE_RESETUSERS_SCHEMA = vol.Schema(
+SERVICE_SPOTIFY_ZEROCONF_DEVICE_DISCONNECT_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Required("action_url"): cv.string,
+        vol.Required("host_ipv4_address"): cv.string,
+        vol.Required("host_ip_port", default=8200): vol.All(vol.Range(min=1,max=65535)),
+        vol.Required("cpath"): cv.string,
+        vol.Optional("version"): cv.string,
+        vol.Optional("use_ssl"): cv.boolean,
+    }
+)
+
+SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("host_ipv4_address"): cv.string,
+        vol.Required("host_ip_port", default=8200): vol.All(vol.Range(min=1,max=65535)),
+        vol.Required("cpath"): cv.string,
+        vol.Optional("version"): cv.string,
+        vol.Optional("use_ssl"): cv.boolean,
     }
 )
 
@@ -1171,19 +1195,42 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_search_tracks, criteria, limit, offset, market, include_external, limit_total)
                     
+                elif service.service == SERVICE_SPOTIFY_ZEROCONF_DEVICE_CONNECT:
+
+                    # spotify connect zeroconf device connect.
+                    host_ipv4_address = service.data.get("host_ipv4_address")
+                    host_ip_port = service.data.get("host_ip_port")
+                    cpath = service.data.get("cpath")
+                    version = service.data.get("version")
+                    use_ssl = service.data.get("use_ssl")
+                    username = service.data.get("username")
+                    password = service.data.get("password")
+                    pre_disconnect = service.data.get("pre_disconnect")
+                    verify_device_list_entry = service.data.get("verify_device_list_entry")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_zeroconf_device_connect, username, password, host_ipv4_address, host_ip_port, cpath, version, use_ssl, pre_disconnect, verify_device_list_entry)
+                    
+                elif service.service == SERVICE_SPOTIFY_ZEROCONF_DEVICE_DISCONNECT:
+
+                    # spotify connect zeroconf device disconnect.
+                    host_ipv4_address = service.data.get("host_ipv4_address")
+                    host_ip_port = service.data.get("host_ip_port")
+                    cpath = service.data.get("cpath")
+                    version = service.data.get("version")
+                    use_ssl = service.data.get("use_ssl")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_zeroconf_device_disconnect, host_ipv4_address, host_ip_port, cpath, version, use_ssl)
+                    
                 elif service.service == SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO:
 
-                    # get zeroconf spotify connect device information.
-                    action_url = service.data.get("action_url")
+                    # spotify connect zeroconf device get information.
+                    host_ipv4_address = service.data.get("host_ipv4_address")
+                    host_ip_port = service.data.get("host_ip_port")
+                    cpath = service.data.get("cpath")
+                    version = service.data.get("version")
+                    use_ssl = service.data.get("use_ssl")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_zeroconf_device_getinfo, action_url)
-                    
-                elif service.service == SERVICE_SPOTIFY_ZEROCONF_DEVICE_RESETUSERS:
-
-                    # zeroconf spotify connect device reset users.
-                    action_url = service.data.get("action_url")
-                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_zeroconf_device_resetusers, action_url)
+                    response = await hass.async_add_executor_job(entity.service_spotify_zeroconf_device_getinfo, host_ipv4_address, host_ip_port, cpath, version, use_ssl)
                     
                 elif service.service == SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES:
 
@@ -1688,21 +1735,30 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             supports_response=SupportsResponse.NONE,
         )
 
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_ZEROCONF_DEVICE_CONNECT, SERVICE_SPOTIFY_ZEROCONF_DEVICE_CONNECT_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_ZEROCONF_DEVICE_CONNECT,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_ZEROCONF_DEVICE_CONNECT_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_ZEROCONF_DEVICE_DISCONNECT, SERVICE_SPOTIFY_ZEROCONF_DEVICE_DISCONNECT_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_ZEROCONF_DEVICE_DISCONNECT,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_ZEROCONF_DEVICE_DISCONNECT_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
         _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO, SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO_SCHEMA)
         hass.services.async_register(
             DOMAIN,
             SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO,
             service_handle_spotify_serviceresponse,
             schema=SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO_SCHEMA,
-            supports_response=SupportsResponse.ONLY,
-        )
-
-        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_ZEROCONF_DEVICE_RESETUSERS, SERVICE_SPOTIFY_ZEROCONF_DEVICE_RESETUSERS_SCHEMA)
-        hass.services.async_register(
-            DOMAIN,
-            SERVICE_SPOTIFY_ZEROCONF_DEVICE_RESETUSERS,
-            service_handle_spotify_serviceresponse,
-            schema=SERVICE_SPOTIFY_ZEROCONF_DEVICE_RESETUSERS_SCHEMA,
             supports_response=SupportsResponse.ONLY,
         )
 

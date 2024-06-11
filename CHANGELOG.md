@@ -7,6 +7,17 @@ Change are listed in reverse chronological order (newest to oldest).
 <span class="changelog">
 
 
+###### [ 1.0.26 ] - 2024/06/10
+
+  * Added service `zeroconf_device_connect` that calls the `addUser` Spotify Zeroconf API endpoint to issue a call to SpConnectionLoginBlob.  If successful, the associated device id is added to the Spotify Connect active device list for the specified user account.
+  * Added service `zeroconf_device_disconnect` that calls the `resetUsers` Spotify Zeroconf API endpoint to issue a call to SpConnectionLogout.  The currently logged in user (if any) will be logged out of Spotify Connect, and the device id removed from the active Spotify Connect device list.
+  * Removed service `zeroconf_device_resetusers` and replaced it with `zeroconf_device_disconnect`.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.48.
+
+###### [ 1.0.25 ] - 2024/06/08
+
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.47.
+
 ###### [ 1.0.25 ] - 2024/06/08
 
   * Fixed a bug that was causing `ValueError: list.remove(x): x not in list` exceptions to be raised whenever the user changed configuration options for a service.  This started appearing with the HA 2024.6.1 release.
