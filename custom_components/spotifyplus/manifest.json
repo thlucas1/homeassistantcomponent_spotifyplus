@@ -18,6 +18,6 @@
     "urllib3>=1.21.1,<1.27",
     "zeroconf>=0.132.2"
   ],
-  "version": "1.0.26",
+  "version": "1.0.27",
   "zeroconf": [ "_spotify-connect._tcp.local." ]
 }

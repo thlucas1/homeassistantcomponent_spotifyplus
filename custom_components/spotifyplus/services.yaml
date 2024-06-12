@@ -1940,7 +1940,7 @@ zeroconf_device_connect:
         text:
     use_ssl:
       name: Use SSL?
-      description: Spotify Connect Zeroconf API version number that the device supports (e.g. False).
+      description: True if the host device utilizes HTTPS Secure Sockets Layer (SSL) support; otherwise, False to utilize HTTP.  Default is False (HTTP).
       example: "False"
       required: false
       selector:

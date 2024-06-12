@@ -361,6 +361,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             if self._playerState.Device is not None:
                 attributes[ATTR_SPOTIFYPLUS_DEVICE_ID] = self._playerState.Device.Id
                 attributes[ATTR_SPOTIFYPLUS_DEVICE_NAME] = self._playerState.Device.Name
+                
+        # add currently active playlist information.
+        if self._playlist is not None:
+            attributes['media_playlist_content_id'] = self._playlist.Uri
 
         return attributes
 
@@ -437,9 +441,41 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
     @property
     def media_playlist(self):
-        """ Title of Playlist currently playing. """
+        """ Title of current playing playlist. """
         if self._playlist is not None:
             return self._playlist.Name
+        return None
+
+
+    @property
+    @property
+    def media_playlist_content_id(self):
+        """ Content ID of current playing playlist. """
+        if self._playlist is not None:
+            return self._playlist.Uri
+        return None
+
+
+    @property
+    def media_playlist_content_type(self):
+        """ Content Type of current playing playlist. """
+        if self._playlist is not None:
+            return self._playlist.Type
+        return None
+
+
+    def media_playlist_description(self):
+        """ Description of current playing playlist. """
+        if self._playlist is not None:
+            return self._playlist.Description
+        return None
+
+
+    @property
+    def media_playlist_image_url(self):
+        """ Image URL of current playing playlist. """
+        if self._playlist is not None:
+            return self._playlist.ImageUrl
         return None
 
 
@@ -921,7 +957,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
             # did the now playing context change?
             context:Context = self._playerState.Context
-            if context is not None and (self._playlist is None or self._playlist.Uri != context.Uri):
+            if (context is not None) and (self._playlist is None or self._playlist.Uri != context.Uri):
                 
                 # yes - if it's a playlist, then we need to update the stored playlist reference.
                 self._playlist = None
@@ -941,6 +977,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 else:
                     
                     self._playlist = None
+                    
+            elif (context is None):
+                
+                self._playlist = None
                     
         except SpotifyWebApiError as ex:
             

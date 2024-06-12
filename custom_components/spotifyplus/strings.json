@@ -1108,7 +1108,7 @@
         },
         "use_ssl": {
           "name": "Use SSL?",
-          "description": "Spotify Connect Zeroconf API version number that the device supports (e.g. False)."
+          "description": "True if the host device utilizes HTTPS Secure Sockets Layer (SSL) support; otherwise, False to utilize HTTP.  Default is False (HTTP)."
         },
         "username": {
           "name": "Spotify User Name",
@@ -1154,7 +1154,7 @@
         },
         "use_ssl": {
           "name": "Use SSL?",
-          "description": "Spotify Connect Zeroconf API version number that the device supports (e.g. False)."
+          "description": "True if the host device utilizes HTTPS Secure Sockets Layer (SSL) support; otherwise, False to utilize HTTP.  Default is False (HTTP)."
         }
       }
     },
@@ -1184,7 +1184,7 @@
         },
         "use_ssl": {
           "name": "Use SSL?",
-          "description": "Spotify Connect Zeroconf API version number that the device supports (e.g. False)."
+          "description": "True if the host device utilizes HTTPS Secure Sockets Layer (SSL) support; otherwise, False to utilize HTTP.  Default is False (HTTP)."
         }
       }
     },

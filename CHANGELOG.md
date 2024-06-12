@@ -6,6 +6,14 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.27 ] - 2024/06/12
+
+  * Added extra state attribute `media_playlist_content_id` that contains the Content ID of current playing playlist context if one is active; otherwise, None.
+  * Added property `media_player.media_playlist_content_id` that contains the Content ID of current playing playlist context if one is active; otherwise, None.
+  * Added property `media_player.media_playlist_content_type` that contains the Content Type of current playing playlist if one is playing; otherwise, None.
+  * Added property `media_player.media_playlist_description` that contains the Description of current playing playlist if one is playing; otherwise, None.
+  * Added property `media_player.media_playlist_image_url` that contains the Image URL of current playing playlist if one is playing; otherwise, None.
+  * Updated `use_ssl` description on all of the Zeroconf Device services.
 
 ###### [ 1.0.26 ] - 2024/06/10
 
