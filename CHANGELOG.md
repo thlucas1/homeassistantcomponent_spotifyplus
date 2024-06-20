@@ -6,6 +6,16 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.28 ] - 2024/06/14
+
+  * Added service `get_spotify_connect_devices` that gets information about all available Spotify Connect player devices.
+  * Added service `get_player_now_playing` that gets object properties currently being played on the user's Spotify account.
+  * Added service `player_activate_devices` that activates all static Spotify Connect player devices, and (optionally) switches the active user context to the current user context.
+  * Added service `player_resolve_device_id` that resolves a Spotify Connect device identifier from a specified device id, name, alias id, or alias name.  This will ensure that the device id can be found on the network, as well as connect to the device if necessary with the current user context. 
+  * Added service `get_player_playback_state` that gets information about the user's current playback state, including track or episode, progress, and active device.
+  * Added extra state attribute `media_context_content_id` that contains the Context Content ID of current playing context if one is active; otherwise, None.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.59.
+
 ###### [ 1.0.27 ] - 2024/06/12
 
   * Added extra state attribute `media_playlist_content_id` that contains the Content ID of current playing playlist context if one is active; otherwise, None.

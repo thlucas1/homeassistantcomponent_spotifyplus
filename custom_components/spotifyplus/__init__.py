@@ -13,9 +13,10 @@ import functools
 import logging
 import voluptuous as vol
 
-from spotifywebapipython import SpotifyClient, SpotifyApiError, SpotifyWebApiError, SpotifyWebApiAuthenticationError
-from spotifywebapipython.models import Device
+from spotifywebapipython import SpotifyClient
+from spotifywebapipython.models import Device, SpotifyConnectDevices
 
+from homeassistant.components import zeroconf
 from homeassistant.components.media_player import MediaPlayerEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform, CONF_ID
@@ -29,6 +30,8 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .appmessages import STAppMessages
 from .const import (
+    CONF_OPTION_DEVICE_PASSWORD,
+    CONF_OPTION_DEVICE_USERNAME,
     DOMAIN, 
     SPOTIFY_SCOPES
 )
@@ -95,6 +98,8 @@ SERVICE_SPOTIFY_GET_BROWSE_CATEGORYS_LIST:str = 'get_browse_categorys_list'
 SERVICE_SPOTIFY_GET_CATEGORY_PLAYLISTS:str = 'get_category_playlists'
 SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS:str = 'get_featured_playlists'
 SERVICE_SPOTIFY_GET_PLAYER_DEVICES:str = 'get_player_devices'
+SERVICE_SPOTIFY_GET_PLAYER_NOW_PLAYING:str = 'get_player_now_playing'
+SERVICE_SPOTIFY_GET_PLAYER_PLAYBACK_STATE:str = 'get_player_playback_state'
 SERVICE_SPOTIFY_GET_PLAYER_QUEUE_INFO:str = 'get_player_queue_info'
 SERVICE_SPOTIFY_GET_PLAYER_RECENT_TRACKS:str = 'get_player_recent_tracks'
 SERVICE_SPOTIFY_GET_PLAYLIST:str = 'get_playlist'
@@ -102,12 +107,15 @@ SERVICE_SPOTIFY_GET_PLAYLIST_FAVORITES:str = 'get_playlist_favorites'
 SERVICE_SPOTIFY_GET_SHOW:str = 'get_show'
 SERVICE_SPOTIFY_GET_SHOW_EPISODES:str = 'get_show_episodes'
 SERVICE_SPOTIFY_GET_SHOW_FAVORITES:str = 'get_show_favorites'
+SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES:str = 'get_spotify_connect_devices'
 SERVICE_SPOTIFY_GET_TRACK_FAVORITES:str = 'get_track_favorites'
 SERVICE_SPOTIFY_GET_USERS_TOP_ARTISTS:str = 'get_users_top_artists'
 SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS:str = 'get_users_top_tracks'
+SERVICE_SPOTIFY_PLAYER_ACTIVATE_DEVICES:str = 'player_activate_devices'
 SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT:str = 'player_media_play_context'
 SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACK_FAVORITES:str = 'player_media_play_track_favorites'
 SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS:str = 'player_media_play_tracks'
+SERVICE_SPOTIFY_PLAYER_RESOLVE_DEVICE_ID:str = 'player_resolve_device_id'
 SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK:str = 'player_transfer_playback'
 SERVICE_SPOTIFY_PLAYLIST_CHANGE:str = 'playlist_change'
 SERVICE_SPOTIFY_PLAYLIST_COVER_IMAGE_ADD:str = 'playlist_cover_image_add'
@@ -253,6 +261,22 @@ SERVICE_SPOTIFY_GET_PLAYER_DEVICES_SCHEMA = vol.Schema(
     }
 )
 
+SERVICE_SPOTIFY_GET_PLAYER_NOW_PLAYING_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("market"): cv.string,
+        vol.Optional("additional_types"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_GET_PLAYER_PLAYBACK_STATE_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("market"): cv.string,
+        vol.Optional("additional_types"): cv.string,
+    }
+)
+
 SERVICE_SPOTIFY_GET_PLAYER_QUEUE_INFO_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
@@ -316,6 +340,12 @@ SERVICE_SPOTIFY_GET_SHOW_FAVORITES_SCHEMA = vol.Schema(
     }
 )
 
+SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+    }
+)
+
 SERVICE_SPOTIFY_GET_TRACK_FAVORITES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
@@ -346,6 +376,14 @@ SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS_SCHEMA = vol.Schema(
     }
 )
 
+SERVICE_SPOTIFY_PLAYER_ACTIVATE_DEVICES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("verify_user_context"): cv.boolean,
+        vol.Optional("delay", default=0.50): vol.All(vol.Range(min=0,max=10.0)),
+    }
+)
+
 SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
@@ -372,6 +410,15 @@ SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS_SCHEMA = vol.Schema(
         vol.Required("uris"): cv.string,
         vol.Optional("position_ms", default=0): vol.All(vol.Range(min=0,max=999999999)),
         vol.Optional("device_id"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_PLAYER_RESOLVE_DEVICE_ID_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("device_value"): cv.string,
+        vol.Optional("verify_user_context"): cv.boolean,
+        vol.Optional("verify_timeout", default=5.0): vol.All(vol.Range(min=0,max=10.0)),
     }
 )
 
@@ -1001,10 +1048,26 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
                 elif service.service == SERVICE_SPOTIFY_GET_PLAYER_DEVICES:
 
-                    # get spotify connect device list.
+                    # get spotify player device list.
                     refresh = service.data.get("refresh")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_get_player_devices, refresh)
+
+                elif service.service == SERVICE_SPOTIFY_GET_PLAYER_NOW_PLAYING:
+
+                    # get spotify player now playing.
+                    market = service.data.get("market")
+                    additional_types = service.data.get("additional_types")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_player_now_playing, market, additional_types)
+
+                elif service.service == SERVICE_SPOTIFY_GET_PLAYER_PLAYBACK_STATE:
+
+                    # get spotify player playback state.
+                    market = service.data.get("market")
+                    additional_types = service.data.get("additional_types")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_player_playback_state, market, additional_types)
 
                 elif service.service == SERVICE_SPOTIFY_GET_PLAYER_QUEUE_INFO:
 
@@ -1069,6 +1132,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_get_show_favorites, limit, offset, limit_total)
 
+                elif service.service == SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES:
+
+                    # get spotify connect device list.
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_spotify_connect_devices)
+
                 elif service.service == SERVICE_SPOTIFY_GET_TRACK_FAVORITES:
 
                     # get spotify album favorites.
@@ -1098,6 +1167,23 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     limit_total = service.data.get("limit_total")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_get_users_top_tracks, time_range, limit, offset, limit_total)
+
+                elif service.service == SERVICE_SPOTIFY_PLAYER_ACTIVATE_DEVICES:
+
+                    # activate all spotify connect player devices.
+                    verify_user_context = service.data.get("verify_user_context")
+                    delay = service.data.get("delay")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_player_activate_devices, verify_user_context, delay)
+
+                elif service.service == SERVICE_SPOTIFY_PLAYER_RESOLVE_DEVICE_ID:
+
+                    # resolve spotify connect player device id.
+                    device_value = service.data.get("device_value")
+                    verify_user_context = service.data.get("verify_user_context")
+                    verify_timeout = service.data.get("verify_timeout")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_player_resolve_device_id, device_value, verify_user_context, verify_timeout)
 
                 elif service.service == SERVICE_SPOTIFY_PLAYLIST_CREATE:
 
@@ -1429,6 +1515,24 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             supports_response=SupportsResponse.ONLY,
         )
 
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_PLAYER_PLAYBACK_STATE, SERVICE_SPOTIFY_GET_PLAYER_PLAYBACK_STATE_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_GET_PLAYER_PLAYBACK_STATE,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_GET_PLAYER_PLAYBACK_STATE_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_PLAYER_NOW_PLAYING, SERVICE_SPOTIFY_GET_PLAYER_NOW_PLAYING_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_GET_PLAYER_NOW_PLAYING,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_GET_PLAYER_NOW_PLAYING_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
         _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_PLAYER_QUEUE_INFO, SERVICE_SPOTIFY_GET_PLAYER_QUEUE_INFO_SCHEMA)
         hass.services.async_register(
             DOMAIN,
@@ -1492,6 +1596,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             supports_response=SupportsResponse.ONLY,
         )
 
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES, SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
         _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_TRACK_FAVORITES, SERVICE_SPOTIFY_GET_TRACK_FAVORITES_SCHEMA)
         hass.services.async_register(
             DOMAIN,
@@ -1516,6 +1629,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS,
             service_handle_spotify_serviceresponse,
             schema=SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_PLAYER_ACTIVATE_DEVICES, SERVICE_SPOTIFY_PLAYER_ACTIVATE_DEVICES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_PLAYER_ACTIVATE_DEVICES,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_PLAYER_ACTIVATE_DEVICES_SCHEMA,
             supports_response=SupportsResponse.ONLY,
         )
 
@@ -1544,6 +1666,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             service_handle_spotify_command,
             schema=SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS_SCHEMA,
             supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_PLAYER_RESOLVE_DEVICE_ID, SERVICE_SPOTIFY_PLAYER_RESOLVE_DEVICE_ID_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_PLAYER_RESOLVE_DEVICE_ID,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_PLAYER_RESOLVE_DEVICE_ID_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
         )
 
         _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK, SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK_SCHEMA)
@@ -1834,16 +1965,36 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
                 A list of Spotify Device class instances.
             """
             
-            devices:list[Device] = []
+            shouldUpdate:bool = True
 
             try:
 
                 _logsi.LogVerbose("'%s': Component DataUpdateCoordinator is retrieving Spotify device list" % entry.title)
 
-                # retrieve list of Spotify Connect devices.
-                devices:list[Device] = await hass.async_add_executor_job(
-                    spotifyClient.GetPlayerDevices
-                )
+                # get spotify client cached device list.
+                # if an internal device list cache is present, then use it IF it is less than 5 minutes old;
+                # otherwise, call GetSpotifyConnectDevices to get the list and update the internal device list cache.
+                # we check like this since some play commands update the internal device list cache,
+                # so there is no need to update the device list (resource intensive) if it's not too stale.
+                scDevices:SpotifyConnectDevices
+                if "GetSpotifyConnectDevices" in spotifyClient.ConfigurationCache:
+                    scDevices = spotifyClient.ConfigurationCache["GetSpotifyConnectDevices"]
+                    if (scDevices.AgeLastRefreshed > 300):
+                        shouldUpdate = True
+                    else:
+                        _logsi.LogVerbose("'%s': Component DataUpdateCoordinator is using cached device list" % entry.title)
+
+                # do we need to refresh the cache?
+                if (shouldUpdate):
+                    
+                    # retrieve list of ALL available Spotify Connect devices.
+                    scDevices = await hass.async_add_executor_job(
+                        spotifyClient.GetSpotifyConnectDevices,
+                        True
+                    )
+                
+                # get the device list.
+                devices:list[Device] = scDevices.GetDeviceList()
                 
                 # trace.
                 _logsi.LogDictionary(SILevel.Verbose, "'%s': Component DataUpdateCoordinator update results" % entry.title, devices, prettyPrint=True)
@@ -1940,14 +2091,21 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
         # Continue with async_setup_entry
         # -----------------------------------------------------------------------------------
 
-        # create new spotify web api python client instance.
+        # get shared zeroconf instance.
+        _logsi.LogVerbose("'%s': MediaPlayer async_setup_entry is storing the Zeroconf reference to the instanceData object" % entry.title)
+        zeroconf_instance = await zeroconf.async_get_instance(hass)
+
+        # create new spotify web api python client instance - "SpotifyClient()".
         _logsi.LogVerbose("'%s': Component async_setup_entry is creating SpotifyClient instance" % entry.title)
         tokenStorageDir:str = "%s/custom_components/%s/data" % (hass.config.config_dir, DOMAIN)
         spotifyClient:SpotifyClient = await hass.async_add_executor_job(
             SpotifyClient, 
-            None, 
-            tokenStorageDir, 
-            _TokenUpdater
+            None,                   # manager:PoolManager=None,
+            tokenStorageDir,        # tokenStorageDir:str=None,
+            _TokenUpdater,          # tokenUpdater:Callable=None,
+            zeroconf_instance,      # zeroconfClient:Zeroconf=None,
+            entry.options.get(CONF_OPTION_DEVICE_USERNAME, None),
+            entry.options.get(CONF_OPTION_DEVICE_PASSWORD, None)
         )
         _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry spotifyClient object" % entry.title, spotifyClient)
 

@@ -13,6 +13,8 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
     CONF_OPTION_DEVICE_DEFAULT,
+    CONF_OPTION_DEVICE_PASSWORD,
+    CONF_OPTION_DEVICE_USERNAME,
     CONF_OPTION_SCRIPT_TURN_OFF,
     CONF_OPTION_SCRIPT_TURN_ON,
 )
@@ -29,7 +31,7 @@ class InstanceDataSpotifyPlus:
     
     devices: DataUpdateCoordinator[list[Device]]
     """
-    List of Spotify Connect devices that are available for this Spotify user.
+    List of Spotify Connect devices that are available.
     This property is refreshed every 5 minutes by a DataUpdateCoordinator.
     """
     
@@ -52,7 +54,7 @@ class InstanceDataSpotifyPlus:
     """
     The SpotifyClient instance used to interface with the Spotify Web API.
     """
-
+    
 
     @property
     def OptionDeviceDefault(self) -> str | None:
@@ -60,6 +62,20 @@ class InstanceDataSpotifyPlus:
         The default Spotify Connect player device.
         """
         return self.options.get(CONF_OPTION_DEVICE_DEFAULT, None)
+
+    @property
+    def OptionDevicePassword(self) -> str | None:
+        """
+        The default Spotify Connect password to use when connecting to an inactive device.
+        """
+        return self.options.get(CONF_OPTION_DEVICE_PASSWORD, None)
+
+    @property
+    def OptionDeviceUsername(self) -> str | None:
+        """
+        The default Spotify Connect username to use when connecting to an inactive device.
+        """
+        return self.options.get(CONF_OPTION_DEVICE_USERNAME, None)
 
     @property
     def OptionScriptTurnOff(self) -> str | None:

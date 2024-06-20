@@ -21,7 +21,7 @@ from typing import Any
 import voluptuous as vol
 
 from spotifywebapipython import SpotifyClient
-from spotifywebapipython.models import Device
+from spotifywebapipython.models import Device, SpotifyConnectDevices
 
 from homeassistant.config_entries import ConfigEntry, OptionsFlow
 from homeassistant.const import CONF_DESCRIPTION, CONF_ID, CONF_NAME, Platform
@@ -36,6 +36,8 @@ from homeassistant.helpers.selector import (
 
 from .const import (
     CONF_OPTION_DEVICE_DEFAULT, 
+    CONF_OPTION_DEVICE_PASSWORD,
+    CONF_OPTION_DEVICE_USERNAME,
     CONF_OPTION_SCRIPT_TURN_OFF,
     CONF_OPTION_SCRIPT_TURN_ON,
     DOMAIN, 
@@ -106,11 +108,14 @@ class SpotifyFlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
 
             try:
             
-                # create new spotify web api python client instance.
+                # create new spotify web api python client instance - "SpotifyClient()".
                 _logsi.LogVerbose("Creating SpotifyClient instance")
                 tokenStorageDir:str = "%s/custom_components/%s/data" % (self.hass.config.config_dir, DOMAIN)
                 spotifyClient:SpotifyClient = await self.hass.async_add_executor_job(
-                    SpotifyClient, None, tokenStorageDir, None
+                    SpotifyClient, 
+                    None,               # manager:PoolManager=None,
+                    tokenStorageDir,    # tokenStorageDir:str=None,
+                    None                # tokenUpdater:Callable=None,
                 )
 
                 _logsi.LogObject(SILevel.Verbose, "SpotifyClient instance created - object", spotifyClient)
@@ -353,25 +358,38 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
             
                 # update config entry options from user input values.
                 self._Options[CONF_OPTION_DEVICE_DEFAULT] = user_input.get(CONF_OPTION_DEVICE_DEFAULT, None)
+                self._Options[CONF_OPTION_DEVICE_USERNAME] = user_input.get(CONF_OPTION_DEVICE_USERNAME, None)
+                self._Options[CONF_OPTION_DEVICE_PASSWORD] = user_input.get(CONF_OPTION_DEVICE_PASSWORD, None)
                 self._Options[CONF_OPTION_SCRIPT_TURN_OFF] = user_input.get(CONF_OPTION_SCRIPT_TURN_OFF, None)
                 self._Options[CONF_OPTION_SCRIPT_TURN_ON] = user_input.get(CONF_OPTION_SCRIPT_TURN_ON, None)
                 
-                # store the updated config entry options.
-                _logsi.LogDictionary(SILevel.Verbose, "'%s': OptionsFlow is updating configuration options - options" % self._name, self._Options)
-                return self.async_create_entry(
-                    title="", 
-                    data=self._Options
-                )
+                # validations.
+                # if device username was entered then device password is required.
+                deviceUsername:str = user_input.get(CONF_OPTION_DEVICE_USERNAME, None)
+                devicePassword:str = user_input.get(CONF_OPTION_DEVICE_PASSWORD, None)
+                if (deviceUsername is not None) and (devicePassword is None):
+                    errors["base"] = "device_password_required"
+
+                # any validation errors? if not, then ...
+                if "base" not in errors:
+                    
+                    # store the updated config entry options.
+                    _logsi.LogDictionary(SILevel.Verbose, "'%s': OptionsFlow is updating configuration options - options" % self._name, self._Options)
+                    return self.async_create_entry(
+                        title="", 
+                        data=self._Options
+                    )
 
             # load available spotify connect devices.
             device_list:list[str] = await self.hass.async_add_executor_job(self._GetPlayerDevicesList)
-            if device_list is None:
+            if (device_list is None) or (len(device_list) == 0):
                 errors["base"] = "no_player_devices"
-                return
 
             # log device that is currently selected.
             device_default:str = self._Options.get(CONF_OPTION_DEVICE_DEFAULT, None)
             _logsi.LogVerbose("'%s': OptionsFlow option '%s' - SELECTED value: '%s'" % (self._name, CONF_OPTION_DEVICE_DEFAULT, device_default))
+            device_username:str = self._Options.get(CONF_OPTION_DEVICE_USERNAME, None)
+            _logsi.LogVerbose("'%s': OptionsFlow option '%s' - SELECTED value: '%s'" % (self._name, CONF_OPTION_DEVICE_USERNAME, device_username))
                    
             # create validation schema.
             schema = vol.Schema(
@@ -383,25 +401,33 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                         description={"suggested_value": self._Options.get(CONF_OPTION_DEVICE_DEFAULT)},
                         ): SelectSelector(
                                 SelectSelectorConfig(
-                                    options=device_list,
+                                    options=device_list or [],
                                     mode=SelectSelectorMode.DROPDOWN
                         )
                     ),
+                    vol.Optional(CONF_OPTION_DEVICE_USERNAME, 
+                                 description={"suggested_value": self._Options.get(CONF_OPTION_DEVICE_USERNAME)},
+                                 ): cv.string,
+                    vol.Optional(CONF_OPTION_DEVICE_PASSWORD, 
+                                 description={"suggested_value": self._Options.get(CONF_OPTION_DEVICE_PASSWORD)},
+                                 ): cv.string,
                     vol.Optional(CONF_OPTION_SCRIPT_TURN_ON, 
                                  description={"suggested_value": self._Options.get(CONF_OPTION_SCRIPT_TURN_ON)},
                                  ): selector.EntitySelector(selector.EntitySelectorConfig(integration=DOMAIN_SCRIPT, 
-                                                            #domain=Platform.SCENE, 
                                                             multiple=False),
                     ),
                     vol.Optional(CONF_OPTION_SCRIPT_TURN_OFF, 
                                  description={"suggested_value": self._Options.get(CONF_OPTION_SCRIPT_TURN_OFF)},
                                  ): selector.EntitySelector(selector.EntitySelectorConfig(integration=DOMAIN_SCRIPT, 
-                                                            #domain=Platform.SCENE, 
                                                             multiple=False),
                     ),
                 }
             )
             
+            # any validation errors? if so, then log them.
+            if "base" in errors:
+                _logsi.LogDictionary(SILevel.Warning, "'%s': OptionsFlow contained validation errors" % self._name, errors)
+
             _logsi.LogVerbose("'%s': OptionsFlow is showing the init configuration options form" % self._name)
             return self.async_show_form(
                 step_id="init", 
@@ -438,15 +464,12 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
             
             # get spotify connect player device list.
             _logsi.LogVerbose("'%s': OptionsFlow is retrieving Spotify Connect player devices" % self._name)
-            devices:list[Device] = data.spotifyClient.GetPlayerDevices(refresh=True)
-            
-            # sort the results (in place) by Name, ascending order.
-            devices.sort(key=lambda x: (x.Name or "").lower(), reverse=False)
-           
+            devices:SpotifyConnectDevices = data.spotifyClient.GetSpotifyConnectDevices()
+
             # build string array of all devices.
             result:list = []
             item:Device
-            for item in devices:
+            for item in devices.GetDeviceList():
                 result.append(item.SelectItemNameAndId)
 
             # trace.

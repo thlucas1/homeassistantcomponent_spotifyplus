@@ -24,6 +24,8 @@
         "description": "Configure SpotifyPlus integration options that control functionality.",
         "data": {
           "device_default": "Default Spotify Connect Player Device ID when none are active.",
+          "device_password": "Default Spotify Connect password to use when connecting to an inactive device.",
+          "device_username": "Default Spotify Connect username to use when connecting to an inactive device.",
           "script_turn_on": "Script called to turn on device that plays media content.",
           "script_turn_off": "Script called to turn off device that plays media content."
         },
@@ -31,7 +33,8 @@
       }
     },
     "error": {
-      "no_player_devices": "Per Spotify Web API, there are currently no Spotify Connect devices active.  Please close the configuration options, play a track on any Spotify Connect player for a minute or two, and then open the configuration options again."
+      "no_player_devices": "Per Spotify Web API, there are currently no Spotify Connect devices active.  Please close the configuration options, play a track on any Spotify Connect player for a minute or two, and then open the configuration options again.",
+      "device_password_required": "Default Device Password is required if a Default Device Username was specified."
     }
   },
   "system_health": {
@@ -334,6 +337,42 @@
         }
       }
     },
+    "get_player_now_playing": {
+      "name": "Get Player Now Playing",
+      "description": "Get the object currently being played on the user's Spotify account.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter."
+        },
+        "additional_types": {
+          "name": "Additional Types",
+          "description": "A comma-separated list of item types that your client supports besides the default track type. Valid types are 'track' and 'episode'."
+        }
+      }
+    },
+    "get_player_playback_state": {
+      "name": "Get Player Playback State",
+      "description": "Get information about the user's current playback state, including track or episode, progress, and active device.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter."
+        },
+        "additional_types": {
+          "name": "Additional Types",
+          "description": "A comma-separated list of item types that your client supports besides the default track type. Valid types are 'track' and 'episode'."
+        }
+      }
+    },
     "get_player_queue_info": {
       "name": "Get Player Queue Info",
       "description": "Get the list of objects that make up the user's playback queue.",
@@ -488,6 +527,16 @@
         }
       }
     },
+    "get_spotify_connect_devices": {
+      "name": "Get Spotify Connect Devices",
+      "description": "Get information about all available Spotify Connect player (both static and dynamic) devices.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        }
+      }
+    },
     "get_track_favorites": {
       "name": "Get Track Favorites",
       "description": "Get a list of the tracks saved in the current Spotify user's 'Your Library'.",
@@ -566,6 +615,24 @@
         }
       }
     },
+    "player_activate_devices": {
+      "name": "Player Activate Devices",
+      "description": "Activates all Spotify Connect player devices, and (optionally) switches the active user context to the current user context.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "verify_user_context": {
+          "name": "Verify User Context?",
+          "description": "If True, the active user context of the resolved device is checked to ensure it matches the specified Spotify Connect user context.  If False, the user context will not be checked.  Default is False."
+        },
+        "delay": {
+          "name": "Delay",
+          "description": "Time delay (in seconds) to wait AFTER issuing the final Connect command (if necessary). This delay will give the spotify web api time to process the device list change before another command is issued.  Default is 0.50; value range is 0 - 10."
+        }
+      }
+    },
     "player_media_play_context": {
       "name": "Player Media Play Context",
       "description": "Start playing one or more tracks of the specified context on a Spotify Connect device.",
@@ -637,6 +704,28 @@
         "device_id": {
           "name": "Device ID",
           "description": "The id or name of the Spotify Connect Player device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an '*' is specified), then the SpotifyPlus default device is activated."
+        }
+      }
+    },
+    "player_resolve_device_id": {
+      "name": "Player Resolve Device ID",
+      "description": "Resolves a Spotify Connect device identifier from a specified device id, name, alias id, or alias name.  This will ensure that the device id can be found on the network, as well as connect to the device if necessary with the current user context. ",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "device_value": {
+          "name": "Device Value",
+          "description": "The device id (e.g. '0d1841b0976bae2a3a310dd74c0f337465899bc8') or name (e.g. 'Bose-ST10-1') value to resolve."
+        },
+        "verify_user_context": {
+          "name": "Verify User Context?",
+          "description": "If True, the active user context of the resolved device is checked to ensure it matches the user context specified on the class constructor. If False, the user context will not be checked.  Default is True."
+        },
+        "verify_timeout": {
+          "name": "Verify Timeout",
+          "description": "Time delay (in seconds) to wait AFTER issuing the final Connect command (if necessary). This delay will give the spotify web api time to process the device list change before another command is issued.  Default is 5.0; value range is 0 - 10."
         }
       }
     },
