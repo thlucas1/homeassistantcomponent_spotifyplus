@@ -47,6 +47,8 @@ The following custom services are also supplied by this integration.
 - Get Category Playlists
 - Get Featured Playlists
 - Get Player Devices
+- Get Player Now Playing
+- Get Player Playback State
 - Get Player Queue Info
 - Get Player Recent Tracks
 - Get Playlist
@@ -54,12 +56,15 @@ The following custom services are also supplied by this integration.
 - Get Show
 - Get Show Episodes
 - Get Show Favorites
+- Get Spotify Connect Devices
 - Get Track Favorites
 - Get Users Top Artists
 - Get Users Top Tracks
+- Player Activate Devices
 - Player Media Play Context
 - Player Media Play Track Favorites
 - Player Media Play Tracks
+- Player Resolve Device Id
 - Player Transfer Playback
 - Playlist Change
 - Playlist Cover Image Add
@@ -81,6 +86,10 @@ The following custom services are also supplied by this integration.
 - Unfollow Artists
 - Unfollow Playlist
 - Unfollow Users
+- ZeroConf Device Connect
+- ZeroConf Device Disconnect
+- ZeroConf Device GetInformation
+- ZeroConf Discover Devices
 
 Check out the [Services Provided wiki](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Services-Provided) page for detailed explanations and YAML examples of the custom services provided by this integration.
 

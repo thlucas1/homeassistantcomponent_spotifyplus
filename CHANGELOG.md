@@ -6,7 +6,12 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
-###### [ 1.0.28 ] - 2024/06/14
+###### [ 1.0.29 ] - 2024/06/21
+
+  * Fixed a bug due to `SpotifyConnect` addon not properly returning a "Content-Type: application/json" header in it's Spotify Zeroconf API responses.  This was causing an error when trying to retrieve the Spotify Connect device list, and returning errors in the configuration options form.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.61.
+
+###### [ 1.0.28 ] - 2024/06/19
 
   * Added service `get_spotify_connect_devices` that gets information about all available Spotify Connect player devices.
   * Added service `get_player_now_playing` that gets object properties currently being played on the user's Spotify account.
