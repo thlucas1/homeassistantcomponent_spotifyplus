@@ -6,9 +6,15 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.30 ] - 2024/06/22
+
+  * Updated `config_flow` to utilize the HA shared Zeroconf instance.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.62.
+  * The underlying `spotifywebapiPython` update fixes a potential memory leak with the Zeroconf discovery process.
+
 ###### [ 1.0.29 ] - 2024/06/21
 
-  * Fixed a bug due to `SpotifyConnect` addon not properly returning a "Content-Type: application/json" header in it's Spotify Zeroconf API responses.  This was causing an error when trying to retrieve the Spotify Connect device list, and returning errors in the configuration options form.
+  * Fixed a bug due to `SpotifyConnect` addon not properly returning a "Content-Type: application/json" header in it's Spotify Zeroconf API responses.  This was causing an error in the SpotifyPlus integration when trying to retrieve the Spotify Connect device list, and returning errors in the configuration options form.
   * Updated underlying `spotifywebapiPython` package requirement to version 1.0.61.
 
 ###### [ 1.0.28 ] - 2024/06/19

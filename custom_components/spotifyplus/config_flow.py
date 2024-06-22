@@ -23,6 +23,7 @@ import voluptuous as vol
 from spotifywebapipython import SpotifyClient
 from spotifywebapipython.models import Device, SpotifyConnectDevices
 
+from homeassistant.components import zeroconf
 from homeassistant.config_entries import ConfigEntry, OptionsFlow
 from homeassistant.const import CONF_DESCRIPTION, CONF_ID, CONF_NAME, Platform
 from homeassistant.core import callback
@@ -108,14 +109,19 @@ class SpotifyFlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
 
             try:
             
+                # get shared zeroconf instance.
+                _logsi.LogVerbose("Retrieving the HA shared Zeroconf instance")
+                zeroconf_instance = await zeroconf.async_get_instance(self.hass)
+
                 # create new spotify web api python client instance - "SpotifyClient()".
                 _logsi.LogVerbose("Creating SpotifyClient instance")
                 tokenStorageDir:str = "%s/custom_components/%s/data" % (self.hass.config.config_dir, DOMAIN)
                 spotifyClient:SpotifyClient = await self.hass.async_add_executor_job(
                     SpotifyClient, 
-                    None,               # manager:PoolManager=None,
-                    tokenStorageDir,    # tokenStorageDir:str=None,
-                    None                # tokenUpdater:Callable=None,
+                    None,                   # manager:PoolManager=None,
+                    tokenStorageDir,        # tokenStorageDir:str=None,
+                    None,                   # tokenUpdater:Callable=None,
+                    zeroconf_instance       # zeroconfClient:Zeroconf=None,
                 )
 
                 _logsi.LogObject(SILevel.Verbose, "SpotifyClient instance created - object", spotifyClient)
@@ -132,8 +138,9 @@ class SpotifyFlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
                 _logsi.LogObject(SILevel.Verbose, "SpotifyClient token authorization was set - object (with AuthToken)", spotifyClient)
                 _logsi.LogObject(SILevel.Verbose, "SpotifyClient UserProfile - object", spotifyClient.UserProfile)
 
-            except Exception:
+            except Exception as ex:
             
+                _logsi.LogException(None, ex, logToSystemLogger=False)
                 return self.async_abort(reason="connection_error")
 
             # is this a reauthentication request?
