@@ -467,7 +467,8 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
             # get configuration instance data so we can reference the client instance.
             _logsi.LogVerbose("'%s': OptionsFlow is retrieving instance data" % self._name)
             data:InstanceDataSpotifyPlus = self.hass.data[DOMAIN].get(self._entry.entry_id, None)
-            _logsi.LogObject(SILevel.Verbose, "'%s': OptionsFlow instance data object" % self._name, data)
+            _logsi.LogObject(SILevel.Verbose, "'%s': OptionsFlow instance data.spotifyClient" % self._name, data.spotifyClient)
+            _logsi.LogObject(SILevel.Verbose, "'%s': OptionsFlow instance data.options" % self._name, data.options)
             
             # get spotify connect player device list.
             _logsi.LogVerbose("'%s': OptionsFlow is retrieving Spotify Connect player devices" % self._name)

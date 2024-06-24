@@ -78,6 +78,7 @@ from .const import (
     DOMAIN_SCRIPT,
     LOGGER,
 )
+from .utils import passwordMaskString
 
 # get smartinspect logger reference; create a new session for this module name.
 from smartinspectpython.siauto import SIAuto, SILevel, SISession, SIMethodParmListContext, SIColors
@@ -4720,7 +4721,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("version", version)
             apiMethodParms.AppendKeyValue("useSSL", useSSL)
             apiMethodParms.AppendKeyValue("username", username)
-            apiMethodParms.AppendKeyValue("password", password)
+            apiMethodParms.AppendKeyValue("password (with mask)", passwordMaskString(password))
             apiMethodParms.AppendKeyValue("preDisconnect", preDisconnect)
             apiMethodParms.AppendKeyValue("verifyDeviceListEntry", verifyDeviceListEntry)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Connect ZeroConf Device Connect Service", apiMethodParms)
