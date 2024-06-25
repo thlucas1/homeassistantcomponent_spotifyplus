@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.33 ] - 2024/06/25
+
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.66.
+  * The underlying `spotifywebapiPython` update changes the way the Spotify Connect Zeroconf API processes the `status` and `spotifyError` response values.  Some Spotify Connect devices return them as strings, while other return them as numerics.  Spotify Zeroconf API specifically says they should be returned as integer values.
+
 ###### [ 1.0.32 ] - 2024/06/25
 
   * Updated underlying `spotifywebapiPython` package requirement to version 1.0.65.
