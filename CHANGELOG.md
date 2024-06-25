@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.32 ] - 2024/06/25
+
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.65.
+  * The underlying `spotifywebapiPython` update changes the way the Spotify Connect Zeroconf API `addUser` call is processed to account for "ERROR-INVALID-PUBLICKEY" statuses returned for some devices.  This will retry the connection request with the PublicKey value returned from the initial request.
+
 ###### [ 1.0.31 ] - 2024/06/24
 
   * Updated underlying `spotifywebapiPython` package requirement to version 1.0.64.
