@@ -13,6 +13,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
     CONF_OPTION_DEVICE_DEFAULT,
+    CONF_OPTION_DEVICE_LOGINID,
     CONF_OPTION_DEVICE_PASSWORD,
     CONF_OPTION_DEVICE_USERNAME,
     CONF_OPTION_SCRIPT_TURN_OFF,
@@ -62,6 +63,13 @@ class InstanceDataSpotifyPlus:
         The default Spotify Connect player device.
         """
         return self.options.get(CONF_OPTION_DEVICE_DEFAULT, None)
+
+    @property
+    def OptionDeviceLoginId(self) -> str | None:
+        """
+        The default Spotify Connect loginid to use when connecting to an inactive device.
+        """
+        return self.options.get(CONF_OPTION_DEVICE_LOGINID, None)
 
     @property
     def OptionDevicePassword(self) -> str | None:

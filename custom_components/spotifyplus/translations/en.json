@@ -24,8 +24,9 @@
         "description": "Configure SpotifyPlus integration options that control functionality.",
         "data": {
           "device_default": "Default Spotify Connect Player Device ID when none are active.",
-          "device_password": "Default Spotify Connect password to use when connecting to an inactive device.",
-          "device_username": "Default Spotify Connect username to use when connecting to an inactive device.",
+          "device_loginid": "Spotify Connect canonical loginid to use when connecting to an inactive device.",
+          "device_password": "Spotify Connect password to use when connecting to an inactive device.",
+          "device_username": "Spotify Connect username to use when connecting to an inactive device.",
           "script_turn_on": "Script called to turn on device that plays media content.",
           "script_turn_off": "Script called to turn off device that plays media content."
         },
@@ -34,7 +35,8 @@
     },
     "error": {
       "no_player_devices": "Per Spotify Web API, there are currently no Spotify Connect devices active.  Please close the configuration options, play a track on any Spotify Connect player for a minute or two, and then open the configuration options again.",
-      "device_password_required": "Default Device Password is required if a Default Device Username was specified."
+      "device_password_required": "Spotify Connect Device Password is required if a Spotify Connect Device Username was specified.",
+      "device_loginid_required": "Spotify Connect Device LoginId is required if a Spotify Connect Device Username was specified."
     }
   },
   "system_health": {
@@ -1201,11 +1203,15 @@
         },
         "username": {
           "name": "Spotify User Name",
-          "description": "Spotify user name to login with; this can be a standard username (e.g. 'yourusername@mail.com') or a canonical userid (e.g. '31l77y75hfnhk79f7gk6jkk878mg').  This MUST match the account name (or one of them) that was used to configure Spotify Connect on the manufacturer device."
+          "description": "Spotify user name to login with (e.g. 'yourusername@mail.com').  This MUST match the account name (or one of them) that was used to configure Spotify Connect on the manufacturer device."
         },
         "password": {
           "name": "Spotify Password",
-          "description": "Spotify user password to login with."
+          "description": "Spotify Connect user password to login with."
+        },
+        "loginid": {
+          "name": "Spotify Login ID",
+          "description": "Spotify Connect login id to login with (e.g. '31l77fd87g8h9j00k89f07jf87ge').  This is also known as the canonical user id value.  This MUST be the value that relates to the `username` argument."
         },
         "pre_disconnect": {
           "name": "Pre Disconnect?",

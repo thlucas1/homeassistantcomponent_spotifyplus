@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.36 ] - 2024/06/26
+
+  * Added support for Spotify Connect LoginID specification in configuration options.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.69.
+
 ###### [ 1.0.35 ] - 2024/06/26
 
   * Updated underlying `spotifywebapiPython` package requirement to version 1.0.68.

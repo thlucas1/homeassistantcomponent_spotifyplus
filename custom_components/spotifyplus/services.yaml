@@ -2080,16 +2080,23 @@ zeroconf_device_connect:
         boolean:
     username:
       name: Spotify User Name
-      description: Spotify user name to login with; this can be a standard username (e.g. 'yourusername@mail.com') or a canonical userid (e.g. '31l77y75hfnhk79f7gk6jkk878mg').  This MUST match the account name (or one of them) that was used to configure Spotify Connect on the manufacturer device.
+      description: Spotify user name to login with (e.g. 'yourusername@mail.com').  This MUST match the account name (or one of them) that was used to configure Spotify Connect on the manufacturer device.
       example: "yourusername@mail.com"
       required: true
       selector:
         text:
     password:
       name: Spotify User Password
-      description: Spotify user password to login with.
+      description: Spotify Connect user password to login with. 
       example: "yourpassword"
       required: true
+      selector:
+        text:
+    loginid:
+      name: Spotify Login ID
+      description: Spotify Connect login id to login with (e.g. "31l77fd87g8h9j00k89f07jf87ge").  This is also known as the canonical user id value.  This MUST be the value that relates to the `username` argument.  
+      example: "31l77y75hfnhk79f7gk6jkk878mg"
+      required: false
       selector:
         text:
     pre_disconnect:

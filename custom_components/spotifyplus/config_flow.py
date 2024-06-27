@@ -37,6 +37,7 @@ from homeassistant.helpers.selector import (
 
 from .const import (
     CONF_OPTION_DEVICE_DEFAULT, 
+    CONF_OPTION_DEVICE_LOGINID,
     CONF_OPTION_DEVICE_PASSWORD,
     CONF_OPTION_DEVICE_USERNAME,
     CONF_OPTION_SCRIPT_TURN_OFF,
@@ -365,6 +366,7 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
             
                 # update config entry options from user input values.
                 self._Options[CONF_OPTION_DEVICE_DEFAULT] = user_input.get(CONF_OPTION_DEVICE_DEFAULT, None)
+                self._Options[CONF_OPTION_DEVICE_LOGINID] = user_input.get(CONF_OPTION_DEVICE_LOGINID, None)
                 self._Options[CONF_OPTION_DEVICE_USERNAME] = user_input.get(CONF_OPTION_DEVICE_USERNAME, None)
                 self._Options[CONF_OPTION_DEVICE_PASSWORD] = user_input.get(CONF_OPTION_DEVICE_PASSWORD, None)
                 self._Options[CONF_OPTION_SCRIPT_TURN_OFF] = user_input.get(CONF_OPTION_SCRIPT_TURN_OFF, None)
@@ -372,10 +374,13 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                 
                 # validations.
                 # if device username was entered then device password is required.
+                deviceLoginid:str = user_input.get(CONF_OPTION_DEVICE_LOGINID, None)
                 deviceUsername:str = user_input.get(CONF_OPTION_DEVICE_USERNAME, None)
                 devicePassword:str = user_input.get(CONF_OPTION_DEVICE_PASSWORD, None)
                 if (deviceUsername is not None) and (devicePassword is None):
                     errors["base"] = "device_password_required"
+                if (deviceUsername is not None) and (deviceLoginid is None):
+                    errors["base"] = "device_loginid_required"
 
                 # any validation errors? if not, then ...
                 if "base" not in errors:
@@ -395,6 +400,8 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
             # log device that is currently selected.
             device_default:str = self._Options.get(CONF_OPTION_DEVICE_DEFAULT, None)
             _logsi.LogVerbose("'%s': OptionsFlow option '%s' - SELECTED value: '%s'" % (self._name, CONF_OPTION_DEVICE_DEFAULT, device_default))
+            device_loginid:str = self._Options.get(CONF_OPTION_DEVICE_LOGINID, None)
+            _logsi.LogVerbose("'%s': OptionsFlow option '%s' - SELECTED value: '%s'" % (self._name, CONF_OPTION_DEVICE_USERNAME, device_loginid))
             device_username:str = self._Options.get(CONF_OPTION_DEVICE_USERNAME, None)
             _logsi.LogVerbose("'%s': OptionsFlow option '%s' - SELECTED value: '%s'" % (self._name, CONF_OPTION_DEVICE_USERNAME, device_username))
                    
@@ -412,6 +419,9 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                                     mode=SelectSelectorMode.DROPDOWN
                         )
                     ),
+                    vol.Optional(CONF_OPTION_DEVICE_LOGINID, 
+                                 description={"suggested_value": self._Options.get(CONF_OPTION_DEVICE_LOGINID)},
+                                 ): cv.string,
                     vol.Optional(CONF_OPTION_DEVICE_USERNAME, 
                                  description={"suggested_value": self._Options.get(CONF_OPTION_DEVICE_USERNAME)},
                                  ): cv.string,

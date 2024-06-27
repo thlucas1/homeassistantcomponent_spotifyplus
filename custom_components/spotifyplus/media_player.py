@@ -4707,6 +4707,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self, 
             username:str,
             password:str,
+            loginid:str,
             hostIpv4Address:str,
             hostIpPort:str,
             cpath:str,
@@ -4721,11 +4722,15 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         
         Args:
             username (str):
-                Spotify Connect user name to login with.  
+                Spotify Connect user name to login with (e.g. "yourspotifyusername").  
                 This MUST match the account name (or one of them) that was used to configure Spotify Connect 
-                on the manufacturer device.
+                on the manufacturer device.               
             password (str):
                 Spotify Connect user password to login with.  
+            loginId (str):
+                Spotify Connect login id to login with (e.g. "31l77fd87g8h9j00k89f07jf87ge").  
+                This is also known as the canonical user id value.  
+                This MUST be the value that relates to the `username` argument.  
             hostIpv4Address (str):
                 IPV4 address (as a string) at which the Spotify Connect Zeroconf API can be reached
                 on the Spotify Connect device (e.g. "192.168.1.81").
@@ -4781,6 +4786,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("useSSL", useSSL)
             apiMethodParms.AppendKeyValue("username", username)
             apiMethodParms.AppendKeyValue("password (with mask)", passwordMaskString(password))
+            apiMethodParms.AppendKeyValue("loginid", loginid)
             apiMethodParms.AppendKeyValue("preDisconnect", preDisconnect)
             apiMethodParms.AppendKeyValue("verifyDeviceListEntry", verifyDeviceListEntry)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Connect ZeroConf Device Connect Service", apiMethodParms)
@@ -4817,7 +4823,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
             # connect the device to Spotify Connect, which should make it known to any available
             # Spotify Connect player clients.
-            result = zconn.Connect(username, password)
+            result = zconn.Connect(username, password, loginid)
 
             # return the (partial) user profile that retrieved the result, as well as the result itself.
             return {

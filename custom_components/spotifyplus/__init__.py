@@ -30,6 +30,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .appmessages import STAppMessages
 from .const import (
+    CONF_OPTION_DEVICE_LOGINID,
     CONF_OPTION_DEVICE_PASSWORD,
     CONF_OPTION_DEVICE_USERNAME,
     DOMAIN, 
@@ -630,6 +631,7 @@ SERVICE_SPOTIFY_ZEROCONF_DEVICE_CONNECT_SCHEMA = vol.Schema(
         vol.Optional("use_ssl"): cv.boolean,
         vol.Required("username"): cv.string,
         vol.Required("password"): cv.string,
+        vol.Optional("loginid"): cv.string,
         vol.Optional("pre_disconnect"): cv.boolean,
         vol.Optional("verify_device_list_entry"): cv.boolean,
     }
@@ -1291,10 +1293,11 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     use_ssl = service.data.get("use_ssl")
                     username = service.data.get("username")
                     password = service.data.get("password")
+                    loginid = service.data.get("loginid")
                     pre_disconnect = service.data.get("pre_disconnect")
                     verify_device_list_entry = service.data.get("verify_device_list_entry")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_zeroconf_device_connect, username, password, host_ipv4_address, host_ip_port, cpath, version, use_ssl, pre_disconnect, verify_device_list_entry)
+                    response = await hass.async_add_executor_job(entity.service_spotify_zeroconf_device_connect, username, password, loginid, host_ipv4_address, host_ip_port, cpath, version, use_ssl, pre_disconnect, verify_device_list_entry)
                     
                 elif service.service == SERVICE_SPOTIFY_ZEROCONF_DEVICE_DISCONNECT:
 
@@ -2105,7 +2108,8 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
             _TokenUpdater,          # tokenUpdater:Callable=None,
             zeroconf_instance,      # zeroconfClient:Zeroconf=None,
             entry.options.get(CONF_OPTION_DEVICE_USERNAME, None),
-            entry.options.get(CONF_OPTION_DEVICE_PASSWORD, None)
+            entry.options.get(CONF_OPTION_DEVICE_PASSWORD, None),
+            entry.options.get(CONF_OPTION_DEVICE_LOGINID, None),
         )
         _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry spotifyClient object" % entry.title, spotifyClient)
 
