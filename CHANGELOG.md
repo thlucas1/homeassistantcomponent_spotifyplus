@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.38 ] - 2024/06/27
+
+  * Corrected various services that use float values that were incorrectly defined as strings by the service schema.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.71.
+
 ###### [ 1.0.37 ] - 2024/06/27
 
   * Updated underlying `spotifywebapiPython` package requirement to version 1.0.70.

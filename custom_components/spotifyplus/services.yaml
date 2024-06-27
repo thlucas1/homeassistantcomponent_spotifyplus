@@ -118,8 +118,7 @@ get_album_favorites:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     offset:
       name: Offset
       description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
@@ -129,6 +128,7 @@ get_album_favorites:
         number:
           min: 1
           max: 500
+          mode: box
     market:
       name: Market / Country Code
       description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
@@ -167,8 +167,7 @@ get_album_new_releases:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     offset:
       name: Offset
       description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
@@ -178,6 +177,7 @@ get_album_new_releases:
         number:
           min: 1
           max: 500
+          mode: box
     country:
       name: Market / Country Code
       description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
@@ -251,8 +251,7 @@ get_artist_albums:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     offset:
       name: Offset
       description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
@@ -262,6 +261,7 @@ get_artist_albums:
         number:
           min: 1
           max: 500
+          mode: box
     market:
       name: Market / Country Code
       description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
@@ -307,8 +307,7 @@ get_artists_followed:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     limit_total:
       name: Limit Total
       description: The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total.
@@ -382,8 +381,7 @@ get_category_playlists:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     offset:
       name: Offset
       description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
@@ -393,6 +391,7 @@ get_category_playlists:
         number:
           min: 1
           max: 500
+          mode: box
     country:
       name: Country
       description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter.
@@ -431,8 +430,7 @@ get_featured_playlists:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     offset:
       name: Offset
       description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
@@ -442,6 +440,7 @@ get_featured_playlists:
         number:
           min: 1
           max: 500
+          mode: box
     country:
       name: Country
       description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter.
@@ -585,8 +584,7 @@ get_player_recent_tracks:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     after:
       name: After Time MS
       description: Returns all items after (but not including) this cursor position, which is a Unix timestamp in milliseconds.  If `after` is specified, `before` must not be specified.  Use with limit to get the next set of items.  Default is `0` (the first item).
@@ -680,8 +678,7 @@ get_playlist_favorites:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     offset:
       name: Offset
       description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
@@ -691,6 +688,7 @@ get_playlist_favorites:
         number:
           min: 1
           max: 500
+          mode: box
     limit_total:
       name: Limit Total
       description: The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total.
@@ -757,8 +755,7 @@ get_show_episodes:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     offset:
       name: Offset
       description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
@@ -768,6 +765,7 @@ get_show_episodes:
         number:
           min: 1
           max: 500
+          mode: box
     market:
       name: Market
       description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter.
@@ -806,8 +804,7 @@ get_show_favorites:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     offset:
       name: Offset
       description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
@@ -817,6 +814,7 @@ get_show_favorites:
         number:
           min: 1
           max: 500
+          mode: box
     limit_total:
       name: Limit Total
       description: The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total.
@@ -862,8 +860,7 @@ get_track_favorites:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     offset:
       name: Offset
       description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
@@ -873,6 +870,7 @@ get_track_favorites:
         number:
           min: 1
           max: 500
+          mode: box
     market:
       name: Market / Country Code
       description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
@@ -918,8 +916,7 @@ get_users_top_artists:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     offset:
       name: Offset
       description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
@@ -929,6 +926,7 @@ get_users_top_artists:
         number:
           min: 1
           max: 500
+          mode: box
     limit_total:
       name: Limit Total
       description: The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total.
@@ -967,8 +965,7 @@ get_users_top_tracks:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     offset:
       name: Offset
       description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
@@ -978,6 +975,7 @@ get_users_top_tracks:
         number:
           min: 1
           max: 500
+          mode: box
     limit_total:
       name: Limit Total
       description: The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total.
@@ -1013,7 +1011,10 @@ player_activate_devices:
       example: "0.50"
       required: false
       selector:
-        text:
+        number:
+          min: 0.0
+          max: 10.0
+          mode: box
 
 player_media_play_context:
   name: Player Media Play Context
@@ -1103,7 +1104,10 @@ player_media_play_track_favorites:
       example: "0.50"
       required: false
       selector:
-        text:
+        number:
+          min: 0.0
+          max: 10.0
+          mode: box
 
 player_media_play_tracks:
   name: Player Media Play Tracks
@@ -1176,7 +1180,10 @@ player_resolve_device_id:
       example: "5.0"
       required: false
       selector:
-        text:
+        number:
+          min: 0.0
+          max: 10.0
+          mode: box
 
 player_transfer_playback:
   name: Player Transfer Playback
@@ -1553,8 +1560,7 @@ search_albums:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     offset:
       name: Offset
       description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
@@ -1564,6 +1570,8 @@ search_albums:
         number:
           min: 1
           max: 500
+          mode: box
+
     market:
       name: Market / Country Code
       description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
@@ -1616,8 +1624,7 @@ search_artists:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     offset:
       name: Offset
       description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
@@ -1627,6 +1634,7 @@ search_artists:
         number:
           min: 1
           max: 500
+          mode: box
     market:
       name: Market / Country Code
       description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
@@ -1679,8 +1687,7 @@ search_audiobooks:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     offset:
       name: Offset
       description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
@@ -1690,6 +1697,7 @@ search_audiobooks:
         number:
           min: 1
           max: 500
+          mode: box
     market:
       name: Market / Country Code
       description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
@@ -1742,8 +1750,7 @@ search_episodes:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     offset:
       name: Offset
       description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
@@ -1753,6 +1760,7 @@ search_episodes:
         number:
           min: 1
           max: 500
+          mode: box
     market:
       name: Market / Country Code
       description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
@@ -1805,8 +1813,7 @@ search_playlists:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     offset:
       name: Offset
       description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
@@ -1816,6 +1823,7 @@ search_playlists:
         number:
           min: 1
           max: 500
+          mode: box
     market:
       name: Market / Country Code
       description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
@@ -1868,8 +1876,7 @@ search_shows:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     offset:
       name: Offset
       description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
@@ -1879,6 +1886,7 @@ search_shows:
         number:
           min: 1
           max: 500
+          mode: box
     market:
       name: Market / Country Code
       description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
@@ -1931,8 +1939,7 @@ search_tracks:
         number:
           min: 1
           max: 50
-          step: 1
-          mode: slider
+          mode: box
     offset:
       name: Offset
       description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
@@ -1942,6 +1949,7 @@ search_tracks:
         number:
           min: 1
           max: 500
+          mode: box
     market:
       name: Market / Country Code
       description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
@@ -2232,11 +2240,10 @@ zeroconf_discover_devices:
     timeout:
       name: Timeout
       description: Maximum amount of time to wait (in seconds) for the discovery to complete.  Default is 5, range is 1 thru 10.
-      example: 5
+      example: 5.0
       required: false
       selector:
         number:
-          min: 1
-          max: 10
-          step: 1
-          mode: slider
+          min: 1.0
+          max: 10.0
+          mode: box
