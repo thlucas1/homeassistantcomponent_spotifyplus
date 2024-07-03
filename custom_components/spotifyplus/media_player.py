@@ -731,7 +731,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 self._attr_source = source
            
             # if player was turned on, then start play.
-            if wasTurnedOn:
+            if wasTurnedOn or (self.state == MediaPlayerState.PAUSED):
                 self.media_play()
 
 
@@ -892,6 +892,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # is the media player powered off?  if so, then there is nothing to do.
         if self._attr_state == MediaPlayerState.OFF:
             _logsi.LogVerbose("'%s': Update - Integration is powered off; nothing to do" % self.name)
+            # if a source is set, then reset it since we are powered off.
+            if self._attr_source is not None:
+                _logsi.LogVerbose("'%s': Update - Integration source is being reset" % self.name)
+                self._attr_source = None
+                self.schedule_update_ha_state(force_refresh=False)
             return
 
         # is the media player in a command event?  if so, then exit as updates are
