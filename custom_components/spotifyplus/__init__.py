@@ -1958,14 +1958,14 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
         # -----------------------------------------------------------------------------------
         # Define DataUpdateCoordinator function.
         # -----------------------------------------------------------------------------------
-        async def _update_devices() -> list[dict[str, Any]]:
+        async def _update_devices() -> SpotifyConnectDevices:
             """
             DataUpdateCoordinator update method that will retrieve the list of Spotify Connect 
             devices that are available.  This method will be executed by the DataUpdateCoordinator
             every 5 minutes to refresh the device list.
             
             Returns:
-                A list of Spotify Device class instances.
+                A `SpotifyConnectDevices` instance.
             """
             
             shouldUpdate:bool = True
@@ -1996,12 +1996,9 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
                         True
                     )
                 
-                # get the device list.
-                devices:list[Device] = scDevices.GetDeviceList()
-                
                 # trace.
-                _logsi.LogDictionary(SILevel.Verbose, "'%s': Component DataUpdateCoordinator update results" % entry.title, devices, prettyPrint=True)
-                return devices
+                _logsi.LogDictionary(SILevel.Verbose, "'%s': Component DataUpdateCoordinator update results" % entry.title, scDevices.ToDictionary(), prettyPrint=True)
+                return scDevices
 
             except Exception as ex:
                 
@@ -2128,7 +2125,7 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
         _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry Spotify UserProfile object" % entry.title, spotifyClient.UserProfile)
 
         # define a data update coordinator that will poll for updated device entries every 5 minutes.
-        device_coordinator:DataUpdateCoordinator[list[Device]] = DataUpdateCoordinator(
+        device_coordinator:DataUpdateCoordinator[SpotifyConnectDevices] = DataUpdateCoordinator(
             hass,
             _LOGGER,
             name=f"{entry.title} Devices",

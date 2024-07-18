@@ -3,7 +3,7 @@ from types import MappingProxyType
 from typing import Any
 
 from spotifywebapipython import SpotifyClient
-from spotifywebapipython.models import Device
+from spotifywebapipython.models import SpotifyConnectDevices
 
 from homeassistant.components.media_player import MediaPlayerEntity
 from homeassistant.helpers.config_entry_oauth2_flow import (
@@ -30,7 +30,7 @@ class InstanceDataSpotifyPlus:
     modules.
     """
     
-    devices: DataUpdateCoordinator[list[Device]]
+    devices: DataUpdateCoordinator[SpotifyConnectDevices] 
     """
     List of Spotify Connect devices that are available.
     This property is refreshed every 5 minutes by a DataUpdateCoordinator.

@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.41 ] - 2024/07/18
+
+  * Added support for Sonos device control and status updates via the Python [SoCo (Sonos Controller) API](https://docs.python-soco.com/en/latest/) package.  These changes will allow you to control playback, obtain current status, and transfer Spotify Connect Player control to / from the device.  Note that this works best when the device is controlled by the various Spotify Applications (e.g. Desktop, Mobile, and Web).  Sonos devices that are controlled by the Sonos Applications can behave erratically when controlled by SpotifyPlus.  More information on why that is can be found on the [Spotify Connect Brand Notes](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Spotify-Connect-Brand-Notes) wiki documentation page.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.76.
+
 ###### [ 1.0.40 ] - 2024/07/02
 
   * Updated underlying `spotifywebapiPython` package requirement to version 1.0.73.

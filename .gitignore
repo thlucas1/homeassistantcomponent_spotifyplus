@@ -29,3 +29,5 @@ config/*
 /developer_notes.txt
 /.github/workflows/lint.yml
 /New_Release_Instructions.txt
+/test/testdata/
+/test/*
