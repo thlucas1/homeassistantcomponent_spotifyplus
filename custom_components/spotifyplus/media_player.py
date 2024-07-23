@@ -3300,12 +3300,12 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 Example: `spotify:track:1301WleyT98MSxVHPZCA6M` start playing at the specified track Uri.  
             offsetPosition (int):
                 Indicates from what position in the context playback should start.  
-                The value is zero-based, and can't be negative.  
+                The value is zero-based, and must be a positive number, or -1 to disable positioning.  
                 Only available when contextUri corresponds to an album or playlist.  
                 Default is `0`.  
                 Example: `3`  start playing at track number 4.
             positionMS (int):
-                The position in milliseconds to seek to; must be a positive number.  
+                The position in milliseconds to seek to; must be a positive number, or -1 to disable positioning.  
                 Passing in a position that is greater than the length of the track will cause the 
                 player to start playing the next track.  
                 Default is `0`.  
@@ -3328,6 +3328,12 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("positionMS", positionMS)
             apiMethodParms.AppendKeyValue("deviceId", deviceId)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Media Play Context Service", apiMethodParms)
+            
+            # validations.
+            if offsetPosition == -1:
+                offsetPosition = None
+            if positionMS == -1:
+                positionMS = None
             
             # see if default device option was specified (e.g. deviceId="*").
             deviceId = self._GetDefaultDeviceOption(deviceId)
@@ -3427,7 +3433,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 Example: `spotify:track:4iV5W9uYEdYUVa79Axb7Rh,spotify:episode:512ojhOuo1ktJprKbVcKyQ`.  
                 A maximum of 50 items can be added in one request.
             positionMS (int):
-                The position in milliseconds to seek to; must be a positive number.  
+                The position in milliseconds to seek to; must be a positive number, or -1 to disable positioning.  
                 Passing in a position that is greater than the length of the track will cause the 
                 player to start playing the next track.  
                 Default is `0`.  
@@ -3448,6 +3454,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("positionMS", positionMS)
             apiMethodParms.AppendKeyValue("deviceId", deviceId)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Media Play Tracks Service", apiMethodParms)
+            
+            # validations.
+            if positionMS == -1:
+                positionMS = None
             
             # see if default device option was specified (e.g. deviceId="*").
             deviceId = self._GetDefaultDeviceOption(deviceId)
@@ -3574,6 +3584,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Set Repeat Mode Service", apiMethodParms)
                 
             # validations.
+            if deviceId == '':
+                deviceId = None
             if deviceId is None or deviceId == "*":
                 deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
                 
@@ -3633,6 +3645,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Set Shuffle Mode Service", apiMethodParms)
                 
             # validations.
+            if deviceId == '':
+                deviceId = None
             if deviceId is None or deviceId == "*":
                 deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
                 
@@ -3691,6 +3705,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Set Volume Level Service", apiMethodParms)
                 
             # validations.
+            if deviceId == '':
+                deviceId = None
             if deviceId is None or deviceId == "*":
                 deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
                 
@@ -3743,6 +3759,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # validations.
             if play is None:
                 play = True
+            if deviceId == '':
+                deviceId = None
             if deviceId is None or deviceId == "*":
                 deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
                 
