@@ -3534,6 +3534,183 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
+    def service_spotify_player_set_repeat_mode(
+            self, 
+            state:bool='off', 
+            deviceId:str=None,
+            delay:float=0.50,
+            ) -> None:
+        """
+        Set repeat mode for the specified Spotify Connect device.
+        
+        Args:
+            state (str):
+                The repeat mode to set: 
+                - `track`   - will repeat the current track.
+                - `context` - will repeat the current context.
+                - `off`     - will turn repeat off.
+                Default: `off`  
+            deviceId (str):
+                The id or name of the device this command is targeting.  
+                If not supplied, the user's currently active device is the target.  
+                Example: `0d1841b0976bae2a3a310dd74c0f3df354899bc8`  
+                Example: `Web Player (Chrome)`  
+            delay (float):
+                Time delay (in seconds) to wait AFTER issuing the command to the player.  
+                This delay will give the spotify web api time to process the change before 
+                another command is issued.  
+                Default is 0.50; value range is 0 - 10.
+        """
+        apiMethodName:str = 'service_spotify_player_set_repeat_mode'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("state", state)
+            apiMethodParms.AppendKeyValue("deviceId", deviceId)
+            apiMethodParms.AppendKeyValue("delay", delay)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Set Repeat Mode Service", apiMethodParms)
+                
+            # validations.
+            if deviceId is None or deviceId == "*":
+                deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
+                
+            # set Spotify player repeat mode.
+            _logsi.LogVerbose("Setting Spotify Player Repeat Mode")
+            self.data.spotifyClient.PlayerSetRepeatMode(state, deviceId, delay)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_player_set_shuffle_mode(
+            self, 
+            state:bool, 
+            deviceId:str=None,
+            delay:float=0.50,
+            ) -> None:
+        """
+        Set shuffle mode for the specified Spotify Connect device.
+        
+        Args:
+            state (bool):
+                The shuffle mode to set: 
+                - `True`  - Shuffle user's playback.
+                - `False` - Do not shuffle user's playback.
+                Default: `False`  
+            deviceId (str):
+                The id or name of the device this command is targeting.  
+                If not supplied, the user's currently active device is the target.  
+                Example: `0d1841b0976bae2a3a310dd74c0f3df354899bc8`  
+                Example: `Web Player (Chrome)`  
+            delay (float):
+                Time delay (in seconds) to wait AFTER issuing the command to the player.  
+                This delay will give the spotify web api time to process the change before 
+                another command is issued.  
+                Default is 0.50; value range is 0 - 10.
+        """
+        apiMethodName:str = 'service_spotify_player_set_shuffle_mode'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("state", state)
+            apiMethodParms.AppendKeyValue("deviceId", deviceId)
+            apiMethodParms.AppendKeyValue("delay", delay)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Set Shuffle Mode Service", apiMethodParms)
+                
+            # validations.
+            if deviceId is None or deviceId == "*":
+                deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
+                
+            # set Spotify player shuffle mode.
+            _logsi.LogVerbose("Setting Spotify Player Shuffle Mode")
+            self.data.spotifyClient.PlayerSetShuffleMode(state, deviceId, delay)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_player_set_volume_level(
+            self, 
+            volumeLevel:int, 
+            deviceId:str=None,
+            delay:float=0.50,
+            ) -> None:
+        """
+        Set volume level for the specified Spotify Connect device.
+        
+        Args:
+            volumeLevel (int):
+                The volume to set.  
+                Must be a value from 0 to 100 inclusive.
+                Example: `50`
+            deviceId (str):
+                The id or name of the device this command is targeting.  
+                If not supplied, the user's currently active device is the target.  
+                Example: `0d1841b0976bae2a3a310dd74c0f3df354899bc8`  
+                Example: `Web Player (Chrome)`  
+            delay (float):
+                Time delay (in seconds) to wait AFTER issuing the command to the player.  
+                This delay will give the spotify web api time to process the change before 
+                another command is issued.  
+                Default is 0.50; value range is 0 - 10.
+        """
+        apiMethodName:str = 'service_spotify_player_set_volume_level'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("volumeLevel", volumeLevel)
+            apiMethodParms.AppendKeyValue("deviceId", deviceId)
+            apiMethodParms.AppendKeyValue("delay", delay)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Set Volume Level Service", apiMethodParms)
+                
+            # validations.
+            if deviceId is None or deviceId == "*":
+                deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
+                
+            # set Spotify player volume level.
+            _logsi.LogVerbose("Setting Spotify Player Volume Level")
+            self.data.spotifyClient.PlayerSetVolume(volumeLevel, deviceId, delay)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
     def service_spotify_player_transfer_playback(self, 
                                                  deviceId:str, 
                                                  play:bool=True, 
@@ -3725,7 +3902,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("public", public)
             apiMethodParms.AppendKeyValue("collaborative", collaborative)
             apiMethodParms.AppendKeyValue("imagePath", imagePath)
-            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Playlist Change Service", imagePath)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Playlist Change Service", apiMethodParms)
                 
             # create Spotify playlist.
             _logsi.LogVerbose("Changing Spotify Playlist Details")
