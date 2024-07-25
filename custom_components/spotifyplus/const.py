@@ -40,3 +40,9 @@ SPOTIFY_SCOPES:list = \
     'user-read-recently-played',
     'user-top-read'
 ]
+
+TRACE_MSG_DELAY_DEVICE_SONOS:str = "Delaying for %s seconds to allow Sonos Soco API to process the change"
+"""
+Delaying for %s seconds to allow Sonos Soco API to process the change
+"""
+

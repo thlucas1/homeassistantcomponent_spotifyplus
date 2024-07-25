@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import time
 from datetime import timedelta, datetime
 from typing import Any, Callable, Concatenate, ParamSpec, TypeVar, Tuple
 from yarl import URL
@@ -89,8 +90,12 @@ from .const import (
     DOMAIN, 
     DOMAIN_SCRIPT,
     LOGGER,
+    TRACE_MSG_DELAY_DEVICE_SONOS,
 )
-from .utils import passwordMaskString
+from .utils import (
+    passwordMaskString, 
+    validateDelay
+)
 
 # get smartinspect logger reference; create a new session for this module name.
 from smartinspectpython.siauto import SIAuto, SILevel, SISession, SIMethodParmListContext, SIColors
@@ -102,6 +107,7 @@ _logsi.SystemLogger = LOGGER
 
 # Sonos constants.
 SONOS_NOT_IMPLEMENTED:str = 'NOT_IMPLEMENTED'
+SONOS_COMMAND_DELAY:float = 0.50
 
 REPEAT_TO_SONOS = {
     RepeatMode.OFF: False,
@@ -577,9 +583,16 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
         # resume playback (use currently active player).
         if (self._sonosDevice is not None):
+            
             _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): PLAY" % (self.name, self._sonosDevice.ip_address, self._sonosDevice.player_name))
             self._sonosDevice.play()
+            
+            # give SoCo api time to process the change.
+            _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % SONOS_COMMAND_DELAY)
+            time.sleep(SONOS_COMMAND_DELAY)
+
         else:
+            
             self.data.spotifyClient.PlayerMediaResume()
             
 
@@ -594,9 +607,16 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         
         # pause playback (use currently active player).
         if (self._sonosDevice is not None):
+
             _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): PAUSE" % (self.name, self._sonosDevice.ip_address, self._sonosDevice.player_name))
             self._sonosDevice.pause()
+            
+            # give SoCo api time to process the change.
+            _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % SONOS_COMMAND_DELAY)
+            time.sleep(SONOS_COMMAND_DELAY)
+
         else:
+
             self.data.spotifyClient.PlayerMediaPause()
 
 
@@ -607,9 +627,16 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         
         # skip to previous track (use currently active player).
         if (self._sonosDevice is not None):
+            
             _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): PREVIOUS" % (self.name, self._sonosDevice.ip_address, self._sonosDevice.player_name))
             self._sonosDevice.previous()
+            
+            # give SoCo api time to process the change.
+            _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % SONOS_COMMAND_DELAY)
+            time.sleep(SONOS_COMMAND_DELAY)
+
         else:
+            
             self.data.spotifyClient.PlayerMediaSkipPrevious()
 
 
@@ -620,9 +647,16 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
         # skip to next track (use currently active player).
         if (self._sonosDevice is not None):
+            
             _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): NEXT" % (self.name, self._sonosDevice.ip_address, self._sonosDevice.player_name))
             self._sonosDevice.next()
+            
+            # give SoCo api time to process the change.
+            _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % SONOS_COMMAND_DELAY)
+            time.sleep(SONOS_COMMAND_DELAY)
+
         else:
+            
             self.data.spotifyClient.PlayerMediaSkipNext()
 
 
@@ -638,13 +672,20 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         
         # seek to track position (use currently active player).
         if (self._sonosDevice is not None):
+            
             _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): SEEK" % (self.name, self._sonosDevice.ip_address, self._sonosDevice.player_name))
             nSeconds = int(position)
             mm, ss = divmod(nSeconds, 60)                       # get minutes and seconds first
             hh, mm= divmod(mm, 60)                              # get hours next
             sonosPosition:str = "%d:%02d:%02d" % (hh, mm, ss)   # format to hh:mm:ss
             self._sonosDevice.seek(str(sonosPosition))
+            
+            # give SoCo api time to process the change.
+            _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % SONOS_COMMAND_DELAY)
+            time.sleep(SONOS_COMMAND_DELAY)
+
         else:
+            
             self.data.spotifyClient.PlayerMediaSeek(int(position * 1000))
         
 
@@ -828,10 +869,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         
         # set shuffle mode (use currently active player).
         if (self._sonosDevice is not None):
+            
             _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): SHUFFLE" % (self.name, self._sonosDevice.ip_address, self._sonosDevice.player_name))
-            self._sonosDevice.shuffle = shuffle
-            # use the Spotify PlayerState `RepeatState` to set the PlayMode, as it can sometimes be different
-            # than what the Sonos device reports as the repeat state!
+            # set the Sonos PlayMode directly (instead of setting the Sonos `shuffle` property)!
+            # the Spotify Web API PlayerState `RepeatState` value can sometimes be different than what the
+            # Sonos device reports for its `repeat` property value!
             sonos_repeat:str
             if self._playerState.RepeatState == 'track':
                 sonos_repeat = 'ONE'
@@ -840,7 +882,13 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             elif self._playerState.RepeatState == 'context':
                 sonos_repeat = True
             self._sonosDevice.play_mode = SONOS_PLAY_MODE_BY_MEANING[(shuffle, sonos_repeat)]
+            
+            # give SoCo api time to process the change.
+            _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % SONOS_COMMAND_DELAY)
+            time.sleep(SONOS_COMMAND_DELAY)
+
         else:
+            
             self.data.spotifyClient.PlayerSetShuffleMode(shuffle)
 
 
@@ -857,12 +905,20 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
         # set repeat mode (use currently active player).
         if (self._sonosDevice is not None):
+            
             _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): REPEAT" % (self.name, self._sonosDevice.ip_address, self._sonosDevice.player_name))
-            # use the Spotify PlayerState `ShuffleState` to set the PlayMode, as it can sometimes be different
-            # than what the Sonos device reports as the shuffle state!
+            # set the Sonos PlayMode directly (instead of setting the Sonos repeat property)!
+            # The Spotify Web API PlayerState `ShuffleState` value can sometimes be different than what the
+            # Sonos device reports for its `shuffle` property value!
             sonos_repeat = REPEAT_TO_SONOS[repeat]
             self._sonosDevice.play_mode = SONOS_PLAY_MODE_BY_MEANING[(self._playerState.ShuffleState, sonos_repeat)]
+            
+            # give SoCo api time to process the change.
+            _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % SONOS_COMMAND_DELAY)
+            time.sleep(SONOS_COMMAND_DELAY)
+            
         else:
+            
             self.data.spotifyClient.PlayerSetRepeatMode(REPEAT_MODE_MAPPING_TO_SPOTIFY[repeat])
 
 
@@ -881,10 +937,17 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
         # set volume (use currently active player).
         if (self._sonosDevice is not None):
+            
             _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): VOLUME" % (self.name, self._sonosDevice.ip_address, self._sonosDevice.player_name))
             nVolume:int = int(volume * 100)
             self._sonosDevice.volume = nVolume
+            
+            # give SoCo api time to process the change.
+            _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % SONOS_COMMAND_DELAY)
+            time.sleep(SONOS_COMMAND_DELAY)
+            
         else:
+            
             self.data.spotifyClient.PlayerSetVolume(int(volume * 100))
 
 
@@ -1186,7 +1249,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogVerbose("'%s': Getting Spotify Connect Player state" % self.name)
             _logsi.LogVerbose("'%s': Currently selected Source: '%s'" % (self.name, str(self._attr_source)))
 
-            # query the Spotify WebService API to get playback status.
+            # query the Spotify Web API to get playback status.
             playerState = self.data.spotifyClient.GetPlayerPlaybackState(additionalTypes=MediaType.EPISODE.value)
 
             # did Spotify Web API report an active device?
@@ -1278,7 +1341,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
             else:
                 
-                # for all other device types just return the Spotify WebService API playback status.
+                # for all other device types just return the Spotify Web API playback status.
                 self._sonosDevice = None
                 return playerState
         
@@ -1314,6 +1377,13 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self._attr_source = None
             self._attr_volume_level = None
             self._attr_is_volume_muted = None
+            
+            # initialize supported features.
+            self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.NEXT_TRACK
+            self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.PREVIOUS_TRACK
+            self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.REPEAT_SET
+            self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.SEEK
+            self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.SHUFFLE_SET
 
             # does player state exist?  if not, then we are done.
             if playerPlayState is None:
@@ -1397,6 +1467,35 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                     self._attr_repeat = RepeatMode.ONE.value
                 else:
                     self._attr_repeat = RepeatMode.OFF.value
+                
+            # 2024/07/24
+            # commented the following for now, as most media players (e.g. mini-media player) do not 
+            # display the correct status of the shuffle and repeat buttons.
+            
+            # update supported features based upon available actions.
+            # note if the selected action is true, then it is not allowed (disallowed).
+            if playerPlayState.Actions is not None:
+
+                # if playerPlayState.Actions.SkippingNext:
+                #     self._attr_supported_features = self._attr_supported_features & (~MediaPlayerEntityFeature.NEXT_TRACK)
+                #     _logsi.LogVerbose("'%s': MediaPlayerState NEXT_TRACK is not allowed" % self.name)                
+                
+                # if playerPlayState.Actions.SkippingPrev:
+                #     self._attr_supported_features = self._attr_supported_features & (~MediaPlayerEntityFeature.PREVIOUS_TRACK)
+                #     _logsi.LogVerbose("'%s': MediaPlayerState PREVIOUS_TRACK is not allowed" % self.name)
+                    
+                # if playerPlayState.Actions.TogglingRepeatTrack:
+                #     self._attr_supported_features = self._attr_supported_features & (~MediaPlayerEntityFeature.REPEAT_SET)
+                #     _logsi.LogVerbose("'%s': MediaPlayerState REPEAT_SET is not allowed" % self.name)
+                
+                # if playerPlayState.Actions.Seeking:
+                #     self._attr_supported_features = self._attr_supported_features & (~MediaPlayerEntityFeature.SEEK)
+                #     _logsi.LogVerbose("'%s': MediaPlayerState SEEK is not allowed" % self.name)                
+                
+                # if playerPlayState.Actions.TogglingShuffle:
+                #     self._attr_supported_features = self._attr_supported_features & (~MediaPlayerEntityFeature.SHUFFLE_SET)
+                #     _logsi.LogVerbose("'%s': MediaPlayerState SHUFFLE_SET is not allowed" % self.name)
+                pass
                     
         except Exception as ex:
 
@@ -3546,7 +3645,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
     def service_spotify_player_set_repeat_mode(
             self, 
-            state:bool='off', 
+            state:str='off', 
             deviceId:str=None,
             delay:float=0.50,
             ) -> None:
@@ -3584,15 +3683,59 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Set Repeat Mode Service", apiMethodParms)
                 
             # validations.
+            delay = validateDelay(delay, 0.50, 10)
             if deviceId == '':
                 deviceId = None
             if deviceId is None or deviceId == "*":
                 deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
-                
-            # set Spotify player repeat mode.
-            _logsi.LogVerbose("Setting Spotify Player Repeat Mode")
-            self.data.spotifyClient.PlayerSetRepeatMode(state, deviceId, delay)
 
+            # get selected device reference from cached list of Spotify Connect devices.
+            scDevices:SpotifyConnectDevices = self.data.spotifyClient.GetSpotifyConnectDevices(refresh=False)
+            scDevice:SpotifyConnectDevice = scDevices.GetDeviceByName(deviceId)
+            if scDevice is None:
+                scDevice = scDevices.GetDeviceById(deviceId)
+
+            # set repeat mode based on device type.
+            if (scDevice is not None) and (scDevice.DeviceInfo.IsBrandSonos):
+
+                # get current Spotify Connect player state.
+                playerState = self.data.spotifyClient.GetPlayerPlaybackState(additionalTypes=MediaType.EPISODE.value)
+
+                # set the Sonos PlayMode directly (instead of setting the Sonos repeat property)!
+                # The Spotify Web API PlayerState `ShuffleState` value can sometimes be different than what the
+                # Sonos device reports for its `shuffle` property value!
+                if state == 'track':
+                    sonos_repeat = 'ONE'
+                elif state == 'off':
+                    sonos_repeat = False
+                elif state == 'context':
+                    sonos_repeat = True
+                else:
+                    sonos_repeat = False
+                playMode:str = SONOS_PLAY_MODE_BY_MEANING[(playerState.ShuffleState, sonos_repeat)]
+                
+                # for Sonos, use the SoCo API command.
+                sonosDevice = SoCo(scDevice.DiscoveryResult.HostIpAddress)
+                _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): REPEAT (playmode=%s)" % (self.name, sonosDevice.ip_address, sonosDevice.player_name, playMode))
+                sonosDevice.play_mode = playMode
+
+                # give SoCo api time to process the change.
+                if delay > 0:
+                    _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % delay)
+                    time.sleep(delay)
+
+            else:
+
+                # for everything else, just use the Spotify Web API command.
+                self.data.spotifyClient.PlayerSetRepeatMode(state, deviceId, delay)
+
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
+
+            # media player command was processed, so force a scan window at the next interval.
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
+            
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
@@ -3645,15 +3788,58 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Set Shuffle Mode Service", apiMethodParms)
                 
             # validations.
+            delay = validateDelay(delay, 0.50, 10)
             if deviceId == '':
                 deviceId = None
             if deviceId is None or deviceId == "*":
                 deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
                 
-            # set Spotify player shuffle mode.
-            _logsi.LogVerbose("Setting Spotify Player Shuffle Mode")
-            self.data.spotifyClient.PlayerSetShuffleMode(state, deviceId, delay)
+            # get selected device reference from cached list of Spotify Connect devices.
+            scDevices:SpotifyConnectDevices = self.data.spotifyClient.GetSpotifyConnectDevices(refresh=False)
+            scDevice:SpotifyConnectDevice = scDevices.GetDeviceByName(deviceId)
+            if scDevice is None:
+                scDevice = scDevices.GetDeviceById(deviceId)
 
+            # set shuffle mode based on device type.
+            if (scDevice is not None) and (scDevice.DeviceInfo.IsBrandSonos):
+
+                # get current Spotify Connect player state.
+                playerState = self.data.spotifyClient.GetPlayerPlaybackState(additionalTypes=MediaType.EPISODE.value)
+            
+                # set the Sonos PlayMode directly (instead of setting the Sonos `shuffle` property)!
+                # the Spotify Web API PlayerState `RepeatState` value can sometimes be different than what the
+                # Sonos device reports for its `repeat` property value!
+                sonos_repeat:str
+                if playerState.RepeatState == 'track':
+                    sonos_repeat = 'ONE'
+                elif playerState.RepeatState == 'off':
+                    sonos_repeat = False
+                elif playerState.RepeatState == 'context':
+                    sonos_repeat = True
+                playMode:str = SONOS_PLAY_MODE_BY_MEANING[(state, sonos_repeat)]
+                
+                # for Sonos, use the SoCo API command.
+                sonosDevice = SoCo(scDevice.DiscoveryResult.HostIpAddress)
+                _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): SHUFFLE (playmode=%s)" % (self.name, sonosDevice.ip_address, sonosDevice.player_name, playMode))
+                sonosDevice.play_mode = playMode
+
+                # give SoCo api time to process the change.
+                if delay > 0:
+                    _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % delay)
+                    time.sleep(delay)
+                    
+            else:
+
+                # for everything else, just use the Spotify Web API command.
+                self.data.spotifyClient.PlayerSetShuffleMode(state, deviceId, delay)
+
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
+            
+            # media player command was processed, so force a scan window at the next interval.
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
+            
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
@@ -3705,15 +3891,43 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Set Volume Level Service", apiMethodParms)
                 
             # validations.
+            delay = validateDelay(delay, 0.50, 10)
             if deviceId == '':
                 deviceId = None
             if deviceId is None or deviceId == "*":
                 deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
                 
-            # set Spotify player volume level.
-            _logsi.LogVerbose("Setting Spotify Player Volume Level")
-            self.data.spotifyClient.PlayerSetVolume(volumeLevel, deviceId, delay)
+            # get selected device reference from cached list of Spotify Connect devices.
+            scDevices:SpotifyConnectDevices = self.data.spotifyClient.GetSpotifyConnectDevices(refresh=False)
+            scDevice:SpotifyConnectDevice = scDevices.GetDeviceByName(deviceId)
+            if scDevice is None:
+                scDevice = scDevices.GetDeviceById(deviceId)
 
+            # set volume level based on device type.
+            if (scDevice is not None) and (scDevice.DeviceInfo.IsBrandSonos):
+
+                # for Sonos, use the SoCo API command.
+                sonosDevice = SoCo(scDevice.DiscoveryResult.HostIpAddress)
+                _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): VOLUME" % (self.name, sonosDevice.ip_address, sonosDevice.player_name))
+                sonosDevice.volume = volumeLevel
+
+                # give SoCo api time to process the change.
+                if delay > 0:
+                    _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % delay)
+                    time.sleep(delay)
+
+            else:
+
+                # for everything else, just use the Spotify Web API command.
+                self.data.spotifyClient.PlayerSetVolume(volumeLevel, deviceId, delay)
+
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
+            
+            # media player command was processed, so force a scan window at the next interval.
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
+            
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:

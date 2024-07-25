@@ -6,6 +6,12 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.44 ] - 2024/07/24
+
+  * Updated service `player_set_shuffle_mode` to correctly set shuffle mode for Sonos devices.
+  * Updated service `player_set_repeat_mode` to correctly set repeat mode for Sonos devices.
+  * Updated service `player_set_volume_level` to correctly set volume level for Sonos devices.
+
 ###### [ 1.0.43 ] - 2024/07/23
 
   * Updated service `player_media_play_context` to correctly default the `position_ms` and `offset_position` argument values.  This was causing the playlist to always start at the first track if the `offset_position` argument value was not supplied.  This manifested itself when shuffle was enabled, as the playlist should have started at a random track and was not doing so.

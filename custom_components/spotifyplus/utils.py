@@ -63,3 +63,33 @@ def passwordMaskString(inputObj:str) -> str:
     result:str = ''.ljust(len(inputObj), '*')
                 
     return result
+
+
+def validateDelay(
+        delay:float, 
+        default:float=0.5, 
+        maxDelay:float=10
+        ) -> float:
+    """
+    Validates a delay value.
+        
+    Args:
+        delay (int):
+            The delay value to validate.
+        default (int):
+            The default delay value to set if the user-input delay is not valid.
+        maxDelay (int):
+            The maximum delay value allowed.  
+            Default is 10.
+    """
+    if (isinstance(delay,int)): 
+        delay = float(delay)
+            
+    if (not isinstance(delay,float)) or (delay < 0): 
+        result = default
+    elif (delay > maxDelay): 
+        result = maxDelay
+    else:
+        result = delay
+            
+    return result
