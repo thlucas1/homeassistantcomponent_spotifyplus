@@ -6,6 +6,12 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.45 ] - 2024/07/30
+
+  * Updated service `player_transfer_playback` to support Sonos devices with some limitations; see the [Sonos Limitations](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Spotify-Connect-Brand-Notes#sonos) wiki documentation for further details.
+  * Updated service `player_media_play_context` and `player_media_play_tracks` to support Sonos devices with some limitations; see the [Sonos Limitations](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Spotify-Connect-Brand-Notes#sonos) wiki documentation for further details.
+  * Fixed a bug in the `player_transfer_playback` service that was not transferring control to offline Spotify Connect devices.
+
 ###### [ 1.0.44 ] - 2024/07/24
 
   * Updated service `player_set_shuffle_mode` to correctly set shuffle mode for Sonos devices.

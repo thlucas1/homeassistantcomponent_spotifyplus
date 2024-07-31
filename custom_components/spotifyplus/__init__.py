@@ -396,6 +396,7 @@ SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT_SCHEMA = vol.Schema(
         vol.Optional("offset_position", default=-1): vol.All(vol.Range(min=-1,max=500)),
         vol.Optional("position_ms", default=-1): vol.All(vol.Range(min=-1,max=999999999)),
         vol.Optional("device_id"): cv.string,
+        vol.Optional("delay", default=0.50): vol.All(vol.Range(min=0,max=10.0)),
     }
 )
 
@@ -414,6 +415,7 @@ SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS_SCHEMA = vol.Schema(
         vol.Required("uris"): cv.string,
         vol.Optional("position_ms", default=-1): vol.All(vol.Range(min=-1,max=999999999)),
         vol.Optional("device_id"): cv.string,
+        vol.Optional("delay", default=0.50): vol.All(vol.Range(min=0,max=10.0)),
     }
 )
 
@@ -458,6 +460,7 @@ SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK_SCHEMA = vol.Schema(
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("device_id"): cv.string,
         vol.Optional("play"): cv.boolean,
+        vol.Optional("delay", default=0.50): vol.All(vol.Range(min=0,max=10.0)),
     }
 )
 
@@ -819,8 +822,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     offset_position = service.data.get("offset_position")
                     position_ms = service.data.get("position_ms")
                     device_id = service.data.get("device_id")
+                    delay = service.data.get("delay")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    await hass.async_add_executor_job(entity.service_spotify_player_media_play_context, context_uri, offset_uri, offset_position, position_ms, device_id)
+                    await hass.async_add_executor_job(entity.service_spotify_player_media_play_context, context_uri, offset_uri, offset_position, position_ms, device_id, delay)
 
                 elif service.service == SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACK_FAVORITES:
 
@@ -837,8 +841,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     uris = service.data.get("uris")
                     position_ms = service.data.get("position_ms")
                     device_id = service.data.get("device_id")
+                    delay = service.data.get("delay")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    await hass.async_add_executor_job(entity.service_spotify_player_media_play_tracks, uris, position_ms, device_id)
+                    await hass.async_add_executor_job(entity.service_spotify_player_media_play_tracks, uris, position_ms, device_id, delay)
 
                 elif service.service == SERVICE_SPOTIFY_PLAYER_SET_REPEAT_MODE:
 
@@ -872,8 +877,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     # transfer playback to a new Spotify Connect device.
                     device_id = service.data.get("device_id")
                     play = service.data.get("play")
+                    delay = service.data.get("delay")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    await hass.async_add_executor_job(entity.service_spotify_player_transfer_playback, device_id, play)
+                    await hass.async_add_executor_job(entity.service_spotify_player_transfer_playback, device_id, play, delay)
 
                 elif service.service == SERVICE_SPOTIFY_PLAYLIST_CHANGE:
 

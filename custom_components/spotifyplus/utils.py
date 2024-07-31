@@ -93,3 +93,59 @@ def validateDelay(
         result = delay
             
     return result
+
+
+def positionHMS_fromMilliSeconds(
+        position:int, 
+        ) -> float:
+    """
+    Converts an integer position value from milliseconds to a string value in H:MM:SS format.
+        
+    Args:
+        position (int):
+            The position value (as specified in milliseconds) to convert.
+    """
+    result:str = '0:00:00'
+    
+    # validations.
+    if (isinstance(position, float)):
+        position = int(position)
+    if (position is None) or (not isinstance(position, int)) or (position < 1):
+        return result            
+
+    # convert milliseconds to H:MM:SS string format.
+    nSeconds = position / 1000
+    mm, ss = divmod(nSeconds, 60)                       # get minutes and seconds first
+    hh, mm= divmod(mm, 60)                              # get hours next
+    result = "%d:%02d:%02d" % (hh, mm, ss)   # format to hh:mm:ss
+    
+    # return result to caller.
+    return result
+
+
+def positionHMS_fromSeconds(
+        position:int, 
+        ) -> float:
+    """
+    Converts an integer position value from seconds to a string value in H:MM:SS format.
+        
+    Args:
+        position (int):
+            The position value (as specified in seconds) to convert.
+    """
+    result:str = '0:00:00'
+    
+    # validations.
+    if (isinstance(position, float)):
+        position = int(position)
+    if (position is None) or (position < 1):
+        return result            
+
+    # convert seconds to H:MM:SS string format.
+    nSeconds = int(position)
+    mm, ss = divmod(nSeconds, 60)                       # get minutes and seconds first
+    hh, mm= divmod(mm, 60)                              # get hours next
+    result = "%d:%02d:%02d" % (hh, mm, ss)   # format to hh:mm:ss
+    
+    # return result to caller.
+    return result
