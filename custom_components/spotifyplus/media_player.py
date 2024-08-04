@@ -796,8 +796,6 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
     @spotify_exception_handler
     def select_source(self, source: str) -> None:
         """ Select playback device. """
-        saveSource:str = None
-        
         try:
 
             # trace.
@@ -809,18 +807,13 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             if (source is None) or (len(source) == 0):
                 raise HomeAssistantError("'%s': Source argument was not specified while trying to select a source.)" % (self.name))
             
-            # save current source in the event of an exception.
-            saveSource = self._attr_source
-
             # are we currently powered off?
-            wasTurnedOn:bool = False
             if self._attr_state == MediaPlayerState.OFF:
             
                 # power on the player.
                 # note that the `turn_on()` method will issue a transfer playback to the specified source.
                 self.turn_on()
                 self._isInCommandEvent = True  # turn "in a command event" indicator back on.
-                wasTurnedOn = True
                 
             else:
 
@@ -831,30 +824,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self._attr_source = source
             _logsi.LogVerbose("'%s': Selected source was changed to: '%s'" % (self.name, self._attr_source))
             
-            # # get current Spotify Connect player state.
-            # self._playerState, self._spotifyConnectDevice, self._sonosDevice = self._GetPlayerPlaybackState()
-                        
-            # # get the currently playing source (if any).
-            # if self._sonosDevice is not None:
-            #     currentSource = self._sonosDevice.player_name
-            # elif self._spotifyConnectDevice is not None:
-            #     currentSource = self._spotifyConnectDevice.DeviceInfo.RemoteName
-            # elif self._playerState.Device.Name is not None:
-            #     currentSource = self._playerState.Device.Name
-                
-            # # verify the source was switched.
-            # if (currentSource != source):
-            #     raise HomeAssistantError("'%s': Source could not be selected: '%s'.)" % (self.name, source))
-
         except HomeAssistantError: raise  # pass handled exceptions on thru
-        # except Exception as ex:
-
-        #     # assume source could not be selected if an exception occurred.
-        #     self._attr_source = saveSource
-        #     _logsi.LogVerbose("'%s': Exception while selecting source; resetting source to: '%s'" % (self.name, self._attr_source))
-            
-        #     _logsi.LogException(None, ex)
-        #     raise HomeAssistantError(str(ex)) from ex
         
         finally:
         
@@ -991,7 +961,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
                 else:
                     
-                    self.data.spotifyClient.PlayerMediaPause(self._spotifyConnectDevice.DeviceInfo.DeviceId)
+                    if self._playerState.IsPlaying:
+                        self.data.spotifyClient.PlayerMediaPause(self._spotifyConnectDevice.DeviceInfo.DeviceId)
                                
             # call script to power off device.
             self._CallScriptPower(self.data.OptionScriptTurnOff, "turn_off")
@@ -4205,7 +4176,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 else:
                 
                     # for everything else, just use the Spotify Web API.
-                    self.data.spotifyClient.PlayerMediaPause(self._playerState.Device.Id)
+                    if self._playerState.IsPlaying:
+                        self.data.spotifyClient.PlayerMediaPause(self._playerState.Device.Id, delay)
                 
             # get target device reference from cached list of Spotify Connect devices.
             scDevices:SpotifyConnectDevices = self.data.spotifyClient.GetSpotifyConnectDevices(refresh=False)
@@ -4269,24 +4241,39 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                     # queue instead of the Spotify Connect queue.
                     _logsi.LogVerbose("'%s': Creating local queue from source playerstate for Sonos device '%s' ('%s')" % (self.name, sonosDevice.ip_address, sonosDevice.player_name))
                     
+                    # retrieve spotify web api player queue - this includes the currently playing item, as well
+                    # as the first 20 items from the queue.
+                    queue:PlayerQueueInfo = self.data.spotifyClient.GetPlayerQueueInfo()
+                    
+                    # build a list of all queue item uri's, adding the currently playing item first.
+                    arrUris:list[str] = []
+                    arrUris.append(self._playerState.Item.Uri)
+                    if queue.QueueCount > 0:
+                        queueTrack:Track
+                        for queueTrack in queue.Queue:
+                            arrUris.append(queueTrack.Uri)
+
+                    # build the Sonos local queue, adding all Spotify Web API player queue items.
+                    sonosDevice = SoCo(scDevice.DiscoveryResult.HostIpAddress)
                     _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): CLEAR_QUEUE" % (self.name, sonosDevice.ip_address, sonosDevice.player_name))
                     sonosDevice.clear_queue()
                     sharelink = ShareLinkPlugin(sonosDevice)
-                    uri:str = self._playerState.Item.Uri
-                    _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): ADD_SHARE_LINK_TO_QUEUE (uri=%s)" % (self.name, sonosDevice.ip_address, sonosDevice.player_name, uri))
-                    sharelink.add_share_link_to_queue(uri)
+                    for uri in arrUris:
+                        _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): ADD_SHARE_LINK_TO_QUEUE (uri=%s)" % (self.name, sonosDevice.ip_address, sonosDevice.player_name, uri))
+                        sharelink.add_share_link_to_queue(uri)
                     _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): PLAY_FROM_QUEUE (index=%s)" % (self.name, sonosDevice.ip_address, sonosDevice.player_name, 0))
-                    sonosDevice.play_from_queue(index=0, start=True)
-
+                    sonosDevice.play_from_queue(index=0)
+                
                     # give SoCo api time to process the change.
                     if delay > 0:
                         _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % delay)
                         time.sleep(delay)
 
+                    # find position of currently playing track.
                     sonosPosition:str = positionHMS_fromMilliSeconds(self._playerState.ProgressMS)  # convert from milliseconds to Sonos H:MM:SS format
                     _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): SEEK (position=%s)" % (self.name, sonosDevice.ip_address, sonosDevice.player_name, sonosPosition))
                     sonosDevice.seek(position=sonosPosition)
-                
+
                     # give SoCo api time to process the change.
                     if delay > 0:
                         _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % delay)
@@ -4297,19 +4284,16 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 # for everything else, just use the Spotify Web API.
                 self.data.spotifyClient.PlayerTransferPlayback(deviceId, play, delay)
 
-            # set the selected source.
-            if scDevice is not None:
-                self._attr_source = scDevice.DeviceInfo.RemoteName
-                _logsi.LogVerbose("'%s': Selected source was changed to: '%s'" % (self.name, self._attr_source))
-            
             # get current Spotify Connect player state.
             self._playerState, self._spotifyConnectDevice, self._sonosDevice = self._GetPlayerPlaybackState()
             
             # reset internal SonosDevice to the SonosDevice that we just created (if transferring to Sonos).
             self._sonosDevice = sonosDevice
                         
-            # update ha state.
-            self.schedule_update_ha_state(force_refresh=False)
+            # set the selected source.
+            if scDevice is not None:
+                self._attr_source = scDevice.DeviceInfo.RemoteName
+                _logsi.LogVerbose("'%s': Selected source was changed to: '%s'" % (self.name, self._attr_source))
             
             # media player command was processed, so force a scan window at the next interval.
             _logsi.LogVerbose("'%s': Processed a transfer playback command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
@@ -4332,8 +4316,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         
         finally:
         
-            # reset Sonos device instance.
-            sonosDevice = None
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
             
             # trace.
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
