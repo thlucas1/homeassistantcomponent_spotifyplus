@@ -541,11 +541,16 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # get spotify client cached device list.
         if "GetSpotifyConnectDevices" in self.data.spotifyClient.ConfigurationCache:
             result:SpotifyConnectDevices = self.data.spotifyClient.ConfigurationCache["GetSpotifyConnectDevices"]
+            
+            # get the list of device names to hide (omit) in the list.
+            sourceListHide:list = self.data.OptionSourceListHide
 
             # build list of device names for the source list.
             deviceNames:list[str] = []
+            device:PlayerDevice
             for device in result.GetDeviceList():
-                deviceNames.append(device.Name)
+                if (device.Name.lower() not in sourceListHide):
+                    deviceNames.append(device.Name)
             return deviceNames
         
         return None

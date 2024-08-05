@@ -33,7 +33,8 @@
           "device_password": "Spotify Connect password to use when connecting to an inactive device.",
           "device_username": "Spotify Connect username to use when connecting to an inactive device.",
           "script_turn_on": "Script called to turn on device that plays media content.",
-          "script_turn_off": "Script called to turn off device that plays media content."
+          "script_turn_off": "Script called to turn off device that plays media content.",
+          "source_list_hide": "The semi-colon delimited list of device names to hide in the source list."
         },
         "submit": "Save"
       }

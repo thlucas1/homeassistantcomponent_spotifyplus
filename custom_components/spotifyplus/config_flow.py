@@ -42,6 +42,7 @@ from .const import (
     CONF_OPTION_DEVICE_USERNAME,
     CONF_OPTION_SCRIPT_TURN_OFF,
     CONF_OPTION_SCRIPT_TURN_ON,
+    CONF_OPTION_SOURCE_LIST_HIDE,
     DOMAIN, 
     DOMAIN_SCRIPT,
     SPOTIFY_SCOPES
@@ -371,6 +372,7 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                 self._Options[CONF_OPTION_DEVICE_PASSWORD] = user_input.get(CONF_OPTION_DEVICE_PASSWORD, None)
                 self._Options[CONF_OPTION_SCRIPT_TURN_OFF] = user_input.get(CONF_OPTION_SCRIPT_TURN_OFF, None)
                 self._Options[CONF_OPTION_SCRIPT_TURN_ON] = user_input.get(CONF_OPTION_SCRIPT_TURN_ON, None)
+                self._Options[CONF_OPTION_SOURCE_LIST_HIDE] = user_input.get(CONF_OPTION_SOURCE_LIST_HIDE, None)
                 
                 # validations.
                 # if device username was entered then device password is required.
@@ -438,6 +440,9 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                                  ): selector.EntitySelector(selector.EntitySelectorConfig(integration=DOMAIN_SCRIPT, 
                                                             multiple=False),
                     ),
+                    vol.Optional(CONF_OPTION_SOURCE_LIST_HIDE, 
+                                 description={"suggested_value": self._Options.get(CONF_OPTION_SOURCE_LIST_HIDE)},
+                                 ): cv.string,
                 }
             )
             

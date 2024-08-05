@@ -18,6 +18,7 @@ from .const import (
     CONF_OPTION_DEVICE_USERNAME,
     CONF_OPTION_SCRIPT_TURN_OFF,
     CONF_OPTION_SCRIPT_TURN_ON,
+    CONF_OPTION_SOURCE_LIST_HIDE,
 )
 
 @dataclass
@@ -99,3 +100,22 @@ class InstanceDataSpotifyPlus:
         """
         return self.options.get(CONF_OPTION_SCRIPT_TURN_ON, None)
     
+    @property
+    def OptionSourceListHide(self) -> list:
+        """
+        The list of devices to hide from the source list.
+        """
+        result:list = []
+        
+        # get option value.
+        value:str = self.options.get(CONF_OPTION_SOURCE_LIST_HIDE, None)
+        
+        # build a list from the semi-colon delimited string.
+        if value is not None:
+            result = value.split(';')
+            for idx in range(0, len(result)):
+                result[idx] = result[idx].strip().lower()
+                
+        # return result.
+        return result
+

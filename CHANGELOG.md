@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.47 ] - 2024/08/05
+
+  * Added configuration option to hide specified device names from the HA media player UI source list.
+
 ###### [ 1.0.46 ] - 2024/08/04
 
   * Updated service `player_transfer_playback` to transfer the Spotify users queue (20 items max) to the Sonos device (instead of just the currently playing track).  See the [Sonos Limitations](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Spotify-Connect-Brand-Notes#sonos) wiki documentation for further details about Sonos-related issues.

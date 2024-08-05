@@ -18,6 +18,7 @@ CONF_OPTION_DEVICE_PASSWORD = "device_password"
 CONF_OPTION_DEVICE_USERNAME = "device_username"
 CONF_OPTION_SCRIPT_TURN_ON = "script_turn_on"
 CONF_OPTION_SCRIPT_TURN_OFF = "script_turn_off"
+CONF_OPTION_SOURCE_LIST_HIDE = "source_list_hide"
 
 # security scopes required by various Spotify Web API endpoints.
 SPOTIFY_SCOPES:list = \
