@@ -52,6 +52,7 @@ from spotifywebapipython.models import (
     SpotifyConnectDevice,
     SpotifyConnectDevices,
     Track,
+    TrackSaved,
     TrackPage,
     TrackPageSaved,
     UserProfile
@@ -860,6 +861,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 sonos_repeat = False
             elif self._playerState.RepeatState == 'context':
                 sonos_repeat = True
+            else:   # assume off if nothing else.
+                sonos_repeat = False
             self._sonosDevice.play_mode = SONOS_PLAY_MODE_BY_MEANING[(shuffle, sonos_repeat)]
             
             # give SoCo api time to process the change.
@@ -3588,13 +3591,66 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("shuffle", shuffle)
             apiMethodParms.AppendKeyValue("delay", delay)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Media Play Favorite Tracks Service", apiMethodParms)
-            
-            # see if default device option was specified (e.g. deviceId="*").
-            deviceId = self._GetDefaultDeviceOption(deviceId)
+
+            # validations.
+            delay = validateDelay(delay, 0.50, 10)
+            if deviceId == '':
+                deviceId = None
+            if deviceId is None or deviceId == "*":
+                deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
+
+            # get selected device reference from cached list of Spotify Connect devices.
+            scDevices:SpotifyConnectDevices = self.data.spotifyClient.GetSpotifyConnectDevices(refresh=False)
+            scDevice:SpotifyConnectDevice = scDevices.GetDeviceByName(deviceId)
+            if scDevice is None:
+                scDevice = scDevices.GetDeviceById(deviceId)
 
             # start playing track favorites on the specified Spotify Connect device.
-            _logsi.LogVerbose("Playing Media Favorite Tracks on device")
-            self.data.spotifyClient.PlayerMediaPlayTrackFavorites(deviceId, shuffle, delay)
+            if (scDevice is not None) and (scDevice.DeviceInfo.IsBrandSonos):
+
+                # get current users favorite tracks.
+                tracks:TrackPageSaved = self.data.spotifyClient.GetTrackFavorites(limitTotal=200)
+                if (tracks.ItemsCount == 0):
+                    _logsi.LogVerbose("Current user has no favorite tracks; nothing to do")
+                    return
+
+                offsetPosition:int = 0
+                
+                # build a list of all item uri's.
+                arrUris:list[str] = []
+                trackSaved:TrackSaved
+                for trackSaved in tracks.Items:
+                    arrUris.append(trackSaved.Track.Uri)
+
+                # for Sonos, use the SoCo API command.
+                sonosDevice = SoCo(scDevice.DiscoveryResult.HostIpAddress)
+                _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): CLEAR_QUEUE" % (self.name, sonosDevice.ip_address, sonosDevice.player_name))
+                sonosDevice.clear_queue()
+                sharelink = ShareLinkPlugin(sonosDevice)
+                for uri in arrUris:
+                    _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): ADD_SHARE_LINK_TO_QUEUE (uri=%s)" % (self.name, sonosDevice.ip_address, sonosDevice.player_name, uri))
+                    sharelink.add_share_link_to_queue(uri)
+
+                # set desired shuffle mode.
+                self.service_spotify_player_set_shuffle_mode(state=shuffle, deviceId=deviceId, delay=delay)
+
+                # skip first track if shuffle is enabled.
+                if (len(arrUris) > 1) and (shuffle is True):
+                    offsetPosition = 1
+
+                # play the queue.
+                _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): PLAY_FROM_QUEUE (index=%s)" % (self.name, sonosDevice.ip_address, sonosDevice.player_name, offsetPosition))
+                sonosDevice.play_from_queue(index=offsetPosition)
+                
+                # give SoCo api time to process the change.
+                if delay > 0:
+                    _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % delay)
+                    time.sleep(delay)
+
+            else:
+
+                # for everything else, just use the Spotify Web API command.
+                self.data.spotifyClient.PlayerMediaPlayTrackFavorites(deviceId, shuffle, delay)
 
             # update ha state.
             self.schedule_update_ha_state(force_refresh=False)
@@ -3956,6 +4012,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 deviceId = None
             if deviceId is None or deviceId == "*":
                 deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
+            if state is None:
+                state = False
                 
             # get selected device reference from cached list of Spotify Connect devices.
             scDevices:SpotifyConnectDevices = self.data.spotifyClient.GetSpotifyConnectDevices(refresh=False)
@@ -3979,6 +4037,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                     sonos_repeat = False
                 elif playerState.RepeatState == 'context':
                     sonos_repeat = True
+                else:   # assume off if nothing else.
+                    sonos_repeat = False
                 playMode:str = SONOS_PLAY_MODE_BY_MEANING[(state, sonos_repeat)]
                 
                 # for Sonos, use the SoCo API command.

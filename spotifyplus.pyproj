@@ -40,6 +40,8 @@
     <Compile Include="custom_components\spotifyplus\__init__.py" />
     <Compile Include="test\testVS_Sonos_AvTransport.py" />
     <Compile Include="test\testVS_Sonos_Base.py" />
+    <Compile Include="test\testVS_Sonos_MusicServices.py" />
+    <Compile Include="test\testVS_Sonos_MusicService_Spotify.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include=".github\" />

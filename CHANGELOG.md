@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.48 ] - 2024/08/10
+
+  * Updated service `player_media_play_track_favorites` to transfer the Spotify users track favorites (200 max) to the Sonos device and play them from a local queue.  See the [Sonos Limitations](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Spotify-Connect-Brand-Notes#sonos) wiki documentation for further details about Sonos-related issues.
+
 ###### [ 1.0.47 ] - 2024/08/05
 
   * Added configuration option to hide specified device names from the HA media player UI source list.
