@@ -133,7 +133,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "offset": {
           "name": "Offset",
@@ -146,6 +146,10 @@
         "limit_total": {
           "name": "Limit Total",
           "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        },
+        "sort_result": {
+          "name": "Sort Result?",
+          "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
         }
       }
     },
@@ -159,7 +163,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "offset": {
           "name": "Offset",
@@ -172,6 +176,10 @@
         "limit_total": {
           "name": "Limit Total",
           "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        },
+        "sort_result": {
+          "name": "Sort Result?",
+          "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
         }
       }
     },
@@ -207,7 +215,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "offset": {
           "name": "Offset",
@@ -220,6 +228,10 @@
         "limit_total": {
           "name": "Limit Total",
           "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        },
+        "sort_result": {
+          "name": "Sort Result?",
+          "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
         }
       }
     },
@@ -237,11 +249,15 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "limit_total": {
           "name": "Limit Total",
           "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        },
+        "sort_result": {
+          "name": "Sort Result?",
+          "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
         }
       }
     },
@@ -281,7 +297,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "offset": {
           "name": "Offset",
@@ -294,6 +310,10 @@
         "limit_total": {
           "name": "Limit Total",
           "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        },
+        "sort_result": {
+          "name": "Sort Result?",
+          "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
         }
       }
     },
@@ -307,7 +327,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "offset": {
           "name": "Offset",
@@ -328,6 +348,10 @@
         "limit_total": {
           "name": "Limit Total",
           "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        },
+        "sort_result": {
+          "name": "Sort Result?",
+          "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
         }
       }
     },
@@ -342,6 +366,10 @@
         "refresh": {
           "name": "Refresh?",
           "description": "True to return real-time information from the spotify web api and update the cache; otherwise, False to just return the cached value."
+        },
+        "sort_result": {
+          "name": "Sort Result?",
+          "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
         }
       }
     },
@@ -401,7 +429,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "after": {
           "name": "After Time MS",
@@ -453,7 +481,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "offset": {
           "name": "Offset",
@@ -462,6 +490,10 @@
         "limit_total": {
           "name": "Limit Total",
           "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        },
+        "sort_result": {
+          "name": "Sort Result?",
+          "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
         }
       }
     },
@@ -497,7 +529,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "offset": {
           "name": "Offset",
@@ -523,7 +555,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "offset": {
           "name": "Offset",
@@ -532,6 +564,44 @@
         "limit_total": {
           "name": "Limit Total",
           "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        },
+        "sort_result": {
+          "name": "Sort Result?",
+          "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
+        }
+      }
+    },
+    "get_spotify_connect_device": {
+      "name": "Get Spotify Connect Device",
+      "description": "Get information about a specific Spotify Connect player device, and (optionally) activate the device if it requires it.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "device_value": {
+          "name": "Device Value",
+          "description": "The id (e.g. '30fbc80e35598f3c242f2120413c943dfd9715fe') or name (e.g. 'Office') of the Spotify Connect Player device this command is targeting.  If an '*' is specified, then the SpotifyPlus default device is used."
+        },
+        "verify_user_context": {
+          "name": "Verify User Context?",
+          "description": "If True, the active user context of the resolved device is checked to ensure it matches the Spotify Connect user context specified in the SpotifyPlus configuration options.  If False, the user context will not be checked.  Default is True."
+        },
+        "verify_timeout": {
+          "name": "Verify Timeout",
+          "description": "Maximum time to wait (in seconds) for the device to become active in the Spotify Connect device list.  This value is only used if a Connect command has to be issued to activate the device. Default is 5; value range is 0 - 10."
+        },
+        "refresh_device_list": {
+          "name": "Refresh Device List?",
+          "description": "True to refresh the Spotify Connect device list; otherwise, False to use the Spotify Connect device list cache.  Default is True."
+        },
+        "activate_device": {
+          "name": "Activate Device?",
+          "description": "True to activate the device if necessary; otherwise, False."
+        },
+        "delay": {
+          "name": "Delay",
+          "description": "Time delay (in seconds) to wait AFTER issuing any command to the device.  This delay will give the spotify zeroconf api time to process the change before another command is issued.  Default is 0.25; value range is 0 - 10."
         }
       }
     },
@@ -542,6 +612,14 @@
         "entity_id": {
           "name": "Entity ID",
           "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "refresh": {
+          "name": "Refresh Cache?",
+          "description": "True (default) to return real-time information from the spotify zeroconf api and update the cache; otherwise, False to just return the cached value."
+        },
+        "sort_result": {
+          "name": "Sort Result?",
+          "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
         }
       }
     },
@@ -555,7 +633,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "offset": {
           "name": "Offset",
@@ -568,6 +646,10 @@
         "limit_total": {
           "name": "Limit Total",
           "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        },
+        "sort_result": {
+          "name": "Sort Result?",
+          "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
         }
       }
     },
@@ -585,7 +667,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "offset": {
           "name": "Offset",
@@ -594,6 +676,10 @@
         "limit_total": {
           "name": "Limit Total",
           "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        },
+        "sort_result": {
+          "name": "Sort Result?",
+          "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
         }
       }
     },
@@ -611,7 +697,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "offset": {
           "name": "Offset",
@@ -620,6 +706,10 @@
         "limit_total": {
           "name": "Limit Total",
           "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        },
+        "sort_result": {
+          "name": "Sort Result?",
+          "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
         }
       }
     },
@@ -694,6 +784,14 @@
         "delay": {
           "name": "Delay",
           "description": "Time delay (in seconds) to wait AFTER issuing the command to the player.  This delay will give the spotify web api time to process the change before another command is issued.  Default is 0.50; value range is 0 - 10."
+        },
+        "resolve_device_id": {
+          "name": "Resolve Device Id?",
+          "description": "True to resolve the supplied `deviceId` value; otherwise, False not resolve the `deviceId` value as it has already been resolved.  Default is True."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to retrieve from favorites.  Default is 200."
         }
       }
     },
@@ -830,6 +928,10 @@
         "delay": {
           "name": "Delay",
           "description": "Time delay (in seconds) to wait AFTER issuing the final Connect command (if necessary). This delay will give the spotify web api time to process the device list change before another command is issued.  Default is 0.50; value range is 0 - 10."
+        },
+        "refresh_device_list": {
+          "name": "Refresh Device List?",
+          "description": "True to refresh the Spotify Connect device list; otherwise, False to use the Spotify Connect device list cache.  Default is False."
         }
       }
     },
@@ -1047,7 +1149,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "market": {
           "name": "Market / Country Code",
@@ -1073,7 +1175,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "market": {
           "name": "Market / Country Code",
@@ -1099,7 +1201,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "market": {
           "name": "Market / Country Code",
@@ -1125,7 +1227,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "market": {
           "name": "Market / Country Code",
@@ -1151,7 +1253,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "market": {
           "name": "Market / Country Code",
@@ -1177,7 +1279,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "market": {
           "name": "Market / Country Code",
@@ -1203,7 +1305,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
         },
         "market": {
           "name": "Market / Country Code",

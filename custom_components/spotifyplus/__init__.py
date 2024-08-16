@@ -108,6 +108,7 @@ SERVICE_SPOTIFY_GET_PLAYLIST_FAVORITES:str = 'get_playlist_favorites'
 SERVICE_SPOTIFY_GET_SHOW:str = 'get_show'
 SERVICE_SPOTIFY_GET_SHOW_EPISODES:str = 'get_show_episodes'
 SERVICE_SPOTIFY_GET_SHOW_FAVORITES:str = 'get_show_favorites'
+SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICE:str = 'get_spotify_connect_device'
 SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES:str = 'get_spotify_connect_devices'
 SERVICE_SPOTIFY_GET_TRACK_FAVORITES:str = 'get_track_favorites'
 SERVICE_SPOTIFY_GET_USERS_TOP_ARTISTS:str = 'get_users_top_artists'
@@ -185,6 +186,7 @@ SERVICE_SPOTIFY_GET_ALBUM_FAVORITES_SCHEMA = vol.Schema(
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("market"): cv.string,
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("sort_result"): cv.boolean,
     }
 )
 
@@ -195,6 +197,7 @@ SERVICE_SPOTIFY_GET_ALBUM_NEW_RELEASES_SCHEMA = vol.Schema(
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("country"): cv.string,
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("sort_result"): cv.boolean,
     }
 )
 
@@ -214,6 +217,7 @@ SERVICE_SPOTIFY_GET_ARTIST_ALBUMS_SCHEMA = vol.Schema(
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("market"): cv.string,
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("sort_result"): cv.boolean,
     }
 )
 
@@ -223,6 +227,7 @@ SERVICE_SPOTIFY_GET_ARTISTS_FOLLOWED_SCHEMA = vol.Schema(
         vol.Optional("after"): cv.string,
         vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("sort_result"): cv.boolean,
     }
 )
 
@@ -243,6 +248,7 @@ SERVICE_SPOTIFY_GET_CATEGORY_PLAYLISTS_SCHEMA = vol.Schema(
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("country"): cv.string,
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("sort_result"): cv.boolean,
     }
 )
 
@@ -255,6 +261,7 @@ SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS_SCHEMA = vol.Schema(
         vol.Optional("locale"): cv.string,
         vol.Optional("timestamp"): cv.string,
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("sort_result"): cv.boolean,
     }
 )
 
@@ -262,6 +269,7 @@ SERVICE_SPOTIFY_GET_PLAYER_DEVICES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("refresh"): cv.boolean,
+        vol.Optional("sort_result"): cv.boolean,
     }
 )
 
@@ -313,6 +321,7 @@ SERVICE_SPOTIFY_GET_PLAYLIST_FAVORITES_SCHEMA = vol.Schema(
         vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("sort_result"): cv.boolean,
     }
 )
 
@@ -341,12 +350,27 @@ SERVICE_SPOTIFY_GET_SHOW_FAVORITES_SCHEMA = vol.Schema(
         vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("sort_result"): cv.boolean,
+    }
+)
+
+SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICE_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("device_value"): cv.string,
+        vol.Optional("verify_user_context"): cv.boolean,
+        vol.Optional("verify_timeout", default=5.0): vol.All(vol.Range(min=0,max=10.0)),
+        vol.Optional("refresh_device_list"): cv.boolean,
+        vol.Optional("activate_device"): cv.boolean,
+        vol.Optional("delay", default=0.25): vol.All(vol.Range(min=0,max=10.0)),
     }
 )
 
 SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("refresh"): cv.boolean,
+        vol.Optional("sort_result"): cv.boolean,
     }
 )
 
@@ -357,6 +381,7 @@ SERVICE_SPOTIFY_GET_TRACK_FAVORITES_SCHEMA = vol.Schema(
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("market"): cv.string,
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("sort_result"): cv.boolean,
     }
 )
 
@@ -367,6 +392,7 @@ SERVICE_SPOTIFY_GET_USERS_TOP_ARTISTS_SCHEMA = vol.Schema(
         vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("sort_result"): cv.boolean,
     }
 )
 
@@ -377,6 +403,7 @@ SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS_SCHEMA = vol.Schema(
         vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("sort_result"): cv.boolean,
     }
 )
 
@@ -406,6 +433,8 @@ SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACK_FAVORITES_SCHEMA = vol.Schema(
         vol.Optional("device_id"): cv.string,
         vol.Optional("shuffle"): cv.boolean,
         vol.Optional("delay", default=0.50): vol.All(vol.Range(min=0,max=10.0)),
+        vol.Optional("resolve_device_id"): cv.boolean,
+        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=999999)),
     }
 )
 
@@ -461,6 +490,7 @@ SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK_SCHEMA = vol.Schema(
         vol.Optional("device_id"): cv.string,
         vol.Optional("play"): cv.boolean,
         vol.Optional("delay", default=0.50): vol.All(vol.Range(min=0,max=10.0)),
+        vol.Optional("refresh_device_list"): cv.boolean,
     }
 )
 
@@ -832,8 +862,10 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     device_id = service.data.get("device_id")
                     shuffle = service.data.get("shuffle")
                     delay = service.data.get("delay")
+                    resolve_device_id = service.data.get("resolve_device_id")
+                    limit_total = service.data.get("limit_total")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    await hass.async_add_executor_job(entity.service_spotify_player_media_play_track_favorites, device_id, shuffle, delay)
+                    await hass.async_add_executor_job(entity.service_spotify_player_media_play_track_favorites, device_id, shuffle, delay, resolve_device_id, limit_total)
 
                 elif service.service == SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS:
 
@@ -876,10 +908,11 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
                     # transfer playback to a new Spotify Connect device.
                     device_id = service.data.get("device_id")
+                    refresh_device_list = service.data.get("refresh_device_list")
                     play = service.data.get("play")
                     delay = service.data.get("delay")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    await hass.async_add_executor_job(entity.service_spotify_player_transfer_playback, device_id, play, delay)
+                    await hass.async_add_executor_job(entity.service_spotify_player_transfer_playback, device_id, play, delay, refresh_device_list)
 
                 elif service.service == SERVICE_SPOTIFY_PLAYLIST_CHANGE:
 
@@ -1038,8 +1071,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     offset = service.data.get("offset")
                     market = service.data.get("market")
                     limit_total = service.data.get("limit_total")
+                    sort_result = service.data.get("sort_result")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_album_favorites, limit, offset, market, limit_total)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_album_favorites, limit, offset, market, limit_total, sort_result)
 
                 elif service.service == SERVICE_SPOTIFY_GET_ALBUM_NEW_RELEASES:
 
@@ -1048,8 +1082,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     offset = service.data.get("offset")
                     country = service.data.get("country")
                     limit_total = service.data.get("limit_total")
+                    sort_result = service.data.get("sort_result")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_album_new_releases, limit, offset, country, limit_total)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_album_new_releases, limit, offset, country, limit_total, sort_result)
 
                 elif service.service == SERVICE_SPOTIFY_GET_ARTIST:
 
@@ -1067,8 +1102,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     offset = service.data.get("offset")
                     market = service.data.get("market")
                     limit_total = service.data.get("limit_total")                   
+                    sort_result = service.data.get("sort_result")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_artist_albums, artist_id, include_groups, limit, offset, market, limit_total)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_artist_albums, artist_id, include_groups, limit, offset, market, limit_total, sort_result)
 
                 elif service.service == SERVICE_SPOTIFY_GET_ARTISTS_FOLLOWED:
 
@@ -1076,8 +1112,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     after = service.data.get("after")
                     limit = service.data.get("limit")
                     limit_total = service.data.get("limit_total")
+                    sort_result = service.data.get("sort_result")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_artists_followed, after, limit, limit_total)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_artists_followed, after, limit, limit_total, sort_result)
 
                 elif service.service == SERVICE_SPOTIFY_GET_BROWSE_CATEGORYS_LIST:
 
@@ -1096,8 +1133,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     offset = service.data.get("offset")
                     country = service.data.get("country")
                     limit_total = service.data.get("limit_total")
+                    sort_result = service.data.get("sort_result")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_category_playlists, category_id, limit, offset, country, limit_total)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_category_playlists, category_id, limit, offset, country, limit_total, sort_result)
 
                 elif service.service == SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS:
 
@@ -1108,15 +1146,17 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     locale = service.data.get("locale")
                     timestamp = service.data.get("timestamp")
                     limit_total = service.data.get("limit_total")
+                    sort_result = service.data.get("sort_result")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_featured_playlists, limit, offset, country, locale, timestamp, limit_total)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_featured_playlists, limit, offset, country, locale, timestamp, limit_total, sort_result)
 
                 elif service.service == SERVICE_SPOTIFY_GET_PLAYER_DEVICES:
 
                     # get spotify player device list.
                     refresh = service.data.get("refresh")
+                    sort_result = service.data.get("sort_result")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_player_devices, refresh)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_player_devices, refresh, sort_result)
 
                 elif service.service == SERVICE_SPOTIFY_GET_PLAYER_NOW_PLAYING:
 
@@ -1166,8 +1206,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     limit = service.data.get("limit")
                     offset = service.data.get("offset")
                     limit_total = service.data.get("limit_total")
+                    sort_result = service.data.get("sort_result")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_playlist_favorites, limit, offset, limit_total)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_playlist_favorites, limit, offset, limit_total, sort_result)
 
                 elif service.service == SERVICE_SPOTIFY_GET_SHOW:
 
@@ -1194,14 +1235,29 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     limit = service.data.get("limit")
                     offset = service.data.get("offset")
                     limit_total = service.data.get("limit_total")
+                    sort_result = service.data.get("sort_result")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_show_favorites, limit, offset, limit_total)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_show_favorites, limit, offset, limit_total, sort_result)
+
+                elif service.service == SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICE:
+
+                    # get spotify connect device list.
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    device_value = service.data.get("device_value")
+                    verify_user_context = service.data.get("verify_user_context")
+                    verify_timeout = service.data.get("verify_timeout")
+                    refresh_device_list = service.data.get("refresh_device_list")
+                    activate_device = service.data.get("activate_device")
+                    delay = service.data.get("delay")
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_spotify_connect_device, device_value, verify_user_context, verify_timeout, refresh_device_list, activate_device, delay)
 
                 elif service.service == SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES:
 
                     # get spotify connect device list.
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_spotify_connect_devices)
+                    refresh = service.data.get("refresh")
+                    sort_result = service.data.get("sort_result")
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_spotify_connect_devices, refresh, sort_result)
 
                 elif service.service == SERVICE_SPOTIFY_GET_TRACK_FAVORITES:
 
@@ -1210,8 +1266,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     offset = service.data.get("offset")
                     market = service.data.get("market")
                     limit_total = service.data.get("limit_total")
+                    sort_result = service.data.get("sort_result")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_track_favorites, limit, offset, market, limit_total)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_track_favorites, limit, offset, market, limit_total, sort_result)
 
                 elif service.service == SERVICE_SPOTIFY_GET_USERS_TOP_ARTISTS:
 
@@ -1220,8 +1277,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     limit = service.data.get("limit")
                     offset = service.data.get("offset")
                     limit_total = service.data.get("limit_total")
+                    sort_result = service.data.get("sort_result")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_users_top_artists, time_range, limit, offset, limit_total)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_users_top_artists, time_range, limit, offset, limit_total, sort_result)
 
                 elif service.service == SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS:
 
@@ -1230,8 +1288,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     limit = service.data.get("limit")
                     offset = service.data.get("offset")
                     limit_total = service.data.get("limit_total")
+                    sort_result = service.data.get("sort_result")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_users_top_tracks, time_range, limit, offset, limit_total)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_users_top_tracks, time_range, limit, offset, limit_total, sort_result)
 
                 elif service.service == SERVICE_SPOTIFY_PLAYER_ACTIVATE_DEVICES:
 
@@ -1659,6 +1718,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             SERVICE_SPOTIFY_GET_SHOW_FAVORITES,
             service_handle_spotify_serviceresponse,
             schema=SERVICE_SPOTIFY_GET_SHOW_FAVORITES_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICE, SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICE_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICE,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICE_SCHEMA,
             supports_response=SupportsResponse.ONLY,
         )
 

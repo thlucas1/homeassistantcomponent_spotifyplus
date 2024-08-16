@@ -111,7 +111,7 @@ get_album_favorites:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
       example: 20
       required: false
       selector:
@@ -144,6 +144,13 @@ get_album_favorites:
       selector:
         number:
           mode: box
+    sort_result:
+      name: Sort Result?
+      description: True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them.
+      example: "True"
+      required: false
+      selector:
+        boolean:
 
 get_album_new_releases:
   name: Get Album New Releases
@@ -160,7 +167,7 @@ get_album_new_releases:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
       example: 20
       required: false
       selector:
@@ -193,6 +200,13 @@ get_album_new_releases:
       selector:
         number:
           mode: box
+    sort_result:
+      name: Sort Result?
+      description: True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them.
+      example: "True"
+      required: false
+      selector:
+        boolean:
 
 get_artist:
   name: Get Artist
@@ -244,7 +258,7 @@ get_artist_albums:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
       example: 20
       required: false
       selector:
@@ -277,6 +291,13 @@ get_artist_albums:
       selector:
         number:
           mode: box
+    sort_result:
+      name: Sort Result?
+      description: True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them.
+      example: "True"
+      required: false
+      selector:
+        boolean:
 
 get_artists_followed:
   name: Get Artists Followed
@@ -300,7 +321,7 @@ get_artists_followed:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
       example: 20
       required: false
       selector:
@@ -316,6 +337,13 @@ get_artists_followed:
       selector:
         number:
           mode: box
+    sort_result:
+      name: Sort Result?
+      description: True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them.
+      example: "True"
+      required: false
+      selector:
+        boolean:
 
 get_browse_categorys_list:
   name: Get Browse Categorys List
@@ -345,7 +373,7 @@ get_browse_categorys_list:
       selector:
         text:
     refresh:
-      name: Refresh Cache
+      name: Refresh Cache?
       description: True to return real-time information from the spotify web api and update the cache; otherwise, False to just return the cached value.
       example: "False"
       required: false
@@ -374,7 +402,7 @@ get_category_playlists:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
       example: 20
       required: false
       selector:
@@ -407,6 +435,13 @@ get_category_playlists:
       selector:
         number:
           mode: box
+    sort_result:
+      name: Sort Result?
+      description: True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them.
+      example: "True"
+      required: false
+      selector:
+        boolean:
 
 get_featured_playlists:
   name: Get Featured Playlists
@@ -423,7 +458,7 @@ get_featured_playlists:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
       example: 20
       required: false
       selector:
@@ -470,6 +505,13 @@ get_featured_playlists:
       selector:
         number:
           mode: box
+    sort_result:
+      name: Sort Result?
+      description: True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them.
+      example: "True"
+      required: false
+      selector:
+        boolean:
 
 get_player_devices:
   name: Get Player Devices
@@ -487,6 +529,13 @@ get_player_devices:
     refresh:
       name: Refresh?
       description: True to return real-time information from the spotify web api and update the cache; otherwise, False to just return the cached value.
+      example: "True"
+      required: false
+      selector:
+        boolean:
+    sort_result:
+      name: Sort Result?
+      description: True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them.
       example: "True"
       required: false
       selector:
@@ -577,7 +626,7 @@ get_player_recent_tracks:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
       example: 20
       required: false
       selector:
@@ -671,7 +720,7 @@ get_playlist_favorites:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
       example: 20
       required: false
       selector:
@@ -697,6 +746,13 @@ get_playlist_favorites:
       selector:
         number:
           mode: box
+    sort_result:
+      name: Sort Result?
+      description: True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them.
+      example: "True"
+      required: false
+      selector:
+        boolean:
 
 get_show:
   name: Get Show
@@ -748,7 +804,7 @@ get_show_episodes:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
       example: 20
       required: false
       selector:
@@ -797,7 +853,7 @@ get_show_favorites:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
       example: 20
       required: false
       selector:
@@ -823,6 +879,75 @@ get_show_favorites:
       selector:
         number:
           mode: box
+    sort_result:
+      name: Sort Result?
+      description: True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them.
+      example: "True"
+      required: false
+      selector:
+        boolean:
+
+get_spotify_connect_device:
+  name: Get Spotify Connect Device
+  description: Get information about a specific Spotify Connect player device, and (optionally) activate the device if it requires it.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    device_value:
+      name: Device Value
+      description: The id or name of the Spotify Connect Player device this command is targeting.  If an "*" is specified, then the SpotifyPlus default device is used.
+      example: "Bose-ST10-1"
+      required: true
+      selector:
+        text:
+    verify_user_context:
+      name: Verify User Context?
+      description: If True, the active user context of the resolved device is checked to ensure it matches the Spotify Connect user context specified in the SpotifyPlus configuration options.  If False, the user context will not be checked.  Default is True.
+      example: "True"
+      required: false
+      selector:
+        boolean:
+    verify_timeout:
+      name: Verify Timeout
+      description: Maximum time to wait (in seconds) for the device to become active in the Spotify Connect device list.  This value is only used if a Connect command has to be issued to activate the device. Default is 5; value range is 0 - 10.
+      example: "0.50"
+      required: false
+      selector:
+        number:
+          min: 0.0
+          max: 10.0
+          mode: box
+    refresh_device_list:
+      name: Refresh Device List?
+      description: True (default) to refresh the Spotify Connect device list; otherwise, False to use the Spotify Connect device list cache.
+      example: "True"
+      required: false
+      selector:
+        boolean:
+    activate_device:
+      name: Activate Device?
+      description: True to activate the device if necessary; otherwise, False.
+      example: "True"
+      required: false
+      selector:
+        boolean:
+    delay:
+      name: Delay
+      description: Time delay (in seconds) to wait AFTER issuing any command to the device.  This delay will give the spotify zeroconf api time to process the change before another command is issued.  Default is 0.25; value range is 0 - 10.
+      example: "0.25"
+      required: false
+      selector:
+        number:
+          min: 0.0
+          max: 10.0
+          mode: box
 
 get_spotify_connect_devices:
   name: Get Spotify Connect Devices
@@ -837,6 +962,20 @@ get_spotify_connect_devices:
         entity:
           integration: spotifyplus
           domain: media_player
+    refresh:
+      name: Refresh Cache?
+      description: True (default) to return real-time information from the spotify zeroconf api and update the cache; otherwise, False to just return the cached value.
+      example: "True"
+      required: false
+      selector:
+        boolean:
+    sort_result:
+      name: Sort Result?
+      description: True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them.
+      example: "True"
+      required: false
+      selector:
+        boolean:
 
 get_track_favorites:
   name: Get Track Favorites
@@ -853,7 +992,7 @@ get_track_favorites:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
       example: 20
       required: false
       selector:
@@ -886,6 +1025,13 @@ get_track_favorites:
       selector:
         number:
           mode: box
+    sort_result:
+      name: Sort Result?
+      description: True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them.
+      example: "True"
+      required: false
+      selector:
+        boolean:
 
 get_users_top_artists:
   name: Get Users Top Artists
@@ -909,7 +1055,7 @@ get_users_top_artists:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
       example: 20
       required: false
       selector:
@@ -935,6 +1081,13 @@ get_users_top_artists:
       selector:
         number:
           mode: box
+    sort_result:
+      name: Sort Result?
+      description: True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them.
+      example: "True"
+      required: false
+      selector:
+        boolean:
 
 get_users_top_tracks:
   name: Get Users Top Tracks
@@ -958,7 +1111,7 @@ get_users_top_tracks:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
       example: 20
       required: false
       selector:
@@ -984,6 +1137,13 @@ get_users_top_tracks:
       selector:
         number:
           mode: box
+    sort_result:
+      name: Sort Result?
+      description: True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them.
+      example: "True"
+      required: false
+      selector:
+        boolean:
 
 player_activate_devices:
   name: Player Activate Devices
@@ -1117,6 +1277,21 @@ player_media_play_track_favorites:
         number:
           min: 0.0
           max: 10.0
+          mode: box
+    resolve_device_id:
+      name: Resolve Device Id?
+      description: True to resolve the supplied `deviceId` value; otherwise, False not resolve the `deviceId` value as it has already been resolved.  Default is True.  
+      example: "True"
+      required: false
+      selector:
+        boolean:
+    limit_total:
+      name: Limit Total
+      description: The maximum number of items to retrieve from favorites.  Default is 200.
+      example: 200
+      required: false
+      selector:
+        number:
           mode: box
 
 player_media_play_tracks:
@@ -1364,6 +1539,13 @@ player_transfer_playback:
           min: 0.0
           max: 10.0
           mode: box
+    refresh_device_list:
+      name: Refresh Device List?
+      description: True to refresh the Spotify Connect device list; otherwise, False to use the Spotify Connect device list cache.  Default is False.
+      example: "True"
+      required: false
+      selector:
+        boolean:
 
 playlist_cover_image_add:
   name: Playlist Cover Image Add
@@ -2217,6 +2399,7 @@ zeroconf_device_connect:
         number:
           min: 1
           max: 65535
+          mode: box
     cpath:
       name: CPath Identifier
       description: Spotify Connect Zeroconf API CPath property value (e.g. '/zc').
@@ -2303,6 +2486,7 @@ zeroconf_device_disconnect:
         number:
           min: 1
           max: 65535
+          mode: box
     cpath:
       name: CPath Identifier
       description: Spotify Connect Zeroconf API CPath property value (e.g. '/zc').
@@ -2354,6 +2538,7 @@ zeroconf_device_getinfo:
         number:
           min: 1
           max: 65535
+          mode: box
     cpath:
       name: CPath Identifier
       description: Spotify Connect Zeroconf API CPath property value (e.g. '/zc').

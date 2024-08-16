@@ -42,6 +42,7 @@
     <Compile Include="test\testVS_Sonos_Base.py" />
     <Compile Include="test\testVS_Sonos_MusicServices.py" />
     <Compile Include="test\testVS_Sonos_MusicService_Spotify.py" />
+    <Compile Include="test\__init__.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include=".github\" />

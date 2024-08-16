@@ -6,6 +6,15 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.49 ] - 2024/08/16
+
+  * Updated service `zeroconf_device_connect` to correctly process Spotify Connect requests for token type `authorization_code` devices.  This requires you to setup a seperate OAuth2 authorization access token outside of Home Assistant in order to activate these devices.  This (currently) only affects Sonos devices, as they are the only manufacturer (that I am aware of) that implements the `authorization_code` token type.  More information can be found in the [wiki documentation](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#oauth2-token-for-tokentypeauthorization_code-devices).
+  * Added service `get_spotify_connect_device` to Get information about a specific Spotify Connect player device, and (optionally) activate the device if it requires it.
+  * Updated service `player_resolve_device_id` with deprecated status, as the `get_spotify_connect_device` service offers the same (and more) functionality.
+  * Updated service descriptions for services that specify a `limit` argument.
+  * Added `sortResult` argument to the various services that return lists that can be sorted.  If True (default), result items are sorted by name prior to returning to the caller; otherwise, results are left in the order that the Spotify Web API returned them.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.83.
+
 ###### [ 1.0.48 ] - 2024/08/10
 
   * Updated service `player_media_play_track_favorites` to transfer the Spotify users track favorites (200 max) to the Sonos device and play them from a local queue.  See the [Sonos Limitations](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Spotify-Connect-Brand-Notes#sonos) wiki documentation for further details about Sonos-related issues.
