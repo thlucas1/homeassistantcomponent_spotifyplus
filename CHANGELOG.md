@@ -6,6 +6,12 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.50 ] - 2024/08/18
+
+  * Updated service `select_source` to refresh the Spotify Connect device list prior to selecting the new source.
+  * Updated service `player_transfer_playback` to refresh the Spotify Connect device list prior to transferring playback to the target device.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.84.
+
 ###### [ 1.0.49 ] - 2024/08/16
 
   * Updated service `zeroconf_device_connect` to correctly process Spotify Connect requests for token type `authorization_code` devices.  This requires you to setup a seperate OAuth2 authorization access token outside of Home Assistant in order to activate these devices.  This (currently) only affects Sonos devices, as they are the only manufacturer (that I am aware of) that implements the `authorization_code` token type.  More information can be found in the [wiki documentation](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#oauth2-token-for-tokentypeauthorization_code-devices).

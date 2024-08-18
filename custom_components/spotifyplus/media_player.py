@@ -824,7 +824,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             else:
 
                 # transfer playback to the specified source.
-                self.service_spotify_player_transfer_playback(source, (self.state == MediaPlayerState.PLAYING))
+                self.service_spotify_player_transfer_playback(source, (self.state == MediaPlayerState.PLAYING), refreshDeviceList=True)
         
             # set the selected source.
             self._attr_source = source
@@ -1476,6 +1476,14 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                     # this seems to happen a lot for Sonos devices!
                     _logsi.LogVerbose("'%s': Source value ('%s') does not match Spotify Web API player name ('%s'); using Spotify Web API player name" % (self.name, self._attr_source, playerPlayState.Device.Name))
                     self._attr_source = playerPlayState.Device.Name
+                    
+                    # check to see if currently active device is in the Spotify Connect device list cache.
+                    # if it's not in the cache, then we need to refresh the Spotify Connect device list cache
+                    scDevices:SpotifyConnectDevices = self.data.spotifyClient.GetSpotifyConnectDevices(refresh=False)
+                    if not scDevices.ContainsDeviceName(playerPlayState.Device.Name):
+                        _logsi.LogVerbose("'%s': Spotify PlayerPlayState device name '%s' was not found in the Spotify Connect device list cache; refreshing cache" % (self.name, self._attr_source))
+                        # it's risky refreshing the Spotify Connect device list here, as this method fires every second.  
+                        self.data.spotifyClient.GetSpotifyConnectDevices(refresh=True)
 
             # update seek-related attributes.
             if playerPlayState.ProgressMS is not None:
@@ -4378,7 +4386,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         deviceId:str, 
         play:bool=True, 
         delay:float=0.50,
-        refreshDeviceList:bool=False, 
+        refreshDeviceList:bool=True, 
         ) -> None:
         """
         Transfer playback to a new Spotify Connect device and optionally begin playback.
@@ -4386,20 +4394,22 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             deviceId (str):
                 The id of the device on which playback should be started/transferred.
+                Example: `Bose-ST10-1`
                 Example: `0d1841b0976bae2a3a310dd74c0f3df354899bc8`
             play (bool):
                 The transfer method:  
                 - `True`  - ensure playback happens on new device.   
                 - `False` - keep the current playback state.  
-                Default: `True`  
+                Default is `True`  
             delay (float):
                 Time delay (in seconds) to wait AFTER issuing the command to the player.  
                 This delay will give the spotify web api time to process the change before 
-                another command is issued.  
-                Default is 0.50; value range is 0 - 10.
+                another command is issued.   
+                Default is 0.50; value range is 0 - 10.  
             refreshDeviceList (bool):
                 True to refresh the Spotify Connect device list; otherwise, False to use the 
-                Spotify Connect device list cache.
+                Spotify Connect device list cache.  
+                Default is True.
         """
         apiMethodName:str = 'service_spotify_player_transfer_playback'
         apiMethodParms:SIMethodParmListContext = None
@@ -6322,10 +6332,6 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
             # call base class method.
             await super().async_added_to_hass()
-
-            # load list of supported sources (also caches them in the client for later).
-            _logsi.LogVerbose("'%s': MediaPlayer is loading list of ALL sources that the device supports" % self.name)
-            result:SpotifyConnectDevices = await self.hass.async_add_executor_job(self.data.spotifyClient.GetSpotifyConnectDevices, True)
 
             # add listener that will inform HA of our state if a user removes the device instance.
             _logsi.LogVerbose("'%s': adding '_handle_devices_update' listener" % self.name)

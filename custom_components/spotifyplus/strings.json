@@ -931,7 +931,7 @@
         },
         "refresh_device_list": {
           "name": "Refresh Device List?",
-          "description": "True to refresh the Spotify Connect device list; otherwise, False to use the Spotify Connect device list cache.  Default is False."
+          "description": "True to refresh the Spotify Connect device list; otherwise, False to use the Spotify Connect device list cache.  Default is True."
         }
       }
     },
