@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.51 ] - 2024/08/18
+
+  * Updated service `player_transfer_playback` to check Sonos transport status after transferring playback to the target device, and play / pause the transport as designated by the `play` argument.
+
 ###### [ 1.0.50 ] - 2024/08/18
 
   * Updated service `select_source` to refresh the Spotify Connect device list prior to selecting the new source.

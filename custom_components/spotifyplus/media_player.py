@@ -1326,7 +1326,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 currentTransportState:str = sonosTransportInfo.get('current_transport_state','')
                 if currentTransportState == 'PLAYING':
                     playerState._IsPlaying = True
-                elif currentTransportState == 'PAUSED_PLAYBACK':
+                elif currentTransportState in ['PAUSED_PLAYBACK','STOPPED']:
                     playerState.Actions._Pausing = True
                     
                 # only update the following PlayState attributes from SoCo if they are NOT set.
@@ -4499,20 +4499,51 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                         refreshDeviceList=False, 
                         activateDevice=True)
 
+                    # at this point the Sonos device should be set to the SPOTIFY_CONNECT music source.
+                    # note that we have to issue a transport play command to actually transfer control to the
+                    # Sonos device though; just connecting to the device will not transfer control!
+                    # we will issue the play command below, based on the current Sonos transport state.
+
                     # refresh sonos music source property value, as it will change after device activation.
                     sonosMusicSource = sonosDevice.music_source
                     _logsi.LogVerbose("'%s': Sonos device '%s' ('%s') music source (after activation): '%s'" % (self.name, sonosDevice.ip_address, sonosDevice.player_name, sonosMusicSource))
-                
+
+                # get current Sonos transport status.
+                sonosTransportInfo:dict = sonosDevice.get_current_transport_info()
+                currentTransportState:str = sonosTransportInfo.get('current_transport_state', None)
+                currentTransportStatus:str = sonosTransportInfo.get('current_transport_status', None)
+                _logsi.LogVerbose("'%s': Sonos device '%s' ('%s') current_transport_state (before activation transfer): '%s' (Status=%s)" % (self.name, sonosDevice.ip_address, sonosDevice.player_name, currentTransportState, currentTransportStatus))
+
                 # was the Sonos device music source set to Spotify Connect?
                 if sonosMusicSource == 'SPOTIFY_CONNECT':
                    
                     _logsi.LogVerbose("'%s': Sonos device music source is currently set to SPOTIFY_CONNECT" % (self.name))
 
-                    # source device is not playing anything, so just issue a play command to the Sonos device
-                    # to let it choose what to play.
-                    _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): PLAY" % (self.name, sonosDevice.ip_address, sonosDevice.player_name))
+                    # issue a transport play command to actually transfer control to the Sonos device.
+                    _logsi.LogVerbose("'%s': Issuing transport command to transfer Sonos device '%s' ('%s'): PLAY" % (self.name, sonosDevice.ip_address, sonosDevice.player_name))
                     sonosDevice.play()
                     
+                    # give SoCo api time to process the change.
+                    if delay > 0:
+                        _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % delay)
+                        time.sleep(delay)
+
+                    # get current Sonos transport status.
+                    sonosTransportInfo:dict = sonosDevice.get_current_transport_info()
+                    currentTransportState:str = sonosTransportInfo.get('current_transport_state', None)
+                    currentTransportStatus:str = sonosTransportInfo.get('current_transport_status', None)
+                    _logsi.LogVerbose("'%s': Sonos device '%s' ('%s') current_transport_state (after activation transfer): '%s' (Status=%s)" % (self.name, sonosDevice.ip_address, sonosDevice.player_name, currentTransportState, currentTransportStatus))
+
+                    # stop / start play as requested.
+                    if currentTransportState == 'PLAYING':
+                        if play == False:
+                            _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): PAUSE" % (self.name, sonosDevice.ip_address, sonosDevice.player_name))
+                            sonosDevice.pause()
+                    elif currentTransportState in ['PAUSED_PLAYBACK','STOPPED','TRANSITIONING']:
+                        if play == True:
+                            _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): PLAY" % (self.name, sonosDevice.ip_address, sonosDevice.player_name))
+                            sonosDevice.play()
+                                        
                     # give SoCo api time to process the change.
                     if delay > 0:
                         _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % delay)
