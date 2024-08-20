@@ -602,8 +602,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
         else:
             
+            # call Spotify Web API to process the request.
             self.data.spotifyClient.PlayerMediaResume()
-            
+
 
     @spotify_exception_handler
     def media_pause(self) -> None:
@@ -626,6 +627,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
         else:
 
+            # call Spotify Web API to process the request.
             self.data.spotifyClient.PlayerMediaPause()
 
 
@@ -646,6 +648,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
         else:
             
+            # call Spotify Web API to process the request.
             self.data.spotifyClient.PlayerMediaSkipPrevious()
 
 
@@ -666,6 +669,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
         else:
             
+            # call Spotify Web API to process the request.
             self.data.spotifyClient.PlayerMediaSkipNext()
 
 
@@ -692,6 +696,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
         else:
             
+            # call Spotify Web API to process the request.
             self.data.spotifyClient.PlayerMediaSeek(int(position * 1000))
         
 
@@ -829,6 +834,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # set the selected source.
             self._attr_source = source
             _logsi.LogVerbose("'%s': Selected source was changed to: '%s'" % (self.name, self._attr_source))
+
+            # set default device name to use for player transport functions that are executed
+            # but there is no active Spotify player device.
+            self.data.spotifyClient.DefaultDeviceId = self._attr_source
             
         except HomeAssistantError: raise  # pass handled exceptions on thru
         
@@ -871,6 +880,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
         else:
             
+            # call Spotify Web API to process the request.
             self.data.spotifyClient.PlayerSetShuffleMode(shuffle)
 
 
@@ -901,6 +911,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             
         else:
             
+            # call Spotify Web API to process the request.
             self.data.spotifyClient.PlayerSetRepeatMode(REPEAT_MODE_MAPPING_TO_SPOTIFY[repeat])
 
 
@@ -930,6 +941,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             
         else:
             
+            # call Spotify Web API to process the request.
             self.data.spotifyClient.PlayerSetVolume(int(volume * 100))
 
 
@@ -1468,6 +1480,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                     if (self._attr_state in [MediaPlayerState.PLAYING, MediaPlayerState.PAUSED, MediaPlayerState.IDLE]):
                         _logsi.LogVerbose("'%s': Source value is not set; using Spotify Web API player name ('%s')" % (self.name, playerPlayState.Device.Name))
                         self._attr_source = playerPlayState.Device.Name
+                        self.data.spotifyClient.DefaultDeviceId = self._attr_source
                             
                 elif (self._attr_source != playerPlayState.Device.Name) and (playerPlayState.Device.Name is not None):
                     
@@ -1476,6 +1489,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                     # this seems to happen a lot for Sonos devices!
                     _logsi.LogVerbose("'%s': Source value ('%s') does not match Spotify Web API player name ('%s'); using Spotify Web API player name" % (self.name, self._attr_source, playerPlayState.Device.Name))
                     self._attr_source = playerPlayState.Device.Name
+                    self.data.spotifyClient.DefaultDeviceId = self._attr_source
                     
                     # check to see if currently active device is in the Spotify Connect device list cache.
                     # if it's not in the cache, then we need to refresh the Spotify Connect device list cache
@@ -4662,6 +4676,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         
         finally:
         
+            # set default device name to use for player transport functions that are executed
+            # but there is no active Spotify player device.
+            self.data.spotifyClient.DefaultDeviceId = self._attr_source
+            
             # update ha state.
             self.schedule_update_ha_state(force_refresh=False)
             

@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.53 ] - 2024/08/20
+
+  * Added `DefaultDeviceId` processing to set the default device id (or name) to use for player transport methods (e.g. play, pause, skip, etc) that do not specify a device id and there is no active Spotify player detected.  This should avoid the `No Active Device` exceptions returned from the Spotify Web API when playback transport methods are called after long pauses of inactivity.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.88.
+
 ###### [ 1.0.52 ] - 2024/08/19
 
   * Changed storage location of authorization Token Cache file to prevent data loss on version updates.  The file was moved from `\config\custom_components\spotifyplus\data\tokens.json` to `\config\.storage\spotifyplus_tokens.json`, which will allow it to persist between version updates.  Note that you can simply copy the Token Cache file from the old location to the new location prior to this update, so that you don't have to re-run the AuthTokenGenerator.py script again.
