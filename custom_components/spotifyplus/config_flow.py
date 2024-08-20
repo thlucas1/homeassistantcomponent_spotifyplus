@@ -117,11 +117,13 @@ class SpotifyFlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
 
                 # create new spotify web api python client instance - "SpotifyClient()".
                 _logsi.LogVerbose("Creating SpotifyClient instance")
-                tokenStorageDir:str = "%s/custom_components/%s/data" % (self.hass.config.config_dir, DOMAIN)
+                tokenStorageDir:str = "%s/.storage" % (self.hass.config.config_dir, DOMAIN)
+                tokenStorageFile:str = "%s_tokens.json" % (DOMAIN)
                 spotifyClient:SpotifyClient = await self.hass.async_add_executor_job(
                     SpotifyClient, 
                     None,                   # manager:PoolManager=None,
                     tokenStorageDir,        # tokenStorageDir:str=None,
+                    tokenStorageFile,       # tokenStorageFile:str=None,
                     None,                   # tokenUpdater:Callable=None,
                     zeroconf_instance       # zeroconfClient:Zeroconf=None,
                 )
@@ -403,7 +405,7 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
             device_default:str = self._Options.get(CONF_OPTION_DEVICE_DEFAULT, None)
             _logsi.LogVerbose("'%s': OptionsFlow option '%s' - SELECTED value: '%s'" % (self._name, CONF_OPTION_DEVICE_DEFAULT, device_default))
             device_loginid:str = self._Options.get(CONF_OPTION_DEVICE_LOGINID, None)
-            _logsi.LogVerbose("'%s': OptionsFlow option '%s' - SELECTED value: '%s'" % (self._name, CONF_OPTION_DEVICE_USERNAME, device_loginid))
+            _logsi.LogVerbose("'%s': OptionsFlow option '%s' - SELECTED value: '%s'" % (self._name, CONF_OPTION_DEVICE_LOGINID, device_loginid))
             device_username:str = self._Options.get(CONF_OPTION_DEVICE_USERNAME, None)
             _logsi.LogVerbose("'%s': OptionsFlow option '%s' - SELECTED value: '%s'" % (self._name, CONF_OPTION_DEVICE_USERNAME, device_username))
                    

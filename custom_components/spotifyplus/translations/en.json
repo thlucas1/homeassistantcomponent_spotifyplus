@@ -133,7 +133,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
         },
         "offset": {
           "name": "Offset",
@@ -163,7 +163,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
         },
         "offset": {
           "name": "Offset",
@@ -215,7 +215,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
         },
         "offset": {
           "name": "Offset",
@@ -249,7 +249,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
         },
         "limit_total": {
           "name": "Limit Total",
@@ -297,7 +297,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
         },
         "offset": {
           "name": "Offset",
@@ -327,7 +327,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
         },
         "offset": {
           "name": "Offset",
@@ -429,7 +429,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
         },
         "after": {
           "name": "After Time MS",
@@ -481,7 +481,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
         },
         "offset": {
           "name": "Offset",
@@ -529,7 +529,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
         },
         "offset": {
           "name": "Offset",
@@ -555,7 +555,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
         },
         "offset": {
           "name": "Offset",
@@ -633,7 +633,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
         },
         "offset": {
           "name": "Offset",
@@ -667,7 +667,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
         },
         "offset": {
           "name": "Offset",
@@ -697,7 +697,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
         },
         "offset": {
           "name": "Offset",
@@ -931,7 +931,7 @@
         },
         "refresh_device_list": {
           "name": "Refresh Device List?",
-          "description": "True to refresh the Spotify Connect device list; otherwise, False to use the Spotify Connect device list cache.  Default is False."
+          "description": "True to refresh the Spotify Connect device list; otherwise, False to use the Spotify Connect device list cache.  Default is True."
         }
       }
     },
@@ -1093,6 +1093,48 @@
         }
       }
     },
+    "remove_audiobook_favorites": {
+      "name": "Remove Audiobook Favorites",
+      "description": "Remove one or more audiobooks from the current user's 'Your Library'.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "ids": {
+          "name": "ID's",
+          "description": "A comma-separated list of Spotify audiobook id's (e.g. `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`).  A maximum of 50 id's may be specified.  If omitted, the currently playing audiobook uri id value is used."
+        }
+      }
+    },
+    "remove_episode_favorites": {
+      "name": "Remove Episode Favorites",
+      "description": "Remove one or more episodes from the current user's 'Your Library'.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "ids": {
+          "name": "ID's",
+          "description": "A comma-separated list of Spotify episode id's (e.g. `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`).  A maximum of 50 id's may be specified.  If omitted, the currently playing episode uri id value is used."
+        }
+      }
+    },
+    "remove_show_favorites": {
+      "name": "Remove Show Favorites",
+      "description": "Remove one or more albums from the current user's 'Your Library'.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "ids": {
+          "name": "ID's",
+          "description": "A comma-separated list of Spotify show id's (e.g. `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing show uri id value is used."
+        }
+      }
+    },
     "remove_track_favorites": {
       "name": "Remove Track Favorites",
       "description": "Remove one or more tracks from the current user's 'Your Library'.",
@@ -1118,6 +1160,48 @@
         "ids": {
           "name": "ID's",
           "description": "A comma-separated list of Spotify album id's (e.g. `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track album uri id value is used."
+        }
+      }
+    },
+    "save_audiobook_favorites": {
+      "name": "Save Audiobook Favorites",
+      "description": "Save one or more audiobook to the current user's 'Your Library'.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "ids": {
+          "name": "ID's",
+          "description": "A comma-separated list of Spotify audiobook id's (e.g. `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`).  A maximum of 50 id's may be specified.  If omitted, the currently playing audiobook uri id value is used."
+        }
+      }
+    },
+    "save_episode_favorites": {
+      "name": "Save Episode Favorites",
+      "description": "Save one or more episodes to the current user's 'Your Library'.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "ids": {
+          "name": "ID's",
+          "description": "A comma-separated list of Spotify episode id's (e.g. `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`).  A maximum of 50 id's may be specified.  If omitted, the currently playing episode uri id value is used."
+        }
+      }
+    },
+    "save_show_favorites": {
+      "name": "Save Show Favorites",
+      "description": "Save one or more shows to the current user's 'Your Library'.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "ids": {
+          "name": "ID's",
+          "description": "A comma-separated list of Spotify show id's (e.g. `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing show uri id value is used."
         }
       }
     },
@@ -1149,11 +1233,19 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
         },
         "market": {
           "name": "Market / Country Code",
           "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter."
+        },
+        "include_external": {
+          "name": "Include External",
+          "description": "If 'audio' is specified it signals that the client can play externally hosted audio content, and marks the content as playable in the response. By default externally hosted audio content is marked as unplayable in the response.  Allowed values are 'audio'."
         },
         "limit_total": {
           "name": "Limit Total",
@@ -1175,11 +1267,19 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
         },
         "market": {
           "name": "Market / Country Code",
           "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter."
+        },
+        "include_external": {
+          "name": "Include External",
+          "description": "If 'audio' is specified it signals that the client can play externally hosted audio content, and marks the content as playable in the response. By default externally hosted audio content is marked as unplayable in the response.  Allowed values are 'audio'."
         },
         "limit_total": {
           "name": "Limit Total",
@@ -1201,11 +1301,19 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
         },
         "market": {
           "name": "Market / Country Code",
           "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter."
+        },
+        "include_external": {
+          "name": "Include External",
+          "description": "If 'audio' is specified it signals that the client can play externally hosted audio content, and marks the content as playable in the response. By default externally hosted audio content is marked as unplayable in the response.  Allowed values are 'audio'."
         },
         "limit_total": {
           "name": "Limit Total",
@@ -1227,11 +1335,19 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
         },
         "market": {
           "name": "Market / Country Code",
           "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter."
+        },
+        "include_external": {
+          "name": "Include External",
+          "description": "If 'audio' is specified it signals that the client can play externally hosted audio content, and marks the content as playable in the response. By default externally hosted audio content is marked as unplayable in the response.  Allowed values are 'audio'."
         },
         "limit_total": {
           "name": "Limit Total",
@@ -1253,11 +1369,19 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
         },
         "market": {
           "name": "Market / Country Code",
           "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter."
+        },
+        "include_external": {
+          "name": "Include External",
+          "description": "If 'audio' is specified it signals that the client can play externally hosted audio content, and marks the content as playable in the response. By default externally hosted audio content is marked as unplayable in the response.  Allowed values are 'audio'."
         },
         "limit_total": {
           "name": "Limit Total",
@@ -1279,11 +1403,19 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
         },
         "market": {
           "name": "Market / Country Code",
           "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter."
+        },
+        "include_external": {
+          "name": "Include External",
+          "description": "If 'audio' is specified it signals that the client can play externally hosted audio content, and marks the content as playable in the response. By default externally hosted audio content is marked as unplayable in the response.  Allowed values are 'audio'."
         },
         "limit_total": {
           "name": "Limit Total",
@@ -1305,11 +1437,19 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
         },
         "market": {
           "name": "Market / Country Code",
           "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter."
+        },
+        "include_external": {
+          "name": "Include External",
+          "description": "If 'audio' is specified it signals that the client can play externally hosted audio content, and marks the content as playable in the response. By default externally hosted audio content is marked as unplayable in the response.  Allowed values are 'audio'."
         },
         "limit_total": {
           "name": "Limit Total",

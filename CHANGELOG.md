@@ -6,6 +6,17 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.52 ] - 2024/08/19
+
+  * Changed storage location of authorization Token Cache file to prevent data loss on version updates.  The file was moved from `\config\custom_components\spotifyplus\data\tokens.json` to `\config\.storage\spotifyplus_tokens.json`, which will allow it to persist between version updates.  Note that you can simply copy the Token Cache file from the old location to the new location prior to this update, so that you don't have to re-run the AuthTokenGenerator.py script again.
+  * Added service `remove_audiobook_favorites` to remove one or more audiobooks (or the currently playing audiobook) from the current user's 'Your Library' favorites.
+  * Added service `remove_episode_favorites` to remove one or more show episodes (or the currently playing episode) from the current user's 'Your Library' favorites.
+  * Added service `remove_show_favorites` to remove one or more shows (or the currently playing show) from the current user's 'Your Library' favorites.
+  * Added service `save_audiobook_favorites` to save one or more audiobooks (or the currently playing audiobook) to the current user's 'Your Library' favorites.
+  * Added service `save_episode_favorites` to save one or more show episodes (or the currently playing episode) to the current user's 'Your Library' favorites.
+  * Added service `save_show_favorites` to save one or more shows (or the currently playing show) to the current user's 'Your Library' favorites.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.86.
+
 ###### [ 1.0.51 ] - 2024/08/18
 
   * Updated service `player_transfer_playback` to check Sonos transport status after transferring playback to the target device, and play / pause the transport as designated by the `play` argument.
@@ -19,7 +30,7 @@ Change are listed in reverse chronological order (newest to oldest).
 ###### [ 1.0.49 ] - 2024/08/16
 
   * Updated service `zeroconf_device_connect` to correctly process Spotify Connect requests for token type `authorization_code` devices.  This requires you to setup a seperate OAuth2 authorization access token outside of Home Assistant in order to activate these devices.  This (currently) only affects Sonos devices, as they are the only manufacturer (that I am aware of) that implements the `authorization_code` token type.  More information can be found in the [wiki documentation](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#oauth2-token-for-tokentypeauthorization_code-devices).
-  * Added service `get_spotify_connect_device` to Get information about a specific Spotify Connect player device, and (optionally) activate the device if it requires it.
+  * Added service `get_spotify_connect_device` to get information about a specific Spotify Connect player device, and (optionally) activate the device if it requires it.
   * Updated service `player_resolve_device_id` with deprecated status, as the `get_spotify_connect_device` service offers the same (and more) functionality.
   * Updated service descriptions for services that specify a `limit` argument.
   * Added `sortResult` argument to the various services that return lists that can be sorted.  If True (default), result items are sorted by name prior to returning to the caller; otherwise, results are left in the order that the Spotify Web API returned them.

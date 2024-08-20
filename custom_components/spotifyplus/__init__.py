@@ -129,8 +129,14 @@ SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD:str = 'playlist_items_add'
 SERVICE_SPOTIFY_PLAYLIST_ITEMS_CLEAR:str = 'playlist_items_clear'
 SERVICE_SPOTIFY_PLAYLIST_ITEMS_REMOVE:str = 'playlist_items_remove'
 SERVICE_SPOTIFY_REMOVE_ALBUM_FAVORITES:str = 'remove_album_favorites'
+SERVICE_SPOTIFY_REMOVE_AUDIOBOOK_FAVORITES:str = 'remove_audiobook_favorites'
+SERVICE_SPOTIFY_REMOVE_EPISODE_FAVORITES:str = 'remove_episode_favorites'
+SERVICE_SPOTIFY_REMOVE_SHOW_FAVORITES:str = 'remove_show_favorites'
 SERVICE_SPOTIFY_REMOVE_TRACK_FAVORITES:str = 'remove_track_favorites'
 SERVICE_SPOTIFY_SAVE_ALBUM_FAVORITES:str = 'save_album_favorites'
+SERVICE_SPOTIFY_SAVE_AUDIOBOOK_FAVORITES:str = 'save_audiobook_favorites'
+SERVICE_SPOTIFY_SAVE_EPISODE_FAVORITES:str = 'save_episode_favorites'
+SERVICE_SPOTIFY_SAVE_SHOW_FAVORITES:str = 'save_show_favorites'
 SERVICE_SPOTIFY_SAVE_TRACK_FAVORITES:str = 'save_track_favorites'
 SERVICE_SPOTIFY_SEARCH_ALBUMS:str = 'search_albums'
 SERVICE_SPOTIFY_SEARCH_ARTISTS:str = 'search_artists'
@@ -558,6 +564,27 @@ SERVICE_SPOTIFY_REMOVE_ALBUM_FAVORITES_SCHEMA = vol.Schema(
     }
 )
 
+SERVICE_SPOTIFY_REMOVE_AUDIOBOOK_FAVORITES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("ids"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_REMOVE_EPISODE_FAVORITES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("ids"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_REMOVE_SHOW_FAVORITES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("ids"): cv.string,
+    }
+)
+
 SERVICE_SPOTIFY_REMOVE_TRACK_FAVORITES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
@@ -566,6 +593,27 @@ SERVICE_SPOTIFY_REMOVE_TRACK_FAVORITES_SCHEMA = vol.Schema(
 )
 
 SERVICE_SPOTIFY_SAVE_ALBUM_FAVORITES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("ids"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_SAVE_AUDIOBOOK_FAVORITES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("ids"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_SAVE_EPISODE_FAVORITES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("ids"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_SAVE_SHOW_FAVORITES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("ids"): cv.string,
@@ -966,6 +1014,27 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     await hass.async_add_executor_job(entity.service_spotify_remove_album_favorites, ids)
 
+                elif service.service == SERVICE_SPOTIFY_REMOVE_AUDIOBOOK_FAVORITES:
+
+                    # remove audiobook(s) from favorites.
+                    ids = service.data.get("ids")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_remove_audiobook_favorites, ids)
+
+                elif service.service == SERVICE_SPOTIFY_REMOVE_EPISODE_FAVORITES:
+
+                    # remove episode(s) from favorites.
+                    ids = service.data.get("ids")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_remove_episode_favorites, ids)
+
+                elif service.service == SERVICE_SPOTIFY_REMOVE_SHOW_FAVORITES:
+
+                    # remove show(s) from favorites.
+                    ids = service.data.get("ids")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_remove_show_favorites, ids)
+
                 elif service.service == SERVICE_SPOTIFY_REMOVE_TRACK_FAVORITES:
 
                     # remove track(s) from favorites.
@@ -979,6 +1048,27 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     ids = service.data.get("ids")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     await hass.async_add_executor_job(entity.service_spotify_save_album_favorites, ids)
+
+                elif service.service == SERVICE_SPOTIFY_SAVE_AUDIOBOOK_FAVORITES:
+
+                    # save audiobook(s) to favorites.
+                    ids = service.data.get("ids")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_save_audiobook_favorites, ids)
+
+                elif service.service == SERVICE_SPOTIFY_SAVE_EPISODE_FAVORITES:
+
+                    # save episode(s) to favorites.
+                    ids = service.data.get("ids")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_save_episode_favorites, ids)
+
+                elif service.service == SERVICE_SPOTIFY_SAVE_SHOW_FAVORITES:
+
+                    # save show(s) to favorites.
+                    ids = service.data.get("ids")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_save_show_favorites, ids)
 
                 elif service.service == SERVICE_SPOTIFY_SAVE_TRACK_FAVORITES:
 
@@ -1910,6 +2000,33 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             supports_response=SupportsResponse.NONE,
         )
 
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_REMOVE_AUDIOBOOK_FAVORITES, SERVICE_SPOTIFY_REMOVE_AUDIOBOOK_FAVORITES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_REMOVE_AUDIOBOOK_FAVORITES,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_REMOVE_AUDIOBOOK_FAVORITES_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_REMOVE_EPISODE_FAVORITES, SERVICE_SPOTIFY_REMOVE_EPISODE_FAVORITES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_REMOVE_EPISODE_FAVORITES,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_REMOVE_EPISODE_FAVORITES_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_REMOVE_SHOW_FAVORITES, SERVICE_SPOTIFY_REMOVE_SHOW_FAVORITES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_REMOVE_SHOW_FAVORITES,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_REMOVE_SHOW_FAVORITES_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
         _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_REMOVE_TRACK_FAVORITES, SERVICE_SPOTIFY_REMOVE_TRACK_FAVORITES_SCHEMA)
         hass.services.async_register(
             DOMAIN,
@@ -1925,6 +2042,33 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             SERVICE_SPOTIFY_SAVE_ALBUM_FAVORITES,
             service_handle_spotify_command,
             schema=SERVICE_SPOTIFY_SAVE_ALBUM_FAVORITES_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_SAVE_AUDIOBOOK_FAVORITES, SERVICE_SPOTIFY_SAVE_AUDIOBOOK_FAVORITES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_SAVE_AUDIOBOOK_FAVORITES,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_SAVE_AUDIOBOOK_FAVORITES_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_SAVE_EPISODE_FAVORITES, SERVICE_SPOTIFY_SAVE_EPISODE_FAVORITES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_SAVE_EPISODE_FAVORITES,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_SAVE_EPISODE_FAVORITES_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_SAVE_SHOW_FAVORITES, SERVICE_SPOTIFY_SAVE_SHOW_FAVORITES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_SAVE_SHOW_FAVORITES,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_SAVE_SHOW_FAVORITES_SCHEMA,
             supports_response=SupportsResponse.NONE,
         )
 
@@ -2255,17 +2399,19 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
 
         # create new spotify web api python client instance - "SpotifyClient()".
         _logsi.LogVerbose("'%s': Component async_setup_entry is creating SpotifyClient instance" % entry.title)
-        tokenStorageDir:str = "%s/custom_components/%s/data" % (hass.config.config_dir, DOMAIN)
+        tokenStorageDir:str = "%s/.storage" % (hass.config.config_dir)
+        tokenStorageFile:str = "%s_tokens.json" % (DOMAIN)
         spotifyClient:SpotifyClient = await hass.async_add_executor_job(
             SpotifyClient, 
             None,                   # manager:PoolManager=None,
             tokenStorageDir,        # tokenStorageDir:str=None,
+            tokenStorageFile,       # tokenStorageFile:str=None,
             _TokenUpdater,          # tokenUpdater:Callable=None,
             zeroconf_instance,      # zeroconfClient:Zeroconf=None,
             entry.options.get(CONF_OPTION_DEVICE_USERNAME, None),
             entry.options.get(CONF_OPTION_DEVICE_PASSWORD, None),
             entry.options.get(CONF_OPTION_DEVICE_LOGINID, None),
-        )
+        )       
         _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry spotifyClient object" % entry.title, spotifyClient)
 
         # set spotify web api python token authorization from HA-managed OAuth2 session token.

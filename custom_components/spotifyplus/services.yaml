@@ -111,7 +111,7 @@ get_album_favorites:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
@@ -167,7 +167,7 @@ get_album_new_releases:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
@@ -258,7 +258,7 @@ get_artist_albums:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
@@ -321,7 +321,7 @@ get_artists_followed:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
@@ -402,7 +402,7 @@ get_category_playlists:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
@@ -458,7 +458,7 @@ get_featured_playlists:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
@@ -626,7 +626,7 @@ get_player_recent_tracks:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
@@ -720,7 +720,7 @@ get_playlist_favorites:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
@@ -804,7 +804,7 @@ get_show_episodes:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
@@ -853,7 +853,7 @@ get_show_favorites:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
@@ -992,7 +992,7 @@ get_track_favorites:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
@@ -1055,7 +1055,7 @@ get_users_top_artists:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
@@ -1111,7 +1111,7 @@ get_users_top_tracks:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
@@ -1802,6 +1802,69 @@ remove_album_favorites:
       selector:
         text:
 
+remove_audiobook_favorites:
+  name: Remove Audiobook Favorites
+  description: Remove one or more audiobooks from the current user's 'Your Library'.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    ids:
+      name: ID's
+      description: A comma-separated list of Spotify audiobook id's (e.g. `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`).  A maximum of 50 id's may be specified.  If omitted, the currently playing audiobook uri id value is used.
+      example: "3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe"
+      required: false
+      selector:
+        text:
+
+remove_episode_favorites:
+  name: Remove Episode Favorites
+  description: Remove one or more episodes from the current user's 'Your Library'.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    ids:
+      name: ID's
+      description: A comma-separated list of Spotify episode id's (e.g. `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`).  A maximum of 50 id's may be specified.  If omitted, the currently playing episode uri id value is used.
+      example: "3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4"
+      required: false
+      selector:
+        text:
+
+remove_show_favorites:
+  name: Remove Show Favorites
+  description: Remove one or more shows from the current user's 'Your Library'.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    ids:
+      name: ID's
+      description: A comma-separated list of Spotify show id's (e.g. `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing show uri id value is used.
+      example: "6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk"
+      required: false
+      selector:
+        text:
+
 remove_track_favorites:
   name: Remove Track Favorites
   description: Remove one or more tracks from the current user's 'Your Library'.
@@ -1840,6 +1903,69 @@ save_album_favorites:
       name: ID's
       description: A comma-separated list of Spotify album id's (e.g. `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track album uri id value is used.
       example: "6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX"
+      required: false
+      selector:
+        text:
+
+save_audiobook_favorites:
+  name: Save Audiobook Favorites
+  description: Save one or more audiobooks to the current user's 'Your Library'.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    ids:
+      name: ID's
+      description: A comma-separated list of Spotify audiobook id's (e.g. `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`).  A maximum of 50 id's may be specified.  If omitted, the currently playing audiobook uri id value is used.
+      example: "3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe"
+      required: false
+      selector:
+        text:
+
+save_episode_favorites:
+  name: Save Episode Favorites
+  description: Save one or more episodes to the current user's 'Your Library'.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    ids:
+      name: ID's
+      description: A comma-separated list of Spotify episode id's (e.g. `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`).  A maximum of 50 id's may be specified.  If omitted, the currently playing episode uri id value is used.
+      example: "3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4"
+      required: false
+      selector:
+        text:
+
+save_show_favorites:
+  name: Save Show Favorites
+  description: Save one or more shows to the current user's 'Your Library'.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    ids:
+      name: ID's
+      description: A comma-separated list of Spotify show id's (e.g. `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing show uri id value is used.
+      example: "6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk"
       required: false
       selector:
         text:
@@ -1887,7 +2013,7 @@ search_albums:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return.
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
@@ -1905,7 +2031,6 @@ search_albums:
           min: 1
           max: 500
           mode: box
-
     market:
       name: Market / Country Code
       description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
@@ -1951,7 +2076,7 @@ search_artists:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return.
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
@@ -2014,7 +2139,7 @@ search_audiobooks:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return.
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
@@ -2077,7 +2202,7 @@ search_episodes:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return.
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
@@ -2140,7 +2265,7 @@ search_playlists:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return.
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
@@ -2203,7 +2328,7 @@ search_shows:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return.
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
@@ -2266,7 +2391,7 @@ search_tracks:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return.
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
       example: 20
       required: false
       selector:
