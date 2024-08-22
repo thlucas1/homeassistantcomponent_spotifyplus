@@ -72,10 +72,16 @@ The following custom services are also supplied by this integration.
 - Playlist Items Add
 - Playlist Items Clear
 - Playlist Items Remove
-- Save Album Favorites
-- Save Track Favorites
 - Remove Album Favorites
+- Remove Audiobook Favorites
+- Remove Episode Favorites
+- Remove Show Favorites
 - Remove Track Favorites
+- Save Album Favorites
+- Save Audiobook Favorites
+- Save Episode Favorites
+- Save Show Favorites
+- Save Track Favorites
 - Search Albums
 - Search Artists
 - Search Audiobooks

@@ -812,6 +812,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # trace.
             methodParms = _logsi.EnterMethodParmList(SILevel.Debug)
             methodParms.AppendKeyValue("source", source)
+            methodParms.AppendKeyValue("self.state", self._attr_state)
             _logsi.LogMethodParmList(SILevel.Verbose, STAppMessages.MSG_MEDIAPLAYER_SERVICE_WITH_PARMS % (self.name, "select_source", "source='%s'" % (source)), methodParms)
 
             # was a source selected?  if not, then we are done.
@@ -829,7 +830,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             else:
 
                 # transfer playback to the specified source.
-                self.service_spotify_player_transfer_playback(source, (self.state == MediaPlayerState.PLAYING), refreshDeviceList=True)
+                self.service_spotify_player_transfer_playback(source, (self._attr_state != MediaPlayerState.PAUSED), refreshDeviceList=True)
         
             # set the selected source.
             self._attr_source = source
@@ -1477,7 +1478,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 if (self._attr_source is None):
                     
                     # if a source is not set, then use current source (if source is active).
-                    if (self._attr_state in [MediaPlayerState.PLAYING, MediaPlayerState.PAUSED, MediaPlayerState.IDLE]):
+                    if (self._attr_state in [MediaPlayerState.PLAYING, MediaPlayerState.PAUSED, MediaPlayerState.IDLE, MediaPlayerState.BUFFERING]):
                         _logsi.LogVerbose("'%s': Source value is not set; using Spotify Web API player name ('%s')" % (self.name, playerPlayState.Device.Name))
                         self._attr_source = playerPlayState.Device.Name
                         self.data.spotifyClient.DefaultDeviceId = self._attr_source

@@ -117,7 +117,7 @@ class SpotifyFlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
 
                 # create new spotify web api python client instance - "SpotifyClient()".
                 _logsi.LogVerbose("Creating SpotifyClient instance")
-                tokenStorageDir:str = "%s/.storage" % (self.hass.config.config_dir, DOMAIN)
+                tokenStorageDir:str = "%s/.storage" % (self.hass.config.config_dir)
                 tokenStorageFile:str = "%s_tokens.json" % (DOMAIN)
                 spotifyClient:SpotifyClient = await self.hass.async_add_executor_job(
                     SpotifyClient, 
@@ -144,8 +144,8 @@ class SpotifyFlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
 
             except Exception as ex:
             
-                _logsi.LogException(None, ex, logToSystemLogger=False)
-                return self.async_abort(reason="connection_error")
+                _logsi.LogException(None, ex)
+                return self.async_abort(reason="setauthtoken_error")
 
             # is this a reauthentication request?
             # if so, and the unique id's are different then it's a mismatch error.

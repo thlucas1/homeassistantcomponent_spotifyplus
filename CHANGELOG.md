@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.54 ] - 2024/08/22
+
+  * Updated `config_flow` to correct a bug in the token authorization process that was introduced in v1.0.52 with the Token Cache file location change.  This was preventing new instances of the integration to be setup due to `connection_error` exceptions in the Spotify OAuth2 authorization method.
+  * Updated `media_player.select_source` service to correctly process the state of the player so that the player resume playing on the target source.  Prior to this fix, play was not resumed (e.g. still paused) on the target source.
+
 ###### [ 1.0.53 ] - 2024/08/20
 
   * Added `DefaultDeviceId` processing to set the default device id (or name) to use for player transport methods (e.g. play, pause, skip, etc) that do not specify a device id and there is no active Spotify player detected.  This should avoid the `No Active Device` exceptions returned from the Spotify Web API when playback transport methods are called after long pauses of inactivity.
