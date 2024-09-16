@@ -86,6 +86,12 @@ CONFIG_SCHEMA = cv.removed(DOMAIN, raise_if_present=False)
 # -----------------------------------------------------------------------------------
 # Custom Service Schemas.
 # -----------------------------------------------------------------------------------
+SERVICE_SPOTIFY_CHECK_ALBUM_FAVORITES:str = 'check_album_favorites'
+SERVICE_SPOTIFY_CHECK_ARTISTS_FOLLOWING:str = 'check_artists_following'
+SERVICE_SPOTIFY_CHECK_AUDIOBOOK_FAVORITES:str = 'check_audiobook_favorites'
+SERVICE_SPOTIFY_CHECK_EPISODE_FAVORITES:str = 'check_episode_favorites'
+SERVICE_SPOTIFY_CHECK_SHOW_FAVORITES:str = 'check_show_favorites'
+SERVICE_SPOTIFY_CHECK_TRACK_FAVORITES:str = 'check_track_favorites'
 SERVICE_SPOTIFY_FOLLOW_ARTISTS:str = 'follow_artists'
 SERVICE_SPOTIFY_FOLLOW_PLAYLIST:str = 'follow_playlist'
 SERVICE_SPOTIFY_FOLLOW_USERS:str = 'follow_users'
@@ -111,6 +117,7 @@ SERVICE_SPOTIFY_GET_SHOW_FAVORITES:str = 'get_show_favorites'
 SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICE:str = 'get_spotify_connect_device'
 SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES:str = 'get_spotify_connect_devices'
 SERVICE_SPOTIFY_GET_TRACK_FAVORITES:str = 'get_track_favorites'
+SERVICE_SPOTIFY_GET_TRACKS_AUDIO_FEATURES:str = 'get_tracks_audio_features'
 SERVICE_SPOTIFY_GET_USERS_TOP_ARTISTS:str = 'get_users_top_artists'
 SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS:str = 'get_users_top_tracks'
 SERVICE_SPOTIFY_PLAYER_ACTIVATE_DEVICES:str = 'player_activate_devices'
@@ -154,6 +161,47 @@ SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO:str = 'zeroconf_device_getinfo'
 SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES:str = 'zeroconf_discover_devices'
 
 
+SERVICE_SPOTIFY_CHECK_ALBUM_FAVORITES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("ids"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_CHECK_ARTISTS_FOLLOWING_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("ids"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_CHECK_AUDIOBOOK_FAVORITES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("ids"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_CHECK_EPISODE_FAVORITES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("ids"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_CHECK_SHOW_FAVORITES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("ids"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_CHECK_TRACK_FAVORITES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("ids"): cv.string,
+    }
+)
 
 SERVICE_SPOTIFY_FOLLOW_ARTISTS_SCHEMA = vol.Schema(
     {
@@ -165,7 +213,7 @@ SERVICE_SPOTIFY_FOLLOW_ARTISTS_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_FOLLOW_PLAYLIST_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Required("playlist_id"): cv.string,
+        vol.Optional("playlist_id"): cv.string,
         vol.Optional("public"): cv.boolean,
     }
 )
@@ -180,7 +228,7 @@ SERVICE_SPOTIFY_FOLLOW_USERS_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_GET_ALBUM_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Required("album_id"): cv.string,
+        vol.Optional("album_id"): cv.string,
         vol.Optional("market"): cv.string,
     }
 )
@@ -188,7 +236,7 @@ SERVICE_SPOTIFY_GET_ALBUM_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_GET_ALBUM_FAVORITES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("market"): cv.string,
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
@@ -199,7 +247,7 @@ SERVICE_SPOTIFY_GET_ALBUM_FAVORITES_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_GET_ALBUM_NEW_RELEASES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("country"): cv.string,
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
@@ -210,16 +258,16 @@ SERVICE_SPOTIFY_GET_ALBUM_NEW_RELEASES_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_GET_ARTIST_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Required("artist_id"): cv.string,
+        vol.Optional("artist_id"): cv.string,
     }
 )
 
 SERVICE_SPOTIFY_GET_ARTIST_ALBUMS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Required("artist_id"): cv.string,
+        vol.Optional("artist_id"): cv.string,
         vol.Optional("include_groups"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("market"): cv.string,
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
@@ -231,7 +279,7 @@ SERVICE_SPOTIFY_GET_ARTISTS_FOLLOWED_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("after"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
         vol.Optional("sort_result"): cv.boolean,
     }
@@ -250,7 +298,7 @@ SERVICE_SPOTIFY_GET_CATEGORY_PLAYLISTS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("category_id"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("country"): cv.string,
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
@@ -261,7 +309,7 @@ SERVICE_SPOTIFY_GET_CATEGORY_PLAYLISTS_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("country"): cv.string,
         vol.Optional("locale"): cv.string,
@@ -304,7 +352,7 @@ SERVICE_SPOTIFY_GET_PLAYER_QUEUE_INFO_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_GET_PLAYER_RECENT_TRACKS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("after", default=0): vol.All(vol.Range(min=0,max=99999999999999)),
         vol.Optional("before", default=0): vol.All(vol.Range(min=0,max=99999999999999)),
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
@@ -314,7 +362,7 @@ SERVICE_SPOTIFY_GET_PLAYER_RECENT_TRACKS_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_GET_PLAYLIST_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Required("playlist_id"): cv.string,
+        vol.Optional("playlist_id"): cv.string,
         vol.Optional("market"): cv.string,
         vol.Optional("fields"): cv.string,
         vol.Optional("additional_types"): cv.string,
@@ -324,7 +372,7 @@ SERVICE_SPOTIFY_GET_PLAYLIST_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_GET_PLAYLIST_FAVORITES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
         vol.Optional("sort_result"): cv.boolean,
@@ -334,7 +382,7 @@ SERVICE_SPOTIFY_GET_PLAYLIST_FAVORITES_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_GET_SHOW_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Required("show_id"): cv.string,
+        vol.Optional("show_id"): cv.string,
         vol.Optional("market"): cv.string,
     }
 )
@@ -342,8 +390,8 @@ SERVICE_SPOTIFY_GET_SHOW_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_GET_SHOW_EPISODES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Required("show_id"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("show_id"): cv.string,
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("market"): cv.string,
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
@@ -353,7 +401,7 @@ SERVICE_SPOTIFY_GET_SHOW_EPISODES_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_GET_SHOW_FAVORITES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
         vol.Optional("sort_result"): cv.boolean,
@@ -383,7 +431,7 @@ SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_GET_TRACK_FAVORITES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("market"): cv.string,
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
@@ -391,11 +439,18 @@ SERVICE_SPOTIFY_GET_TRACK_FAVORITES_SCHEMA = vol.Schema(
     }
 )
 
+SERVICE_SPOTIFY_GET_TRACKS_AUDIO_FEATURES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("ids"): cv.string,
+    }
+)
+
 SERVICE_SPOTIFY_GET_USERS_TOP_ARTISTS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("time_range"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
         vol.Optional("sort_result"): cv.boolean,
@@ -406,7 +461,7 @@ SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("time_range"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
         vol.Optional("sort_result"): cv.boolean,
@@ -631,7 +686,7 @@ SERVICE_SPOTIFY_SEARCH_ALBUMS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
@@ -643,7 +698,7 @@ SERVICE_SPOTIFY_SEARCH_ARTISTS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
@@ -655,7 +710,7 @@ SERVICE_SPOTIFY_SEARCH_AUDIOBOOKS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
@@ -667,7 +722,7 @@ SERVICE_SPOTIFY_SEARCH_EPISODES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
@@ -679,7 +734,7 @@ SERVICE_SPOTIFY_SEARCH_PLAYLISTS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
@@ -691,7 +746,7 @@ SERVICE_SPOTIFY_SEARCH_SHOWS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
@@ -703,7 +758,7 @@ SERVICE_SPOTIFY_SEARCH_TRACKS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=1,max=50)),
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
@@ -721,7 +776,7 @@ SERVICE_SPOTIFY_UNFOLLOW_ARTISTS_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_UNFOLLOW_PLAYLIST_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Required("playlist_id"): cv.string,
+        vol.Optional("playlist_id"): cv.string,
     }
 )
 
@@ -1146,7 +1201,49 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 response:dict = {}
 
                 # process service request.
-                if service.service == SERVICE_SPOTIFY_GET_ALBUM:
+                if service.service == SERVICE_SPOTIFY_CHECK_ALBUM_FAVORITES:
+
+                    # check album favorites.
+                    ids = service.data.get("ids")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_check_album_favorites, ids)
+
+                elif service.service == SERVICE_SPOTIFY_CHECK_ARTISTS_FOLLOWING:
+
+                    # check artists following.
+                    ids = service.data.get("ids")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_check_artists_following, ids)
+
+                elif service.service == SERVICE_SPOTIFY_CHECK_AUDIOBOOK_FAVORITES:
+
+                    # check audiobook favorites.
+                    ids = service.data.get("ids")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_check_audiobook_favorites, ids)
+
+                elif service.service == SERVICE_SPOTIFY_CHECK_EPISODE_FAVORITES:
+
+                    # check episode favorites.
+                    ids = service.data.get("ids")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_check_episode_favorites, ids)
+
+                elif service.service == SERVICE_SPOTIFY_CHECK_SHOW_FAVORITES:
+
+                    # check show favorites.
+                    ids = service.data.get("ids")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_check_show_favorites, ids)
+
+                elif service.service == SERVICE_SPOTIFY_CHECK_TRACK_FAVORITES:
+
+                    # check track favorites.
+                    ids = service.data.get("ids")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_check_track_favorites, ids)
+
+                elif service.service == SERVICE_SPOTIFY_GET_ALBUM:
 
                     # get spotify album.
                     album_id = service.data.get("album_id")
@@ -1359,6 +1456,14 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     sort_result = service.data.get("sort_result")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_get_track_favorites, limit, offset, market, limit_total, sort_result)
+
+                elif service.service == SERVICE_SPOTIFY_GET_TRACKS_AUDIO_FEATURES:
+
+                    # get spotify album favorites.
+                    limit = service.data.get("limit")
+                    ids = service.data.get("ids")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_tracks_audio_features, ids)
 
                 elif service.service == SERVICE_SPOTIFY_GET_USERS_TOP_ARTISTS:
 
@@ -1613,6 +1718,60 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         
 
         # register all services this component provides, and their corresponding schemas.
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_CHECK_ALBUM_FAVORITES, SERVICE_SPOTIFY_CHECK_ALBUM_FAVORITES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_CHECK_ALBUM_FAVORITES,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_CHECK_ALBUM_FAVORITES_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_CHECK_ARTISTS_FOLLOWING, SERVICE_SPOTIFY_CHECK_ARTISTS_FOLLOWING_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_CHECK_ARTISTS_FOLLOWING,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_CHECK_ARTISTS_FOLLOWING_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_CHECK_AUDIOBOOK_FAVORITES, SERVICE_SPOTIFY_CHECK_AUDIOBOOK_FAVORITES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_CHECK_AUDIOBOOK_FAVORITES,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_CHECK_AUDIOBOOK_FAVORITES_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_CHECK_EPISODE_FAVORITES, SERVICE_SPOTIFY_CHECK_EPISODE_FAVORITES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_CHECK_EPISODE_FAVORITES,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_CHECK_EPISODE_FAVORITES_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_CHECK_SHOW_FAVORITES, SERVICE_SPOTIFY_CHECK_SHOW_FAVORITES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_CHECK_SHOW_FAVORITES,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_CHECK_SHOW_FAVORITES_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_CHECK_TRACK_FAVORITES, SERVICE_SPOTIFY_CHECK_TRACK_FAVORITES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_CHECK_TRACK_FAVORITES,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_CHECK_TRACK_FAVORITES_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
         _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_FOLLOW_ARTISTS, SERVICE_SPOTIFY_FOLLOW_ARTISTS_SCHEMA)
         hass.services.async_register(
             DOMAIN,
@@ -1835,6 +1994,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             SERVICE_SPOTIFY_GET_TRACK_FAVORITES,
             service_handle_spotify_serviceresponse,
             schema=SERVICE_SPOTIFY_GET_TRACK_FAVORITES_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_TRACKS_AUDIO_FEATURES, SERVICE_SPOTIFY_GET_TRACKS_AUDIO_FEATURES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_GET_TRACKS_AUDIO_FEATURES,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_GET_TRACKS_AUDIO_FEATURES_SCHEMA,
             supports_response=SupportsResponse.ONLY,
         )
 

@@ -33,73 +33,12 @@ The following Home Assistant media_player Platform services are supplied by this
 - VOLUME_SET
 - VOLUME_STEP
 
-The following custom services are also supplied by this integration.
-- Follow Artists
-- Follow Playlist
-- Follow Users
-- Get Album
-- Get Album Favorites
-- Get Album New Releases
-- Get Artist
-- Get Artists Albums
-- Get Artists Followed
-- Get Browse Categories
-- Get Category Playlists
-- Get Featured Playlists
-- Get Player Devices
-- Get Player Now Playing
-- Get Player Playback State
-- Get Player Queue Info
-- Get Player Recent Tracks
-- Get Playlist
-- Get Playlist Favorites
-- Get Show
-- Get Show Episodes
-- Get Show Favorites
-- Get Spotify Connect Devices
-- Get Track Favorites
-- Get Users Top Artists
-- Get Users Top Tracks
-- Player Activate Devices
-- Player Media Play Context
-- Player Media Play Track Favorites
-- Player Media Play Tracks
-- Player Resolve Device Id
-- Player Transfer Playback
-- Playlist Change
-- Playlist Cover Image Add
-- Playlist Create
-- Playlist Items Add
-- Playlist Items Clear
-- Playlist Items Remove
-- Remove Album Favorites
-- Remove Audiobook Favorites
-- Remove Episode Favorites
-- Remove Show Favorites
-- Remove Track Favorites
-- Save Album Favorites
-- Save Audiobook Favorites
-- Save Episode Favorites
-- Save Show Favorites
-- Save Track Favorites
-- Search Albums
-- Search Artists
-- Search Audiobooks
-- Search Episodes
-- Search Playlists
-- Search Shows
-- Search Tracks
-- Unfollow Artists
-- Unfollow Playlist
-- Unfollow Users
-- ZeroConf Device Connect
-- ZeroConf Device Disconnect
-- ZeroConf Device GetInformation
-- ZeroConf Discover Devices
-
-Check out the [Services Provided wiki](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Services-Provided) page for detailed explanations and YAML examples of the custom services provided by this integration.
-
 Check out the [Media Player Service Enhancements wiki](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Media-Player-Service-Enhancements) page for detailed explanations and YAML examples of the media player service enhancements provided by this integration.
+
+## Custom Services
+
+This integration provides 99% of the services offered by the Spotify Web API.  
+Check out the [Services Provided wiki](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Services-Provided) page for detailed explanations and YAML examples.
 
 ## HACS Installation Instructions
 

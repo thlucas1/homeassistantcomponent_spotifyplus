@@ -62,6 +62,90 @@
     }
   },
   "services": {
+    "check_album_favorites": {
+      "name": "Check Album Favorites",
+      "description": "Check if one or more albums (or the currently playing album) exists in the current user's 'Your Library' favorites.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "ids": {
+          "name": "ID's",
+          "description": "A comma-separated list of Spotify album id's (e.g. `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track album uri id value is used."
+        }
+      }
+    },
+    "check_artists_following": {
+      "name": "Check Artists Following",
+      "description": "Check if one or more artists (or the currently playing artists) is followed in the current user's 'Your Library' favorites.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "ids": {
+          "name": "ID's",
+          "description": "A comma-separated list of Spotify artist id's (e.g. `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track artist uri id value is used."
+        }
+      }
+    },
+    "check_audiobook_favorites": {
+      "name": "Check Audiobook Favorites",
+      "description": "Check if one or more audiobooks (or the currently playing audiobook) exists in the current user's 'Your Library' favorites.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "ids": {
+          "name": "ID's",
+          "description": "A comma-separated list of Spotify audiobook id's (e.g. `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`).  A maximum of 50 id's may be specified.  If omitted, the currently playing audiobook uri id value is used."
+        }
+      }
+    },
+    "check_episode_favorites": {
+      "name": "Check Episode Favorites",
+      "description": "Check if one or more episodes (or the currently playing episode) exists in the current user's 'Your Library' favorites.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "ids": {
+          "name": "ID's",
+          "description": "A comma-separated list of Spotify episode id's (e.g. `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`).  A maximum of 50 id's may be specified.  If omitted, the currently playing episode uri id value is used."
+        }
+      }
+    },
+    "check_show_favorites": {
+      "name": "Check Show Favorites",
+      "description": "Check if one or more shows (or the currently playing show) exists in the current user's 'Your Library' favorites.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "ids": {
+          "name": "ID's",
+          "description": "A comma-separated list of Spotify show id's (e.g. `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing show uri id value is used."
+        }
+      }
+    },
+    "check_track_favorites": {
+      "name": "Check Track Favorites",
+      "description": "Check if one or more tracks (or the currently playing track) exists in the current user's 'Your Library' favorites.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "ids": {
+          "name": "ID's",
+          "description": "A comma-separated list of Spotify track id's (e.g. `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`).  A maximum of 50 id's may be specified.  If omitted, the currently playing context uri id value is used."
+        }
+      }
+    },
     "follow_artists": {
       "name": "Follow Artists",
       "description": "Add the current user as a follower of one or more artists.",
@@ -86,7 +170,7 @@
         },
         "playlist_id": {
           "name": "ID's",
-          "description": "The Spotify ID of the playlist (e.g. `3cEYpjA9oz9GiPac4AsH4n`)."
+          "description": "The Spotify ID of the playlist (e.g. `3cEYpjA9oz9GiPac4AsH4n`).  If omitted, the currently playing playlist uri id value is used."
         },
         "public": {
           "name": "Public?",
@@ -118,7 +202,7 @@
         },
         "album_id": {
           "name": "Album Id",
-          "description": "The Spotify ID of the album."
+          "description": "The Spotify ID of the album.  If omitted, the currently playing album uri id value is used."
         },
         "market": {
           "name": "Market / Country Code",
@@ -196,7 +280,7 @@
         },
         "artist_id": {
           "name": "Artist Id",
-          "description": "The Spotify ID of the artist."
+          "description": "The Spotify ID of the artist.  If omitted, the currently playing artist uri id value is used."
         }
       }
     },
@@ -210,11 +294,11 @@
         },
         "artist_id": {
           "name": "Artist Id",
-          "description": "The Spotify ID of the artist."
+          "description": "The Spotify ID of the artist.  If omitted, the currently playing artist uri id value is used."
         },
         "include_groups": {
           "name": "Include Groups",
-          "description": "A comma-separated list of keywords that will be used to filter the response.  If not supplied, all album types will be returned. Valid values are `album`, `single`, `appears_on`, `compilation`."
+          "description": "A comma-separated list of keywords that will be used to filter the response.  If not supplied, only `album` types will be returned. Valid values are `album`, `single`, `appears_on`, `compilation`."
         },
         "limit": {
           "name": "Limit",
@@ -458,7 +542,7 @@
         },
         "playlist_id": {
           "name": "Playlist Id",
-          "description": "The Spotify ID of the playlist."
+          "description": "The Spotify ID of the playlist.  If omitted, the currently playing playlist uri id value is used."
         },
         "market": {
           "name": "Market / Country Code",
@@ -510,7 +594,7 @@
         },
         "show_id": {
           "name": "Show Id",
-          "description": "The Spotify ID of the show."
+          "description": "The Spotify ID of the show.  If omitted, the currently playing show uri id value is used."
         },
         "market": {
           "name": "Market / Country Code",
@@ -528,7 +612,7 @@
         },
         "show_id": {
           "name": "Show ID",
-          "description": "The Spotify ID for the show."
+          "description": "The Spotify ID for the show.  If omitted, the currently playing show uri id value is used."
         },
         "limit": {
           "name": "Limit",
@@ -653,6 +737,20 @@
         "sort_result": {
           "name": "Sort Result?",
           "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
+        }
+      }
+    },
+    "get_tracks_audio_features": {
+      "name": "Get Tracks Audio Features",
+      "description": "Get audio features for multiple tracks based on their Spotify IDs.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "ids": {
+          "name": "ID's",
+          "description": "A comma-separated list of the Spotify track IDs.  Maximum of 100 IDs.  Example `7ouMYWpwJ422jRcDASZB7P,4VqPOruhp5EdPBeR92t6lQ,2takcwOaAZWiXQijPHIx7B`."
         }
       }
     },
@@ -1484,7 +1582,7 @@
         },
         "playlist_id": {
           "name": "Playlist ID",
-          "description": "The Spotify ID of the playlist (e.g. `3cEYpjA9oz9GiPac4AsH4n`)."
+          "description": "The Spotify ID of the playlist (e.g. `3cEYpjA9oz9GiPac4AsH4n`).  If omitted, the currently playing playlist uri id value is used."
         }
       }
     },

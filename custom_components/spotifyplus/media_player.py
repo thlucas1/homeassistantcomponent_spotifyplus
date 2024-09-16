@@ -34,6 +34,7 @@ from spotifywebapipython.models import (
     AlbumSimplified,
     Artist,
     ArtistPage,
+    AudioFeatures,
     Category,
     CategoryPage,
     Context, 
@@ -122,8 +123,21 @@ SONOS_TO_REPEAT = {meaning: mode for mode, meaning in REPEAT_TO_SONOS.items()}
 
 
 # our extra state attribute names.
-ATTR_SPOTIFYPLUS_DEVICE_ID = "spotifyplus_device_id"
-ATTR_SPOTIFYPLUS_DEVICE_NAME = "spotifyplus_device_name"
+ATTR_SPOTIFYPLUS_CONTEXT_URI = "sp_context_uri"
+ATTR_SPOTIFYPLUS_DEVICE_ID = "sp_device_id"
+ATTR_SPOTIFYPLUS_DEVICE_NAME = "sp_device_name"
+ATTR_SPOTIFYPLUS_PLAYLIST_NAME = "sp_playlist_name"
+ATTR_SPOTIFYPLUS_PLAYLIST_URI = "sp_playlist_uri"
+ATTR_SPOTIFYPLUS_USER_COUNTRY = "sp_user_country"
+ATTR_SPOTIFYPLUS_USER_DISPLAY_NAME = "sp_user_display_name"
+ATTR_SPOTIFYPLUS_USER_EMAIL = "sp_user_email"
+ATTR_SPOTIFYPLUS_USER_ID = "sp_user_id"
+ATTR_SPOTIFYPLUS_USER_PRODUCT = "sp_user_product"
+ATTR_SPOTIFYPLUS_USER_URI = "sp_user_uri"
+
+ATTRVALUE_NO_DEVICE = "no_device"
+ATTRVALUE_UNKNOWN = "unknown"
+
 
 
 # annotate the `spotify_exception_handler` callable.
@@ -312,7 +326,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self._playerState:PlayerPlayState = PlayerPlayState()
             self._spotifyConnectDevice:SpotifyConnectDevice = None
             self._sonosDevice:SoCo = None
-
+            
             # initialize base class attributes (MediaPlayerEntity).
             self._attr_icon = "mdi:spotify"
             self._attr_media_image_remotely_accessible = False
@@ -401,8 +415,19 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         """ Return entity specific state attributes. """
         # build list of our extra state attributes to return to HA UI.
         attributes = {}
-        attributes[ATTR_SPOTIFYPLUS_DEVICE_ID] = "no_device"
-        attributes[ATTR_SPOTIFYPLUS_DEVICE_NAME] = "no_device"
+        # attributes[ATTR_SPOTIFYPLUS_CONTEXT_URI] = ATTRVALUE_UNKNOWN
+        attributes[ATTR_SPOTIFYPLUS_DEVICE_ID] = ATTRVALUE_NO_DEVICE
+        attributes[ATTR_SPOTIFYPLUS_DEVICE_NAME] = ATTRVALUE_NO_DEVICE
+        # attributes[ATTR_SPOTIFYPLUS_PLAYLIST_NAME] = ATTRVALUE_UNKNOWN
+        # attributes[ATTR_SPOTIFYPLUS_PLAYLIST_URI] = ATTRVALUE_UNKNOWN
+        attributes[ATTR_SPOTIFYPLUS_USER_COUNTRY] = ATTRVALUE_UNKNOWN
+        attributes[ATTR_SPOTIFYPLUS_USER_DISPLAY_NAME] = ATTRVALUE_UNKNOWN
+        attributes[ATTR_SPOTIFYPLUS_USER_EMAIL] = ATTRVALUE_UNKNOWN
+        attributes[ATTR_SPOTIFYPLUS_USER_ID] = ATTRVALUE_UNKNOWN
+        attributes[ATTR_SPOTIFYPLUS_USER_PRODUCT] = ATTRVALUE_UNKNOWN
+        attributes[ATTR_SPOTIFYPLUS_USER_URI] = ATTRVALUE_UNKNOWN
+        
+        self.data.spotifyClient.UserProfile.DisplayName
         
         # get currently active device id.
         if self._playerState is not None:
@@ -410,11 +435,25 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 attributes[ATTR_SPOTIFYPLUS_DEVICE_ID] = self._playerState.Device.Id
                 attributes[ATTR_SPOTIFYPLUS_DEVICE_NAME] = self._playerState.Device.Name
             if self._playerState.Context is not None:
+                attributes[ATTR_SPOTIFYPLUS_CONTEXT_URI] = self._playerState.Context.Uri
                 attributes['media_context_content_id'] = self._playerState.Context.Uri
                 
         # add currently active playlist information.
         if self._playlist is not None:
+            attributes[ATTR_SPOTIFYPLUS_PLAYLIST_NAME] = self._playlist.Name
+            attributes[ATTR_SPOTIFYPLUS_PLAYLIST_URI] = self._playlist.Uri
             attributes['media_playlist_content_id'] = self._playlist.Uri
+            
+        # add userprofile information.
+        if self.data.spotifyClient is not None:
+            profile:UserProfile = self.data.spotifyClient.UserProfile
+            if profile is not None:
+                attributes[ATTR_SPOTIFYPLUS_USER_COUNTRY] = profile.Country
+                attributes[ATTR_SPOTIFYPLUS_USER_DISPLAY_NAME] = profile.DisplayName
+                attributes[ATTR_SPOTIFYPLUS_USER_EMAIL] = profile.EMail
+                attributes[ATTR_SPOTIFYPLUS_USER_ID] = profile.Id
+                attributes[ATTR_SPOTIFYPLUS_USER_PRODUCT] = profile.Product
+                attributes[ATTR_SPOTIFYPLUS_USER_URI] = profile.Uri
             
         return attributes
 
@@ -1667,9 +1706,304 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         return deviceId
 
 
-    def service_spotify_follow_artists(self, 
-                                       ids:str=None, 
-                                       ) -> None:
+    def service_spotify_check_album_favorites(
+            self, 
+            ids:str=None, 
+            ) -> None:
+        """
+        Check if one or more albums (or the currently playing album) exists in the current 
+        user's 'Your Library' favorites.
+        
+        Args:
+            ids (str):  
+                A comma-separated list of the Spotify IDs for the albums.  
+                Maximum: 50 IDs.  
+                Example: `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`
+                If null, the currently playing track album uri id value is used.
+        """
+        apiMethodName:str = 'service_spotify_check_album_favorites'
+        apiMethodParms:SIMethodParmListContext = None
+        result:dict = {}
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("ids", ids)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Check Album Favorites Service", apiMethodParms)
+                           
+            # check Spotify album favorites.
+            _logsi.LogVerbose("Check Spotify Album Favorites")
+            result = self.data.spotifyClient.CheckAlbumFavorites(ids)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_check_artists_following(
+            self, 
+            ids:str=None, 
+            ) -> None:
+        """
+        Check if one or more artists (or the currently playing artist) is followed in the current 
+        user's 'Your Library' favorites.
+        
+        Args:
+            ids (str):  
+                A comma-separated list of the Spotify IDs for the artists.  
+                Maximum: 50 IDs.  
+                Example: `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`
+                If null, the currently playing track artist uri id value is used.
+        """
+        apiMethodName:str = 'service_spotify_check_artists_following'
+        apiMethodParms:SIMethodParmListContext = None
+        result:dict = {}
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("ids", ids)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Follow Artists Service", apiMethodParms)
+                           
+            # follow artist(s).
+            _logsi.LogVerbose("Adding items(s) to Spotify Artist Favorites")
+            result = self.data.spotifyClient.CheckArtistsFollowing(ids)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_check_audiobook_favorites(
+            self, 
+            ids:str=None, 
+            ) -> None:
+        """
+        Check if one or more audiobooks (or the currently playing audiobook) exists in the current 
+        user's 'Your Library' favorites.
+        
+        Args:
+            ids (str):  
+                A comma-separated list of the Spotify IDs for the audiobooks.  
+                Maximum: 50 IDs.  
+                Example: `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`
+                If null, the currently playing audiobook uri id value is used.
+        """
+        apiMethodName:str = 'service_spotify_check_audiobook_favorites'
+        apiMethodParms:SIMethodParmListContext = None
+        result:dict = {}
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("ids", ids)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Check Audiobook Favorites Service", apiMethodParms)
+                           
+            # check Spotify audiobook favorites.
+            _logsi.LogVerbose("Check Spotify Audiobook Favorites")
+            result = self.data.spotifyClient.CheckAudiobookFavorites(ids)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_check_episode_favorites(
+            self, 
+            ids:str=None, 
+            ) -> None:
+        """
+        Check if one or more episodes (or the currently playing episode) exists in the current 
+        user's 'Your Library' favorites.
+        
+        Args:
+            ids (str):  
+                A comma-separated list of the Spotify IDs for the episodes.  
+                Maximum: 50 IDs.  
+                Example: `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`
+                If null, the currently playing episode uri id value is used.
+        """
+        apiMethodName:str = 'service_spotify_check_episode_favorites'
+        apiMethodParms:SIMethodParmListContext = None
+        result:dict = {}
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("ids", ids)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Check Episode Favorites Service", apiMethodParms)
+                           
+            # check Spotify episode favorites.
+            _logsi.LogVerbose("Check Spotify Episode Favorites")
+            result = self.data.spotifyClient.CheckEpisodeFavorites(ids)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_check_show_favorites(
+            self, 
+            ids:str=None, 
+            ) -> None:
+        """
+        Check if one or more shows (or the currently playing show) exists in the current 
+        user's 'Your Library' favorites.
+        
+        Args:
+            ids (str):  
+                A comma-separated list of the Spotify IDs for the shows.  
+                Maximum: 50 IDs.  
+                Example: `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`
+                If null, the currently playing show uri id value is used.
+        """
+        apiMethodName:str = 'service_spotify_check_show_favorites'
+        apiMethodParms:SIMethodParmListContext = None
+        result:dict = {}
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("ids", ids)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Check Show Favorites Service", apiMethodParms)
+                           
+            # check Spotify show favorites.
+            _logsi.LogVerbose("Check Spotify Show Favorites")
+            result = self.data.spotifyClient.CheckShowFavorites(ids)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_check_track_favorites(
+            self, 
+            ids:str=None, 
+            ) -> None:
+        """
+        Check if one or more tracks (or the currently playing track) exists in the current 
+        user's 'Your Library' favorites.
+        
+        Args:
+            ids (str):  
+                A comma-separated list of the Spotify IDs for the tracks.  
+                Maximum: 50 IDs.  
+                Example: `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`
+                If null, the currently playing context uri id value is used.
+        """
+        apiMethodName:str = 'service_spotify_check_track_favorites'
+        apiMethodParms:SIMethodParmListContext = None
+        result:dict = {}
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("ids", ids)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Check Track Favorites Service", apiMethodParms)
+                           
+            # check Spotify track favorites.
+            _logsi.LogVerbose("Check Spotify Track Favorites")
+            result = self.data.spotifyClient.CheckTrackFavorites(ids)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_follow_artists(
+            self, 
+            ids:str=None, 
+            ) -> None:
         """
         Add the current user as a follower of one or more artists.
         
@@ -1707,10 +2041,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_follow_playlist(self, 
-                                        playlistId:str=None, 
-                                        public:bool=True, 
-                                        ) -> None:
+    def service_spotify_follow_playlist(
+            self, 
+            playlistId:str=None, 
+            public:bool=True, 
+            ) -> None:
         """
         Add the current user as a follower of a playlist.
 
@@ -1718,6 +2053,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             playlistId (str):  
                 The Spotify ID of the playlist.  
                 Example: `3cEYpjA9oz9GiPac4AsH4n`
+                If null, the currently playing playlist uri id value is used.
             public (bool):
                 If true the playlist will be included in user's public playlists, if false it 
                 will remain private.  
@@ -1790,10 +2126,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_get_album(self, 
-                                  albumId:str, 
-                                  market:str=None,
-                                  ) -> dict:
+    def service_spotify_get_album(
+            self, 
+            albumId:str=None, 
+            market:str=None,
+            ) -> dict:
         """
         Get Spotify catalog information for a single album.
         
@@ -1801,6 +2138,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             albumId (str):  
                 The Spotify ID of the album.  
                 Example: `6vc9OTcyd3hyzabCmsdnwE`
+                If omitted, the currently playing album uri id value is used.
             market (str):
                 An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that 
                 is available in that market will be returned.  If a valid user access token is specified 
@@ -2006,16 +2344,18 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_get_artist(self, 
-                                  artistId:str, 
-                                  ) -> dict:
+    def service_spotify_get_artist(
+            self, 
+            artistId:str=None, 
+            ) -> dict:
         """
         Get Spotify catalog information for a single artist.
         
         Args:
             artistId (str):  
                 The Spotify ID of the artist.  
-                Example: `6APm8EjxOHSYM5B4i3vT3q`
+                If null, the currently playing artist uri id value is used.  
+                Example: `6APm8EjxOHSYM5B4i3vT3q`  
                 
         Returns:
             A dictionary that contains the following keys:
@@ -2072,7 +2412,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             artistId (str):  
                 The Spotify ID of the artist.  
-                Example: `6APm8EjxOHSYM5B4i3vT3q`
+                If null, the currently playing artist uri id value is used.  
+                Example: `6APm8EjxOHSYM5B4i3vT3q`  
             include_groups (str):  
                 A comma-separated list of keywords that will be used to filter the response.  
                 If not supplied, all album types will be returned.  
@@ -2121,6 +2462,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("limitTotal", limitTotal)
             apiMethodParms.AppendKeyValue("sortResult", sortResult)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Artist Albums Service", apiMethodParms)
+            
+            # validations.
+            if include_groups is None:
+                include_groups = 'album'
                 
             # request information from Spotify Web API.
             _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
@@ -2812,19 +3157,21 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_get_playlist(self, 
-                                     playlistId:str, 
-                                     market:str=None,
-                                     fields:str=None,
-                                     additionalTypes:str=None
-                                     ) -> dict:
+    def service_spotify_get_playlist(
+            self, 
+            playlistId:str=None, 
+            market:str=None,
+            fields:str=None,
+            additionalTypes:str=None
+            ) -> dict:
         """
         Get a playlist owned by a Spotify user.
         
         Args:
             playlistId (str):  
                 The Spotify ID of the playlist.  
-                Example: `5v5ETK9WFXAnGQ3MRubKuE`
+                If null, the currently playing playlist uri id value is used.  
+                Example: `5v5ETK9WFXAnGQ3MRubKuE`  
             market (str):
                 An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that 
                 is available in that market will be returned.  If a valid user access token is specified 
@@ -2950,17 +3297,19 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_get_show(self, 
-                                 showId:str, 
-                                 market:str=None,
-                                 ) -> dict:
+    def service_spotify_get_show(
+            self, 
+            showId:str=None, 
+            market:str=None,
+            ) -> dict:
         """
         Get Spotify catalog information for a single show identified by its unique Spotify ID.
         
         Args:
             showId (str):  
-                The Spotify ID for the show.
-                Example: `5CfCWKI5pZ28U0uOzXkDHe`
+                The Spotify ID for the show.  
+                If null, the currently playing show uri id value is used.  
+                Example: `5CfCWKI5pZ28U0uOzXkDHe`  
             market (str):
                 An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that 
                 is available in that market will be returned.  If a valid user access token is specified 
@@ -3008,20 +3357,22 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_get_show_episodes(self, 
-                                          showId:str, 
-                                          limit:int, 
-                                          offset:int,
-                                          market:str=None,
-                                          limitTotal:int=None
-                                          ) -> dict:
+    def service_spotify_get_show_episodes(
+            self, 
+            showId:str=None, 
+            limit:int=20, 
+            offset:int=0,
+            market:str=None,
+            limitTotal:int=None
+            ) -> dict:
         """
         Get Spotify catalog information about a show's episodes.
         
         Args:
             showId (str):  
-                The Spotify ID for the show.
-                Example: `6kAsbP8pxwaU2kPibKTuHE`
+                The Spotify ID for the show.  
+                If null, the currently playing show uri id value is used.  
+                Example: `6kAsbP8pxwaU2kPibKTuHE`  
             limit (int):  
                 The maximum number of items to return in a page of items.  
                 Default: 20, Range: 1 to 50.  
@@ -3377,6 +3728,64 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             return {
                 "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
                 "result": result.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_get_tracks_audio_features(
+            self, 
+            ids:str,
+            ) -> dict:
+        """
+        Get audio features for multiple tracks based on their Spotify IDs.
+        
+        Args:
+            ids (list[str]):  
+                A comma-separated list of the Spotify track IDs. 
+                Maximum: 100 IDs.  
+                Example: `7ouMYWpwJ422jRcDASZB7P,4VqPOruhp5EdPBeR92t6lQ,2takcwOaAZWiXQijPHIx7B`
+            
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A list of `AudioFeatures` objects that contain the audio feature details.
+        """
+        apiMethodName:str = 'service_spotify_get_track_favorites'
+        apiMethodParms:SIMethodParmListContext = None
+        result:TrackPageSaved = TrackPageSaved()
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("ids", ids)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Tracks Audio Features Service", apiMethodParms)
+                
+            # request information from Spotify Web API.
+            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
+            result:TrackPageSaved = self.data.spotifyClient.GetTracksAudioFeatures(ids)
+
+            # build dictionary result from array.
+            resultArray:list = []
+            item:AudioFeatures
+            for item in result: 
+                resultArray.append(item.ToDictionary())
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": resultArray
             }
 
         # the following exceptions have already been logged, so we just need to
@@ -6163,6 +6572,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             playlistId (str):  
                 The Spotify ID of the playlist.  
                 Example: `3cEYpjA9oz9GiPac4AsH4n`
+                If null, the currently playing playlist uri id value is used.
         """
         apiMethodName:str = 'service_spotify_unfollow_playlist'
         apiMethodParms:SIMethodParmListContext = None

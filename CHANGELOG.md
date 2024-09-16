@@ -6,6 +6,26 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.55 ] - 2024/09/16
+
+  * Added service `check_album_favorites` to check if one or more albums (or the currently playing album) exists in the current user's 'Your Library' favorites.
+  * Added service `check_artists_following` to check if one or more artists (or the currently playing artist) exists in the current user's 'Your Library' favorites.
+  * Added service `check_audiobook_favorites` to check if one or more audiobooks (or the currently playing audiobook) exists in the current user's 'Your Library' favorites.
+  * Added service `check_episode_favorites` to check if one or more episodes (or the currently playing episode) exists in the current user's 'Your Library' favorites.
+  * Added service `check_show_favorites` to check if one or more shows (or the currently playing show) exists in the current user's 'Your Library' favorites.
+  * Added service `check_track_favorites` to check if one or more tracks (or the currently playing track) exists in the current user's 'Your Library' favorites.
+  * Added service `get_tracks_audio_features` to get audio features for multiple tracks based on their Spotify IDs.
+  * Updated service `follow_playlist` to make the `playlistId` argument optional; if not supplied, the currently playing playlist id value is used instead.
+  * Updated service `get_album` to make the `albumId` argument optional; if not supplied, the currently playing album id value is used instead.
+  * Updated service `get_artist` to make the `artistId` argument optional; if not supplied, the currently playing artist id value is used instead.
+  * Updated service `get_artist_albums` to make the `artistId` argument optional; if not supplied, the currently playing artist id value is used instead.
+  * Updated service `get_playlist` to make the `playlistId` argument optional; if not supplied, the currently playing playlist id value is used instead.
+  * Updated service `get_show` to make the `showId` argument optional; if not supplied, the currently playing show id value is used instead.
+  * Updated service `get_show_episodes` to make the `showId` argument optional; if not supplied, the currently playing show id value is used instead.
+  * Updated service `unfollow_playlist` to make the `playlistId` argument optional; if not supplied, the currently playing playlist id value is used instead.
+  * Added the following extra state attributes: `sp_playlist_name`, `sp_playlist_uri`, `sp_user_country`, `sp_user_display-name`, `sp_user_email`, `sp_user_id`, `sp_user_product`, `sp_user_uri`.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.95.
+
 ###### [ 1.0.54 ] - 2024/08/22
 
   * Updated `config_flow` to correct a bug in the token authorization process that was introduced in v1.0.52 with the Token Cache file location change.  This was preventing new instances of the integration to be setup due to `connection_error` exceptions in the Spotify OAuth2 authorization method.
