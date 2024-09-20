@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.56 ] - 2024/09/19
+
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.96.
+
 ###### [ 1.0.55 ] - 2024/09/16
 
   * Added service `check_album_favorites` to check if one or more albums (or the currently playing album) exists in the current user's 'Your Library' favorites.
