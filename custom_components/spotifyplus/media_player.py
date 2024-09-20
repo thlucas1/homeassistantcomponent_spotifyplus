@@ -34,12 +34,14 @@ from spotifywebapipython.models import (
     AlbumSimplified,
     Artist,
     ArtistPage,
+    AudiobookPageSimplified,
     AudioFeatures,
     Category,
     CategoryPage,
     Context, 
     Device as PlayerDevice, 
     Episode, 
+    EpisodePageSaved,
     EpisodePageSimplified,
     ImageObject,
     PlayerPlayState, 
@@ -2560,6 +2562,76 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
+    def service_spotify_get_audiobook_favorites(
+            self, 
+            limit:int, 
+            offset:int,
+            limitTotal:int=None,
+            sortResult:bool=True,
+            ) -> dict:
+        """
+        Get a list of the audiobooks saved in the current Spotify user's 'Your Library'.
+        
+        Args:
+            limit (int):
+                The maximum number of items to return in a page of items.  
+                Default: 20, Range: 1 to 50.  
+            offset (int):
+                The index of the first item to return.  
+                Use with limit to get the next set of items.  
+                Default: 0 (the first item).  
+            limitTotal (int):
+                The maximum number of items to return for the request.
+                If specified, this argument overrides the limit and offset argument values
+                and paging is automatically used to retrieve all available items up to the
+                maximum count specified.
+                Default: None (disabled)
+            sortResult (bool):
+                True to sort the items by name; otherwise, False to leave the items in the same order they 
+                were returned in by the Spotify Web API.  
+                Default: True
+                
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A `AudiobookPageSimplified` object that contains saved audiobook information.
+        """
+        apiMethodName:str = 'service_spotify_get_audiobook_favorites'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("limit", limit)
+            apiMethodParms.AppendKeyValue("offset", offset)
+            apiMethodParms.AppendKeyValue("limitTotal", limitTotal)
+            apiMethodParms.AppendKeyValue("sortResult", sortResult)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Audiobook Favorites Service", apiMethodParms)
+                
+            # request information from Spotify Web API.
+            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
+            result:AudiobookPageSimplified = self.data.spotifyClient.GetAudiobookFavorites(limit, offset, limitTotal, sortResult)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
     def service_spotify_get_browse_categorys_list(self, 
                                                   country:str=None, 
                                                   locale:str=None,
@@ -2709,6 +2781,76 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
                 "result": result.ToDictionary(),
                 "message": message
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_get_episode_favorites(
+            self, 
+            limit:int, 
+            offset:int,
+            limitTotal:int=None,
+            sortResult:bool=True,
+            ) -> dict:
+        """
+        Get a list of the episodes saved in the current Spotify user's 'Your Library'.
+        
+        Args:
+            limit (int):
+                The maximum number of items to return in a page of items.  
+                Default: 20, Range: 1 to 50.  
+            offset (int):
+                The index of the first item to return.  
+                Use with limit to get the next set of items.  
+                Default: 0 (the first item).  
+            limitTotal (int):
+                The maximum number of items to return for the request.
+                If specified, this argument overrides the limit and offset argument values
+                and paging is automatically used to retrieve all available items up to the
+                maximum count specified.
+                Default: None (disabled)
+            sortResult (bool):
+                True to sort the items by name; otherwise, False to leave the items in the same order they 
+                were returned in by the Spotify Web API.  
+                Default: True
+                
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A `EpisodePageSaved` object that contains saved audiobook information.
+        """
+        apiMethodName:str = 'service_spotify_get_episode_favorites'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("limit", limit)
+            apiMethodParms.AppendKeyValue("offset", offset)
+            apiMethodParms.AppendKeyValue("limitTotal", limitTotal)
+            apiMethodParms.AppendKeyValue("sortResult", sortResult)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Episode Favorites Service", apiMethodParms)
+                
+            # request information from Spotify Web API.
+            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
+            result:EpisodePageSaved = self.data.spotifyClient.GetEpisodeFavorites(limit, offset, limitTotal, sortResult)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result.ToDictionary()
             }
 
         # the following exceptions have already been logged, so we just need to
@@ -3761,7 +3903,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             - user_profile: A (partial) user profile that retrieved the result.
             - result: A list of `AudioFeatures` objects that contain the audio feature details.
         """
-        apiMethodName:str = 'service_spotify_get_track_favorites'
+        apiMethodName:str = 'service_spotify_get_tracks_audio_features'
         apiMethodParms:SIMethodParmListContext = None
         result:TrackPageSaved = TrackPageSaved()
 

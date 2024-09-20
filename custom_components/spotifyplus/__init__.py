@@ -101,8 +101,10 @@ SERVICE_SPOTIFY_GET_ALBUM_NEW_RELEASES:str = 'get_album_new_releases'
 SERVICE_SPOTIFY_GET_ARTIST:str = 'get_artist'
 SERVICE_SPOTIFY_GET_ARTIST_ALBUMS:str = 'get_artist_albums'
 SERVICE_SPOTIFY_GET_ARTISTS_FOLLOWED:str = 'get_artists_followed'
+SERVICE_SPOTIFY_GET_AUDIOBOOK_FAVORITES:str = 'get_audiobook_favorites'
 SERVICE_SPOTIFY_GET_BROWSE_CATEGORYS_LIST:str = 'get_browse_categorys_list'
 SERVICE_SPOTIFY_GET_CATEGORY_PLAYLISTS:str = 'get_category_playlists'
+SERVICE_SPOTIFY_GET_EPISODE_FAVORITES:str = 'get_episode_favorites'
 SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS:str = 'get_featured_playlists'
 SERVICE_SPOTIFY_GET_PLAYER_DEVICES:str = 'get_player_devices'
 SERVICE_SPOTIFY_GET_PLAYER_NOW_PLAYING:str = 'get_player_now_playing'
@@ -285,6 +287,16 @@ SERVICE_SPOTIFY_GET_ARTISTS_FOLLOWED_SCHEMA = vol.Schema(
     }
 )
 
+SERVICE_SPOTIFY_GET_AUDIOBOOK_FAVORITES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
+        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
+        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("sort_result"): cv.boolean,
+    }
+)
+
 SERVICE_SPOTIFY_GET_BROWSE_CATEGORYS_LIST_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
@@ -301,6 +313,16 @@ SERVICE_SPOTIFY_GET_CATEGORY_PLAYLISTS_SCHEMA = vol.Schema(
         vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("country"): cv.string,
+        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("sort_result"): cv.boolean,
+    }
+)
+
+SERVICE_SPOTIFY_GET_EPISODE_FAVORITES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
+        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
         vol.Optional("sort_result"): cv.boolean,
     }
@@ -1303,6 +1325,16 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_get_artists_followed, after, limit, limit_total, sort_result)
 
+                elif service.service == SERVICE_SPOTIFY_GET_AUDIOBOOK_FAVORITES:
+
+                    # get spotify audiobook favorites.
+                    limit = service.data.get("limit")
+                    offset = service.data.get("offset")
+                    limit_total = service.data.get("limit_total")
+                    sort_result = service.data.get("sort_result")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_audiobook_favorites, limit, offset, limit_total, sort_result)
+
                 elif service.service == SERVICE_SPOTIFY_GET_BROWSE_CATEGORYS_LIST:
 
                     # get spotify browse categorys.
@@ -1323,6 +1355,16 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     sort_result = service.data.get("sort_result")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_get_category_playlists, category_id, limit, offset, country, limit_total, sort_result)
+
+                elif service.service == SERVICE_SPOTIFY_GET_EPISODE_FAVORITES:
+
+                    # get spotify episode (podcast) favorites.
+                    limit = service.data.get("limit")
+                    offset = service.data.get("offset")
+                    limit_total = service.data.get("limit_total")
+                    sort_result = service.data.get("sort_result")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_episode_favorites, limit, offset, limit_total, sort_result)
 
                 elif service.service == SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS:
 
@@ -1853,6 +1895,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             supports_response=SupportsResponse.ONLY,
         )
 
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_AUDIOBOOK_FAVORITES, SERVICE_SPOTIFY_GET_AUDIOBOOK_FAVORITES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_GET_AUDIOBOOK_FAVORITES,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_GET_AUDIOBOOK_FAVORITES_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
         _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_BROWSE_CATEGORYS_LIST, SERVICE_SPOTIFY_GET_BROWSE_CATEGORYS_LIST_SCHEMA)
         hass.services.async_register(
             DOMAIN,
@@ -1868,6 +1919,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             SERVICE_SPOTIFY_GET_CATEGORY_PLAYLISTS,
             service_handle_spotify_serviceresponse,
             schema=SERVICE_SPOTIFY_GET_CATEGORY_PLAYLISTS_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_EPISODE_FAVORITES, SERVICE_SPOTIFY_GET_EPISODE_FAVORITES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_GET_EPISODE_FAVORITES,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_GET_EPISODE_FAVORITES_SCHEMA,
             supports_response=SupportsResponse.ONLY,
         )
 

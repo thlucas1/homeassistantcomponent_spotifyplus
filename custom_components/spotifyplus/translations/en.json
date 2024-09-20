@@ -348,6 +348,32 @@
         }
       }
     },
+    "get_audiobook_favorites": {
+      "name": "Get Audiobook Favorites",
+      "description": "Get a list of the audiobooks saved in the current Spotify user's 'Your Library'.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        },
+        "sort_result": {
+          "name": "Sort Result?",
+          "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
+        }
+      }
+    },
     "get_browse_categorys": {
       "name": "Get Browse Categorys",
       "description": "Get a sorted list of ALL categories used to tag items in Spotify.",
@@ -393,6 +419,32 @@
         "country": {
           "name": "Market / Country Code",
           "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        },
+        "sort_result": {
+          "name": "Sort Result?",
+          "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
+        }
+      }
+    },
+    "get_episode_favorites": {
+      "name": "Get Episode Favorites",
+      "description": "Get a list of the episodes saved in the current Spotify user's 'Your Library'.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
         },
         "limit_total": {
           "name": "Limit Total",
