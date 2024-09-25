@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.58 ] - 2024/09/25
+
+  * Added the following extra state attribute: `sp_item_type` - denotes the type of episode being played: `podcast` or `audiobook`.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.99.
+
 ###### [ 1.0.57 ] - 2024/09/20
 
   * Added service `get_audiobook_favorites` to get a list of the audiobooks saved in the current Spotify user's 'Your Library'.

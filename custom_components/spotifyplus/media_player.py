@@ -128,6 +128,7 @@ SONOS_TO_REPEAT = {meaning: mode for mode, meaning in REPEAT_TO_SONOS.items()}
 ATTR_SPOTIFYPLUS_CONTEXT_URI = "sp_context_uri"
 ATTR_SPOTIFYPLUS_DEVICE_ID = "sp_device_id"
 ATTR_SPOTIFYPLUS_DEVICE_NAME = "sp_device_name"
+ATTR_SPOTIFYPLUS_ITEM_TYPE = "sp_item_type"
 ATTR_SPOTIFYPLUS_PLAYLIST_NAME = "sp_playlist_name"
 ATTR_SPOTIFYPLUS_PLAYLIST_URI = "sp_playlist_uri"
 ATTR_SPOTIFYPLUS_USER_COUNTRY = "sp_user_country"
@@ -382,6 +383,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             else:
                 _logsi.LogVerbose("'%s': MediaPlayer is setting supported features for Spotify Non-Premium user" % self.name)
                 self._attr_supported_features = MediaPlayerEntityFeature.BROWSE_MEDIA \
+                                              | MediaPlayerEntityFeature.PAUSE \
                                               | MediaPlayerEntityFeature.PLAY \
                                               | MediaPlayerEntityFeature.PLAY_MEDIA \
                                               | MediaPlayerEntityFeature.SELECT_SOURCE \
@@ -417,9 +419,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         """ Return entity specific state attributes. """
         # build list of our extra state attributes to return to HA UI.
         attributes = {}
-        # attributes[ATTR_SPOTIFYPLUS_CONTEXT_URI] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_DEVICE_ID] = ATTRVALUE_NO_DEVICE
         attributes[ATTR_SPOTIFYPLUS_DEVICE_NAME] = ATTRVALUE_NO_DEVICE
+        attributes[ATTR_SPOTIFYPLUS_ITEM_TYPE] = ATTRVALUE_UNKNOWN
         # attributes[ATTR_SPOTIFYPLUS_PLAYLIST_NAME] = ATTRVALUE_UNKNOWN
         # attributes[ATTR_SPOTIFYPLUS_PLAYLIST_URI] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_USER_COUNTRY] = ATTRVALUE_UNKNOWN
@@ -439,6 +441,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             if self._playerState.Context is not None:
                 attributes[ATTR_SPOTIFYPLUS_CONTEXT_URI] = self._playerState.Context.Uri
                 attributes['media_context_content_id'] = self._playerState.Context.Uri
+            if self._playerState.ItemType is not None:
+                attributes[ATTR_SPOTIFYPLUS_ITEM_TYPE] = self._playerState.ItemType
                 
         # add currently active playlist information.
         if self._playlist is not None:
@@ -5017,22 +5021,29 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # to the target device.
             if (self._playerState.Device.Id is not None):
                 
-                # pause playback based on device type.
-                if (self._sonosDevice is not None):
+                # capture (and ignore) any errors, in case the device is not responsive.
+                try:
+                    
+                    # pause playback based on device type.
+                    if (self._sonosDevice is not None):
                 
-                    _logsi.LogVerbose("'%s': Sonos device is active; issuing command to PAUSE Sonos player name '%s'" % (self.name, self._playerState.Device.Name))
-                    self._sonosDevice.pause()
+                        _logsi.LogVerbose("'%s': Sonos device is active; issuing command to PAUSE Sonos player name '%s'" % (self.name, self._playerState.Device.Name))
+                        self._sonosDevice.pause()
 
-                    # give SoCo api time to process the change.
-                    if delay > 0:
-                        _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % delay)
-                        time.sleep(delay)
+                        # give SoCo api time to process the change.
+                        if delay > 0:
+                            _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % delay)
+                            time.sleep(delay)
 
-                else:
+                    else:
                 
-                    # for everything else, just use the Spotify Web API.
-                    if self._playerState.IsPlaying:
-                        self.data.spotifyClient.PlayerMediaPause(self._playerState.Device.Id, delay)
+                        # for everything else, just use the Spotify Web API.
+                        if self._playerState.IsPlaying:
+                            self.data.spotifyClient.PlayerMediaPause(self._playerState.Device.Id, delay)
+
+                except Exception as ex:
+                    
+                    _logsi.LogException("'%s': Exception occurred while pausing device '%s' (ignored)" % (self.name, self._playerState.Device.Name), ex, logToSystemLogger=False)
                 
             # get target device reference from cached list of Spotify Connect devices.
             scDevices:SpotifyConnectDevices = self.data.spotifyClient.GetSpotifyConnectDevices(refresh=refreshDeviceList)
@@ -5118,7 +5129,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 # was source device playing anything?
                 elif self._playerState.Item is None:
 
-                    _logsi.LogVerbose("'%s': Spotify Web API PlayerState Item reference not set (nothing is playling)" % (self.name))
+                    _logsi.LogVerbose("'%s': Spotify Web API PlayerState Item reference not set (nothing is playing)" % (self.name))
 
                     # source device is not playing anything, so just issue a play command to the Sonos device
                     # to let it choose what to play.
