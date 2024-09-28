@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import datetime as dt
 import time
+import urllib.parse
 from datetime import timedelta, datetime
 from typing import Any, Callable, Concatenate, ParamSpec, TypeVar, Tuple
 from yarl import URL
@@ -128,6 +129,7 @@ SONOS_TO_REPEAT = {meaning: mode for mode, meaning in REPEAT_TO_SONOS.items()}
 ATTR_SPOTIFYPLUS_CONTEXT_URI = "sp_context_uri"
 ATTR_SPOTIFYPLUS_DEVICE_ID = "sp_device_id"
 ATTR_SPOTIFYPLUS_DEVICE_NAME = "sp_device_name"
+ATTR_SPOTIFYPLUS_DEVICE_IS_BRAND_SONOS = "sp_device_is_brand_sonos"
 ATTR_SPOTIFYPLUS_ITEM_TYPE = "sp_item_type"
 ATTR_SPOTIFYPLUS_PLAYLIST_NAME = "sp_playlist_name"
 ATTR_SPOTIFYPLUS_PLAYLIST_URI = "sp_playlist_uri"
@@ -421,6 +423,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         attributes = {}
         attributes[ATTR_SPOTIFYPLUS_DEVICE_ID] = ATTRVALUE_NO_DEVICE
         attributes[ATTR_SPOTIFYPLUS_DEVICE_NAME] = ATTRVALUE_NO_DEVICE
+        attributes[ATTR_SPOTIFYPLUS_DEVICE_IS_BRAND_SONOS] = False
         attributes[ATTR_SPOTIFYPLUS_ITEM_TYPE] = ATTRVALUE_UNKNOWN
         # attributes[ATTR_SPOTIFYPLUS_PLAYLIST_NAME] = ATTRVALUE_UNKNOWN
         # attributes[ATTR_SPOTIFYPLUS_PLAYLIST_URI] = ATTRVALUE_UNKNOWN
@@ -443,13 +446,15 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 attributes['media_context_content_id'] = self._playerState.Context.Uri
             if self._playerState.ItemType is not None:
                 attributes[ATTR_SPOTIFYPLUS_ITEM_TYPE] = self._playerState.ItemType
+            if self._spotifyConnectDevice is not None:
+                attributes[ATTR_SPOTIFYPLUS_DEVICE_IS_BRAND_SONOS] = self._spotifyConnectDevice.DeviceInfo.IsBrandSonos
                 
         # add currently active playlist information.
         if self._playlist is not None:
             attributes[ATTR_SPOTIFYPLUS_PLAYLIST_NAME] = self._playlist.Name
             attributes[ATTR_SPOTIFYPLUS_PLAYLIST_URI] = self._playlist.Uri
             attributes['media_playlist_content_id'] = self._playlist.Uri
-            
+                       
         # add userprofile information.
         if self.data.spotifyClient is not None:
             profile:UserProfile = self.data.spotifyClient.UserProfile
@@ -875,7 +880,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             else:
 
                 # transfer playback to the specified source.
-                self.service_spotify_player_transfer_playback(source, (self._attr_state != MediaPlayerState.PAUSED), refreshDeviceList=True)
+                self.service_spotify_player_transfer_playback(
+                    source, 
+                    (self._attr_state != MediaPlayerState.PAUSED), 
+                    refreshDeviceList=True,
+                    forceActivateDevice=True)
         
             # set the selected source.
             self._attr_source = source
@@ -1331,7 +1340,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             spotifyConnectDevice:SpotifyConnectDevice = scDevices.GetDeviceByName(playerState.Device.Name)
             if spotifyConnectDevice is None:
                 spotifyConnectDevice = scDevices.GetDeviceById(playerState.Device.Id)
-
+                
             # if current playback device is a Sonos device, then we will set the sonosDevice reference
             # and use the SoCo API to get the Sonos playback status.    
             if (spotifyConnectDevice is not None) and (spotifyConnectDevice.DeviceInfo.IsBrandSonos):
@@ -1365,22 +1374,126 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 playerState._Device._IsRestricted = True
                 playerState._Device._SupportsVolume = True
                 playerState._Device._Type = 'SPEAKER'
-                playerState._Item = Track()
-                playerState._Item._Album = Album()
-                playerState._Item._Album._Name = sonosTrackInfo.get('album','')
-                playerState._Item._Album.Images.append(ImageObject())
-                playerState._Item._Album.Images[0]._Url = sonosTrackInfo.get('album_art','')
-                playerState._Item.Artists.append(Artist())
-                playerState._Item.Artists[0]._Name = sonosTrackInfo.get('artist','')
-                playerState._Item._Name  = sonosTrackInfo.get('title','')
-                playerState._Item._TrackNumber = sonosTrackInfo.get('playlist_position','')
-                playerState._Item._Uri = sonosTrackInfo.get('uri','')
-                sTimeValue:str = sonosTrackInfo.get('duration',None)
-                playerState._Item._DurationMS = self.to_seconds(sTimeValue) * 1000  # convert h:mm:ss to milliseconds
+                
+                # try to get the spotify uri from the "metadata" music library DIDL value, as
+                # the "uri" value (e.g. "x-sonos-vli:RINCON_38420B909DC801400:2,spotify:e934941535d7b182815bf688490ce8a8")
+                # is not a true spotify uri value (e.g. "spotify:track:6kYyS9g4WJeRzTYqsmcMmM")
+                spotifyUri:str = sonosTrackInfo.get('uri','')
+                didl:str = sonosTrackInfo.get('metadata',None)
+                if (didl):
+                    METADATA_ID:str = 'x-sonos-spotify:'
+                    idx:int = didl.find(METADATA_ID)
+                    if (idx > -1):
+                        spotifyUri:str = didl[idx + len(METADATA_ID):]
+                        spotifyUri = urllib.parse.unquote(spotifyUri)
+                        idx = spotifyUri.find('?')
+                        if (idx > -1):
+                            spotifyUri = spotifyUri[:idx]
+                spotifyType = self.data.spotifyClient.GetTypeFromUri(spotifyUri) or ''
+                spotifyId = self.data.spotifyClient.GetIdFromUri(spotifyUri) or ''
+                
+                # set base item properties.
+                playerState.ItemType = spotifyType
                 sTimeValue:str = sonosTrackInfo.get('position',None)
                 playerState._ProgressMS = self.to_seconds(sTimeValue) * 1000        # convert h:mm:ss to milliseconds
-                playerState._CurrentlyPlayingType = 'track'
                 
+                # set some item properties based on the playing type (episode or non-episode).
+                if (spotifyType == 'episode'):
+
+                    # get the episode data from spotify, as Sonos Soco data is incomplete.
+                    playerState._CurrentlyPlayingType = 'episode'
+                    episode:Episode = self.data.spotifyClient.GetEpisode(spotifyId)
+                    if (episode.Id is not None): 
+                        playerState._Item = episode
+                        if (playerState._Context is None):
+                            playerState._Context = Context()
+                            playerState._Context._Type = episode.Show.Type
+                            playerState._Context._Uri = episode.Show.Uri
+                            playerState._Context._Href = episode.Show.Href
+                            playerState._Context._ExternalUrls = episode.Show.ExternalUrls
+                    else:
+                        # if data could not be obtained from spotify, then use what's 
+                        # available from Sonos Soco api metadata.
+                        playerState._Item = Episode()
+                        playerState._Item._Name = sonosTrackInfo.get('title','')
+                        playerState._Item._Uri = spotifyUri
+                        playerState._Item._Description = 'Sonos device does not provide a description'
+                        sTimeValue:str = sonosTrackInfo.get('duration',None)
+                        playerState._Item._DurationMS = self.to_seconds(sTimeValue) * 1000  # convert h:mm:ss to milliseconds
+                        playerState._Item._Explicit = False
+                        playerState._Item._Href = 'https://api.spotify.com/v1/episodes/' + spotifyId
+                        playerState._Item._HtmlDescription = playerState._Item._Description
+                        playerState._Item._Id = spotifyId
+                        playerState._Item.Images.append(ImageObject())
+                        playerState._Item.Images[0]._Url = sonosTrackInfo.get('album_art','')
+                        playerState._Item._TrackNumber = sonosTrackInfo.get('playlist_position','')
+                        playerState._Item._ReleaseDate = '0000'
+                        playerState._Item._ReleaseDatePrecision = 'year'
+                        playerState._Item._Type = 'episode'
+                        playerState._Item._Show = Show()
+                        playerState._Item._Show._Name = sonosTrackInfo.get('album','')  # TODO get this from metadata (<r:podcast>The Elfstones of Shannara</r:podcast>)
+                        playerState._Item._Show.Images.append(ImageObject())
+                        playerState._Item._Show.Images[0]._Url = sonosTrackInfo.get('album_art','')
+                        playerState._Item._Show._Publisher = sonosTrackInfo.get('artist','')
+
+                        # if show name not set then get it from metadata.
+                        if (playerState._Item._Show._Name == ''):
+                            if (didl):
+                                METADATA_ID:str = '<r:podcast>'
+                                METADATA_END:str = '</r:podcast>'
+                                idx:int = didl.find(METADATA_ID)
+                                if (idx > -1):
+                                    metaValue:str = didl[idx + len(METADATA_ID):]
+                                    idx = metaValue.find(METADATA_END)
+                                    if (idx > -1):
+                                        metaValue = metaValue[:idx]
+                                        playerState._Item._Show._Name = metaValue
+                                    
+                    # if episode is playing then resolve the underlying type (audiobook / podcast show).
+                    if (self.data.spotifyClient.IsChapterEpisode(spotifyId)):
+                        playerState.ItemType = 'audiobook'
+                    else:
+                        playerState.ItemType = 'podcast'
+                        
+                elif (spotifyType == 'track'):
+                    
+                    # get the track data from spotify, as Sonos Soco data is incomplete.
+                    track:Track = self.data.spotifyClient.GetTrack(spotifyId)
+                    if (track.Id is not None): 
+                        playerState._Item = track
+                        if (playerState._Context is None):
+                            playerState._Context = Context()
+                            playerState._Context._Type = track.Album.Type
+                            playerState._Context._Uri = track.Album.Uri
+                            playerState._Context._Href = track.Album.Href
+                            playerState._Context._ExternalUrls = track.Album.ExternalUrls
+                    else:
+                        # if data could not be obtained from spotify, then use what's 
+                        # available from Sonos Soco api metadata.
+                        playerState._CurrentlyPlayingType = 'track'
+                        playerState.ItemType = playerState._CurrentlyPlayingType
+                        playerState._Item = Track()
+                        playerState._Item._Name = sonosTrackInfo.get('title','')
+                        playerState._Item._Uri = spotifyUri
+                        playerState._Item._Description = 'Sonos device does not provide a description'
+                        sTimeValue:str = sonosTrackInfo.get('duration',None)
+                        playerState._Item._DurationMS = self.to_seconds(sTimeValue) * 1000  # convert h:mm:ss to milliseconds
+                        playerState._Item._Explicit = False
+                        playerState._Item._Href = 'https://api.spotify.com/v1/episodes/' + spotifyId
+                        playerState._Item._HtmlDescription = playerState._Item._Description
+                        playerState._Item._Id = spotifyId
+                        playerState._Item._TrackNumber = sonosTrackInfo.get('playlist_position','')
+                        playerState._Item._ReleaseDate = '0000'
+                        playerState._Item._ReleaseDatePrecision = 'year'
+                        playerState._Item._Type = 'track'
+                        playerState._Item._Album = Album()
+                        playerState._Item._Album._Name = sonosTrackInfo.get('album','')
+                        playerState._Item._Album.Images.append(ImageObject())
+                        playerState._Item._Album.Images[0]._Url = sonosTrackInfo.get('album_art','')
+                        playerState._Item.Artists.append(Artist())
+                        playerState._Item.Artists[0]._Name = sonosTrackInfo.get('artist','')
+                               
+                # set transport actions.
                 currentTransportState:str = sonosTransportInfo.get('current_transport_state','')
                 if currentTransportState == 'PLAYING':
                     playerState._IsPlaying = True
@@ -1737,7 +1850,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
             apiMethodParms.AppendKeyValue("ids", ids)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Check Album Favorites Service", apiMethodParms)
-                           
+            
             # check Spotify album favorites.
             _logsi.LogVerbose("Check Spotify Album Favorites")
             result = self.data.spotifyClient.CheckAlbumFavorites(ids)
@@ -2093,9 +2206,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_follow_users(self, 
-                                     ids:str=None, 
-                                     ) -> None:
+    def service_spotify_follow_users(
+            self, 
+            ids:str=None, 
+            ) -> None:
         """
         Add the current user as a follower of one or more users.
 
@@ -2196,9 +2310,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
     def service_spotify_get_album_favorites(
             self, 
-            limit:int, 
-            offset:int,
-            market:str,
+            limit:int=20, 
+            offset:int=0,
+            market:str=None,
             limitTotal:int=None,
             sortResult:bool=True,
             ) -> dict:
@@ -2274,9 +2388,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
     def service_spotify_get_album_new_releases(
             self, 
-            limit:int, 
-            offset:int,
-            country:str,
+            limit:int=20, 
+            offset:int=0,
+            country:str=None,
             limitTotal:int=None,
             sortResult:bool=True,
             ) -> dict:
@@ -2498,8 +2612,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
     def service_spotify_get_artists_followed(
             self, 
-            after:str, 
-            limit:int,
+            after:str=None, 
+            limit:int=20,
             limitTotal:int=None,
             sortResult:bool=True,
             ) -> dict:
@@ -2568,8 +2682,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
     def service_spotify_get_audiobook_favorites(
             self, 
-            limit:int, 
-            offset:int,
+            limit:int=20, 
+            offset:int=0,
             limitTotal:int=None,
             sortResult:bool=True,
             ) -> dict:
@@ -2636,11 +2750,12 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_get_browse_categorys_list(self, 
-                                                  country:str=None, 
-                                                  locale:str=None,
-                                                  refresh:str=False,
-                                                  ) -> dict:
+    def service_spotify_get_browse_categorys_list(
+            self, 
+            country:str=None, 
+            locale:str=None,
+            refresh:str=False,
+            ) -> dict:
         """
         Get a sorted list of ALL categories used to tag items in Spotify.
         
@@ -2800,10 +2915,73 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
+    def service_spotify_get_episode(
+            self, 
+            episodeId:str=None, 
+            market:str=None, 
+            ) -> dict:
+        """
+        Get Spotify catalog information for a single episode identified by its unique Spotify ID.
+        
+        Args:
+            episodeId (str):  
+                The Spotify ID of the episode.  
+                Example: `512ojhOuo1ktJprKbVcKyQ`
+                If null, the currently playing episode uri id value is used; a Spotify Free or Premium account 
+                is required to correctly read the currently playing context.
+            market (str):
+                An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that 
+                is available in that market will be returned.  If a valid user access token is specified 
+                in the request header, the country associated with the user account will take priority over 
+                this parameter.  
+                Note: If neither market or user country are provided, the content is considered unavailable for the client.  
+                Users can view the country that is associated with their account in the account settings.  
+                Example: `ES`
+                
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A `Episode` object that contain the episode details.
+        """
+        apiMethodName:str = 'service_spotify_get_episode'
+        apiMethodParms:SIMethodParmListContext = None
+        result:Episode = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("episodeId", episodeId)
+            apiMethodParms.AppendKeyValue("market", market)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Episode Service", apiMethodParms)
+                
+            # request information from Spotify Web API.
+            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
+            result = self.data.spotifyClient.GetEpisode(episodeId, market)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
     def service_spotify_get_episode_favorites(
             self, 
-            limit:int, 
-            offset:int,
+            limit:int=20, 
+            offset:int=0,
             limitTotal:int=None,
             sortResult:bool=True,
             ) -> dict:
@@ -3223,12 +3401,13 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_get_player_recent_tracks(self, 
-                                                 limit:int, 
-                                                 after:int, 
-                                                 before:int,
-                                                 limitTotal:int=None
-                                                 ) -> dict:
+    def service_spotify_get_player_recent_tracks(
+            self, 
+            limit:int=20, 
+            after:int=0, 
+            before:int=0,
+            limitTotal:int=None
+            ) -> dict:
         """
         Get tracks from the current user's recently played tracks.  
         Note: Currently doesn't support podcast episodes.
@@ -3375,8 +3554,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
     def service_spotify_get_playlist_favorites(
             self, 
-            limit:int, 
-            offset:int,
+            limit:int=20, 
+            offset:int=0,
             limitTotal:int=None,
             sortResult:bool=True,
             ) -> dict:
@@ -3585,8 +3764,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
     def service_spotify_get_show_favorites(
             self, 
-            limit:int, 
-            offset:int,
+            limit:int=20, 
+            offset:int=0,
             limitTotal:int=None,
             sortResult:bool=True,
             ) -> dict:
@@ -3810,11 +3989,64 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
+    def service_spotify_get_track(
+            self, 
+            trackId:str=None, 
+            ) -> dict:
+        """
+        Get Spotify catalog information for a single track identified by its unique Spotify ID.
+        
+        Args:
+            trackId (str):  
+                The Spotify ID of the track.  
+                Example: `1kWUud3vY5ij5r62zxpTRy`
+                If null, the currently playing track uri id value is used; a Spotify Free or Premium account 
+                is required to correctly read the currently playing context.
+                
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A `Track` object that contain the track details.
+        """
+        apiMethodName:str = 'service_spotify_get_track'
+        apiMethodParms:SIMethodParmListContext = None
+        result:Track = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("trackId", trackId)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Track Service", apiMethodParms)
+                
+            # request information from Spotify Web API.
+            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
+            result = self.data.spotifyClient.GetTrack(trackId)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
     def service_spotify_get_track_favorites(
             self, 
-            limit:int, 
-            offset:int,
-            market:str,
+            limit:int=20, 
+            offset:int=0,
+            market:str=None,
             limitTotal:int=None,
             sortResult:bool=True,
             ) -> dict:
@@ -3949,9 +4181,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
     def service_spotify_get_users_top_artists(
             self, 
-            timeRange:str,
-            limit:int, 
-            offset:int,
+            timeRange:str='medium_term',
+            limit:int=20, 
+            offset:int=0,
             limitTotal:int=None,
             sortResult:bool=True,
             ) -> dict:
@@ -4029,9 +4261,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
     def service_spotify_get_users_top_tracks(
             self, 
-            timeRange:str,
-            limit:int, 
-            offset:int,
+            timeRange:str='medium_term',
+            limit:int=20, 
+            offset:int=0,
             limitTotal:int=None,
             sortResult:bool=True,
             ) -> dict:
@@ -4332,11 +4564,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
     @spotify_exception_handler
     def service_spotify_player_media_play_track_favorites(
         self, 
-        deviceId:str, 
-        shuffle:bool,
-        delay:float,
-        resolveDeviceId:bool,
-        limitTotal:int,
+        deviceId:str=None, 
+        shuffle:bool=False,
+        delay:float=0.50,
+        resolveDeviceId:bool=True,
+        limitTotal:int=None,
         ) -> None:
         """
         Start playing one or more tracks on the specified Spotify Connect device.
@@ -4757,7 +4989,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
     def service_spotify_player_set_shuffle_mode(
         self, 
-        state:bool, 
+        state:bool=False, 
         deviceId:str=None,
         delay:float=0.50,
         ) -> None:
@@ -4953,10 +5185,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
     def service_spotify_player_transfer_playback(
         self, 
-        deviceId:str, 
+        deviceId:str=None, 
         play:bool=True, 
         delay:float=0.50,
         refreshDeviceList:bool=True, 
+        forceActivateDevice:bool=True,
         ) -> None:
         """
         Transfer playback to a new Spotify Connect device and optionally begin playback.
@@ -4980,6 +5213,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 True to refresh the Spotify Connect device list; otherwise, False to use the 
                 Spotify Connect device list cache.  
                 Default is True.
+            forceActivateDevice (bool):
+                True to issue a Spotify Connect Disconnect call prior to transfer, which will
+                force the device to reconnect to Spotify Connect; otherwise, False to not
+                disconnect.
+                Default is True.  
         """
         apiMethodName:str = 'service_spotify_player_transfer_playback'
         apiMethodParms:SIMethodParmListContext = None
@@ -5143,7 +5381,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 
                 else:
                 
-                    _logsi.LogVerbose("'%s': Sonos music source is NOT set to Spotify Connect; " % (self.name))
+                    _logsi.LogVerbose("'%s': Sonos device music source is NOT set to Spotify Connect; " % (self.name))
                     
                     # at this point the source device is playing something, but the target Sonos device is not
                     # set to the SPOTIFY_CONNECT music source.  we will create a local queue on the target Sonos 
@@ -5250,10 +5488,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_playlist_cover_image_add(self, 
-                                                 playlistId:str, 
-                                                 imagePath:str, 
-                                                 ) -> None:
+    def service_spotify_playlist_cover_image_add(
+            self, 
+            playlistId:str, 
+            imagePath:str, 
+            ) -> None:
         """
         Replace the image used to represent a specific playlist.
         
@@ -5293,14 +5532,15 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_playlist_change(self, 
-                                        playlistId:str, 
-                                        name:str=None,
-                                        description:str=None,
-                                        public:bool=True,
-                                        collaborative:bool=False,
-                                        imagePath:str=None
-                                        ) -> None:
+    def service_spotify_playlist_change(
+            self, 
+            playlistId:str, 
+            name:str=None,
+            description:str=None,
+            public:bool=True,
+            collaborative:bool=False,
+            imagePath:str=None
+            ) -> None:
         """
         Change a playlist's details (name, description, and public / private state).
         
@@ -5358,14 +5598,15 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_playlist_create(self, 
-                                        userId:str, 
-                                        name:str=None,
-                                        description:str=None,
-                                        public:bool=True,
-                                        collaborative:bool=False,
-                                        imagePath:str=None
-                                        ) -> dict:
+    def service_spotify_playlist_create(
+            self, 
+            userId:str, 
+            name:str=None,
+            description:str=None,
+            public:bool=True,
+            collaborative:bool=False,
+            imagePath:str=None
+            ) -> dict:
         """
         Create an empty playlist for a Spotify user.  
         
@@ -5442,11 +5683,12 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_playlist_items_add(self, 
-                                           playlistId:str, 
-                                           uris:str, 
-                                           position:int,
-                                           ) -> None:
+    def service_spotify_playlist_items_add(
+            self, 
+            playlistId:str, 
+            uris:str, 
+            position:int=None,
+            ) -> None:
         """
         Add one or more items to a user's playlist.
         
@@ -5500,9 +5742,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_playlist_items_clear(self, 
-                                             playlistId:str, 
-                                             ) -> None:
+    def service_spotify_playlist_items_clear(
+            self, 
+            playlistId:str, 
+            ) -> None:
         """
         Removes (clears) all items from a user's playlist.
         
@@ -5539,11 +5782,12 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_playlist_items_remove(self, 
-                                              playlistId:str, 
-                                              uris:str, 
-                                              snapshotId:str,
-                                              ) -> None:
+    def service_spotify_playlist_items_remove(
+            self, 
+            playlistId:str=None, 
+            uris:str=None, 
+            snapshotId:str=None,
+            ) -> None:
         """
         Remove one or more items from a user's playlist.
         
@@ -6003,14 +6247,15 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_search_albums(self, 
-                                      criteria:str, 
-                                      limit:int, 
-                                      offset:int, 
-                                      market:str,
-                                      includeExternal:str,
-                                      limitTotal:int,
-                                      ) -> dict:
+    def service_spotify_search_albums(
+            self, 
+            criteria:str, 
+            limit:int=20, 
+            offset:int=0, 
+            market:str=None,
+            includeExternal:str=None,
+            limitTotal:int=None,
+            ) -> dict:
         """
         Get Spotify catalog information about albums that match a keyword string.
 
@@ -6099,14 +6344,15 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_search_artists(self, 
-                                       criteria:str, 
-                                       limit:int, 
-                                       offset:int, 
-                                       market:str,
-                                       includeExternal:str,
-                                       limitTotal:int,
-                                       ) -> dict:
+    def service_spotify_search_artists(
+            self, 
+            criteria:str, 
+            limit:int=20, 
+            offset:int=0, 
+            market:str=None,
+            includeExternal:str=None,
+            limitTotal:int=None,
+            ) -> dict:
         """
         Get Spotify catalog information about artists that match a keyword string.
 
@@ -6195,14 +6441,15 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_search_audiobooks(self, 
-                                          criteria:str, 
-                                          limit:int, 
-                                          offset:int, 
-                                          market:str,
-                                          includeExternal:str,
-                                          limitTotal:int,
-                                          ) -> dict:
+    def service_spotify_search_audiobooks(
+            self, 
+            criteria:str, 
+            limit:int=20, 
+            offset:int=0, 
+            market:str=None,
+            includeExternal:str=None,
+            limitTotal:int=None,
+            ) -> dict:
         """
         Get Spotify catalog information about audiobooks that match a keyword string.
 
@@ -6291,14 +6538,15 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_search_episodes(self, 
-                                        criteria:str, 
-                                        limit:int, 
-                                        offset:int, 
-                                        market:str,
-                                        includeExternal:str,
-                                        limitTotal:int,
-                                        ) -> dict:
+    def service_spotify_search_episodes(
+            self, 
+            criteria:str, 
+            limit:int=20, 
+            offset:int=0, 
+            market:str=None,
+            includeExternal:str=None,
+            limitTotal:int=None,
+            ) -> dict:
         """
         Get Spotify catalog information about episodes that match a keyword string.
 
@@ -6387,14 +6635,15 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_search_playlists(self, 
-                                         criteria:str, 
-                                         limit:int, 
-                                         offset:int, 
-                                         market:str,
-                                         includeExternal:str,
-                                         limitTotal:int,
-                                         ) -> dict:
+    def service_spotify_search_playlists(
+            self, 
+            criteria:str, 
+            limit:int=20, 
+            offset:int=0, 
+            market:str=None,
+            includeExternal:str=None,
+            limitTotal:int=None,
+            ) -> dict:
         """
         Get Spotify catalog information about playlists that match a keyword string.
 
@@ -6483,14 +6732,15 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_search_shows(self, 
-                                     criteria:str, 
-                                     limit:int, 
-                                     offset:int, 
-                                     market:str,
-                                     includeExternal:str,
-                                     limitTotal:int,
-                                     ) -> dict:
+    def service_spotify_search_shows(
+            self, 
+            criteria:str, 
+            limit:int=20, 
+            offset:int=0, 
+            market:str=None,
+            includeExternal:str=None,
+            limitTotal:int=None,
+            ) -> dict:
         """
         Get Spotify catalog information about shows (aka. podcasts) that match a keyword string.
 
@@ -6579,14 +6829,15 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_search_tracks(self, 
-                                      criteria:str, 
-                                      limit:int, 
-                                      offset:int, 
-                                      market:str,
-                                      includeExternal:str,
-                                      limitTotal:int,
-                                      ) -> dict:
+    def service_spotify_search_tracks(
+            self, 
+            criteria:str, 
+            limit:int=20, 
+            offset:int=0, 
+            market:str=None,
+            includeExternal:str=None,
+            limitTotal:int=None,
+            ) -> dict:
         """
         Get Spotify catalog information about tracks that match a keyword string.
 
@@ -6675,9 +6926,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_unfollow_artists(self, 
-                                         ids:str=None, 
-                                         ) -> None:
+    def service_spotify_unfollow_artists(
+            self, 
+            ids:str=None, 
+            ) -> None:
         """
         Remove the current user as a follower of one or more artists.
         
@@ -6715,9 +6967,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_unfollow_playlist(self, 
-                                          playlistId:str=None, 
-                                          ) -> None:
+    def service_spotify_unfollow_playlist(
+            self, 
+            playlistId:str=None, 
+            ) -> None:
         """
         Remove the current user as a follower of a playlist.
 
@@ -6754,9 +7007,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_unfollow_users(self, 
-                                       ids:str=None, 
-                                       ) -> None:
+    def service_spotify_unfollow_users(
+            self, 
+            ids:str=None, 
+            ) -> None:
         """
         Remove the current user as a follower of one or more users.
 
@@ -7119,9 +7373,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_zeroconf_discover_devices(self, 
-                                                  timeout:int=5, 
-                                                  ) -> dict:
+    def service_spotify_zeroconf_discover_devices(
+            self, 
+            timeout:int=5, 
+            ) -> dict:
         """
         Discover Spotify Connect devices on the local network via the 
         ZeroConf (aka MDNS) service, and return details about each device. 

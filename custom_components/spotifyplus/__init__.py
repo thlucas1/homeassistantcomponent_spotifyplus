@@ -104,6 +104,7 @@ SERVICE_SPOTIFY_GET_ARTISTS_FOLLOWED:str = 'get_artists_followed'
 SERVICE_SPOTIFY_GET_AUDIOBOOK_FAVORITES:str = 'get_audiobook_favorites'
 SERVICE_SPOTIFY_GET_BROWSE_CATEGORYS_LIST:str = 'get_browse_categorys_list'
 SERVICE_SPOTIFY_GET_CATEGORY_PLAYLISTS:str = 'get_category_playlists'
+SERVICE_SPOTIFY_GET_EPISODE:str = 'get_episode'
 SERVICE_SPOTIFY_GET_EPISODE_FAVORITES:str = 'get_episode_favorites'
 SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS:str = 'get_featured_playlists'
 SERVICE_SPOTIFY_GET_PLAYER_DEVICES:str = 'get_player_devices'
@@ -118,6 +119,7 @@ SERVICE_SPOTIFY_GET_SHOW_EPISODES:str = 'get_show_episodes'
 SERVICE_SPOTIFY_GET_SHOW_FAVORITES:str = 'get_show_favorites'
 SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICE:str = 'get_spotify_connect_device'
 SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES:str = 'get_spotify_connect_devices'
+SERVICE_SPOTIFY_GET_TRACK:str = 'get_track'
 SERVICE_SPOTIFY_GET_TRACK_FAVORITES:str = 'get_track_favorites'
 SERVICE_SPOTIFY_GET_TRACKS_AUDIO_FEATURES:str = 'get_tracks_audio_features'
 SERVICE_SPOTIFY_GET_USERS_TOP_ARTISTS:str = 'get_users_top_artists'
@@ -318,6 +320,14 @@ SERVICE_SPOTIFY_GET_CATEGORY_PLAYLISTS_SCHEMA = vol.Schema(
     }
 )
 
+SERVICE_SPOTIFY_GET_EPISODE_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("episode_id"): cv.string,
+        vol.Optional("market"): cv.string,
+    }
+)
+
 SERVICE_SPOTIFY_GET_EPISODE_FAVORITES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
@@ -450,6 +460,13 @@ SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES_SCHEMA = vol.Schema(
     }
 )
 
+SERVICE_SPOTIFY_GET_TRACK_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("track_id"): cv.string,
+    }
+)
+
 SERVICE_SPOTIFY_GET_TRACK_FAVORITES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
@@ -574,6 +591,7 @@ SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK_SCHEMA = vol.Schema(
         vol.Optional("play"): cv.boolean,
         vol.Optional("delay", default=0.50): vol.All(vol.Range(min=0,max=10.0)),
         vol.Optional("refresh_device_list"): cv.boolean,
+        vol.Optional("force_activate_device"): cv.boolean,
     }
 )
 
@@ -1033,11 +1051,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
                     # transfer playback to a new Spotify Connect device.
                     device_id = service.data.get("device_id")
-                    refresh_device_list = service.data.get("refresh_device_list")
                     play = service.data.get("play")
                     delay = service.data.get("delay")
+                    refresh_device_list = service.data.get("refresh_device_list")
+                    force_activate_device = service.data.get("force_activate_device")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    await hass.async_add_executor_job(entity.service_spotify_player_transfer_playback, device_id, play, delay, refresh_device_list)
+                    await hass.async_add_executor_job(entity.service_spotify_player_transfer_playback, device_id, play, delay, refresh_device_list, force_activate_device)
 
                 elif service.service == SERVICE_SPOTIFY_PLAYLIST_CHANGE:
 
@@ -1356,6 +1375,14 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_get_category_playlists, category_id, limit, offset, country, limit_total, sort_result)
 
+                elif service.service == SERVICE_SPOTIFY_GET_EPISODE:
+
+                    # get spotify episode details.
+                    episode_id = service.data.get("episode_id")
+                    market = service.data.get("market")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_episode, episode_id, market)
+
                 elif service.service == SERVICE_SPOTIFY_GET_EPISODE_FAVORITES:
 
                     # get spotify episode (podcast) favorites.
@@ -1487,6 +1514,13 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     refresh = service.data.get("refresh")
                     sort_result = service.data.get("sort_result")
                     response = await hass.async_add_executor_job(entity.service_spotify_get_spotify_connect_devices, refresh, sort_result)
+
+                elif service.service == SERVICE_SPOTIFY_GET_TRACK:
+
+                    # get spotify track details.
+                    track_id = service.data.get("track_id")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_track, track_id)
 
                 elif service.service == SERVICE_SPOTIFY_GET_TRACK_FAVORITES:
 
@@ -1922,6 +1956,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             supports_response=SupportsResponse.ONLY,
         )
 
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_EPISODE, SERVICE_SPOTIFY_GET_EPISODE_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_GET_EPISODE,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_GET_EPISODE_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
         _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_EPISODE_FAVORITES, SERVICE_SPOTIFY_GET_EPISODE_FAVORITES_SCHEMA)
         hass.services.async_register(
             DOMAIN,
@@ -2045,6 +2088,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES,
             service_handle_spotify_serviceresponse,
             schema=SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_TRACK, SERVICE_SPOTIFY_GET_TRACK_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_GET_TRACK,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_GET_TRACK_SCHEMA,
             supports_response=SupportsResponse.ONLY,
         )
 

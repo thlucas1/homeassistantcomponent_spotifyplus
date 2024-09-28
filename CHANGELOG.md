@@ -6,6 +6,15 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.59 ] - 2024/09/28
+
+  * Added support for devices that utilize spotifyd / librespot.  See the [wiki documentation](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#librespot-and-spotifyd-device-support) for more information on how to configure support for spotifyD / librespot applications.
+  * Corrected the `media_content_id` attribute value when content is played on a Sonos device.  Prior to this fix, the value was loaded from the Sonos Soco API `get_current_track_info.uri` value that contained the `x-sonos-vli` value (e.g. `x-sonos-vli:RINCON_38420B909DC801400:2,spotify:e934941535d7b182815bf688490ce8a8`).  The `media_content_id` attribute value now contains a true Spotify URI value (e.g. `spotify:track:6kYyS9g4WJeRzTYqsmcMmM`).
+  * Added the following extra state attribute: `sp_device_is_brand_sonos` - denotes the source device is a Sonos brand device (true) or not (false).
+  * Added service `get_track` to get Spotify catalog information for a single track identified by its unique Spotify ID.
+  * Added service `get_episode` to get Spotify catalog information for a single episode identified by its unique Spotify ID.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.101.
+
 ###### [ 1.0.58 ] - 2024/09/25
 
   * Added the following extra state attribute: `sp_item_type` - denotes the type of episode being played: `podcast` or `audiobook`.

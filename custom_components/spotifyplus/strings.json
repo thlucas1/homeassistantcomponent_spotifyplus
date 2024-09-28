@@ -430,6 +430,24 @@
         }
       }
     },
+    "get_episode": {
+      "name": "Get Episode",
+      "description": "Get Spotify catalog information for a single episode.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "episode_id": {
+          "name": "Episode Id",
+          "description": "The Spotify ID of the episode.  If omitted, the currently playing episode uri id value is used."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter."
+        }
+      }
+    },
     "get_episode_favorites": {
       "name": "Get Episode Favorites",
       "description": "Get a list of the episodes saved in the current Spotify user's 'Your Library'.",
@@ -762,6 +780,20 @@
         }
       }
     },
+    "get_track": {
+      "name": "Get Track",
+      "description": "Get Spotify catalog information for a single track.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "track_id": {
+          "name": "Track Id",
+          "description": "The Spotify ID of the track.  If omitted, the currently playing track uri id value is used."
+        }
+      }
+    },
     "get_track_favorites": {
       "name": "Get Track Favorites",
       "description": "Get a list of the tracks saved in the current Spotify user's 'Your Library'.",
@@ -1085,6 +1117,10 @@
         "refresh_device_list": {
           "name": "Refresh Device List?",
           "description": "True to refresh the Spotify Connect device list; otherwise, False to use the Spotify Connect device list cache.  Default is True."
+        },
+        "force_activate_device": {
+          "name": "Force Activate Device?",
+          "description": "True to issue a Spotify Connect Disconnect call prior to transfer, which will force the device to reconnect to Spotify Connect; otherwise, False to not disconnect. Default is True."
         }
       }
     },

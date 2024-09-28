@@ -35,12 +35,10 @@ async def system_health_info(hass):
         healthInfo: dict[str, Any] = {}
     
         # add manifest file details.
+        # as of HA 2024.6, we have to use an executor job to load the file contents as the trace uses a blocking file open / read call.
         myConfigDir:str = "%s/custom_components/%s" % (hass.config.config_dir, DOMAIN)
         myManifestPath:str = "%s/manifest.json" % (myConfigDir)
-        _logsi.LogTextFile(SILevel.Verbose, "Integration Manifest File (%s)" % myManifestPath, myManifestPath)
-        with open(myManifestPath) as reader:
-            data = reader.read()
-        myManifest:dict = json.loads(data) 
+        myManifest:dict = await hass.async_add_executor_job(_getManifestFile, myManifestPath, "Integration Manifest File (%s)" % myManifestPath)
         healthInfo["integration_version"] = myManifest.get('version','unknown')
 
         # add client configuration data.
@@ -72,6 +70,42 @@ async def system_health_info(hass):
         # trace.
         _logsi.LogException("system_health_info exception: %s" % str(ex), ex, logToSystemLogger=False)
         raise
+        
+    finally:
+
+        # trace.
+        _logsi.LeaveMethod(SILevel.Debug)
+
+
+def _getManifestFile(filePath: str, title: str) -> str:
+    """
+    Loads the contents of the specified text file and returns them.
+    
+    Args:
+        filePath (str):
+            Fully-qualified file path to log.
+        title (str):
+            Title to assign to the log entry.
+
+    """
+    try:
+
+        # trace.
+        _logsi.EnterMethod(SILevel.Debug)
+        _logsi.LogTextFile(SILevel.Verbose, title, filePath)
+
+        # open file and read the contents.
+        with open(filePath) as reader:
+            data = reader.read()
+            
+        # return contents to caller.
+        return json.loads(data) 
+
+    except Exception as ex:
+            
+        # trace.
+        _logsi.LogException("system_health_info _getManifestFile exception: %s" % str(ex), ex, logToSystemLogger=False)
+        return {}
         
     finally:
 
