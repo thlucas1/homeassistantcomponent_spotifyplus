@@ -3768,6 +3768,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             offset:int=0,
             limitTotal:int=None,
             sortResult:bool=True,
+            excludeAudiobooks:bool=True,
             ) -> dict:
         """
         Get a list of the shows saved in the current Spotify user's 'Your Library'.
@@ -3790,6 +3791,15 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 True to sort the items by name; otherwise, False to leave the items in the same order they 
                 were returned in by the Spotify Web API.  
                 Default: True
+            excludeAudiobooks (bool):
+                True to exclude audiobook shows from the returned list, leaving only podcast shows;
+                otherwise, False to include all results returned by the Spotify Web API.  
+                Default: True  
+                
+        For some reason, Spotify Web API returns audiobooks AND podcasts with the `/me/shows` service.
+        Spotify Web API returns only audiobooks with the `/me/audiobooks` service.
+        The reasoning for that is unclear, but the `excludeAudiobooks` argument allows you to
+        only return podcast shows in the results if desired.
                 
         Returns:
             A dictionary that contains the following keys:
@@ -3807,11 +3817,12 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("offset", offset)
             apiMethodParms.AppendKeyValue("limitTotal", limitTotal)
             apiMethodParms.AppendKeyValue("sortResult", sortResult)
+            apiMethodParms.AppendKeyValue("excludeAudiobooks", excludeAudiobooks)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Show Favorites Service", apiMethodParms)
                 
             # request information from Spotify Web API.
             _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
-            result:ShowPageSaved = self.data.spotifyClient.GetShowFavorites(limit, offset, limitTotal, sortResult)
+            result:ShowPageSaved = self.data.spotifyClient.GetShowFavorites(limit, offset, limitTotal, sortResult, excludeAudiobooks)
 
             # return the (partial) user profile that retrieved the result, as well as the result itself.
             return {
@@ -4798,6 +4809,131 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
                 # for everything else, just use the Spotify Web API command.
                 self.data.spotifyClient.PlayerMediaPlayTracks(uris, positionMS, deviceId, delay)
+            
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
+
+            # media player command was processed, so force a scan window at the next interval.
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    @spotify_exception_handler
+    def service_spotify_player_media_seek(
+        self, 
+        positionMS:int=-1, 
+        deviceId:str=None, 
+        delay:float=0.50,
+        relativePositionMS:int=0, 
+        ) -> None:
+        """
+        Seeks to the given absolute or relative position in the user's currently playing track 
+        for the specified Spotify Connect device.
+        
+        Args:
+            positionMS (int):
+                The absolute position in milliseconds to seek to; must be a positive number.  
+                Passing in a position that is greater than the length of the track will cause the 
+                player to start playing the next song.  
+                Example = `25000` to start playing at the 25 second mark.  
+            deviceId (str):
+                The id or name of the device this command is targeting.  
+                If not supplied, the user's currently active device is the target.  
+                Example: `0d1841b0976bae2a3a310dd74c0f3df354899bc8`  
+                Example: `Web Player (Chrome)`  
+            delay (float):
+                Time delay (in seconds) to wait AFTER issuing the command to the player.  
+                This delay will give the spotify web api time to process the change before 
+                another command is issued.  
+                Default is 0.50; value range is 0 - 10.
+            relativePositionMS (int):
+                The relative position in milliseconds to seek to; can be a positive or negative number.  
+                Example = `-10000` to seek behind by 10 seconds.  
+                Example = `10000` to seek ahead by 10 seconds.  
+        """
+        apiMethodName:str = 'service_spotify_player_media_seek'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("positionMS", positionMS)
+            apiMethodParms.AppendKeyValue("deviceId", deviceId)
+            apiMethodParms.AppendKeyValue("delay", delay)
+            apiMethodParms.AppendKeyValue("relativePositionMS", positionMS)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Media Seek Service", apiMethodParms)
+            
+            # validations.
+            if positionMS == -1:
+                positionMS = None
+            if relativePositionMS == 0:
+                relativePositionMS = None
+
+            # validations.
+            delay = validateDelay(delay, 0.50, 10)
+            if deviceId == '':
+                deviceId = None
+            if deviceId is None or deviceId == "*":
+                deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
+                
+            # get selected device reference from cached list of Spotify Connect devices.
+            scDevices:SpotifyConnectDevices = self.data.spotifyClient.GetSpotifyConnectDevices(refresh=False)
+            scDevice:SpotifyConnectDevice = scDevices.GetDeviceByName(deviceId)
+            if scDevice is None:
+                scDevice = scDevices.GetDeviceById(deviceId)
+
+            # get current track position.
+            # ignore what we get for device from _GetPlayerPlaybackState, as it's the active device
+            # and may be NOT what the user asked for (via deviceId argument).
+            playerState:PlayerPlayState
+            spotifyConnectDevice:SpotifyConnectDevice
+            sonosDevice:SoCo 
+
+            # get current track position.
+            playerState, spotifyConnectDevice, sonosDevice = self._GetPlayerPlaybackState()
+
+            # set seek position based on device type.
+            if (sonosDevice is not None):    
+
+                # was relative seeking specified?
+                if (relativePositionMS != 0) and ((positionMS is None) or (positionMS <= 0)):
+                
+                    newPositionMS:int = playerState.ProgressMS
+                    if (newPositionMS is not None) and (newPositionMS > 0):
+                    
+                        # calculate new position; if less than zero, then force it to zero.
+                        newPositionMS += relativePositionMS
+                        if (newPositionMS < 0):
+                            newPositionMS = 0
+                        positionMS = newPositionMS
+
+                # for Sonos, use the SoCo API command.
+                sonosPosition:str = positionHMS_fromMilliSeconds(positionMS)  # convert from milliseconds to Sonos H:MM:SS format
+                _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): SEEK (position=%s)" % (self.name, sonosDevice.ip_address, sonosDevice.player_name, sonosPosition))
+                sonosDevice.seek(position=sonosPosition)
+
+                # give SoCo api time to process the change.
+                if delay > 0:
+                    _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % delay)
+                    time.sleep(delay)
+
+            else:
+
+                # for everything else, just use the Spotify Web API command.
+                self.data.spotifyClient.PlayerMediaSeek(positionMS, deviceId, delay, relativePositionMS)
             
             # update ha state.
             self.schedule_update_ha_state(force_refresh=False)

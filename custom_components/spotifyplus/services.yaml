@@ -237,7 +237,7 @@ get_album_favorites:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -247,7 +247,7 @@ get_album_favorites:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -257,7 +257,7 @@ get_album_favorites:
           mode: box
     market:
       name: Market / Country Code
-      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
+      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.
       example: "ES"
       required: false
       selector:
@@ -293,7 +293,7 @@ get_album_new_releases:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -303,7 +303,7 @@ get_album_new_releases:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -313,7 +313,7 @@ get_album_new_releases:
           mode: box
     country:
       name: Market / Country Code
-      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
+      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.
       example: "ES"
       required: false
       selector:
@@ -384,7 +384,7 @@ get_artist_albums:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -394,7 +394,7 @@ get_artist_albums:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -404,7 +404,7 @@ get_artist_albums:
           mode: box
     market:
       name: Market / Country Code
-      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
+      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.
       example: "ES"
       required: false
       selector:
@@ -447,7 +447,7 @@ get_artists_followed:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -486,7 +486,7 @@ get_audiobook_favorites:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -496,7 +496,7 @@ get_audiobook_favorites:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -577,7 +577,7 @@ get_category_playlists:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -587,7 +587,7 @@ get_category_playlists:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -661,7 +661,7 @@ get_episode_favorites:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -671,7 +671,7 @@ get_episode_favorites:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -710,7 +710,7 @@ get_featured_playlists:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -720,7 +720,7 @@ get_featured_playlists:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -815,7 +815,7 @@ get_player_now_playing:
         text:
     additional_types:
       name: Additional Types
-      description: A comma-separated list of item types that your client supports besides the default track type. Valid types are 'track' and 'episode'.  
+      description: A comma-separated list of item types that your client supports besides the default track type. Valid types are 'track' and 'episode'.
       example: "episode"
       required: false
       selector:
@@ -843,7 +843,7 @@ get_player_playback_state:
         text:
     additional_types:
       name: Additional Types
-      description: A comma-separated list of item types that your client supports besides the default track type. Valid types are 'track' and 'episode'.  
+      description: A comma-separated list of item types that your client supports besides the default track type. Valid types are 'track' and 'episode'.
       example: "episode"
       required: false
       selector:
@@ -878,7 +878,7 @@ get_player_recent_tracks:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -951,7 +951,7 @@ get_playlist:
         text:
     additional_types:
       name: Additional Types
-      description: A comma-separated list of item types that your client supports besides the default track type. Valid types are 'track' and 'episode'.  
+      description: A comma-separated list of item types that your client supports besides the default track type. Valid types are 'track' and 'episode'.
       example: "episode"
       required: false
       selector:
@@ -972,7 +972,7 @@ get_playlist_favorites:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -982,7 +982,7 @@ get_playlist_favorites:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -1056,7 +1056,7 @@ get_show_episodes:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -1066,7 +1066,7 @@ get_show_episodes:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -1105,7 +1105,7 @@ get_show_favorites:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -1115,7 +1115,7 @@ get_show_favorites:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -1134,6 +1134,13 @@ get_show_favorites:
     sort_result:
       name: Sort Result?
       description: True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them.
+      example: "True"
+      required: false
+      selector:
+        boolean:
+    exclude_audiobooks:
+      name: Exclude Audiobooks?
+      description: True (default) to exclude audiobook shows from the returned list, leaving only podcast shows; otherwise, False to include all results returned by the Spotify Web API.
       example: "True"
       required: false
       selector:
@@ -1265,7 +1272,7 @@ get_track_favorites:
           domain: media_player
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -1275,7 +1282,7 @@ get_track_favorites:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -1285,7 +1292,7 @@ get_track_favorites:
           mode: box
     market:
       name: Market / Country Code
-      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
+      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.
       example: "ES"
       required: false
       selector:
@@ -1349,7 +1356,7 @@ get_users_top_artists:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -1359,7 +1366,7 @@ get_users_top_artists:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -1405,7 +1412,7 @@ get_users_top_tracks:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -1415,7 +1422,7 @@ get_users_top_tracks:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -1485,7 +1492,7 @@ player_media_play_context:
           domain: media_player
     context_uri:
       name: Context Uri
-      description: Spotify URI of the context to play (e.g. `spotify:album:6vc9OTcyd3hyzabCmsdnwE`).  Valid contexts are albums, artists & playlists.  
+      description: Spotify URI of the context to play (e.g. `spotify:album:6vc9OTcyd3hyzabCmsdnwE`).  Valid contexts are albums, artists & playlists.
       example: "spotify:album:6vc9OTcyd3hyzabCmsdnwE"
       required: true
       selector:
@@ -1574,7 +1581,7 @@ player_media_play_track_favorites:
           mode: box
     resolve_device_id:
       name: Resolve Device Id?
-      description: True to resolve the supplied `deviceId` value; otherwise, False not resolve the `deviceId` value as it has already been resolved.  Default is True.  
+      description: True to resolve the supplied `deviceId` value; otherwise, False not resolve the `deviceId` value as it has already been resolved.  Default is True.
       example: "True"
       required: false
       selector:
@@ -1634,6 +1641,57 @@ player_media_play_tracks:
         number:
           min: 0.0
           max: 10.0
+          mode: box
+
+player_media_seek:
+  name: Player Media Seek
+  description: Seeks to the given absolute or relative position in the user's currently playing track for the specified Spotify Connect device.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    position_ms:
+      name: Absolute Seek Position
+      description: The absolute position in milliseconds to seek to; must be a positive number or zero if the `relativePositionMS` argument is specified. Passing in a position that is greater than the length of the track will cause the player to start playing the next song. Example = `25000` to start playing at the 25 second mark.
+      example: 25000
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 999999999
+          mode: box
+    device_id:
+      name: Device ID
+      description: The id or name of the Spotify Connect Player device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an "*" is specified), then the SpotifyPlus default device is activated.
+      example: "0d1841b0976bae2a3a310dd74c0f337465899bc8"
+      required: false
+      selector:
+        text:
+    delay:
+      name: Delay
+      description: Time delay (in seconds) to wait AFTER issuing the final Connect command (if necessary). This delay will give the spotify web api time to process the device list change before another command is issued.  Default is 0.50; value range is 0 - 10.
+      example: "0.50"
+      required: false
+      selector:
+        number:
+          min: 0.0
+          max: 10.0
+          mode: box
+    relative_position_ms:
+      name: Relative Seek Position
+      description: The relative position in milliseconds to seek to; can be a positive or negative number, or zero if the `positionMS` argument is specified. Example = `-10000` to seek behind by 10 seconds; `10000` to seek ahead by 10 seconds. 
+      example: 10000
+      required: false
+      selector:
+        number:
+          min: -999999999
+          max: 999999999
           mode: box
 
 player_resolve_device_id:
@@ -1842,7 +1900,7 @@ player_transfer_playback:
         boolean:
     force_activate_device:
       name: Force Activate Device?
-      description: True to issue a Spotify Connect Disconnect call prior to transfer, which will force the device to reconnect to Spotify Connect; otherwise, False to not disconnect. Default is True.  
+      description: True to issue a Spotify Connect Disconnect call prior to transfer, which will force the device to reconnect to Spotify Connect; otherwise, False to not disconnect. Default is True.
       example: "True"
       required: false
       selector:
@@ -2017,7 +2075,7 @@ playlist_items_add:
         text:
     position:
       name: Position
-      description: The position to insert the items, a zero-based index.  For example, to insert the items in the first position use a value of 0; to insert the items in the third position use a value of 2.  Omit the parameter to append the items to the end of the playlist.  
+      description: The position to insert the items, a zero-based index.  For example, to insert the items in the first position use a value of 0; to insert the items in the third position use a value of 2.  Omit the parameter to append the items to the end of the playlist.
       example: "0"
       required: false
       selector:
@@ -2314,7 +2372,7 @@ search_albums:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -2324,7 +2382,7 @@ search_albums:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -2334,7 +2392,7 @@ search_albums:
           mode: box
     market:
       name: Market / Country Code
-      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
+      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.
       example: "ES"
       required: false
       selector:
@@ -2377,7 +2435,7 @@ search_artists:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -2387,7 +2445,7 @@ search_artists:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -2397,7 +2455,7 @@ search_artists:
           mode: box
     market:
       name: Market / Country Code
-      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
+      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.
       example: "ES"
       required: false
       selector:
@@ -2440,7 +2498,7 @@ search_audiobooks:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -2450,7 +2508,7 @@ search_audiobooks:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -2460,7 +2518,7 @@ search_audiobooks:
           mode: box
     market:
       name: Market / Country Code
-      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
+      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.
       example: "ES"
       required: false
       selector:
@@ -2503,7 +2561,7 @@ search_episodes:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -2513,7 +2571,7 @@ search_episodes:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -2523,7 +2581,7 @@ search_episodes:
           mode: box
     market:
       name: Market / Country Code
-      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
+      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.
       example: "ES"
       required: false
       selector:
@@ -2566,7 +2624,7 @@ search_playlists:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -2576,7 +2634,7 @@ search_playlists:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -2586,7 +2644,7 @@ search_playlists:
           mode: box
     market:
       name: Market / Country Code
-      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
+      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.
       example: "ES"
       required: false
       selector:
@@ -2629,7 +2687,7 @@ search_shows:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -2639,7 +2697,7 @@ search_shows:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -2649,7 +2707,7 @@ search_shows:
           mode: box
     market:
       name: Market / Country Code
-      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
+      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.
       example: "ES"
       required: false
       selector:
@@ -2692,7 +2750,7 @@ search_tracks:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.  
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
       example: 20
       required: false
       selector:
@@ -2702,7 +2760,7 @@ search_tracks:
           mode: box
     offset:
       name: Offset
-      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).  
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
       example: 0
       required: false
       selector:
@@ -2712,7 +2770,7 @@ search_tracks:
           mode: box
     market:
       name: Market / Country Code
-      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.  
+      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.
       example: "ES"
       required: false
       selector:
@@ -2863,7 +2921,7 @@ zeroconf_device_connect:
         text:
     loginid:
       name: Spotify Login ID
-      description: Spotify Connect login id to login with (e.g. "31l77fd87g8h9j00k89f07jf87ge").  This is also known as the canonical user id value.  This MUST be the value that relates to the `username` argument.  
+      description: Spotify Connect login id to login with (e.g. "31l77fd87g8h9j00k89f07jf87ge").  This is also known as the canonical user id value.  This MUST be the value that relates to the `username` argument.
       example: "31l77y75hfnhk79f7gk6jkk878mg"
       required: false
       selector:

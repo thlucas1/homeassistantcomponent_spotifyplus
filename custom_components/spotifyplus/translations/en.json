@@ -725,6 +725,10 @@
         "sort_result": {
           "name": "Sort Result?",
           "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
+        },
+        "exclude_audiobooks": {
+          "name": "Exclude Audiobooks?",
+          "description": "True (default) to exclude audiobook shows from the returned list, leaving only podcast shows; otherwise, False to include all results returned by the Spotify Web API."
         }
       }
     },
@@ -1006,9 +1010,35 @@
         }
       }
     },
+    "player_media_seek": {
+      "name": "Player Media Seek",
+      "description": "Seeks to the given absolute or relative position in the user's currently playing track for the specified Spotify Connect device.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "position_ms": {
+          "name": "Absolute Seek Position",
+          "description": "The absolute position in milliseconds to seek to; must be a positive number or zero if the `relativePositionMS` argument is specified. Passing in a position that is greater than the length of the track will cause the player to start playing the next song. Example = `25000` to start playing at the 25 second mark."
+        },
+        "device_id": {
+          "name": "Device ID",
+          "description": "The id or name of the Spotify Connect Player device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an '*' is specified), then the SpotifyPlus default device is activated."
+        },
+        "delay": {
+          "name": "Delay",
+          "description": "Time delay (in seconds) to wait AFTER issuing the final Connect command (if necessary). This delay will give the spotify web api time to process the device list change before another command is issued.  Default is 0.50; value range is 0 - 10."
+        },
+        "relative_position_ms": {
+          "name": "Relative Seek Position",
+          "description": "The relative position in milliseconds to seek to; can be a positive or negative number, or zero if the `positionMS` argument is specified. Example = `-10000` to seek behind by 10 seconds; `10000` to seek ahead by 10 seconds."
+        }
+      }
+    },
     "player_resolve_device_id": {
       "name": "Player Resolve Device ID",
-      "description": "Resolves a Spotify Connect device identifier from a specified device id, name, alias id, or alias name.  This will ensure that the device id can be found on the network, as well as connect to the device if necessary with the current user context. ",
+      "description": "Resolves a Spotify Connect device identifier from a specified device id, name, alias id, or alias name.  This will ensure that the device id can be found on the network, as well as connect to the device if necessary with the current user context.",
       "fields": {
         "entity_id": {
           "name": "Entity ID",

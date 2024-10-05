@@ -6,6 +6,14 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.60 ] - 2024/10/04
+
+  * Added service `player_media_seek` to seek to the given absolute or relative position in the user's currently playing track for the specified Spotify Connect device.
+  * Updated service `get_show_favorites` to include the `exclude_audiobooks` argument, which allows you to limit the results to only podcast items (by default).  For some reason, the Spotify Web API returns both audiobook and podcast items.
+  * Updated Spotify Connect device processing to only require the userid and password configuration options when authenticating to devices that require user and password values.  Some devices only require a loginid value (e.g. spotifyd, Spotify Connect AddOn, librespot, Sonos, etc).  The user should not have to specify userid and password options if they are not required!
+  * Updated service description strings to correct HASSFest validation errors on GitHub.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.106.
+
 ###### [ 1.0.59 ] - 2024/09/28
 
   * Added support for devices that utilize spotifyd / librespot.  See the [wiki documentation](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#librespot-and-spotifyd-device-support) for more information on how to configure support for spotifyD / librespot applications.

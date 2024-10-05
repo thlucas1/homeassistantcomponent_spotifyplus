@@ -128,6 +128,7 @@ SERVICE_SPOTIFY_PLAYER_ACTIVATE_DEVICES:str = 'player_activate_devices'
 SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT:str = 'player_media_play_context'
 SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACK_FAVORITES:str = 'player_media_play_track_favorites'
 SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS:str = 'player_media_play_tracks'
+SERVICE_SPOTIFY_PLAYER_MEDIA_SEEK:str = 'player_media_seek'
 SERVICE_SPOTIFY_PLAYER_RESOLVE_DEVICE_ID:str = 'player_resolve_device_id'
 SERVICE_SPOTIFY_PLAYER_SET_REPEAT_MODE:str = 'player_set_repeat_mode'
 SERVICE_SPOTIFY_PLAYER_SET_SHUFFLE_MODE:str = 'player_set_shuffle_mode'
@@ -437,6 +438,7 @@ SERVICE_SPOTIFY_GET_SHOW_FAVORITES_SCHEMA = vol.Schema(
         vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=500)),
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
         vol.Optional("sort_result"): cv.boolean,
+        vol.Optional("exclude_audiobooks"): cv.boolean,
     }
 )
 
@@ -545,6 +547,16 @@ SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS_SCHEMA = vol.Schema(
         vol.Optional("position_ms", default=-1): vol.All(vol.Range(min=-1,max=999999999)),
         vol.Optional("device_id"): cv.string,
         vol.Optional("delay", default=0.50): vol.All(vol.Range(min=0,max=10.0)),
+    }
+)
+
+SERVICE_SPOTIFY_PLAYER_MEDIA_SEEK_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("position_ms", default=-1): vol.All(vol.Range(min=-1,max=999999999)),
+        vol.Optional("device_id"): cv.string,
+        vol.Optional("delay", default=0.50): vol.All(vol.Range(min=0,max=10.0)),
+        vol.Optional("relative_position_ms", default=0): vol.All(vol.Range(min=-999999999,max=999999999)),
     }
 )
 
@@ -1020,6 +1032,16 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     await hass.async_add_executor_job(entity.service_spotify_player_media_play_tracks, uris, position_ms, device_id, delay)
 
+                elif service.service == SERVICE_SPOTIFY_PLAYER_MEDIA_SEEK:
+
+                    # seeks to the given position in the currently playing track.
+                    position_ms = service.data.get("position_ms")
+                    device_id = service.data.get("device_id")
+                    delay = service.data.get("delay")
+                    relative_position_ms = service.data.get("relative_position_ms")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_player_media_seek, position_ms, device_id, delay, relative_position_ms)
+
                 elif service.service == SERVICE_SPOTIFY_PLAYER_SET_REPEAT_MODE:
 
                     # set player repeat mode.
@@ -1492,8 +1514,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     offset = service.data.get("offset")
                     limit_total = service.data.get("limit_total")
                     sort_result = service.data.get("sort_result")
+                    exclude_audiobooks = service.data.get("exclude_audiobooks")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_show_favorites, limit, offset, limit_total, sort_result)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_show_favorites, limit, offset, limit_total, sort_result, exclude_audiobooks)
 
                 elif service.service == SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICE:
 
@@ -2169,6 +2192,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS,
             service_handle_spotify_command,
             schema=SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_PLAYER_MEDIA_SEEK, SERVICE_SPOTIFY_PLAYER_MEDIA_SEEK_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_PLAYER_MEDIA_SEEK,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_PLAYER_MEDIA_SEEK_SCHEMA,
             supports_response=SupportsResponse.NONE,
         )
 
