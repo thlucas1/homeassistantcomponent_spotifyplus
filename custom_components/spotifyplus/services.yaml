@@ -82,6 +82,33 @@ check_episode_favorites:
       selector:
         text:
 
+check_playlist_followers:
+  name: Check Playlist Followers
+  description: Check to see if the current user is following a specified playlist.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    playlist_id:
+      name: Playlist ID
+      description: The Spotify ID of the playlist (e.g. `3cEYpjA9oz9GiPac4AsH4n`).
+      example: "3cEYpjA9oz9GiPac4AsH4n"
+      required: true
+      selector:
+        text:
+    user_ids:
+      name: User ID's
+      description: Deprecated - must contain the current user's Spotify Username; Maximum of 1 id.  Omit to default to current user name.
+      required: false
+      selector:
+        text:
+
 check_show_favorites:
   name: Check Show Favorites
   description: Check if one or more shows (or the currently playing show) exists in the current user's 'Your Library' favorites.
@@ -334,6 +361,62 @@ get_album_new_releases:
       selector:
         boolean:
 
+get_album_tracks:
+  name: Get Album Tracks
+  description: Get Spotify catalog information about an album's tracks.  
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    album_id:
+      name: Album ID
+      description: The Spotify ID of the album (e.g. `6vc9OTcyd3hyzabCmsdnwE`). If null, the currently playing album uri id value is used; a Spotify Free or Premium account is required to correctly read the currently playing context.
+      example: "6vc9OTcyd3hyzabCmsdnwE"
+      required: false
+      selector:
+        text:
+    limit:
+      name: Limit
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
+      example: 20
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 50
+          mode: box
+    offset:
+      name: Offset
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
+      example: 0
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 500
+          mode: box
+    market:
+      name: Market / Country Code
+      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.
+      example: "ES"
+      required: false
+      selector:
+        text:
+    limit_total:
+      name: Limit Total
+      description: The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total.
+      example: 20
+      required: false
+      selector:
+        number:
+          mode: box
+
 get_artist:
   name: Get Artist
   description: Get Spotify catalog information for a single artist.
@@ -425,6 +508,27 @@ get_artist_albums:
       selector:
         boolean:
 
+get_artist_info:
+  name: Get Artist Info
+  description: Get artist about information from the Spotify Artist Biography page for the specified Spotify artist ID.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    artist_id:
+      name: Artist Id
+      description: The Spotify ID of the artist.  If omitted, the currently playing artist uri id value is used.
+      example: "6APm8EjxOHSYM5B4i3vT3q"
+      required: false
+      selector:
+        text:
+
 get_artists_followed:
   name: Get Artists Followed
   description: Get the current user's followed artists.
@@ -470,6 +574,62 @@ get_artists_followed:
       required: false
       selector:
         boolean:
+
+get_audiobook_chapters:
+  name: Get Audiobook Chapters
+  description: Get Spotify catalog information about an audiobook's chapters.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    audiobook_id:
+      name: Audiobook Id
+      description: The Spotify ID for the audiobook (e.g. `74aydHJKgYz3AIq3jjBSv1`). If null, the currently playing audiobook uri id value is used.
+      example: "74aydHJKgYz3AIq3jjBSv1"
+      required: false
+      selector:
+        text:
+    limit:
+      name: Limit
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
+      example: 20
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 50
+          mode: box
+    offset:
+      name: Offset
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
+      example: 0
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 500
+          mode: box
+    market:
+      name: Market
+      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter.
+      example: "ES"
+      required: false
+      selector:
+        text:
+    limit_total:
+      name: Limit Total
+      description: The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total.
+      example: 20
+      required: false
+      selector:
+        number:
+          mode: box
 
 get_audiobook_favorites:
   name: Get Audiobook Favorites
@@ -617,6 +777,34 @@ get_category_playlists:
       required: false
       selector:
         boolean:
+
+get_chapter:
+  name: Get Chapter
+  description: Get Spotify catalog information for a single audiobook chapter identified by its unique Spotify ID.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    chapter_id:
+      name: Chapter Id
+      description: The Spotify ID for the chapter.  If omitted, the currently playing chapter uri id value is used.
+      example: "3V0yw9UDrYAfkhAvTrvt9Y"
+      required: false
+      selector:
+        text:
+    market:
+      name: Market
+      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter.
+      example: "ES"
+      required: false
+      selector:
+        text:
 
 get_episode:
   name: Get Episode
@@ -1005,6 +1193,76 @@ get_playlist_favorites:
       required: false
       selector:
         boolean:
+
+get_playlist_items:
+  name: Get Playlist Items
+  description: Get full details of the items of a playlist owned by a Spotify user.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    playlist_id:
+      name: Playlist ID
+      description: The Spotify ID of the playlist (e.g. 5v5ETK9WFXAnGQ3MRubKuE).  If null, the currently playing playlist uri id value is used.
+      example: "5v5ETK9WFXAnGQ3MRubKuE"
+      required: true
+      selector:
+        text:
+    limit:
+      name: Limit
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
+      example: 20
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 50
+          mode: box
+    offset:
+      name: Offset
+      description: The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item).
+      example: 0
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 500
+          mode: box
+    market:
+      name: Market
+      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter.
+      example: "ES"
+      required: false
+      selector:
+        text:
+    fields:
+      name: Fields
+      description: Filters for the query; a comma-separated list of the fields to return. If omitted, all fields are returned. For example, specify 'items(track(name,uri))' to get just the playlist's track names and URIs.
+      example: "items(track(name,uri,album(name,uri)))"
+      required: false
+      selector:
+        text:
+    additional_types:
+      name: Additional Types
+      description: A comma-separated list of item types that your client supports besides the default track type.  Valid types are 'track' and 'episode'.
+      example: "track"
+      required: false
+      selector:
+        text:
+    limit_total:
+      name: Limit Total
+      description: The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total.
+      example: 20
+      required: false
+      selector:
+        number:
+          mode: box
 
 get_show:
   name: Get Show

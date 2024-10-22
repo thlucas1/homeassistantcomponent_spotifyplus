@@ -6,6 +6,17 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.61 ] - 2024/10/22
+
+  * Added service `get_audiobook_chapters` to get Spotify catalog information about an audiobook's chapters.
+  * Added service `get_chapter` to get Spotify catalog information about a single audiobook chapter.
+  * Added service `check_playlist_followers` to check to see if the current user is following a specified playlist.
+  * Added service `get_album_tracks` to get Spotify catalog information about an album's tracks.  
+  * Added service `get_artist_info` to get artist about information from the Spotify Artist Biography page for the specified Spotify artist ID.
+  * Added service `get_playlist_items` to get full details of the items of a playlist owned by a Spotify user.
+  * Updated service `get_spotify_connect_devices` to return a `SpotifyConnectDevices` instead of a list of `Device` instances.  This contains more detailed information about the device, as well as when the list was last refreshed from real-time queries.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.112.
+
 ###### [ 1.0.60 ] - 2024/10/04
 
   * Added service `player_media_seek` to seek to the given absolute or relative position in the user's currently playing track for the specified Spotify Connect device.
