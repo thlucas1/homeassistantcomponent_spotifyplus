@@ -976,6 +976,204 @@
         }
       }
     },
+    "get_track_recommendations": {
+      "name": "Get Track Recommendations",
+      "description": "Get track recommendations for specified criteria.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter."
+        },
+        "seed_artists": {
+          "name": "Seed Artists",
+          "description": "A comma separated list of Spotify IDs for seed artists (e.g. 4NHQUGzhtTLFvgF5SZesLK).  Up to 5 seed values may be provided in any combination of seedArtists, seedTracks and seedGenres; only required if seedGenres and seedTracks are not set."
+        },
+        "seed_genres": {
+          "name": "Seed Genres",
+          "description": "A comma separated list of any genres in the set of available genre seeds (e.g. classical,country).  Up to 5 seed values may be provided in any combination of seedArtists, seedTracks and seedGenres; only required if seedArtists and seedTracks are not set."
+        },
+        "seed_tracks": {
+          "name": "Seed Tracks",
+          "description": "A comma separated list of Spotify IDs for a seed track (e.g. 0c6xIDDpzE81m2q797ordA).  Up to 5 seed values may be provided in any combination of seedArtists, seedTracks and seedGenres; only required if seedArtists and seedGenres are not set."
+        },
+        "min_acousticness": {
+          "name": "Minimum Acousticness",
+          "description": "Restrict results to only those tracks whose acousticness level is greater than the specified value.  Range is `0` - `1`."
+        },
+        "max_acousticness": {
+          "name": "Maximum Acousticness",
+          "description": "Restrict results to only those tracks whose acousticness level is less than the specified value.  Range is `0` - `1`."
+        },
+        "target_acousticness": {
+          "name": "Target Acousticness",
+          "description": "Restrict results to only those tracks whose acousticness level is equal to the specified value.  Range is `0` - `1`."
+        },
+        "min_danceability": {
+          "name": "Minimum Danceability",
+          "description": "Restrict results to only those tracks whose danceability level is greater than the specified value.  Range is `0` - `1`."
+        },
+        "max_danceability": {
+          "name": "Maximum Danceability",
+          "description": "Restrict results to only those tracks whose danceability level is less than the specified value.  Range is `0` - `1`."
+        },
+        "target_danceability": {
+          "name": "Target Danceability",
+          "description": "Restrict results to only those tracks whose acousticness is equal to the specified value.  Range is `0` - `1`."
+        },
+        "min_duration_ms": {
+          "name": "Minimum Duration MS",
+          "description": "Restrict results to only those tracks whose duration is greater than the specified value in milliseconds."
+        },
+        "max_duration_ms": {
+          "name": "Maximum Duration MS",
+          "description": "Restrict results to only those tracks whose duration is less than the specified value in milliseconds."
+        },
+        "target_duration_ms": {
+          "name": "Target Duration MS",
+          "description": "Restrict results to only those tracks whose duration is equal to the specified value in milliseconds."
+        },
+        "min_energy": {
+          "name": "Minimum Energy",
+          "description": "Restrict results to only those tracks whose energy level is greater than the specified value.  Range is `0` - `1`."
+        },
+        "max_energy": {
+          "name": "Maximum Energy",
+          "description": "Restrict results to only those tracks whose energy level is less than the specified value.  Range is `0` - `1`."
+        },
+        "target_energy": {
+          "name": "Target Energy",
+          "description": "Restrict results to only those tracks whose energy level is equal to the specified value.  Range is `0` - `1`."
+        },
+        "min_instrumentalness": {
+          "name": "Minimum Instrumentalness",
+          "description": "Restrict results to only those tracks whose instrumentalness level is greater than the specified value.  Range is `0` - `1`."
+        },
+        "max_instrumentalness": {
+          "name": "Maximum Instrumentalness",
+          "description": "Restrict results to only those tracks whose instrumentalness level is less than the specified value.  Range is `0` - `1`."
+        },
+        "target_instrumentalness": {
+          "name": "Target Instrumentalness",
+          "description": "Restrict results to only those tracks whose instrumentalness level is equal to the specified value.  Range is `0` - `1`."
+        },
+        "min_key": {
+          "name": "Minimum Key",
+          "description": "Restrict results to only those tracks whose key level is greater than the specified value.  Range is `0` - `11`."
+        },
+        "max_key": {
+          "name": "Maximum Key",
+          "description": "Restrict results to only those tracks whose key level is less than the specified value.  Range is `0` - `11`."
+        },
+        "target_key": {
+          "name": "Target Key",
+          "description": "Restrict results to only those tracks whose key level is equal to the specified value.  Range is `0` - `11`."
+        },
+        "min_liveness": {
+          "name": "Minimum Liveness",
+          "description": "Restrict results to only those tracks whose liveness level is greater than the specified value.  Range is `0` - `1`."
+        },
+        "max_liveness": {
+          "name": "Maximum Liveness",
+          "description": "Restrict results to only those tracks whose liveness level is less than the specified value.  Range is `0` - `1`."
+        },
+        "target_liveness": {
+          "name": "Target Liveness",
+          "description": "Restrict results to only those tracks whose liveness level is equal to the specified value.  Range is `0` - `1`."
+        },
+        "min_loudness": {
+          "name": "Minimum Loudness",
+          "description": "Restrict results to only those tracks whose loudness level is greater than the specified value."
+        },
+        "max_loudness": {
+          "name": "Maximum Loudness",
+          "description": "Restrict results to only those tracks whose loudness level is less than the specified value."
+        },
+        "target_loudness": {
+          "name": "Target Loudness",
+          "description": "Restrict results to only those tracks whose loudness level is equal to the specified value."
+        },
+        "min_mode": {
+          "name": "Minimum Mode",
+          "description": "Restrict results to only those tracks whose mode level is greater than the specified value.  Range is `0` - `1`."
+        },
+        "max_mode": {
+          "name": "Maximum Mode",
+          "description": "Restrict results to only those tracks whose mode level is less than the specified value.  Range is `0` - `1`."
+        },
+        "target_mode": {
+          "name": "Target Mode",
+          "description": "Restrict results to only those tracks whose mode level is equal to the specified value.  Range is `0` - `1`."
+        },
+        "min_popularity": {
+          "name": "Minimum Popularity",
+          "description": "Restrict results to only those tracks whose popularity level is greater than the specified value.  Range is `0` - `100`."
+        },
+        "max_popularity": {
+          "name": "Maximum Popularity",
+          "description": "Restrict results to only those tracks whose popularity level is less than the specified value.  Range is `0` - `100`."
+        },
+        "target_popularity": {
+          "name": "Target Popularity",
+          "description": "Restrict results to only those tracks whose popularity level is equal to the specified value.  Range is `0` - `100`."
+        },
+        "min_speechiness": {
+          "name": "Minimum Speechiness",
+          "description": "Restrict results to only those tracks whose speechiness level is greater than the specified value.  Range is `0` - `1`."
+        },
+        "max_speechiness": {
+          "name": "Maximum Speechiness",
+          "description": "Restrict results to only those tracks whose speechiness level is less than the specified value.  Range is `0` - `1`."
+        },
+        "target_speechiness": {
+          "name": "Target Speechiness",
+          "description": "Restrict results to only those tracks whose speechiness level is equal to the specified value.  Range is `0` - `1`."
+        },
+        "min_tempo": {
+          "name": "Minimum Tempo",
+          "description": "Restrict results to only those tracks with a tempo greater than the specified number of beats per minute."
+        },
+        "max_tempo": {
+          "name": "Maximum Tempo",
+          "description": "Restrict results to only those tracks with a tempo less than the specified number of beats per minute."
+        },
+        "target_tempo": {
+          "name": "Target Tempo",
+          "description": "Restrict results to only those tracks with a tempo equal to the specified number of beats per minute."
+        },
+        "min_time_signature": {
+          "name": "Minimum Time Signature",
+          "description": "Restrict results to only those tracks whose time signature is greater than the specified value.  Range is `0` - `11`."
+        },
+        "max_time_signature": {
+          "name": "Maximum Time Signature",
+          "description": "Restrict results to only those tracks whose time signature is less than the specified value.  Range is `0` - `11`."
+        },
+        "target_time_signature": {
+          "name": "Target Time Signature",
+          "description": "Restrict results to only those tracks whose time signature is equal to the specified value.  Range is `0` - `11`."
+        },
+        "min_valence": {
+          "name": "Minimum Valence",
+          "description": "Restrict results to only those tracks whose valence level is greater than the specified value.  Range is `0` - `1`."
+        },
+        "max_valence": {
+          "name": "Maximum Valence",
+          "description": "Restrict results to only those tracks whose valence level is less than the specified value.  Range is `0` - `1`."
+        },
+        "target_valence": {
+          "name": "Target Valence",
+          "description": "Restrict results to only those tracks whose valence level is equal to the specified value.  Range is `0` - `1`."
+        }
+      }
+    },
     "get_tracks_audio_features": {
       "name": "Get Tracks Audio Features",
       "description": "Get audio features for multiple tracks based on their Spotify IDs.",

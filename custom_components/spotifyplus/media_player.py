@@ -59,6 +59,7 @@ from spotifywebapipython.models import (
     SpotifyConnectDevice,
     SpotifyConnectDevices,
     Track,
+    TrackRecommendations,
     TrackSaved,
     TrackPage,
     TrackPageSaved,
@@ -137,6 +138,7 @@ ATTR_SPOTIFYPLUS_DEVICE_IS_BRAND_SONOS = "sp_device_is_brand_sonos"
 ATTR_SPOTIFYPLUS_ITEM_TYPE = "sp_item_type"
 ATTR_SPOTIFYPLUS_PLAYLIST_NAME = "sp_playlist_name"
 ATTR_SPOTIFYPLUS_PLAYLIST_URI = "sp_playlist_uri"
+ATTR_SPOTIFYPLUS_TRACK_IS_EXPLICIT = "sp_track_is_explicit"
 ATTR_SPOTIFYPLUS_USER_COUNTRY = "sp_user_country"
 ATTR_SPOTIFYPLUS_USER_DISPLAY_NAME = "sp_user_display_name"
 ATTR_SPOTIFYPLUS_USER_EMAIL = "sp_user_email"
@@ -429,8 +431,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         attributes[ATTR_SPOTIFYPLUS_DEVICE_NAME] = ATTRVALUE_NO_DEVICE
         attributes[ATTR_SPOTIFYPLUS_DEVICE_IS_BRAND_SONOS] = False
         attributes[ATTR_SPOTIFYPLUS_ITEM_TYPE] = ATTRVALUE_UNKNOWN
-        # attributes[ATTR_SPOTIFYPLUS_PLAYLIST_NAME] = ATTRVALUE_UNKNOWN
-        # attributes[ATTR_SPOTIFYPLUS_PLAYLIST_URI] = ATTRVALUE_UNKNOWN
+        attributes[ATTR_SPOTIFYPLUS_TRACK_IS_EXPLICIT] = False
         attributes[ATTR_SPOTIFYPLUS_USER_COUNTRY] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_USER_DISPLAY_NAME] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_USER_EMAIL] = ATTRVALUE_UNKNOWN
@@ -440,7 +441,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         
         self.data.spotifyClient.UserProfile.DisplayName
         
-        # get currently active device id.
+        # add currently active playstate information.
         if self._playerState is not None:
             if self._playerState.Device is not None:
                 attributes[ATTR_SPOTIFYPLUS_DEVICE_ID] = self._playerState.Device.Id
@@ -452,6 +453,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 attributes[ATTR_SPOTIFYPLUS_ITEM_TYPE] = self._playerState.ItemType
             if self._spotifyConnectDevice is not None:
                 attributes[ATTR_SPOTIFYPLUS_DEVICE_IS_BRAND_SONOS] = self._spotifyConnectDevice.DeviceInfo.IsBrandSonos
+            if self._playerState.Item is not None:
+                track:Track = self._playerState.Item
+                if track.Explicit:
+                    attributes[ATTR_SPOTIFYPLUS_TRACK_IS_EXPLICIT] = track.Explicit
                 
         # add currently active playlist information.
         if self._playlist is not None:
@@ -4530,7 +4535,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Returns:
             A dictionary that contains the following keys:
             - user_profile: A (partial) user profile that retrieved the result.
-            - result: A `TrackPageSaved` object that contains playlist information.
+            - result: A `TrackPageSaved` object that contains track favorites.
         """
         apiMethodName:str = 'service_spotify_get_track_favorites'
         apiMethodParms:SIMethodParmListContext = None
@@ -4550,6 +4555,374 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # request information from Spotify Web API.
             _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
             result:TrackPageSaved = self.data.spotifyClient.GetTrackFavorites(limit, offset, market, limitTotal, sortResult)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_get_track_recommendations(
+            self, 
+            limit:int=20, 
+            market:str=None, 
+            seedArtists:str=None, 
+            seedGenres:str=None, 
+            seedTracks:str=None, 
+            minAcousticness:float=None, maxAcousticness:float=None, targetAcousticness:float=None, 
+            minDanceability:float=None, maxDanceability:float=None, targetDanceability:float=None, 
+            minDurationMS:int=None, maxDurationMS:int=None, targetDurationMS:int=None, 
+            minEnergy:float=None, maxEnergy:float=None, targetEnergy:float=None, 
+            minInstrumentalness:float=None, maxInstrumentalness:float=None, targetInstrumentalness:float=None, 
+            minKey:int=None, maxKey:int=None, targetKey:int=None, 
+            minLiveness:float=None, maxLiveness:float=None, targetLiveness:float=None, 
+            minLoudness:float=None, maxLoudness:float=None, targetLoudness:float=None, 
+            minMode:float=None, maxMode:float=None, targetMode:float=None, 
+            minPopularity:int=None, maxPopularity:int=None, targetPopularity:int=None, 
+            minSpeechiness:float=None, maxSpeechiness:float=None, targetSpeechiness:float=None, 
+            minTempo:int=None, maxTempo:int=None, targetTempo:int=None, 
+            minTimeSignature:int=None, maxTimeSignature:int=None, targetTimeSignature:int=None, 
+            minValence:float=None, maxValence:float=None, targetValence:float=None
+            ) -> dict:
+        """
+        Get track recommendations for specified criteria.
+        
+        Args:
+            limit (int):
+                The maximum number of items to return in a page of items.  
+                Default: 20, Range: 1 to 50.  
+            market (str):
+                An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that 
+                is available in that market will be returned.  If a valid user access token is specified 
+                in the request header, the country associated with the user account will take priority over 
+                this parameter.  
+                Note: If neither market or user country are provided, the content is considered unavailable for the client.  
+                Users can view the country that is associated with their account in the account settings.  
+                Example: `ES`
+            seedArtists (str):
+                A comma separated list of Spotify IDs for seed artists.  
+                Up to 5 seed values may be provided in any combination of seedArtists, seedTracks and seedGenres.  
+                Note: only required if seedGenres and seedTracks are not set.  
+                Example: `4NHQUGzhtTLFvgF5SZesLK`
+            seedGenres (str):
+                A comma separated list of any genres in the set of available genre seeds.  
+                Up to 5 seed values may be provided in any combination of seedArtists, seedTracks and seedGenres.  
+                Note: only required if seedArtists and seedTracks are not set.  
+                Example: `classical,country`
+            seedTracks (str):
+                A comma separated list of Spotify IDs for a seed track.  
+                Up to 5 seed values may be provided in any combination of seedArtists, seedTracks and seedGenres.  
+                Note: only required if seedArtists and seedGenres are not set.  
+                Example: `0c6xIDDpzE81m2q797ordA`  
+            minAcousticness (float):
+                Restrict results to only those tracks whose acousticness level is greater than the specified value.  
+                Range: `0` - `1`
+            maxAcousticness (float):
+                Restrict results to only those tracks whose acousticness level is less than the specified value.  
+                Range: `0` - `1`  
+            targetAcousticness (float):
+                Restrict results to only those tracks whose acousticness level is equal to the specified value.  
+                Range: `0` - `1`  
+            minDanceability (float):
+                Restrict results to only those tracks whose danceability level is greater than the specified value.  
+                Range: `0` - `1`  
+            maxDanceability (float):
+                Restrict results to only those tracks whose danceability level is less than the specified value.  
+                Range: `0` - `1`  
+            targetDanceability (float):
+                Restrict results to only those tracks whose acousticness is equal to the specified value.  
+                Range: `0` - `1`  
+            minDurationMS (int):
+                Restrict results to only those tracks whose duration is greater than the specified value in milliseconds.  
+            maxDurationMS (int):
+                Restrict results to only those tracks whose duration is less than the specified value in milliseconds.  
+            targetDurationMS (int):
+                Restrict results to only those tracks whose duration is equal to the specified value in milliseconds.  
+            minEnergy (float):
+                Restrict results to only those tracks whose energy level is greater than the specified value.  
+                Range: `0` - `1`  
+            maxEnergy (float):
+                Restrict results to only those tracks whose energy level is less than the specified value.  
+                Range: `0` - `1`  
+            targetEnergy (float):
+                Restrict results to only those tracks whose energy level is equal to the specified value.  
+                Range: `0` - `1`  
+            minInstrumentalness (float):
+                Restrict results to only those tracks whose instrumentalness level is greater than the specified value.  
+                Range: `0` - `1`  
+            maxInstrumentalness (float):
+                Restrict results to only those tracks whose instrumentalness level is less than the specified value.  
+                Range: `0` - `1`  
+            targetInstrumentalness (float):
+                Restrict results to only those tracks whose instrumentalness level is equal to the specified value.  
+                Range: `0` - `1`  
+            minKey (int):
+                Restrict results to only those tracks whose key level is greater than the specified value.  
+                Range: `0` - `11`  
+            maxKey (int):
+                Restrict results to only those tracks whose key level is less than the specified value.  
+                Range: `0` - `11`  
+            targetKey (int):
+                Restrict results to only those tracks whose key level is equal to the specified value.  
+                Range: `0` - `11`
+            minLiveness (float):
+                Restrict results to only those tracks whose liveness level is greater than the specified value.  
+                Range: `0` - `1`  
+            maxLiveness (float):
+                Restrict results to only those tracks whose liveness level is less than the specified value.  
+                Range: `0` - `1`  
+            targetLiveness (float):
+                Restrict results to only those tracks whose liveness level is equal to the specified value.  
+                Range: `0` - `1`  
+            minLoudness (float):
+                Restrict results to only those tracks whose loudness level is greater than the specified value.  
+            maxLoudness (float):
+                Restrict results to only those tracks whose loudness level is less than the specified value.  
+            targetLoudness (float):
+                Restrict results to only those tracks whose loudness level is equal to the specified value.  
+            minMode (float):
+                Restrict results to only those tracks whose mode level is greater than the specified value.  
+                Range: `0` - `1`  
+            maxMode (float):
+                Restrict results to only those tracks whose mode level is less than the specified value.  
+                Range: `0` - `1`  
+            targetMode (float):
+                Restrict results to only those tracks whose mode level is equal to the specified value.  
+                Range: `0` - `1`  
+            minPopularity (int):
+                Restrict results to only those tracks whose popularity level is greater than the specified value.  
+                Range: `0` - `100`  
+            maxPopularity (int):
+                Restrict results to only those tracks whose popularity level is less than the specified value.  
+                Range: `0` - `100`  
+            targetPopularity (int):
+                Restrict results to only those tracks whose popularity level is equal to the specified value.  
+                Range: `0` - `100`  
+            minSpeechiness (float):
+                Restrict results to only those tracks whose speechiness level is greater than the specified value.  
+                Range: `0` - `1`  
+            maxSpeechiness (float):
+                Restrict results to only those tracks whose speechiness level is less than the specified value.  
+                Range: `0` - `1`  
+            targetSpeechiness (float):
+                Restrict results to only those tracks whose speechiness level is equal to the specified value.  
+                Range: `0` - `1`  
+            minTempo (int):
+                Restrict results to only those tracks with a tempo greater than the specified number of beats per minute.  
+            maxTempo (int):
+                Restrict results to only those tracks with a tempo less than the specified number of beats per minute.  
+            targetTempo (int):
+                Restrict results to only those tracks with a tempo equal to the specified number of beats per minute.  
+            minTimeSignature (int):
+                Restrict results to only those tracks whose time signature is greater than the specified value.  
+                Maximum value: 11
+            maxTimeSignature (int):
+                Restrict results to only those tracks whose time signature is less than the specified value.  
+            targetTimeSignature (int):
+                Restrict results to only those tracks whose time signature is equal to the specified value.  
+            minValence (float):
+                Restrict results to only those tracks whose valence level is greater than the specified value.  
+                Range: `0` - `1`  
+            maxValence (float):
+                Restrict results to only those tracks whose valence level is less than the specified value.  
+                Range: `0` - `1`  
+            targetValence (float):
+                Restrict results to only those tracks whose valence level is equal to the specified value.  
+                Range: `0` - `1`  
+                
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A `TrackRecommendations` object that contains track information.
+        """
+        apiMethodName:str = 'service_spotify_get_track_recommendations'
+        apiMethodParms:SIMethodParmListContext = None
+        result:TrackRecommendations = TrackRecommendations()
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("limit", limit)
+            apiMethodParms.AppendKeyValue("market", market)
+            apiMethodParms.AppendKeyValue("seedArtists", seedArtists)
+            apiMethodParms.AppendKeyValue("seedGenres", seedGenres)
+            apiMethodParms.AppendKeyValue("seedTracks", seedTracks)
+            apiMethodParms.AppendKeyValue("minAcousticness", minAcousticness)
+            apiMethodParms.AppendKeyValue("maxAcousticness", maxAcousticness)
+            apiMethodParms.AppendKeyValue("targetAcousticness", targetAcousticness)
+            apiMethodParms.AppendKeyValue("minDanceability", minDanceability)
+            apiMethodParms.AppendKeyValue("maxDanceability", maxDanceability)
+            apiMethodParms.AppendKeyValue("targetDanceability", targetDanceability)
+            apiMethodParms.AppendKeyValue("minDurationMS", minDurationMS)
+            apiMethodParms.AppendKeyValue("maxDurationMS", maxDurationMS)
+            apiMethodParms.AppendKeyValue("targetDurationMS", targetDurationMS)
+            apiMethodParms.AppendKeyValue("minEnergy", minEnergy)
+            apiMethodParms.AppendKeyValue("maxEnergy", maxEnergy)
+            apiMethodParms.AppendKeyValue("targetEnergy", targetEnergy)
+            apiMethodParms.AppendKeyValue("minInstrumentalness", minInstrumentalness)
+            apiMethodParms.AppendKeyValue("maxInstrumentalness", maxInstrumentalness)
+            apiMethodParms.AppendKeyValue("targetInstrumentalness", targetInstrumentalness)
+            apiMethodParms.AppendKeyValue("minKey", minKey)
+            apiMethodParms.AppendKeyValue("maxKey", maxKey)
+            apiMethodParms.AppendKeyValue("targetKey", targetKey)
+            apiMethodParms.AppendKeyValue("minLiveness", minLiveness)
+            apiMethodParms.AppendKeyValue("maxLiveness", maxLiveness)
+            apiMethodParms.AppendKeyValue("targetLiveness", targetLiveness)
+            apiMethodParms.AppendKeyValue("minLoudness", minLoudness)
+            apiMethodParms.AppendKeyValue("maxLoudness", maxLoudness)
+            apiMethodParms.AppendKeyValue("targetLoudness", targetLoudness)
+            apiMethodParms.AppendKeyValue("minMode", minMode)
+            apiMethodParms.AppendKeyValue("maxMode", maxMode)
+            apiMethodParms.AppendKeyValue("targetMode", targetMode)
+            apiMethodParms.AppendKeyValue("minPopularity", minPopularity)
+            apiMethodParms.AppendKeyValue("maxPopularity", maxPopularity)
+            apiMethodParms.AppendKeyValue("targetPopularity", targetPopularity)
+            apiMethodParms.AppendKeyValue("minSpeechiness", minSpeechiness)
+            apiMethodParms.AppendKeyValue("maxSpeechiness", maxSpeechiness)
+            apiMethodParms.AppendKeyValue("targetSpeechiness", targetSpeechiness)
+            apiMethodParms.AppendKeyValue("minTempo", minTempo)
+            apiMethodParms.AppendKeyValue("maxTempo", maxTempo)
+            apiMethodParms.AppendKeyValue("targetTempo", targetTempo)
+            apiMethodParms.AppendKeyValue("minTimeSignature", minTimeSignature)
+            apiMethodParms.AppendKeyValue("maxTimeSignature", maxTimeSignature)
+            apiMethodParms.AppendKeyValue("targetTimeSignature", targetTimeSignature)
+            apiMethodParms.AppendKeyValue("minValence", minValence)
+            apiMethodParms.AppendKeyValue("maxValence", maxValence)
+            apiMethodParms.AppendKeyValue("targetValence", targetValence)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Track Recommendations Service", apiMethodParms)
+            
+            # reset default values to None so they are processed correctly by the api.
+            if minAcousticness == 0:
+                minAcousticness = None
+            if maxAcousticness == 0:
+                maxAcousticness = None
+            if targetAcousticness == 0:
+                targetAcousticness = None
+                
+            if minDanceability == 0:
+                minDanceability = None
+            if maxDanceability == 0:
+                maxDanceability = None
+            if targetDanceability == 0:
+                targetDanceability = None
+                
+            if minDurationMS == 0:
+                minDurationMS = None
+            if maxDurationMS == 0:
+                maxDurationMS = None
+            if targetDurationMS == 0:
+                targetDurationMS = None
+                
+            if minEnergy == 0:
+                minEnergy = None
+            if maxEnergy == 0:
+                maxEnergy = None
+            if targetEnergy == 0:
+                targetEnergy = None
+
+            if minInstrumentalness == 0:
+                minInstrumentalness = None
+            if maxInstrumentalness == 0:
+                maxInstrumentalness = None
+            if targetInstrumentalness == 0:
+                targetInstrumentalness = None
+                
+            if minKey == 0:
+                minKey = None
+            if maxKey == 0:
+                maxKey = None
+            if targetKey == 0:
+                targetKey = None
+                
+            if minLiveness == 0:
+                minLiveness = None
+            if maxLiveness == 0:
+                maxLiveness = None
+            if targetLiveness == 0:
+                targetLiveness = None
+                
+            if minLoudness == 0:
+                minLoudness = None
+            if maxLoudness == 0:
+                maxLoudness = None
+            if targetLoudness == 0:
+                targetLoudness = None
+                
+            if minMode == 0:
+                minMode = None
+            if maxMode == 0:
+                maxMode = None
+            if targetMode == 0:
+                targetMode = None
+                
+            if minPopularity == 0:
+                minPopularity = None
+            if maxPopularity == 0:
+                maxPopularity = None
+            if targetPopularity == 0:
+                targetPopularity = None
+                
+            if minSpeechiness == 0:
+                minSpeechiness = None
+            if maxSpeechiness == 0:
+                maxSpeechiness = None
+            if targetSpeechiness == 0:
+                targetSpeechiness = None
+                
+            if minTempo == 0:
+                minTempo = None
+            if maxTempo == 0:
+                maxTempo = None
+            if targetTempo == 0:
+                targetTempo = None
+                
+            if minTimeSignature == 0:
+                minTimeSignature = None
+            if maxTimeSignature == 0:
+                maxTimeSignature = None
+            if targetTimeSignature == 0:
+                targetTimeSignature = None
+                
+            if minValence == 0:
+                minValence = None
+            if maxValence == 0:
+                maxValence = None
+            if targetValence == 0:
+                targetValence = None
+                
+            # request information from Spotify Web API.
+            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
+            result:TrackPageSaved = self.data.spotifyClient.GetTrackRecommendations(
+                limit, market, 
+                seedArtists, seedGenres, seedTracks, 
+                minAcousticness, maxAcousticness, targetAcousticness,
+                minDanceability, maxDanceability, targetDanceability,
+                minDurationMS, maxDurationMS, targetDurationMS,
+                minEnergy, maxEnergy, targetEnergy,
+                minInstrumentalness, maxInstrumentalness, targetInstrumentalness, 
+                minKey, maxKey, targetKey, 
+                minLiveness, maxLiveness, targetLiveness, 
+                minLoudness, maxLoudness, targetLoudness, 
+                minMode, maxMode, targetMode, 
+                minPopularity, maxPopularity, targetPopularity, 
+                minSpeechiness, maxSpeechiness, targetSpeechiness, 
+                minTempo, maxTempo, targetTempo, 
+                minTimeSignature, maxTimeSignature, targetTimeSignature, 
+                minValence, maxValence, targetValence)
 
             # return the (partial) user profile that retrieved the result, as well as the result itself.
             return {

@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.62 ] - 2024/10/27
+
+  * Added service `get_track_recommendations` to get track recommendations for specified criteria.
+  * Added the following extra state attribute: `sp_track_is_explicit` - denotes the nowplaying track contains explicit lyrics (true) or not (false).
+
 ###### [ 1.0.61 ] - 2024/10/22
 
   * Added service `get_audiobook_chapters` to get Spotify catalog information about an audiobook's chapters.

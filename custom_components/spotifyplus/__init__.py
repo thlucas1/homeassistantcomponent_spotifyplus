@@ -127,6 +127,7 @@ SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICE:str = 'get_spotify_connect_device'
 SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES:str = 'get_spotify_connect_devices'
 SERVICE_SPOTIFY_GET_TRACK:str = 'get_track'
 SERVICE_SPOTIFY_GET_TRACK_FAVORITES:str = 'get_track_favorites'
+SERVICE_SPOTIFY_GET_TRACK_RECOMMENDATIONS:str = 'get_track_recommendations'
 SERVICE_SPOTIFY_GET_TRACKS_AUDIO_FEATURES:str = 'get_tracks_audio_features'
 SERVICE_SPOTIFY_GET_USERS_TOP_ARTISTS:str = 'get_users_top_artists'
 SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS:str = 'get_users_top_tracks'
@@ -541,6 +542,59 @@ SERVICE_SPOTIFY_GET_TRACK_FAVORITES_SCHEMA = vol.Schema(
         vol.Optional("market"): cv.string,
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
         vol.Optional("sort_result"): cv.boolean,
+    }
+)
+
+SERVICE_SPOTIFY_GET_TRACK_RECOMMENDATIONS_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("limit", default=20): vol.All(vol.Range(min=0,max=50)),
+        vol.Optional("market"): cv.string,
+        vol.Optional("seed_artists"): cv.string,
+        vol.Optional("seed_genres"): cv.string,
+        vol.Optional("seed_tracks"): cv.string,
+        vol.Optional("min_acousticness", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("max_acousticness", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("target_acousticness", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("min_danceability", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("max_danceability", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("target_danceability", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("min_duration_ms", default=0): vol.All(vol.Range(min=0,max=999999999)),
+        vol.Optional("max_duration_ms", default=0): vol.All(vol.Range(min=0,max=999999999)),
+        vol.Optional("target_duration_ms", default=0): vol.All(vol.Range(min=0,max=999999999)),
+        vol.Optional("min_energy", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("max_energy", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("target_energy", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("min_instrumentalness", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("max_instrumentalness", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("target_instrumentalness", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("min_key", default=0): vol.All(vol.Range(min=0,max=11)),
+        vol.Optional("max_key", default=0): vol.All(vol.Range(min=0,max=11)),
+        vol.Optional("target_key", default=0): vol.All(vol.Range(min=0,max=11)),
+        vol.Optional("min_liveness", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("max_liveness", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("target_liveness", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("min_loudness", default=0): vol.All(vol.Range(min=-1000.0,max=1000.0)),
+        vol.Optional("max_loudness", default=0): vol.All(vol.Range(min=-1000.0,max=1000.0)),
+        vol.Optional("target_loudness", default=0): vol.All(vol.Range(min=-1000.0,max=1000.0)),
+        vol.Optional("min_mode", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("max_mode", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("target_mode", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("min_popularity", default=0): vol.All(vol.Range(min=0,max=100)),
+        vol.Optional("max_popularity", default=0): vol.All(vol.Range(min=0,max=100)),
+        vol.Optional("target_popularity", default=0): vol.All(vol.Range(min=0,max=100)),
+        vol.Optional("min_speechiness", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("max_speechiness", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("target_speechiness", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("min_tempo", default=0): vol.All(vol.Range(min=0,max=99999)),
+        vol.Optional("max_tempo", default=0): vol.All(vol.Range(min=0,max=99999)),
+        vol.Optional("target_tempo", default=0): vol.All(vol.Range(min=0,max=99999)),
+        vol.Optional("min_time_signature", default=0): vol.All(vol.Range(min=0,max=99999)),
+        vol.Optional("max_time_signature", default=0): vol.All(vol.Range(min=0,max=99999)),
+        vol.Optional("target_time_signature", default=0): vol.All(vol.Range(min=0,max=99999)),
+        vol.Optional("min_valence", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("max_valence", default=0): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Optional("target_valence", default=0): vol.All(vol.Range(min=-0,max=1.0)),
     }
 )
 
@@ -1669,7 +1723,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
                 elif service.service == SERVICE_SPOTIFY_GET_TRACK_FAVORITES:
 
-                    # get spotify album favorites.
+                    # get spotify track favorites.
                     limit = service.data.get("limit")
                     offset = service.data.get("offset")
                     market = service.data.get("market")
@@ -1677,6 +1731,76 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     sort_result = service.data.get("sort_result")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_get_track_favorites, limit, offset, market, limit_total, sort_result)
+
+                elif service.service == SERVICE_SPOTIFY_GET_TRACK_RECOMMENDATIONS:
+
+                    # get spotify track recommendations.
+                    limit = service.data.get("limit")
+                    market = service.data.get("market")
+                    seed_artists = service.data.get("seed_artists")
+                    seed_genres = service.data.get("seed_genres")
+                    seed_tracks = service.data.get("seed_tracks")
+                    min_acousticness = service.data.get("min_acousticness")
+                    max_acousticness = service.data.get("max_acousticness")
+                    target_acousticness = service.data.get("target_acousticness")
+                    min_danceability = service.data.get("min_danceability")
+                    max_danceability = service.data.get("max_danceability")
+                    target_danceability = service.data.get("target_danceability")
+                    min_duration_ms = service.data.get("min_duration_ms")
+                    max_duration_ms = service.data.get("max_duration_ms")
+                    target_duration_ms = service.data.get("target_duration_ms")
+                    min_energy = service.data.get("min_energy")
+                    max_energy = service.data.get("max_energy")
+                    target_energy = service.data.get("target_energy")
+                    min_instrumentalness = service.data.get("min_instrumentalness")
+                    max_instrumentalness = service.data.get("max_instrumentalness")
+                    target_instrumentalness = service.data.get("target_instrumentalness")
+                    min_key = service.data.get("min_key")
+                    max_key = service.data.get("max_key")
+                    target_key = service.data.get("target_key")
+                    min_liveness = service.data.get("min_liveness")
+                    max_liveness = service.data.get("max_liveness")
+                    target_liveness = service.data.get("target_liveness")
+                    min_loudness = service.data.get("min_loudness")
+                    max_loudness = service.data.get("max_loudness")
+                    target_loudness = service.data.get("target_loudness")
+                    min_mode = service.data.get("min_mode")
+                    max_mode = service.data.get("max_mode")
+                    target_mode = service.data.get("target_mode")
+                    min_popularity = service.data.get("min_popularity")
+                    max_popularity = service.data.get("max_popularity")
+                    target_popularity = service.data.get("target_popularity")
+                    min_speechiness = service.data.get("min_speechiness")
+                    max_speechiness = service.data.get("max_speechiness")
+                    target_speechiness = service.data.get("target_speechiness")
+                    min_tempo = service.data.get("min_tempo")
+                    max_tempo = service.data.get("max_tempo")
+                    target_tempo = service.data.get("target_tempo")
+                    min_time_signature = service.data.get("min_time_signature")
+                    max_time_signature = service.data.get("max_time_signature")
+                    target_time_signature = service.data.get("target_time_signature")
+                    min_valence = service.data.get("min_valence")
+                    max_valence = service.data.get("max_valence")
+                    target_valence = service.data.get("target_valence")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(
+                        entity.service_spotify_get_track_recommendations, 
+                        limit, market, 
+                        seed_artists, seed_genres, seed_tracks, 
+                        min_acousticness, max_acousticness, target_acousticness,
+                        min_danceability, max_danceability, target_danceability,
+                        min_duration_ms, max_duration_ms, target_duration_ms,
+                        min_energy, max_energy, target_energy,
+                        min_instrumentalness, max_instrumentalness, target_instrumentalness, 
+                        min_key, max_key, target_key, 
+                        min_liveness, max_liveness, target_liveness, 
+                        min_loudness, max_loudness, target_loudness, 
+                        min_mode, max_mode, target_mode, 
+                        min_popularity, max_popularity, target_popularity, 
+                        min_speechiness, max_speechiness, target_speechiness, 
+                        min_tempo, max_tempo, target_tempo, 
+                        min_time_signature, max_time_signature, target_time_signature, 
+                        min_valence, max_valence, target_valence)
 
                 elif service.service == SERVICE_SPOTIFY_GET_TRACKS_AUDIO_FEATURES:
 
@@ -2305,6 +2429,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             SERVICE_SPOTIFY_GET_TRACK_FAVORITES,
             service_handle_spotify_serviceresponse,
             schema=SERVICE_SPOTIFY_GET_TRACK_FAVORITES_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_TRACK_RECOMMENDATIONS, SERVICE_SPOTIFY_GET_TRACK_RECOMMENDATIONS_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_GET_TRACK_RECOMMENDATIONS,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_GET_TRACK_RECOMMENDATIONS_SCHEMA,
             supports_response=SupportsResponse.ONLY,
         )
 
