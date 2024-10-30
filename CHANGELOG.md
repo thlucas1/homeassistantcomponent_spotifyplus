@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.63 ] - 2024/10/31
+
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.113.
+
 ###### [ 1.0.62 ] - 2024/10/27
 
   * Added service `get_track_recommendations` to get track recommendations for specified criteria.
