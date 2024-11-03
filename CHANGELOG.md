@@ -6,6 +6,14 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.64 ] - 2024/11/03
+
+  * Added service `add_player_queue_items` to add one or more items to the end of the user's current Spotify Player playback queue. 
+  * Added service `get_artist_related_artists` to get Spotify catalog information about artists similar to a given artist.  Similarity is based on analysis of the Spotify community's listening history.
+  * Added service `get_artist_top_tracks` to get Spotify catalog information about an artist's top tracks by country.
+  * Added service `get_audiobook` to get Spotify catalog information for a single audiobook.  Audiobooks are only available within the US, UK, Canada, Ireland, New Zealand and Australia markets.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.114.
+
 ###### [ 1.0.63 ] - 2024/10/31
 
   * Updated underlying `spotifywebapiPython` package requirement to version 1.0.113.

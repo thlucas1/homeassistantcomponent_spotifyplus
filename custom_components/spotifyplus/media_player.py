@@ -36,6 +36,7 @@ from spotifywebapipython.models import (
     Artist,
     ArtistInfo,
     ArtistPage,
+    Audiobook,
     AudiobookPageSimplified,
     AudioFeatures,
     Category,
@@ -1834,6 +1835,69 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         return deviceId
 
 
+    def service_spotify_add_player_queue_items(
+            self, 
+            uris:str,
+            deviceId:str=None,
+            verifyDeviceId:bool=True,
+            delay:float=0.15,
+            ) -> None:
+        """
+        Add one or more items to the end of the user's current playback queue. 
+        
+        Args:
+            uris (str):
+                A list of Spotify track or episode URIs to add to the queue; can be track or episode URIs.  
+                All URIs must be of the same type - you cannot mix and match tracks and episodes!  
+                Example: [`spotify:track:6zd8T1PBe9JFHmuVnurdRp` ,`spotify:track:1kWUud3vY5ij5r62zxpTRy`].  
+                It can also be specified as a comma-delimited string.  
+                Example: `spotify:track:6zd8T1PBe9JFHmuVnurdRp,spotify:track:1kWUud3vY5ij5r62zxpTRy`.  
+                An unlimited number of items can be added in one request, but the more items the longer it
+                will take.
+            deviceId (str):
+                The id or name of the device this command is targeting.  
+                If not supplied, the user's currently active device is the target.  
+                Example: `0d1841b0976bae2a3a310dd74c0f3df354899bc8`  
+                Example: `Web Player (Chrome)`  
+            verifyDeviceId (bool):
+                True to verify a device id is active; otherwise, false to assume that a
+                device id is already active.  
+                Default is True.  
+            delay (float):
+                Time delay (in seconds) to wait AFTER issuing the add request.  This delay will give the 
+                Spotify web api time to process the queue change before another command is issued.  
+                Default is 0.15; value range is 0 - 10.
+        """
+        apiMethodName:str = 'service_spotify_add_player_queue_items'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("uris", uris)
+            apiMethodParms.AppendKeyValue("deviceId", deviceId)
+            apiMethodParms.AppendKeyValue("verifyDeviceId", verifyDeviceId)
+            apiMethodParms.AppendKeyValue("delay", delay)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Add Player Queue Items Service", apiMethodParms)
+                           
+            # follow artist(s).
+            _logsi.LogVerbose("Adding items(s) to Spotify Player Queue")
+            self.data.spotifyClient.AddPlayerQueueItems(uris, deviceId, verifyDeviceId, delay)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
     def service_spotify_check_album_favorites(
             self, 
             ids:str=None, 
@@ -2810,6 +2874,146 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
+    def service_spotify_get_artist_related_artists(
+            self, 
+            artistId:str, 
+            sortResult:bool=True,
+            ) -> dict:
+        """
+        Get Spotify catalog information about artists similar to a given artist.  
+        Similarity is based on analysis of the Spotify community's listening history.
+        
+        Args:
+            artistId (str):  
+                The Spotify ID of the artist.  
+                If null, the currently playing artist uri id value is used.  
+                Example: `6APm8EjxOHSYM5B4i3vT3q`  
+            sortResult (bool):
+                True to sort the items by name; otherwise, False to leave the items in the same order they 
+                were returned in by the Spotify Web API.  
+                Default: True
+                
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A list of `Artist` objects that contain artist information.
+        """
+        apiMethodName:str = 'service_spotify_get_artist_related_artists'
+        apiMethodParms:SIMethodParmListContext = None
+        result:list = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("artistId", artistId)
+            apiMethodParms.AppendKeyValue("sortResult", sortResult)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Artist Related Artists Service", apiMethodParms)
+            
+            # request information from Spotify Web API.
+            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
+            result:list = self.data.spotifyClient.GetArtistRelatedArtists(artistId, sortResult)
+
+            # build dictionary result from array.
+            resultArray:list = []
+            item:Artist
+            for item in result: 
+                resultArray.append(item.ToDictionary())
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": resultArray
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_get_artist_top_tracks(
+            self, 
+            artistId:str, 
+            market:str=None, 
+            sortResult:bool=True,
+            ) -> dict:
+        """
+        Get Spotify catalog information about an artist's top tracks by country.
+        
+        Args:
+            artistId (str):  
+                The Spotify ID of the artist.  
+                Example: `6APm8EjxOHSYM5B4i3vT3q`
+                If null, the currently playing artist uri id value is used; a Spotify Free or Premium account 
+                is required to correctly read the currently playing context.
+            market (str):
+                An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that 
+                is available in that market will be returned.  If a valid user access token is specified 
+                in the request header, the country associated with the user account will take priority over 
+                this parameter.  
+                Note: If neither market or user country are provided, the content is considered unavailable for the client.  
+                Users can view the country that is associated with their account in the account settings.  
+                Example: `ES`
+            sortResult (bool):
+                True to sort the items by name; otherwise, False to leave the items in the same order they 
+                were returned in by the Spotify Web API.  
+                Default: True
+                
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A list of `Track` objects of matching results.
+        """
+        apiMethodName:str = 'service_spotify_get_artist_top_tracks'
+        apiMethodParms:SIMethodParmListContext = None
+        result:list = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("artistId", artistId)
+            apiMethodParms.AppendKeyValue("market", market)
+            apiMethodParms.AppendKeyValue("sortResult", sortResult)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Artist Top Tracks Service", apiMethodParms)
+            
+            # request information from Spotify Web API.
+            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
+            result:list = self.data.spotifyClient.GetArtistTopTracks(artistId, market, sortResult)
+            
+            # build dictionary result from array.
+            resultArray:list = []
+            item:Track
+            for item in result: 
+                resultArray.append(item.ToDictionary())
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": resultArray
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
     def service_spotify_get_artists_followed(
             self, 
             after:str=None, 
@@ -2860,6 +3064,71 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # request information from Spotify Web API.
             _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
             result:ArtistPage = self.data.spotifyClient.GetArtistsFollowed(after, limit, limitTotal, sortResult)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_get_audiobook(
+            self, 
+            audiobookId:str=None, 
+            market:str=None, 
+            ) -> dict:
+        """
+        Get Spotify catalog information for a single audiobook.  
+        
+        Audiobooks are only available within the US, UK, Canada, Ireland, New Zealand and Australia markets.
+        
+        Args:
+            audiobookId (str):  
+                The Spotify ID for the audiobook.
+                Example: `74aydHJKgYz3AIq3jjBSv1`
+                If null, the currently playing audiobook uri id value is used; a Spotify Free or Premium account 
+                is required to correctly read the currently playing context.
+            market (str):
+                An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that 
+                is available in that market will be returned.  If a valid user access token is specified 
+                in the request header, the country associated with the user account will take priority over 
+                this parameter.  
+                Note: If neither market or user country are provided, the content is considered unavailable for the client.  
+                Users can view the country that is associated with their account in the account settings.  
+                Example: `ES`
+                
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A `Audiobook` object that contains audiobook details.
+        """
+        apiMethodName:str = 'service_spotify_get_audiobook'
+        apiMethodParms:SIMethodParmListContext = None
+        result: Audiobook = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("audiobookId", audiobookId)
+            apiMethodParms.AppendKeyValue("market", market)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Audiobook Service", apiMethodParms)
+                
+            # request information from Spotify Web API.
+            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
+            result:Audiobook = self.data.spotifyClient.GetAudiobook(audiobookId, market)
 
             # return the (partial) user profile that retrieved the result, as well as the result itself.
             return {
@@ -4963,7 +5232,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         """
         apiMethodName:str = 'service_spotify_get_tracks_audio_features'
         apiMethodParms:SIMethodParmListContext = None
-        result:TrackPageSaved = TrackPageSaved()
+        result:list = None
 
         try:
 

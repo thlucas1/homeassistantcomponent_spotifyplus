@@ -1,3 +1,48 @@
+add_player_queue_items:
+  name: Add Player Queue Items
+  description: Add one or more items to the end of the user's current Spotify Player playback queue. 
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    uris:
+      name: URI's
+      description: A list of Spotify track or episode URIs to add to the queue (spotify:track:6zd8T1PBe9JFHmuVnurdRp, spotify:track:1kWUud3vY5ij5r62zxpTRy); values can be track or episode URIs.  All URIs must be of the same type - you cannot mix and match tracks and episodes.  An unlimited number of items can be added in one request, but the more items the longer it will take.
+      example: "spotify:track:6zd8T1PBe9JFHmuVnurdRp"
+      required: true
+      selector:
+        text:
+    device_id:
+      name: Device ID
+      description: The id or name of the Spotify Connect Player device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an '*' is specified), then the SpotifyPlus default device is activated.
+      example: "0d1841b0976bae2a3a310dd74c0f337465899bc8"
+      required: false
+      selector:
+        text:
+    verify_device_id:
+      name: Verify Device ID?
+      description: True to verify a device id is active; otherwise, false to assume that a device id is already active. Default is True.
+      example: "True"
+      required: false
+      selector:
+        boolean:
+    delay:
+      name: Delay
+      description: Time delay (in seconds) to wait AFTER issuing the final add request (if necessary). This delay will give the spotify web api time to process the change before another command is issued.  Default is 0.15; value range is 0 - 10.
+      example: "0.15"
+      required: false
+      selector:
+        number:
+          min: 0.0
+          max: 10.0
+          mode: box
+
 check_album_favorites:
   name: Check Album Favorites
   description: Check if one or more albums (or the currently playing album) exists in the current user's 'Your Library' favorites.
@@ -529,6 +574,69 @@ get_artist_info:
       selector:
         text:
 
+get_artist_related_artists:
+  name: Get Artist Related Artists
+  description: Get Spotify catalog information about artists similar to a given artist. Similarity is based on analysis of the Spotify community's listening history.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    artist_id:
+      name: Artist Id
+      description: The Spotify ID of the artist.  If omitted, the currently playing artist uri id value is used.
+      example: "6APm8EjxOHSYM5B4i3vT3q"
+      required: false
+      selector:
+        text:
+    sort_result:
+      name: Sort Result?
+      description: True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them.
+      example: "True"
+      required: false
+      selector:
+        boolean:
+
+get_artist_top_tracks:
+  name: Get Artist Top Tracks
+  description: Get Spotify catalog information about an artist's top tracks by country.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    artist_id:
+      name: Artist Id
+      description: The Spotify ID of the artist.  If omitted, the currently playing artist uri id value is used.
+      example: "6APm8EjxOHSYM5B4i3vT3q"
+      required: false
+      selector:
+        text:
+    market:
+      name: Market
+      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter.
+      example: "ES"
+      required: false
+      selector:
+        text:
+    sort_result:
+      name: Sort Result?
+      description: True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them.
+      example: "True"
+      required: false
+      selector:
+        boolean:
+
 get_artists_followed:
   name: Get Artists Followed
   description: Get the current user's followed artists.
@@ -574,6 +682,34 @@ get_artists_followed:
       required: false
       selector:
         boolean:
+
+get_audiobook:
+  name: Get Audiobook
+  description: Get Spotify catalog information for a single audiobook.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    audiobook_id:
+      name: Audiobook Id
+      description: The Spotify ID for the audiobook (e.g. `74aydHJKgYz3AIq3jjBSv1`). If null, the currently playing audiobook uri id value is used.
+      example: "74aydHJKgYz3AIq3jjBSv1"
+      required: false
+      selector:
+        text:
+    market:
+      name: Market
+      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter.
+      example: "ES"
+      required: false
+      selector:
+        text:
 
 get_audiobook_chapters:
   name: Get Audiobook Chapters
