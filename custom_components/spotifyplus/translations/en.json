@@ -550,8 +550,8 @@
         }
       }
     },
-    "get_browse_categorys": {
-      "name": "Get Browse Categorys",
+    "get_browse_categorys_list": {
+      "name": "Get Browse Categorys List",
       "description": "Get a sorted list of ALL categories used to tag items in Spotify.",
       "fields": {
         "entity_id": {

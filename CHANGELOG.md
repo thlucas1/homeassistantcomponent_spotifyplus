@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.65 ] - 2024/11/15
+
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.119.
+
 ###### [ 1.0.64 ] - 2024/11/03
 
   * Added service `add_player_queue_items` to add one or more items to the end of the user's current Spotify Player playback queue. 

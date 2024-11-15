@@ -3345,7 +3345,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("country", country)
             apiMethodParms.AppendKeyValue("locale", locale)
             apiMethodParms.AppendKeyValue("refresh", refresh)
-            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Browse Categorys Service", apiMethodParms)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Browse Categorys List Service", apiMethodParms)
                 
             # request information from Spotify Web API.
             _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
@@ -3355,6 +3355,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             category:Category
             for category in resultArray:
                 result.Items.append(category)
+
+            # set CategoryPage object summary.
+            result.Total = len(resultArray)
+            result.Limit = result.Total
+            result.DateLastRefreshed = datetime.utcnow().timestamp()
 
             # return the (partial) user profile that retrieved the result, as well as the result itself.
             return {
