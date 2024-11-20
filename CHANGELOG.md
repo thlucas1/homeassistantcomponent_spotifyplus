@@ -6,6 +6,24 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.66 ] - 2024/11/20
+
+  * Added service `get_playlist_cover_image` to get the current image associated with a specific playlist.
+  * Added service `get_playlists_for_user` to get a list of the playlists owned or followed by a Spotify user.
+  * Added service `player_media_pause` to pause media play for the specified Spotify Connect device.
+  * Added service `player_media_resume` to resume media play for the specified Spotify Connect device.
+  * Added service `player_media_skip_next` to skip to next track in the user's queue for the specified Spotify Connect device.
+  * Added service `player_media_skip_previous` to skip to previous track in the user's queue for the specified Spotify Connect device.
+  * Updated service `playlist_items_add` to return a result property that contains a snapshot ID for the updated playlist.
+  * Updated service `playlist_items_clear` to return a result property that contains a snapshot ID for the updated playlist.
+  * Updated service `playlist_items_remove` to return a result property that contains a snapshot ID for the updated playlist.
+  * Added service `playlist_items_reorder` to reorder items in a user's playlist.
+  * Added service `playlist_items_replace` to replace one or more items in a user's playlist. Replacing items in a playlist will overwrite its existing items. This service can also be used to clear a playlist.
+  * Added service `check_users_following` to check to see if the current user is following one or more users.
+  * Updated service `zeroconf_device_connect` to add the `delay` argument.
+  * Updated service `zeroconf_device_disconnect` to add the `delay` argument.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.121.
+
 ###### [ 1.0.65 ] - 2024/11/15
 
   * Updated underlying `spotifywebapiPython` package requirement to version 1.0.119.

@@ -1912,6 +1912,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 Maximum: 50 IDs.  
                 Example: `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`
                 If null, the currently playing track album uri id value is used.
+                
+        Returns:
+            A dictionary of the ids, along with a boolean status for each that indicates 
+            if the album is saved (True) in the users 'Your Library' or not (False).
         """
         apiMethodName:str = 'service_spotify_check_album_favorites'
         apiMethodParms:SIMethodParmListContext = None
@@ -1961,6 +1965,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 Maximum: 50 IDs.  
                 Example: `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`
                 If null, the currently playing track artist uri id value is used.
+                
+        Returns:
+            A dictionary of the IDs, along with a boolean status for each that indicates 
+            if the user follows the ID (True) or not (False).
         """
         apiMethodName:str = 'service_spotify_check_artists_following'
         apiMethodParms:SIMethodParmListContext = None
@@ -2010,6 +2018,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 Maximum: 50 IDs.  
                 Example: `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`
                 If null, the currently playing audiobook uri id value is used.
+                
+        Returns:
+            A dictionary of the ids, along with a boolean status for each that indicates 
+            if the audiobook is saved (True) in the users 'Your Library' or not (False).
         """
         apiMethodName:str = 'service_spotify_check_audiobook_favorites'
         apiMethodParms:SIMethodParmListContext = None
@@ -2059,6 +2071,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 Maximum: 50 IDs.  
                 Example: `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`
                 If null, the currently playing episode uri id value is used.
+                
+        Returns:
+            A dictionary of the ids, along with a boolean status for each that indicates 
+            if the episode is saved (True) in the users 'Your Library' or not (False).
         """
         apiMethodName:str = 'service_spotify_check_episode_favorites'
         apiMethodParms:SIMethodParmListContext = None
@@ -2111,6 +2127,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 Maximum: 5 ID's.  
                 Example: `1kWUud3vY5ij5r62zxpTRy,2takcwOaAZWiXQijPHIx7B`  
                 Deprecated - A single item list containing current user's Spotify Username; Maximum of 1 id.
+                
+        Returns:
+            Array of boolean, containing a single boolean status that indicates 
+            if the user follows the playlist (True) or not (False).
         """
         apiMethodName:str = 'service_spotify_check_playlist_followers'
         apiMethodParms:SIMethodParmListContext = None
@@ -2165,6 +2185,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 Maximum: 50 IDs.  
                 Example: `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`
                 If null, the currently playing show uri id value is used.
+                
+        Returns:
+            A dictionary of the ids, along with a boolean status for each that indicates 
+            if the show is saved (True) in the users 'Your Library' or not (False).
         """
         apiMethodName:str = 'service_spotify_check_show_favorites'
         apiMethodParms:SIMethodParmListContext = None
@@ -2214,6 +2238,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 Maximum: 50 IDs.  
                 Example: `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`
                 If null, the currently playing context uri id value is used.
+                
+        Returns:
+            A dictionary of the ids, along with a boolean status for each that indicates 
+            if the track is saved (True) in the users 'Your Library' or not (False).
         """
         apiMethodName:str = 'service_spotify_check_track_favorites'
         apiMethodParms:SIMethodParmListContext = None
@@ -2229,6 +2257,57 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # check Spotify track favorites.
             _logsi.LogVerbose("Check Spotify Track Favorites")
             result = self.data.spotifyClient.CheckTrackFavorites(ids)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_check_users_following(
+            self, 
+            ids:str, 
+            ) -> None:
+        """
+        Check to see if the current user is following one or more users.
+        
+        Args:
+            ids (str):  
+                A comma-separated list of Spotify user ID's to check.  
+                Maximum: 50 ID's.  
+                Example: `smedjan`  
+                
+        Returns:
+            A dictionary of the IDs, along with a boolean status for each that indicates 
+            if the user follows the ID (True) or not (False).
+        """
+        apiMethodName:str = 'service_spotify_check_users_following'
+        apiMethodParms:SIMethodParmListContext = None
+        result:dict = {}
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("ids", ids)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Check Users Following Service", apiMethodParms)
+                           
+            # check Spotify users following.
+            _logsi.LogVerbose("Check Spotify Users Following")
+            result = self.data.spotifyClient.CheckUsersFollowing(ids)
 
             # return the (partial) user profile that retrieved the result, as well as the result itself.
             return {
@@ -4170,6 +4249,58 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
+    def service_spotify_get_playlist_cover_image(
+            self, 
+            playlistId:str=None, 
+            ) -> dict:
+        """
+        Get the current image associated with a specific playlist.
+        
+        Args:
+            playlistId (str):  
+                The Spotify ID of the playlist.  
+                If null, the currently playing playlist uri id value is used.  
+                Example: `5v5ETK9WFXAnGQ3MRubKuE`  
+                
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: An `ImageObject` object that contains the playlist cover image details.
+        """
+        apiMethodName:str = 'service_spotify_get_playlist_cover_image'
+        apiMethodParms:SIMethodParmListContext = None
+        result:Playlist = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("playlistId", playlistId)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Playlist Cover Image Service", apiMethodParms)
+                
+            # request information from Spotify Web API.
+            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
+            result = self.data.spotifyClient.GetPlaylistCoverImage(playlistId)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
     def service_spotify_get_playlist_favorites(
             self, 
             limit:int=20, 
@@ -4325,6 +4456,81 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # request information from Spotify Web API.
             _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
             result:PlaylistPage = self.data.spotifyClient.GetPlaylistItems(playlistId, limit, offset, market, fields, additionalTypes, limitTotal)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_get_playlists_for_user(
+            self, 
+            userId:str,
+            limit:int=20, 
+            offset:int=0,
+            limitTotal:int=None,
+            sortResult:bool=True,
+            ) -> dict:
+        """
+        Get a list of the playlists owned or followed by the current Spotify user.
+
+        Args:
+            userId (str):
+                The user's Spotify user ID.  
+                Example: `smedjan`
+            limit (int):
+                The maximum number of items to return in a page of items.  
+                Default: 20, Range: 1 to 50.  
+            offset (int):
+                The index of the first item to return.  
+                Use with limit to get the next set of items.  
+                Default: 0 (the first item).  
+            limitTotal (int):
+                The maximum number of items to return for the request.
+                If specified, this argument overrides the limit and offset argument values
+                and paging is automatically used to retrieve all available items up to the
+                maximum count specified.
+                Default: None (disabled)
+            sortResult (bool):
+                True to sort the items by name; otherwise, False to leave the items in the same order they 
+                were returned in by the Spotify Web API.  
+                Default: True
+
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A `PlaylistPageSimplified` object that contains user playlist information.
+        """
+        apiMethodName:str = 'service_spotify_get_playlists_for_user'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("userId", userId)
+            apiMethodParms.AppendKeyValue("limit", limit)
+            apiMethodParms.AppendKeyValue("offset", offset)
+            apiMethodParms.AppendKeyValue("limitTotal", limitTotal)
+            apiMethodParms.AppendKeyValue("sortResult", sortResult)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Playlists For User Service", apiMethodParms)
+                
+            # request information from Spotify Web API.
+            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
+            result:PlaylistPageSimplified = self.data.spotifyClient.GetPlaylistsForUser(userId, limit, offset, limitTotal, sortResult)
 
             # return the (partial) user profile that retrieved the result, as well as the result itself.
             return {
@@ -4585,7 +4791,6 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         or alias name.  This will ensure that the device can be found on the network, as well 
         as connect to the device if necessary with the current user context.  
 
-        Args:
         Args:
             deviceValue (str):
                 The device id / name value to check.
@@ -5493,6 +5698,97 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
 
     @spotify_exception_handler
+    def service_spotify_player_media_pause(
+        self, 
+        deviceId:str=None, 
+        delay:float=0.50,
+        ) -> None:
+        """
+        Pause media play for the specified Spotify Connect device.
+        
+        Args:
+            deviceId (str):
+                The id or name of the device this command is targeting.  
+                If not supplied, the user's currently active device is the target.  
+                Example: `0d1841b0976bae2a3a310dd74c0f3df354899bc8`  
+                Example: `Web Player (Chrome)`  
+            delay (float):
+                Time delay (in seconds) to wait AFTER issuing the command to the player.  
+                This delay will give the spotify web api time to process the change before 
+                another command is issued.  
+                Default is 0.50; value range is 0 - 10.
+        """
+        apiMethodName:str = 'service_spotify_player_media_pause'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("deviceId", deviceId)
+            apiMethodParms.AppendKeyValue("delay", delay)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Media Pause Service", apiMethodParms)
+            
+            # validations.
+            delay = validateDelay(delay, 0.50, 10)
+            if deviceId == '':
+                deviceId = None
+            if deviceId is None or deviceId == "*":
+                deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
+                
+            # get selected device reference from cached list of Spotify Connect devices.
+            scDevices:SpotifyConnectDevices = self.data.spotifyClient.GetSpotifyConnectDevices(refresh=False)
+            scDevice:SpotifyConnectDevice = scDevices.GetDeviceByName(deviceId)
+            if scDevice is None:
+                scDevice = scDevices.GetDeviceById(deviceId)
+
+            playerState:PlayerPlayState
+            spotifyConnectDevice:SpotifyConnectDevice
+            sonosDevice:SoCo 
+
+            # get current player state.
+            # ignore what we get for device from _GetPlayerPlaybackState, as it's the active device
+            # and may be NOT what the user asked for (via deviceId argument).
+            playerState, spotifyConnectDevice, sonosDevice = self._GetPlayerPlaybackState()
+
+            # process based on device type.
+            if (sonosDevice is not None):    
+
+                # for Sonos, use the SoCo API command.
+                _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): PAUSE" % (self.name, sonosDevice.ip_address, sonosDevice.player_name))
+                sonosDevice.pause()
+
+                # give SoCo api time to process the change.
+                if delay > 0:
+                    _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % delay)
+                    time.sleep(delay)
+
+            else:
+
+                # for everything else, just use the Spotify Web API command.
+                self.data.spotifyClient.PlayerMediaPause(deviceId, delay)
+            
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
+
+            # media player command was processed, so force a scan window at the next interval.
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    @spotify_exception_handler
     def service_spotify_player_media_play_context(
         self, 
         contextUri:str, 
@@ -5916,6 +6212,97 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
 
     @spotify_exception_handler
+    def service_spotify_player_media_resume(
+        self, 
+        deviceId:str=None, 
+        delay:float=0.50,
+        ) -> None:
+        """
+        Resume media play for the specified Spotify Connect device.
+        
+        Args:
+            deviceId (str):
+                The id or name of the device this command is targeting.  
+                If not supplied, the user's currently active device is the target.  
+                Example: `0d1841b0976bae2a3a310dd74c0f3df354899bc8`  
+                Example: `Web Player (Chrome)`  
+            delay (float):
+                Time delay (in seconds) to wait AFTER issuing the command to the player.  
+                This delay will give the spotify web api time to process the change before 
+                another command is issued.  
+                Default is 0.50; value range is 0 - 10.
+        """
+        apiMethodName:str = 'service_spotify_player_media_resume'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("deviceId", deviceId)
+            apiMethodParms.AppendKeyValue("delay", delay)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Media Resume Service", apiMethodParms)
+            
+            # validations.
+            delay = validateDelay(delay, 0.50, 10)
+            if deviceId == '':
+                deviceId = None
+            if deviceId is None or deviceId == "*":
+                deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
+                
+            # get selected device reference from cached list of Spotify Connect devices.
+            scDevices:SpotifyConnectDevices = self.data.spotifyClient.GetSpotifyConnectDevices(refresh=False)
+            scDevice:SpotifyConnectDevice = scDevices.GetDeviceByName(deviceId)
+            if scDevice is None:
+                scDevice = scDevices.GetDeviceById(deviceId)
+
+            playerState:PlayerPlayState
+            spotifyConnectDevice:SpotifyConnectDevice
+            sonosDevice:SoCo 
+
+            # get current player state.
+            # ignore what we get for device from _GetPlayerPlaybackState, as it's the active device
+            # and may be NOT what the user asked for (via deviceId argument).
+            playerState, spotifyConnectDevice, sonosDevice = self._GetPlayerPlaybackState()
+
+            # process based on device type.
+            if (sonosDevice is not None):    
+
+                # for Sonos, use the SoCo API command.
+                _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): RESUME" % (self.name, sonosDevice.ip_address, sonosDevice.player_name))
+                sonosDevice.play()
+
+                # give SoCo api time to process the change.
+                if delay > 0:
+                    _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % delay)
+                    time.sleep(delay)
+
+            else:
+
+                # for everything else, just use the Spotify Web API command.
+                self.data.spotifyClient.PlayerMediaResume(deviceId, delay)
+            
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
+
+            # media player command was processed, so force a scan window at the next interval.
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    @spotify_exception_handler
     def service_spotify_player_media_seek(
         self, 
         positionMS:int=-1, 
@@ -5980,14 +6367,13 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             if scDevice is None:
                 scDevice = scDevices.GetDeviceById(deviceId)
 
-            # get current track position.
-            # ignore what we get for device from _GetPlayerPlaybackState, as it's the active device
-            # and may be NOT what the user asked for (via deviceId argument).
             playerState:PlayerPlayState
             spotifyConnectDevice:SpotifyConnectDevice
             sonosDevice:SoCo 
 
-            # get current track position.
+            # get current player state.
+            # ignore what we get for device from _GetPlayerPlaybackState, as it's the active device
+            # and may be NOT what the user asked for (via deviceId argument).
             playerState, spotifyConnectDevice, sonosDevice = self._GetPlayerPlaybackState()
 
             # set seek position based on device type.
@@ -6019,6 +6405,188 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
                 # for everything else, just use the Spotify Web API command.
                 self.data.spotifyClient.PlayerMediaSeek(positionMS, deviceId, delay, relativePositionMS)
+            
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
+
+            # media player command was processed, so force a scan window at the next interval.
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    @spotify_exception_handler
+    def service_spotify_player_media_skip_next(
+        self, 
+        deviceId:str=None, 
+        delay:float=0.50,
+        ) -> None:
+        """
+        Skips to next track in the user's queue for the specified Spotify Connect device.
+        
+        Args:
+            deviceId (str):
+                The id or name of the device this command is targeting.  
+                If not supplied, the user's currently active device is the target.  
+                Example: `0d1841b0976bae2a3a310dd74c0f3df354899bc8`  
+                Example: `Web Player (Chrome)`  
+            delay (float):
+                Time delay (in seconds) to wait AFTER issuing the command to the player.  
+                This delay will give the spotify web api time to process the change before 
+                another command is issued.  
+                Default is 0.50; value range is 0 - 10.
+        """
+        apiMethodName:str = 'service_spotify_player_media_skip_next'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("deviceId", deviceId)
+            apiMethodParms.AppendKeyValue("delay", delay)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Media Skip Next Service", apiMethodParms)
+            
+            # validations.
+            delay = validateDelay(delay, 0.50, 10)
+            if deviceId == '':
+                deviceId = None
+            if deviceId is None or deviceId == "*":
+                deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
+                
+            # get selected device reference from cached list of Spotify Connect devices.
+            scDevices:SpotifyConnectDevices = self.data.spotifyClient.GetSpotifyConnectDevices(refresh=False)
+            scDevice:SpotifyConnectDevice = scDevices.GetDeviceByName(deviceId)
+            if scDevice is None:
+                scDevice = scDevices.GetDeviceById(deviceId)
+
+            playerState:PlayerPlayState
+            spotifyConnectDevice:SpotifyConnectDevice
+            sonosDevice:SoCo 
+
+            # get current player state.
+            # ignore what we get for device from _GetPlayerPlaybackState, as it's the active device
+            # and may be NOT what the user asked for (via deviceId argument).
+            playerState, spotifyConnectDevice, sonosDevice = self._GetPlayerPlaybackState()
+
+            # process based on device type.
+            if (sonosDevice is not None):    
+
+                # for Sonos, use the SoCo API command.
+                _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): SKIP_NEXT" % (self.name, sonosDevice.ip_address, sonosDevice.player_name))
+                sonosDevice.next()
+
+                # give SoCo api time to process the change.
+                if delay > 0:
+                    _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % delay)
+                    time.sleep(delay)
+
+            else:
+
+                # for everything else, just use the Spotify Web API command.
+                self.data.spotifyClient.PlayerMediaSkipNext(deviceId, delay)
+            
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
+
+            # media player command was processed, so force a scan window at the next interval.
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    @spotify_exception_handler
+    def service_spotify_player_media_skip_previous(
+        self, 
+        deviceId:str=None, 
+        delay:float=0.50,
+        ) -> None:
+        """
+        Skips to previous track in the user's queue for the specified Spotify Connect device.
+        
+        Args:
+            deviceId (str):
+                The id or name of the device this command is targeting.  
+                If not supplied, the user's currently active device is the target.  
+                Example: `0d1841b0976bae2a3a310dd74c0f3df354899bc8`  
+                Example: `Web Player (Chrome)`  
+            delay (float):
+                Time delay (in seconds) to wait AFTER issuing the command to the player.  
+                This delay will give the spotify web api time to process the change before 
+                another command is issued.  
+                Default is 0.50; value range is 0 - 10.
+        """
+        apiMethodName:str = 'service_spotify_player_media_skip_previous'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("deviceId", deviceId)
+            apiMethodParms.AppendKeyValue("delay", delay)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Media Skip Previous Service", apiMethodParms)
+            
+            # validations.
+            delay = validateDelay(delay, 0.50, 10)
+            if deviceId == '':
+                deviceId = None
+            if deviceId is None or deviceId == "*":
+                deviceId = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
+                
+            # get selected device reference from cached list of Spotify Connect devices.
+            scDevices:SpotifyConnectDevices = self.data.spotifyClient.GetSpotifyConnectDevices(refresh=False)
+            scDevice:SpotifyConnectDevice = scDevices.GetDeviceByName(deviceId)
+            if scDevice is None:
+                scDevice = scDevices.GetDeviceById(deviceId)
+
+            playerState:PlayerPlayState
+            spotifyConnectDevice:SpotifyConnectDevice
+            sonosDevice:SoCo 
+
+            # get current player state.
+            # ignore what we get for device from _GetPlayerPlaybackState, as it's the active device
+            # and may be NOT what the user asked for (via deviceId argument).
+            playerState, spotifyConnectDevice, sonosDevice = self._GetPlayerPlaybackState()
+
+            # process based on device type.
+            if (sonosDevice is not None):    
+
+                # for Sonos, use the SoCo API command.
+                _logsi.LogVerbose("'%s': Issuing command to Sonos device '%s' ('%s'): SKIP_PREVIOUS" % (self.name, sonosDevice.ip_address, sonosDevice.player_name))
+                sonosDevice.previous()
+
+                # give SoCo api time to process the change.
+                if delay > 0:
+                    _logsi.LogVerbose(TRACE_MSG_DELAY_DEVICE_SONOS % delay)
+                    time.sleep(delay)
+
+            else:
+
+                # for everything else, just use the Spotify Web API command.
+                self.data.spotifyClient.PlayerMediaSkipPrevious(deviceId, delay)
             
             # update ha state.
             self.schedule_update_ha_state(force_refresh=False)
@@ -6766,7 +7334,6 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Change a playlist's details (name, description, and public / private state).
         
         Args:
-        
             playlistId (str):  
                 The Spotify ID of the playlist.
                 Example: `5AC9ZXA7nJ7oGWO911FuDG`
@@ -6834,7 +7401,6 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         This method requires the `playlist-modify-public` and `playlist-modify-private` scope.
         
         Args:
-        
             userId (str):  
                 The user's Spotify user ID.
                 Example: `32k99y2kg5lnn3mxhtmd2bpdkjfu`
@@ -6909,12 +7475,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             playlistId:str, 
             uris:str, 
             position:int=None,
-            ) -> None:
+            ) -> dict:
         """
         Add one or more items to a user's playlist.
         
         Args:
-        
             playlistId (str):  
                 The Spotify ID of the playlist.
                 Example: `5AC9ZXA7nJ7oGWO911FuDG`
@@ -6929,6 +7494,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 to insert the items in the third position: position=2.  
                 If omitted, the items will be appended to the playlist.  
                 Items are added in the order they are listed in the `uris` argument.
+                
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A snapshot ID for the updated playlist.
         """
         apiMethodName:str = 'service_spotify_playlist_items_add'
         apiMethodParms:SIMethodParmListContext = None
@@ -6948,7 +7518,13 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                
             # add items to Spotify playlist.
             _logsi.LogVerbose("Adding item(s) to Spotify playlist")
-            self.data.spotifyClient.AddPlaylistItems(playlistId, uris, position)
+            result:str = self.data.spotifyClient.AddPlaylistItems(playlistId, uris, position)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result
+            }
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
@@ -6966,15 +7542,19 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
     def service_spotify_playlist_items_clear(
             self, 
             playlistId:str, 
-            ) -> None:
+            ) -> dict:
         """
         Removes (clears) all items from a user's playlist.
         
         Args:
-        
             playlistId (str):  
                 The Spotify ID of the playlist.
                 Example: `5AC9ZXA7nJ7oGWO911FuDG`
+                
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A snapshot ID for the updated playlist.
         """
         apiMethodName:str = 'service_spotify_playlist_items_clear'
         apiMethodParms:SIMethodParmListContext = None
@@ -6988,7 +7568,13 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             
             # clear items from Spotify playlist.
             _logsi.LogVerbose("Clearing item(s) from Spotify playlist")
-            self.data.spotifyClient.ClearPlaylistItems(playlistId)
+            result:str = self.data.spotifyClient.ClearPlaylistItems(playlistId)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result
+            }
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
@@ -7008,12 +7594,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             playlistId:str=None, 
             uris:str=None, 
             snapshotId:str=None,
-            ) -> None:
+            ) -> dict:
         """
         Remove one or more items from a user's playlist.
         
         Args:
-        
             playlistId (str):  
                 The Spotify ID of the playlist.
                 Example: `5AC9ZXA7nJ7oGWO911FuDG`
@@ -7028,6 +7613,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 make the changes, even if more recent changes have been made to the playlist.
                 If null, the current playlist is updated.  
                 Default is null.
+                
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A snapshot ID for the updated playlist.
         """
         apiMethodName:str = 'service_spotify_playlist_items_remove'
         apiMethodParms:SIMethodParmListContext = None
@@ -7043,7 +7633,149 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                            
             # remove items from Spotify playlist.
             _logsi.LogVerbose("Removing item(s) from Spotify playlist")
-            self.data.spotifyClient.RemovePlaylistItems(playlistId, uris, snapshotId)
+            result:str = self.data.spotifyClient.RemovePlaylistItems(playlistId, uris, snapshotId)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_playlist_items_reorder(
+            self, 
+            playlistId:str, 
+            rangeStart:int,
+            insertBefore:int,
+            rangeLength:int=1,
+            snapshotId:str=None,
+            ) -> dict:
+        """
+        Reorder items in a user's playlist.
+        
+        Args:
+            playlistId (str):  
+                The Spotify ID of the playlist.
+                Example: `5AC9ZXA7nJ7oGWO911FuDG`
+            rangeStart (int):
+                The position of the first item to be reordered.  
+                This is a one-offset integer (NOT zero-offset).
+            insertBefore (int):
+                The position where the items should be inserted.
+                To reorder the items to the end of the playlist, simply set `insertBefore` 
+                to the position after the last item.  
+                This is a one-offset integer (NOT zero-offset).
+            rangeLength (int):
+                The amount of items to be reordered; defaults to 1 if not set.  
+                The range of items to be reordered begins from the `rangeStart` position, and includes 
+                the `rangeLength` subsequent items.  
+            snapshotId (str):  
+                The playlist's snapshot ID against which you want to make the changes.  
+                If null, the current playlist is updated.  
+                Example: `MTk3LGEzMjUwZGYwODljNmI5ZjAxZTRjZThiOGI4NzZhM2U5M2IxOWUyMDQ`
+                Default is null.
+                
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A snapshot ID for the updated playlist.
+        """
+        apiMethodName:str = 'service_spotify_playlist_items_reorder'
+        apiMethodParms:SIMethodParmListContext = None
+        result:dict = {}
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("playlistId", playlistId)
+            apiMethodParms.AppendKeyValue("rangeStart", rangeStart)
+            apiMethodParms.AppendKeyValue("insertBefore", insertBefore)
+            apiMethodParms.AppendKeyValue("rangeLength", rangeLength)
+            apiMethodParms.AppendKeyValue("snapshotId", snapshotId)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Reorder Playlist Items Service", apiMethodParms)
+                           
+            # reorder playlist items.
+            _logsi.LogVerbose("Reorder Spotify Playlist Items")
+            result = self.data.spotifyClient.ReorderPlaylistItems(playlistId, rangeStart, insertBefore, rangeLength, snapshotId)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise HomeAssistantError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_playlist_items_replace(
+            self, 
+            playlistId:str=None, 
+            uris:str=None,
+            ) -> dict:
+        """
+        Replace one or more items in a user's playlist. Replacing items in a playlist will 
+        overwrite its existing items. 
+        
+        This method can also be used to clear a playlist.
+        
+        Args:
+            playlistId (str):  
+                The Spotify ID of the playlist.
+                Example: `5AC9ZXA7nJ7oGWO911FuDG`
+            uris (str):  
+                A comma-separated list of Spotify URIs to replace; can be track or episode URIs.  
+                Example: `spotify:track:4iV5W9uYEdYUVa79Axb7Rh,spotify:episode:26c0zVyOv1lzfYpBXdh1zC`.  
+                A maximum of 100 items can be specified in one request.        
+
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A snapshot ID for the updated playlist.
+        """
+        apiMethodName:str = 'service_spotify_playlist_items_replace'
+        apiMethodParms:SIMethodParmListContext = None
+        result:dict = {}
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("playlistId", playlistId)
+            apiMethodParms.AppendKeyValue("uris", uris)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Replace Playlist Items Service", apiMethodParms)
+                           
+            # replace playlist items.
+            _logsi.LogVerbose("Replace Spotify Playlist Items")
+            result = self.data.spotifyClient.ReplacePlaylistItems(playlistId, uris)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result
+            }
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
@@ -8280,6 +9012,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             useSSL:bool=False,
             preDisconnect:bool=False,
             verifyDeviceListEntry:bool=False,
+            delay:float=0.50,
         ) -> dict:
         """
         Calls the `addUser` Spotify Zeroconf API endpoint to issue a call to SpConnectionLoginBlob.  If successful,
@@ -8320,6 +9053,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 True to ensure that the device id is present in the Spotify Connect device list before
                 issuing a call to Connect; otherwise, False to always call Connect to add the device.
                 Default is False.
+            delay (float):
+                Time delay (in seconds) to wait AFTER issuing a command to the device.  
+                This delay will give the spotify zeroconf api time to process the change before 
+                another command is issued.  
+                Default is 0.50; value range is 0 - 10.
 
         The login (on the device) is performed asynchronously, so the return result only indicates whether the library 
         is able to perform the login attempt.  You should issue a call to the Spotify Web API `Get Available Devices` 
@@ -8354,7 +9092,14 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("loginid", loginid)
             apiMethodParms.AppendKeyValue("preDisconnect", preDisconnect)
             apiMethodParms.AppendKeyValue("verifyDeviceListEntry", verifyDeviceListEntry)
+            apiMethodParms.AppendKeyValue("delay", delay)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Connect ZeroConf Device Connect Service", apiMethodParms)
+            
+            # validations.
+            if (preDisconnect is None):
+                preDisconnect = False
+            if (verifyDeviceListEntry is None):
+                verifyDeviceListEntry = False
                 
             # create Spotify Zeroconf API connection object for the device.
             zconn:ZeroconfConnect = ZeroconfConnect(
@@ -8392,11 +9137,21 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             
             # disconnect the device from Spotify Connect.
             if (preDisconnect == True):
-                result = zconn.Disconnect()
+                result = zconn.Disconnect(delay)
+                
+            # default user credentials if not specified.  these are the same credentials that
+            # are stored in the configuration options settings, which were loaded when the
+            # spotifyClient instance was created.
+            if (username is None):
+                username = self.data.spotifyClient._SpotifyConnectUsername
+            if (password is None):
+                password = self.data.spotifyClient._SpotifyConnectPassword
+            if (loginid is None):
+                loginid = self.data.spotifyClient._SpotifyConnectLoginId
 
             # connect the device to Spotify Connect, which should make it known to any available
             # Spotify Connect player clients.
-            result = zconn.Connect(username, password, loginid)
+            result = zconn.Connect(username, password, loginid, delay)
 
             # return the (partial) user profile that retrieved the result, as well as the result itself.
             return {
@@ -8426,7 +9181,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             hostIpPort:str,
             cpath:str,
             version:str='1.0',
-            useSSL:bool=False
+            useSSL:bool=False,
+            delay:float=0.50,
         ) -> dict:
         """
         Calls the `resetUsers` Spotify Zeroconf API endpoint to issue a call to SpConnectionLogout.
@@ -8449,6 +9205,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 True if the host device utilizes HTTPS Secure Sockets Layer (SSL) support; 
                 otherwise, False to utilize HTTP.  
                 Default is False (HTTP).
+            delay (float):
+                Time delay (in seconds) to wait AFTER issuing a command to the device.  
+                This delay will give the spotify zeroconf api time to process the change before 
+                another command is issued.  
+                Default is 0.50; value range is 0 - 10.
 
         The URI value consists of an IP Address, port, CPath, and version value that are used to send
         requests to / receive responses from a headless Spotify Connect device.  These values can be
@@ -8472,6 +9233,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("cpath", cpath)
             apiMethodParms.AppendKeyValue("version", version)
             apiMethodParms.AppendKeyValue("useSSL", useSSL)
+            apiMethodParms.AppendKeyValue("delay", delay)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Connect ZeroConf Device Disconnect Service", apiMethodParms)
                 
             # create Spotify Zeroconf API connection object for the device.
@@ -8486,7 +9248,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 tokenAuthInBrowser=False)
             
             # disconnect the device from Spotify Connect.
-            result = zconn.Disconnect()
+            result = zconn.Disconnect(delay)
 
             # return the (partial) user profile that retrieved the result, as well as the result itself.
             return {

@@ -190,6 +190,20 @@
         }
       }
     },
+    "check_users_following": {
+      "name": "Check Users Following",
+      "description": "Check to see if the current user is following one or more users.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "ids": {
+          "name": "ID's",
+          "description": "A comma-separated list of Spotify user ID's to check (e.g. `smedjan, 7piUznRWxNyKpaPvmOSdiZ`).  A maximum of 50 ID's can be specified."
+        }
+      }
+    },
     "follow_artists": {
       "name": "Follow Artists",
       "description": "Add the current user as a follower of one or more artists.",
@@ -822,6 +836,20 @@
         }
       }
     },
+    "get_playlist_cover_image": {
+      "name": "Get Playlist Cover Image",
+      "description": "Get the current image associated with a specific playlist.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "playlist_id": {
+          "name": "Playlist Id",
+          "description": "The Spotify ID of the playlist (e.g. 5v5ETK9WFXAnGQ3MRubKuE).  If omitted, the currently playing playlist uri id value is used."
+        }
+      }
+    },
     "get_playlist_favorites": {
       "name": "Get Playlist Favorites",
       "description": "Get a list of the playlists owned or followed by the current Spotify user.",
@@ -883,6 +911,36 @@
         "limit_total": {
           "name": "Limit Total",
           "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        }
+      }
+    },
+    "get_playlists_for_user": {
+      "name": "Get Playlists For User",
+      "description": "Get a list of the playlists owned or followed by the current Spotify user.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "user_id": {
+          "name": "User ID",
+          "description": "The user's Spotify user ID (e.g. `smedjan`)."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
+        },
+        "offset": {
+          "name": "Offset",
+          "description": "The page index offset of the first item to return.  Use with limit to get the next set of items.  Default is 0 (the first item)."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        },
+        "sort_result": {
+          "name": "Sort Result?",
+          "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
         }
       }
     },
@@ -1350,6 +1408,24 @@
         }
       }
     },
+    "player_media_pause": {
+      "name": "Player Media Pause",
+      "description": "Pause media play for the specified Spotify Connect device.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "device_id": {
+          "name": "Device ID",
+          "description": "The id or name of the Spotify Connect Player device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an '*' is specified), then the SpotifyPlus default device is activated."
+        },
+        "delay": {
+          "name": "Delay",
+          "description": "Time delay (in seconds) to wait AFTER issuing the final Connect command (if necessary). This delay will give the spotify web api time to process the device list change before another command is issued.  Default is 0.50; value range is 0 - 10."
+        }
+      }
+    },
     "player_media_play_context": {
       "name": "Player Media Play Context",
       "description": "Start playing one or more tracks of the specified context on a Spotify Connect device.",
@@ -1440,6 +1516,24 @@
         }
       }
     },
+    "player_media_resume": {
+      "name": "Player Media Resume",
+      "description": "Resume media play for the specified Spotify Connect device.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "device_id": {
+          "name": "Device ID",
+          "description": "The id or name of the Spotify Connect Player device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an '*' is specified), then the SpotifyPlus default device is activated."
+        },
+        "delay": {
+          "name": "Delay",
+          "description": "Time delay (in seconds) to wait AFTER issuing the final Connect command (if necessary). This delay will give the spotify web api time to process the device list change before another command is issued.  Default is 0.50; value range is 0 - 10."
+        }
+      }
+    },
     "player_media_seek": {
       "name": "Player Media Seek",
       "description": "Seeks to the given absolute or relative position in the user's currently playing track for the specified Spotify Connect device.",
@@ -1463,6 +1557,42 @@
         "relative_position_ms": {
           "name": "Relative Seek Position",
           "description": "The relative position in milliseconds to seek to; can be a positive or negative number, or zero if the `positionMS` argument is specified. Example = `-10000` to seek behind by 10 seconds; `10000` to seek ahead by 10 seconds."
+        }
+      }
+    },
+    "player_media_skip_next": {
+      "name": "Player Media Skip Next",
+      "description": "Skips to next track in the user's queue for the specified Spotify Connect device.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "device_id": {
+          "name": "Device ID",
+          "description": "The id or name of the Spotify Connect Player device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an '*' is specified), then the SpotifyPlus default device is activated."
+        },
+        "delay": {
+          "name": "Delay",
+          "description": "Time delay (in seconds) to wait AFTER issuing the final Connect command (if necessary). This delay will give the spotify web api time to process the device list change before another command is issued.  Default is 0.50; value range is 0 - 10."
+        }
+      }
+    },
+    "player_media_skip_previous": {
+      "name": "Player Media Skip Previous",
+      "description": "Skips to previous track in the user's queue for the specified Spotify Connect device.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "device_id": {
+          "name": "Device ID",
+          "description": "The id or name of the Spotify Connect Player device this command is targeting.  If not supplied, the user's currently active device is the target.  If no device is active (or an '*' is specified), then the SpotifyPlus default device is activated."
+        },
+        "delay": {
+          "name": "Delay",
+          "description": "Time delay (in seconds) to wait AFTER issuing the final Connect command (if necessary). This delay will give the spotify web api time to process the device list change before another command is issued.  Default is 0.50; value range is 0 - 10."
         }
       }
     },
@@ -1725,6 +1855,54 @@
         "snapshot_id": {
           "name": "Snapshot ID",
           "description": "The playlist's snapshot ID against which you want to make the changes (e.g. `MzgsMWVkNDY3MTQ5YjVjYWE0MzAyNjkyZWMyOThjNjE3YWMwOTY0ZmJjYg==`).  The API will validate that the specified items exist and make the changes, even if more recent changes have been made to the playlist.  If omitted, the current playlist is updated."
+        }
+      }
+    },
+    "playlist_items_reorder": {
+      "name": "Playlist Items Reorder",
+      "description": "Reorder items in a user's playlist.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "playlist_id": {
+          "name": "Playlist ID",
+          "description": "The Spotify ID of the playlist (e.g. 5AC9ZXA7nJ7oGWO911FuDG)."
+        },
+        "range_start": {
+          "name": "Range Start",
+          "description": "The position of the first item to be reordered.  This is a one-offset integer (NOT zero-offset)."
+        },
+        "insert_before": {
+          "name": "Insert Before",
+          "description": "The position where the items should be inserted.  To reorder the items to the end of the playlist, simply set `insertBefore` to the position after the last item.  This is a one-offset integer (NOT zero-offset)."
+        },
+        "range_length": {
+          "name": "Range Length",
+          "description": "The amount of items to be reordered; defaults to 1 if not set.  The range of items to be reordered begins from the `rangeStart` position, and includes the `rangeLength` subsequent items."
+        },
+        "snapshot_id": {
+          "name": "Snapshot ID",
+          "description": "The playlist's snapshot ID against which you want to make the changes (e.g. `MzgsMWVkNDY3MTQ5YjVjYWE0MzAyNjkyZWMyOThjNjE3YWMwOTY0ZmJjYg==`).  The API will validate that the specified items exist and make the changes, even if more recent changes have been made to the playlist.  If omitted, the current playlist is updated."
+        }
+      }
+    },
+    "playlist_items_replace": {
+      "name": "Playlist Items Replace",
+      "description": "Replace one or more items in a user's playlist. Replacing items in a playlist will overwrite its existing items. This service can also be used to clear a playlist.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "playlist_id": {
+          "name": "Playlist ID",
+          "description": "The Spotify ID of the playlist (e.g. `3cEYpjA9oz9GiPac4AsH4n`)."
+        },
+        "uris": {
+          "name": "URI's",
+          "description": "A comma-separated list of Spotify URIs to replace; can be track or episode URIs (e.g. `spotify:track:4iV5W9uYEdYUVa79Axb7Rh, spotify:episode:26c0zVyOv1lzfYpBXdh1zC`). A maximum of 100 items can be specified in one request."
         }
       }
     },
@@ -2178,15 +2356,15 @@
         },
         "username": {
           "name": "Spotify User Name",
-          "description": "Spotify user name to login with (e.g. 'yourusername@mail.com').  This MUST match the account name (or one of them) that was used to configure Spotify Connect on the manufacturer device."
+          "description": "Spotify user name to login with (e.g. 'yourusername@mail.com').  This MUST match the account name (or one of them) that was used to configure Spotify Connect on the manufacturer device. If not specified, the integration options Spotify Connect username value will be used."
         },
         "password": {
           "name": "Spotify Password",
-          "description": "Spotify Connect user password to login with."
+          "description": "Spotify Connect user password to login with. If not specified, the integration options Spotify Connect password value will be used."
         },
         "loginid": {
           "name": "Spotify Login ID",
-          "description": "Spotify Connect login id to login with (e.g. '31l77fd87g8h9j00k89f07jf87ge').  This is also known as the canonical user id value.  This MUST be the value that relates to the `username` argument."
+          "description": "Spotify Connect login id to login with (e.g. '31l77fd87g8h9j00k89f07jf87ge').  This is also known as the canonical user id value.  This MUST be the value that relates to the `username` argument. If not specified, the integration options Spotify Connect loginId value will be used."
         },
         "pre_disconnect": {
           "name": "Pre Disconnect?",
@@ -2195,6 +2373,10 @@
         "verify_device_list_entry": {
           "name": "Verify Device List Entry?",
           "description": "True to ensure that the device id is present in the Spotify Connect device list before issuing a call to Connect; Connect will not be called if the device id is already in the list; otherwise, False to always call Connect to add the device.  Default is False."
+        },
+        "delay": {
+          "name": "Delay",
+          "description": "Time delay (in seconds) to wait AFTER issuing a command to the device. This delay will give the spotify zeroconf api time to process the change before another command is issued. Default is 0.50; value range is 0 - 10."
         }
       }
     },
@@ -2225,6 +2407,10 @@
         "use_ssl": {
           "name": "Use SSL?",
           "description": "True if the host device utilizes HTTPS Secure Sockets Layer (SSL) support; otherwise, False to utilize HTTP.  Default is False (HTTP)."
+        },
+        "delay": {
+          "name": "Delay",
+          "description": "Time delay (in seconds) to wait AFTER issuing a command to the device. This delay will give the spotify zeroconf api time to process the change before another command is issued. Default is 0.50; value range is 0 - 10."
         }
       }
     },
