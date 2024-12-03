@@ -6,6 +6,12 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.67 ] - 2024/12/02
+
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.22.
+  * The above `spotifywebapiPython` package will now return an exception due to the functions being deprecated by the Spotify development team.  More information can be found on the [Spotify Developer Forum Blog post](https://developer.spotify.com/blog/2024-11-27-changes-to-the-web-api) that was conveyed on November 27, 2024.  The following methods will now raise a `SpotifyApiError` exception due to the Spotify development team changes: `GetArtistRelatedArtists`, `GetTrackRecommendations`, `GetTrackAudioFeatures`, `GetFeaturedPlaylists`, `GetCategoryPlaylists`, `GetGenres`.  The following properties were also marked as deprecated for the same reason: `TrackSimplified.PreviewUrl`.
+  * Due to the above chnages made by Spotify, any Algorithmic and Spotify-owned editorial playlists are no longer accessible or have more limited functionality.  This means that you can no longer obtain details via the `SpotifyClient.GetPlaylist` and `SpotifyClient.GetPlaylistItems` methods for Spotify-owned / generated content (e.g. "Made For You", etc).  A `404 - Not Found` error will be returned when trying to retrieve information for these playlist types.
+
 ###### [ 1.0.66 ] - 2024/11/20
 
   * Added service `get_playlist_cover_image` to get the current image associated with a specific playlist.
