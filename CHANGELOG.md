@@ -6,11 +6,16 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.68 ] - 2024/12/06
+
+  * Updated service `player_transfer_playback` to resume play if `play=True` and `force_activate_device=True`.  If forcefully activating a device, then we need to resume play manually if `play=True` was specified; this is due to the device losing its current status since it was being forcefully activated (e.g. disconnected and reconnected).
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.123.
+
 ###### [ 1.0.67 ] - 2024/12/02
 
-  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.22.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.122.
   * The above `spotifywebapiPython` package will now return an exception due to the functions being deprecated by the Spotify development team.  More information can be found on the [Spotify Developer Forum Blog post](https://developer.spotify.com/blog/2024-11-27-changes-to-the-web-api) that was conveyed on November 27, 2024.  The following methods will now raise a `SpotifyApiError` exception due to the Spotify development team changes: `GetArtistRelatedArtists`, `GetTrackRecommendations`, `GetTrackAudioFeatures`, `GetFeaturedPlaylists`, `GetCategoryPlaylists`, `GetGenres`.  The following properties were also marked as deprecated for the same reason: `TrackSimplified.PreviewUrl`.
-  * Due to the above chnages made by Spotify, any Algorithmic and Spotify-owned editorial playlists are no longer accessible or have more limited functionality.  This means that you can no longer obtain details via the `SpotifyClient.GetPlaylist` and `SpotifyClient.GetPlaylistItems` methods for Spotify-owned / generated content (e.g. "Made For You", etc).  A `404 - Not Found` error will be returned when trying to retrieve information for these playlist types.
+  * Due to the above changes made by Spotify, any Algorithmic and Spotify-owned editorial playlists are no longer accessible or have more limited functionality.  This means that you can no longer obtain details via the `SpotifyClient.GetPlaylist` and `SpotifyClient.GetPlaylistItems` methods for Spotify-owned / generated content (e.g. "Made For You", etc).  A `404 - Not Found` error will be returned when trying to retrieve information for these playlist types.
 
 ###### [ 1.0.66 ] - 2024/11/20
 

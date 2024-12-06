@@ -663,6 +663,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         else:
             
             # call Spotify Web API to process the request.
+            _logsi.LogVerbose("'%s': Issuing command to Spotify Player: PLAY" % (self.name))
             self.data.spotifyClient.PlayerMediaResume()
 
 
@@ -688,6 +689,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         else:
 
             # call Spotify Web API to process the request.
+            _logsi.LogVerbose("'%s': Issuing command to Spotify Player: PAUSE" % (self.name))
             self.data.spotifyClient.PlayerMediaPause()
 
 
@@ -709,6 +711,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         else:
             
             # call Spotify Web API to process the request.
+            _logsi.LogVerbose("'%s': Issuing command to Spotify Player: PREVIOUS" % (self.name))
             self.data.spotifyClient.PlayerMediaSkipPrevious()
 
 
@@ -730,6 +733,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         else:
             
             # call Spotify Web API to process the request.
+            _logsi.LogVerbose("'%s': Issuing command to Spotify Player: NEXT" % (self.name))
             self.data.spotifyClient.PlayerMediaSkipNext()
 
 
@@ -757,6 +761,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         else:
             
             # call Spotify Web API to process the request.
+            _logsi.LogVerbose("'%s': Issuing command to Spotify Player: SEEK (position=%s)" % (self.name, position))
             self.data.spotifyClient.PlayerMediaSeek(int(position * 1000))
         
 
@@ -892,7 +897,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 # transfer playback to the specified source.
                 self.service_spotify_player_transfer_playback(
                     source, 
-                    (self._attr_state != MediaPlayerState.PAUSED), 
+                    #play=(self._attr_state != MediaPlayerState.PAUSED), 
+                    play=True,
                     refreshDeviceList=True,
                     forceActivateDevice=True)
         
@@ -1100,7 +1106,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self._playerState, self._spotifyConnectDevice, self._sonosDevice = self._GetPlayerPlaybackState()
             
             # update the source list (spotify connect devices cache).
-            self.data.spotifyClient.GetSpotifyConnectDevices(refresh=True)
+            #self.data.spotifyClient.GetSpotifyConnectDevices(refresh=True)
 
             # try to automatically select a source for play.
             # if spotify web api player is not found and a default spotify connect device is configured, then select it;
@@ -1120,10 +1126,14 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             else:
                 _logsi.LogVerbose("'%s': Could not auto-select a source for play" % (self.name))
 
-            # activate the selected source.
+            # was a source selected?
             if source is not None:    
+                # yes - activate the selected source (e.g. transfer playback).
                 self.select_source(source)
                 self._isInCommandEvent = True  # turn "in a command event" indicator back on.
+            else:
+                # no - update the source list (spotify connect devices cache).
+                self.data.spotifyClient.GetSpotifyConnectDevices(refresh=True)
 
             # is playing content paused?  if so, then resume play.
             if (self._playerState.Device.IsActive) \
@@ -1661,7 +1671,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                     self.data.spotifyClient.DefaultDeviceId = self._attr_source
                     
                     # check to see if currently active device is in the Spotify Connect device list cache.
-                    # if it's not in the cache, then we need to refresh the Spotify Connect device list cache
+                    # if it's not in the cache, then we need to refresh the Spotify Connect device list cache.
                     scDevices:SpotifyConnectDevices = self.data.spotifyClient.GetSpotifyConnectDevices(refresh=False)
                     if not scDevices.ContainsDeviceName(playerPlayState.Device.Name):
                         _logsi.LogVerbose("'%s': Spotify PlayerPlayState device name '%s' was not found in the Spotify Connect device list cache; refreshing cache" % (self.name, self._attr_source))
@@ -7021,6 +7031,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("play", play)
             apiMethodParms.AppendKeyValue("delay", delay)
             apiMethodParms.AppendKeyValue("refreshDeviceList", refreshDeviceList)
+            apiMethodParms.AppendKeyValue("forceActivateDevice", forceActivateDevice)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Transfer Playback Service", apiMethodParms)
             
             # validations.
@@ -7233,6 +7244,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             if scDevice is not None:
                 self._attr_source = scDevice.Name
                 _logsi.LogVerbose("'%s': Selected source was changed to: '%s'" % (self.name, self._attr_source))
+                
+            # resume play (if requested and necessary).
+            if (play) and (self.state == 'paused'):
+                _logsi.LogVerbose("'%s': Selected source was changed to: '%s'" % (self.name, self._attr_source))
+                self.media_play()
             
             # media player command was processed, so force a scan window at the next interval.
             _logsi.LogVerbose("'%s': Processed a transfer playback command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
