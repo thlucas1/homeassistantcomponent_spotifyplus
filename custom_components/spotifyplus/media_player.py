@@ -14,6 +14,7 @@ import datetime as dt
 import time
 import urllib.parse
 from datetime import timedelta, datetime
+from pprint import pformat
 from typing import Any, Callable, Concatenate, ParamSpec, TypeVar, Tuple
 from yarl import URL
 
@@ -328,6 +329,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # initialize instance storage.
             self._id = data.spotifyClient.UserProfile.Id
             self._playlist:Playlist = None
+            self._lastMediaPlayedPosition:int = 0
+            self._lastMediaPlayedContextUri:str = None
+            self._lastMediaPlayedUri:str = None
             self.data = data
             self._currentScanInterval:int = 0
             self._commandScanInterval:int = 0
@@ -897,7 +901,6 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 # transfer playback to the specified source.
                 self.service_spotify_player_transfer_playback(
                     source, 
-                    #play=(self._attr_state != MediaPlayerState.PAUSED), 
                     play=True,
                     refreshDeviceList=True,
                     forceActivateDevice=True)
@@ -1105,9 +1108,6 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # get current Spotify Connect player state.
             self._playerState, self._spotifyConnectDevice, self._sonosDevice = self._GetPlayerPlaybackState()
             
-            # update the source list (spotify connect devices cache).
-            #self.data.spotifyClient.GetSpotifyConnectDevices(refresh=True)
-
             # try to automatically select a source for play.
             # if spotify web api player is not found and a default spotify connect device is configured, then select it;
             # otherwise, select the last active device source;
@@ -1128,12 +1128,24 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
             # was a source selected?
             if source is not None:    
-                # yes - activate the selected source (e.g. transfer playback).
-                self.select_source(source)
-                self._isInCommandEvent = True  # turn "in a command event" indicator back on.
+                # yes - is the source currently active?
+                if (self._playerState) \
+                and (self._playerState.Device) \
+                and ((self._playerState.Device.Name == source) or (self._playerState.Device.Id == source)) \
+                and (self._playerState.Device.IsActive):
+                    # yes - nothing to do since the source is active source.
+                    _logsi.LogVerbose("'%s': Previously active source '%s' is still the active source; bypassing select_source" % (self.name, source))
+                    pass
+                else:
+                    # no - activate (e.g. transfer playback to) the selected source.
+                    self.select_source(source)
+                    self._isInCommandEvent = True  # turn "in a command event" indicator back on.
             else:
                 # no - update the source list (spotify connect devices cache).
                 self.data.spotifyClient.GetSpotifyConnectDevices(refresh=True)
+
+            # trace.
+            _logsi.LogVerbose("'%s': About to resume play; last known media content: ContextUri=%s, Uri=%s, Position=%d" % (self.name, self._lastMediaPlayedContextUri, self._lastMediaPlayedUri, self._lastMediaPlayedPosition))
 
             # is playing content paused?  if so, then resume play.
             if (self._playerState.Device.IsActive) \
@@ -1223,6 +1235,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                     pass
                 else:
                     # no - keep waiting to update.
+                    # add scan interval time value to last media played position since it's not a real-time value.
+                    if (self._attr_state == MediaPlayerState.PLAYING):
+                        self._lastMediaPlayedPosition = (self._lastMediaPlayedPosition + SCAN_INTERVAL.seconds)
                     return
 
             # # TEST TODO - force token expire!!!
@@ -1263,18 +1278,31 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 
                 # yes - if it's a playlist, then we need to update the stored playlist reference.
                 self._playlist = None
+                self._lastMediaPlayedContextUri = context.Uri
                 if context.Type == MediaType.PLAYLIST:
                 
+                    # as of 2024/11/27, Spotify deprecated API support for various Spotify-owned playlists!
+                    # due to that, the following `GetPlaylist` call will fail if the currently playing context
+                    # is a Spotify-owned "algorithmic" playlist (e.g. various "Made For You" content, etc).
                     try:
                         
-                        _logsi.LogVerbose("Retrieving playlist for context uri '%s'" % context.Uri)
+                        _logsi.LogVerbose("'%s': Retrieving playlist for context uri '%s'" % (self.name, context.Uri))
                         spotifyId:str = SpotifyClient.GetIdFromUri(context.Uri)
                         self._playlist = self.data.spotifyClient.GetPlaylist(spotifyId)
                         
                     except Exception as ex:
                         
-                        _logsi.LogException("Unable to load spotify playlist '%s'. Continuing without playlist data" % context.Uri, ex)
-                        self._playlist = None
+                        #_logsi.LogException("Unable to get playlist data for context '%s'. Continuing without playlist data" % context.Uri, ex, logToSystemLogger=False)
+                        _logsi.LogWarning("'%s': Unable to get playlist data for context '%s'. Continuing without playlist data. GetPlaylist response: %s" % (self.name, context.Uri, str(ex)), logToSystemLogger=False)
+
+                        # if we could not get the current playlist info, then build a "dummy" playlist so that
+                        # information is still conveyed in the extended attributes.
+                        self._playlist = Playlist()
+                        self._playlist.Uri = context.Uri
+                        self._playlist.Type = self.data.spotifyClient.GetTypeFromUri(context.Uri)
+                        self._playlist.Id = self.data.spotifyClient.GetIdFromUri(context.Uri)
+                        self._playlist.Name = "Unknown"
+                        self._playlist.Description = str(ex)
                         
                 else:
                     
@@ -1614,6 +1642,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 self._attr_media_content_type = item.Type
                 self._attr_media_duration = item.DurationMS / 1000
                 self._attr_media_title = item.Name
+
+                # save currently playing track uri in case we need to restore it later.
+                self._lastMediaPlayedUri = playerPlayState.Item.Uri
                     
                 # update media album name attribute.
                 if item.Type == MediaType.EPISODE.value:
@@ -1679,9 +1710,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                         self.data.spotifyClient.GetSpotifyConnectDevices(refresh=True)
 
             # update seek-related attributes.
+            # also save currently playing track position in case we need to restore it later.
             if playerPlayState.ProgressMS is not None:
                 self._attr_media_position = playerPlayState.ProgressMS / 1000
                 self._attr_media_position_updated_at = utcnow()
+                self._lastMediaPlayedPosition = self._attr_media_position
         
             # update repeat related attributes.
             if playerPlayState.RepeatState is not None:
@@ -7048,11 +7081,23 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
             # get current Spotify Connect player state.
             self._playerState, self._spotifyConnectDevice, self._sonosDevice = self._GetPlayerPlaybackState()
-            
+
             # get current device name and id values (if any).
             currentDeviceName:str = self._playerState.Device.Name or ''
             currentDeviceId:str = self._playerState.Device.Id or ''
             _logsi.LogVerbose("'%s': Transferring playback from source device name: '%s' (id=%s)" % (self.name, currentDeviceName, currentDeviceId))
+            
+            # trace.
+            if (_logsi.IsOn(SILevel.Debug)):
+                dictText:str = pformat(self._playerState or "* No State *",indent=2,width=132,sort_dicts=False)
+                _logsi.LogVerbose("'%s': Spotify Player Playback State BEFORE transfer: %s" % (self.name, dictText))
+                if (self._playerState):
+                    dictText:str = pformat(self._playerState.Device or "* No Device *",indent=2,width=132,sort_dicts=False)
+                    _logsi.LogVerbose("'%s': Spotify Player Playback State BEFORE transfer: %s" % (self.name, dictText))
+                    dictText:str = pformat(self._playerState.Item or "* No Track *",indent=2,width=132,sort_dicts=False)
+                    _logsi.LogVerbose("'%s': Spotify Player Playback State BEFORE transfer: %s" % (self.name, dictText))
+                    dictText:str = pformat(self._playerState.Context or "* No Context *",indent=2,width=132,sort_dicts=False)
+                    _logsi.LogVerbose("'%s': Spotify Player Playback State BEFORE transfer: %s" % (self.name, dictText))
             
             # is there an active spotify connect device?
             # if so, then we will pause playback on the device before we transfer control 
@@ -7237,18 +7282,35 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # get current Spotify Connect player state.
             self._playerState, self._spotifyConnectDevice, self._sonosDevice = self._GetPlayerPlaybackState()
             
+            # trace.
+            if (_logsi.IsOn(SILevel.Debug)):
+                dictText:str = pformat(self._playerState or "* No State *",indent=2,width=132,sort_dicts=False)
+                _logsi.LogVerbose("'%s': Spotify Player Playback State AFTER transfer: %s" % (self.name, dictText))
+                if (self._playerState):
+                    dictText:str = pformat(self._playerState.Device or "* No Device *",indent=2,width=132,sort_dicts=False)
+                    _logsi.LogVerbose("'%s': Spotify Player Playback State AFTER transfer: %s" % (self.name, dictText))
+                    dictText:str = pformat(self._playerState.Item or "* No Track *",indent=2,width=132,sort_dicts=False)
+                    _logsi.LogVerbose("'%s': Spotify Player Playback State AFTER transfer: %s" % (self.name, dictText))
+                    dictText:str = pformat(self._playerState.Context or "* No Context *",indent=2,width=132,sort_dicts=False)
+                    _logsi.LogVerbose("'%s': Spotify Player Playback State AFTER transfer: %s" % (self.name, dictText))
+
             # reset internal SonosDevice to the SonosDevice that we just created (if transferring to Sonos).
             self._sonosDevice = sonosDevice
                         
-            # set the selected source.
+            # did we resolve a target device?
             if scDevice is not None:
+    
+                # yes - set the selected source.
                 self._attr_source = scDevice.Name
                 _logsi.LogVerbose("'%s': Selected source was changed to: '%s'" % (self.name, self._attr_source))
                 
-            # resume play (if requested and necessary).
-            if (play) and (self.state == 'paused'):
-                _logsi.LogVerbose("'%s': Selected source was changed to: '%s'" % (self.name, self._attr_source))
-                self.media_play()
+                # trace.
+                _logsi.LogVerbose("'%s': About to resume play; last known media content: ContextUri=%s, Uri=%s, Position=%d" % (self.name, self._lastMediaPlayedContextUri, self._lastMediaPlayedUri, self._lastMediaPlayedPosition))
+
+                # resume play (if requested and necessary).
+                if (play) and (self.state == 'paused'):
+                    _logsi.LogVerbose("'%s': Current state is paused; resuming play on source: '%s'" % (self.name, self._attr_source))
+                    self.media_play()
             
             # media player command was processed, so force a scan window at the next interval.
             _logsi.LogVerbose("'%s': Processed a transfer playback command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))

@@ -6,6 +6,13 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.69 ] - 2024/12/09
+
+  * Updated code when calling the spotifywebapiPython `GetPlaylist` method to not log exception information if the call fails.  This was causing exceptions to be logged when trying to retrieve details for Spotify-owned algorithmic playlist details; the call now fails due to the unannounced Spotify Web API changes that were made by the Spotify Developer Team on 2024/11/27.  Note that the call works fine for user-defined playlists.
+  * The `media_playlist` extended attribute will now display `Unknown` if the currently playing context is a Spotify-owned algorithmic playlist (e.g. "Daily Mix 1", etc). It will display the correct playlist name if the currently playing context is a user-defined playlist.  
+  * The `sp_playlist_name` extended attribute will now display `Unknown` if the currently playing context is a Spotify-owned algorithmic playlist (e.g. "Daily Mix 1", etc).  It will display the correct playlist name if the currently playing context is a user-defined playlist.  
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.125.  
+
 ###### [ 1.0.68 ] - 2024/12/06
 
   * Updated service `player_transfer_playback` to resume play if `play=True` and `force_activate_device=True`.  If forcefully activating a device, then we need to resume play manually if `play=True` was specified; this is due to the device losing its current status since it was being forcefully activated (e.g. disconnected and reconnected).
