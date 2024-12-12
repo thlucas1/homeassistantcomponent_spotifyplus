@@ -19,6 +19,9 @@ CONF_OPTION_DEVICE_USERNAME = "device_username"
 CONF_OPTION_SCRIPT_TURN_ON = "script_turn_on"
 CONF_OPTION_SCRIPT_TURN_OFF = "script_turn_off"
 CONF_OPTION_SOURCE_LIST_HIDE = "source_list_hide"
+CONF_OPTION_SPOTIFY_SCAN_INTERVAL = "spotify_scan_interval"
+
+DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL = 30
 
 # security scopes required by various Spotify Web API endpoints.
 SPOTIFY_SCOPES:list = \

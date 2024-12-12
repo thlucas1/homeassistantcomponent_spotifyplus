@@ -40,9 +40,11 @@ from .const import (
     CONF_OPTION_DEVICE_LOGINID,
     CONF_OPTION_DEVICE_PASSWORD,
     CONF_OPTION_DEVICE_USERNAME,
+    CONF_OPTION_SPOTIFY_SCAN_INTERVAL,
     CONF_OPTION_SCRIPT_TURN_OFF,
     CONF_OPTION_SCRIPT_TURN_ON,
     CONF_OPTION_SOURCE_LIST_HIDE,
+    DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL,
     DOMAIN, 
     DOMAIN_SCRIPT,
     SPOTIFY_SCOPES
@@ -372,6 +374,7 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                 self._Options[CONF_OPTION_DEVICE_LOGINID] = user_input.get(CONF_OPTION_DEVICE_LOGINID, None)
                 self._Options[CONF_OPTION_DEVICE_USERNAME] = user_input.get(CONF_OPTION_DEVICE_USERNAME, None)
                 self._Options[CONF_OPTION_DEVICE_PASSWORD] = user_input.get(CONF_OPTION_DEVICE_PASSWORD, None)
+                self._Options[CONF_OPTION_SPOTIFY_SCAN_INTERVAL] = user_input.get(CONF_OPTION_SPOTIFY_SCAN_INTERVAL, DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL)
                 self._Options[CONF_OPTION_SCRIPT_TURN_OFF] = user_input.get(CONF_OPTION_SCRIPT_TURN_OFF, None)
                 self._Options[CONF_OPTION_SCRIPT_TURN_ON] = user_input.get(CONF_OPTION_SCRIPT_TURN_ON, None)
                 self._Options[CONF_OPTION_SOURCE_LIST_HIDE] = user_input.get(CONF_OPTION_SOURCE_LIST_HIDE, None)
@@ -385,6 +388,11 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                     errors["base"] = "device_password_required"
                 if (deviceUsername is not None) and (deviceLoginid is None):
                     errors["base"] = "device_loginid_required"
+
+                # spotify scan interval must be in the 4 to 60 range (if specified).
+                spotifyScanInterval:int = user_input.get(CONF_OPTION_SPOTIFY_SCAN_INTERVAL, DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL)
+                if (spotifyScanInterval is not None) and ((spotifyScanInterval < 4) or (spotifyScanInterval > 60)):
+                    errors["base"] = "spotify_scan_interval_range_invalid"
 
                 # any validation errors? if not, then ...
                 if "base" not in errors:
@@ -432,6 +440,9 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                     vol.Optional(CONF_OPTION_DEVICE_PASSWORD, 
                                  description={"suggested_value": self._Options.get(CONF_OPTION_DEVICE_PASSWORD)},
                                  ): cv.string,
+                    vol.Optional(CONF_OPTION_SPOTIFY_SCAN_INTERVAL, 
+                                 description={"suggested_value": self._Options.get(CONF_OPTION_SPOTIFY_SCAN_INTERVAL)},
+                                 ): cv.positive_int,
                     vol.Optional(CONF_OPTION_SCRIPT_TURN_ON, 
                                  description={"suggested_value": self._Options.get(CONF_OPTION_SCRIPT_TURN_ON)},
                                  ): selector.EntitySelector(selector.EntitySelectorConfig(integration=DOMAIN_SCRIPT, 

@@ -35,6 +35,7 @@
           "device_loginid": "Spotify Connect canonical loginid to use when connecting to an inactive device.",
           "device_password": "Spotify Connect password to use when connecting to an inactive device.",
           "device_username": "Spotify Connect username to use when connecting to an inactive device.",
+          "spotify_scan_interval": "Scan interval (in seconds) used to query Spotify Player playstate (range 4 - 60).",
           "script_turn_on": "Script called to turn on device that plays media content.",
           "script_turn_off": "Script called to turn off device that plays media content.",
           "source_list_hide": "The semi-colon delimited list of device names to hide in the source list."
@@ -45,7 +46,8 @@
     "error": {
       "no_player_devices": "Per Spotify Web API, there are currently no Spotify Connect devices active.  Please close the configuration options, play a track on any Spotify Connect player for a minute or two, and then open the configuration options again.",
       "device_password_required": "Spotify Connect Device Password is required if a Spotify Connect Device Username was specified.",
-      "device_loginid_required": "Spotify Connect Device LoginId is required if a Spotify Connect Device Username was specified."
+      "device_loginid_required": "Spotify Connect Device LoginId is required if a Spotify Connect Device Username was specified.",
+      "spotify_scan_interval_range_invalid": "Spotify Scan Interval is invalid; please specify a whole number between 4 and 60, or leave blank to use the default (30)."
     }
   },
   "system_health": {

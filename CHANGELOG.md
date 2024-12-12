@@ -6,11 +6,16 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.70 ] - 2024/12/12
+
+  * Added [configuration option](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#spotify-polling-scan-interval) to specify the Spotify polling scan interval.  This option specifies the polling scan interval (in seconds) used to query Spotify Player playstate.
+
 ###### [ 1.0.69 ] - 2024/12/09
 
   * Updated code when calling the spotifywebapiPython `GetPlaylist` method to not log exception information if the call fails.  This was causing exceptions to be logged when trying to retrieve details for Spotify-owned algorithmic playlist details; the call now fails due to the unannounced Spotify Web API changes that were made by the Spotify Developer Team on 2024/11/27.  Note that the call works fine for user-defined playlists.
   * The `media_playlist` extended attribute will now display `Unknown` if the currently playing context is a Spotify-owned algorithmic playlist (e.g. "Daily Mix 1", etc). It will display the correct playlist name if the currently playing context is a user-defined playlist.  
   * The `sp_playlist_name` extended attribute will now display `Unknown` if the currently playing context is a Spotify-owned algorithmic playlist (e.g. "Daily Mix 1", etc).  It will display the correct playlist name if the currently playing context is a user-defined playlist.  
+  * Updated service `turn_on` to first check if the previously selected source is active or not; if so, then play is resumed immediately; if not, then a `source_select` is performed to activate the selected source.
   * Updated underlying `spotifywebapiPython` package requirement to version 1.0.125.  
 
 ###### [ 1.0.68 ] - 2024/12/06

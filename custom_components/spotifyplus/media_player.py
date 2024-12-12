@@ -99,6 +99,7 @@ from .browse_media import (
 )
 from .instancedata_spotifyplus import InstanceDataSpotifyPlus
 from .const import (
+    DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL,
     DOMAIN, 
     DOMAIN_SCRIPT,
     LOGGER,
@@ -166,22 +167,17 @@ Note that the Spotify Web API does not get called every time HA update method is
 though; check update method for logic that controls this.
 """
 
-SPOTIFY_SCAN_INTERVAL:int = 30
-""" 
-Time interval (in seconds) to scan spotify connect player for updates. 
-"""
-
 SPOTIFY_SCAN_INTERVAL_TRACK_ENDSTART:int = 3
 """ 
 Time interval (in seconds) to scan spotify connect player for updates
 due to a track ending / starting.
 """
 
-SPOTIFY_SCAN_INTERVAL_COMMAND:int = 6
+SPOTIFY_SCAN_INTERVAL_COMMAND:int = 5
 """ 
 Time interval (in seconds) to scan spotify connect player for updates
 due to a player command.  This gives the Spotify Connect Player time to
-update its PlayState status.
+update its PlayState status (5 seconds).
 """
 
 
@@ -295,7 +291,7 @@ def spotify_exception_handler(
             self._isInCommandEvent = False
 
             # media player command was processed, so force a scan window at the next interval.
-            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND))
             self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
 
     return wrapper
@@ -328,6 +324,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
             # initialize instance storage.
             self._id = data.spotifyClient.UserProfile.Id
+            self._spotifyScanInterval = DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL
             self._playlist:Playlist = None
             self._lastMediaPlayedPosition:int = 0
             self._lastMediaPlayedContextUri:str = None
@@ -410,6 +407,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # for player update notifications.
             _logsi.LogVerbose("'%s': MediaPlayer device polling is being enabled, as the device does not support websockets" % self.name)
             self._attr_should_poll = True
+
+            # set scan interval based on configuration options.
+            self._spotifyScanInterval = data.OptionSpotifyScanInterval
         
             # trace.
             _logsi.LogObject(SILevel.Verbose, "'%s': MediaPlayer SpotifyClient object" % self.name, self.data.spotifyClient)
@@ -1203,15 +1203,14 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # trace.
             _logsi.EnterMethod(SILevel.Debug)
         
-            _logsi.LogVerbose("'%s': Scan interval %d check - commandScanInterval=%d, currentScanInterval=%d, lastKnownTimeRemainingSeconds=%d, state=%s" % (self.name, SPOTIFY_SCAN_INTERVAL, self._commandScanInterval, self._currentScanInterval, self._lastKnownTimeRemainingSeconds, str(self._attr_state)))
+            _logsi.LogVerbose("'%s': Scan interval %d check - commandScanInterval=%d, currentScanInterval=%d, lastKnownTimeRemainingSeconds=%d, state=%s" % (self.name, self._spotifyScanInterval, self._commandScanInterval, self._currentScanInterval, self._lastKnownTimeRemainingSeconds, str(self._attr_state)))
             
             # have we reached a scan interval?
-            if not ((self._currentScanInterval % SPOTIFY_SCAN_INTERVAL) == 0):
+            if (self._currentScanInterval == self._spotifyScanInterval) \
+            or (not ((self._currentScanInterval % self._spotifyScanInterval) == 0)):
 
-                # no - decrement the current scan interval counts.
-                self._currentScanInterval = self._currentScanInterval - 1
-                if self._commandScanInterval > 0:
-                    self._commandScanInterval = self._commandScanInterval - 1
+                # # no - decrement the current scan interval counts.
+                # self._currentScanInterval = self._currentScanInterval - 1
 
                 # if last known time remaining value is less than current scan interval then
                 # use the lesser last known time remaining value as the current scan interval.
@@ -1224,17 +1223,25 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                     self._currentScanInterval = self._lastKnownTimeRemainingSeconds
                     _logsi.LogVerbose("'%s': Resetting current scan interval to last known time remaining value - currentScanInterval=%d, lastKnownTimeRemainingSeconds=%d, state=%s" % (self.name, self._currentScanInterval, self._lastKnownTimeRemainingSeconds, str(self._attr_state)))
 
-                # we will query Spotify for player state if ANY of the following:
-                # - we reached a scan interval (e.g. 30 seconds).
-                # - within specified seconds of an issued command (e.g. 5 seconds).
-                # - within specified seconds of a playing track ending.
-                if (self._currentScanInterval == 0) \
-                or (self._commandScanInterval > 0 and self._commandScanInterval <= SPOTIFY_SCAN_INTERVAL_COMMAND) \
-                or ((self._lastKnownTimeRemainingSeconds <= SPOTIFY_SCAN_INTERVAL_TRACK_ENDSTART) and (self._attr_state == MediaPlayerState.PLAYING)):
+                # do we need to query Spotify for player state?
+                if (self._currentScanInterval == 0):
+                    # yes - we reached a scan interval (e.g. 30 seconds).
+                    _logsi.LogVerbose("'%s': updating playerstate - current scan interval is zero" % (self.name))
+                    pass
+                elif (self._commandScanInterval != 0):
+                    # yes - we are monitoring an issued command response (e.g. 5 seconds).
+                    _logsi.LogVerbose("'%s': updating playerstate - monitoring an issued command response" % (self.name))
+                    pass
+                elif ((self._lastKnownTimeRemainingSeconds <= SPOTIFY_SCAN_INTERVAL_TRACK_ENDSTART) and (self._attr_state == MediaPlayerState.PLAYING)):
                     # yes - allow the update
+                    _logsi.LogVerbose("'%s': updating playerstate - monitoring for end of track (remaining track time is nearing zero)" % (self.name))
                     pass
                 else:
                     # no - keep waiting to update.
+
+                    # decrement the current scan interval count.
+                    self._currentScanInterval = self._currentScanInterval - 1
+
                     # add scan interval time value to last media played position since it's not a real-time value.
                     if (self._attr_state == MediaPlayerState.PLAYING):
                         self._lastMediaPlayedPosition = (self._lastMediaPlayedPosition + SCAN_INTERVAL.seconds)
@@ -1252,6 +1259,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # self.data.spotifyClient.AuthToken._ExpiresAt = int((dtUtcNow - unix_epoch).total_seconds())  # seconds from epoch, current date
             # self.data.spotifyClient.AuthToken._ExpiresAt = self.data.spotifyClient.AuthToken._ExpiresAt + self.data.spotifyClient.AuthToken._ExpiresIn             # add ExpiresIn seconds
 
+            # are we monitoring a command response? if so, then decrement the interval count.
+            if self._commandScanInterval > 0:
+                self._commandScanInterval = self._commandScanInterval - 1
+
             # get now playing status.
             _logsi.LogVerbose("'%s': update method - getting Spotify Connect Player state" % self.name)
             self._playerState, self._spotifyConnectDevice, self._sonosDevice = self._GetPlayerPlaybackState()
@@ -1259,7 +1270,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.WatchDateTime(SILevel.Debug, "HASpotifyPlaystateLastUpdate", datetime.now())
             
             # update the scan interval for next time.
-            self._currentScanInterval = SPOTIFY_SCAN_INTERVAL - 1
+            self._currentScanInterval = self._spotifyScanInterval
 
             # calculate the time (in seconds) remaining on the playing track.
             if self._playerState is not None:
@@ -5815,7 +5826,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self.schedule_update_ha_state(force_refresh=False)
 
             # media player command was processed, so force a scan window at the next interval.
-            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND))
             self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
 
         # the following exceptions have already been logged, so we just need to
@@ -5979,7 +5990,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self.schedule_update_ha_state(force_refresh=False)
 
             # media player command was processed, so force a scan window at the next interval.
-            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND))
             self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
 
         # the following exceptions have already been logged, so we just need to
@@ -6238,7 +6249,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self.schedule_update_ha_state(force_refresh=False)
 
             # media player command was processed, so force a scan window at the next interval.
-            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND))
             self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
 
         # the following exceptions have already been logged, so we just need to
@@ -6329,7 +6340,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self.schedule_update_ha_state(force_refresh=False)
 
             # media player command was processed, so force a scan window at the next interval.
-            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND))
             self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
 
         # the following exceptions have already been logged, so we just need to
@@ -6453,7 +6464,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self.schedule_update_ha_state(force_refresh=False)
 
             # media player command was processed, so force a scan window at the next interval.
-            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND))
             self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
 
         # the following exceptions have already been logged, so we just need to
@@ -6544,7 +6555,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self.schedule_update_ha_state(force_refresh=False)
 
             # media player command was processed, so force a scan window at the next interval.
-            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND))
             self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
 
         # the following exceptions have already been logged, so we just need to
@@ -6635,7 +6646,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self.schedule_update_ha_state(force_refresh=False)
 
             # media player command was processed, so force a scan window at the next interval.
-            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND))
             self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
 
         # the following exceptions have already been logged, so we just need to
@@ -6803,7 +6814,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self.schedule_update_ha_state(force_refresh=False)
 
             # media player command was processed, so force a scan window at the next interval.
-            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND))
             self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
             
         # the following exceptions have already been logged, so we just need to
@@ -6911,7 +6922,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self.schedule_update_ha_state(force_refresh=False)
             
             # media player command was processed, so force a scan window at the next interval.
-            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND))
             self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
             
         # the following exceptions have already been logged, so we just need to
@@ -6999,7 +7010,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self.schedule_update_ha_state(force_refresh=False)
             
             # media player command was processed, so force a scan window at the next interval.
-            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            _logsi.LogVerbose("'%s': Processed a media player command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND))
             self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
             
         # the following exceptions have already been logged, so we just need to
@@ -7313,7 +7324,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                     self.media_play()
             
             # media player command was processed, so force a scan window at the next interval.
-            _logsi.LogVerbose("'%s': Processed a transfer playback command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND - 1))
+            _logsi.LogVerbose("'%s': Processed a transfer playback command - forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND))
             self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
 
         # the following exceptions have already been logged, so we just need to

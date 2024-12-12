@@ -16,9 +16,11 @@ from .const import (
     CONF_OPTION_DEVICE_LOGINID,
     CONF_OPTION_DEVICE_PASSWORD,
     CONF_OPTION_DEVICE_USERNAME,
+    CONF_OPTION_SPOTIFY_SCAN_INTERVAL,
     CONF_OPTION_SCRIPT_TURN_OFF,
     CONF_OPTION_SCRIPT_TURN_ON,
     CONF_OPTION_SOURCE_LIST_HIDE,
+    DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL,
 )
 
 @dataclass
@@ -85,6 +87,14 @@ class InstanceDataSpotifyPlus:
         The default Spotify Connect username to use when connecting to an inactive device.
         """
         return self.options.get(CONF_OPTION_DEVICE_USERNAME, None)
+
+    @property
+    def OptionSpotifyScanInterval(self) -> int:
+        """
+        Scan Interval (in seconds) to use when querying Spotify Player for current playstate.
+        Defaults to 30 (seconds) if not set.
+        """
+        return self.options.get(CONF_OPTION_SPOTIFY_SCAN_INTERVAL, DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL)
 
     @property
     def OptionScriptTurnOff(self) -> str | None:
