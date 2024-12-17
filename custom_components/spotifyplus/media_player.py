@@ -81,7 +81,7 @@ from homeassistant.components.media_player import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.device_registry import DeviceEntryType
 from homeassistant.helpers.entity import DeviceInfo
@@ -139,6 +139,7 @@ ATTR_SPOTIFYPLUS_DEVICE_ID = "sp_device_id"
 ATTR_SPOTIFYPLUS_DEVICE_NAME = "sp_device_name"
 ATTR_SPOTIFYPLUS_DEVICE_IS_BRAND_SONOS = "sp_device_is_brand_sonos"
 ATTR_SPOTIFYPLUS_ITEM_TYPE = "sp_item_type"
+ATTR_SPOTIFYPLUS_PLAYING_TYPE = "sp_playing_type"
 ATTR_SPOTIFYPLUS_PLAYLIST_NAME = "sp_playlist_name"
 ATTR_SPOTIFYPLUS_PLAYLIST_URI = "sp_playlist_uri"
 ATTR_SPOTIFYPLUS_TRACK_IS_EXPLICIT = "sp_track_is_explicit"
@@ -275,12 +276,13 @@ def spotify_exception_handler(
             # return function result to caller.
             return result
 
+        except ServiceValidationError: raise  # pass handled exceptions on thru
         except HomeAssistantError: raise  # pass handled exceptions on thru
         except ValueError: raise  # pass handled exceptions on thru
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except Exception as ex:
             _logsi.LogException(None, ex)
             raise HomeAssistantError(str(ex)) from ex
@@ -372,7 +374,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # most features will NOT be supported if the Spotify user does not have a PREMIUM
             # membership level, as the Spotify Web API requires a premium membership for most 
             # of the player control functions.
-            if self.data.spotifyClient.UserProfile.Product == "premium":
+            if (self.data.spotifyClient.UserProfile.IsProductPremium):
                 _logsi.LogVerbose("'%s': MediaPlayer is setting supported features for Spotify Premium user" % self.name)
                 self._attr_supported_features = MediaPlayerEntityFeature.BROWSE_MEDIA \
                                               | MediaPlayerEntityFeature.MEDIA_ENQUEUE \
@@ -393,15 +395,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             else:
                 _logsi.LogVerbose("'%s': MediaPlayer is setting supported features for Spotify Non-Premium user" % self.name)
                 self._attr_supported_features = MediaPlayerEntityFeature.BROWSE_MEDIA \
-                                              | MediaPlayerEntityFeature.PAUSE \
-                                              | MediaPlayerEntityFeature.PLAY \
-                                              | MediaPlayerEntityFeature.PLAY_MEDIA \
-                                              | MediaPlayerEntityFeature.SELECT_SOURCE \
                                               | MediaPlayerEntityFeature.TURN_OFF \
-                                              | MediaPlayerEntityFeature.TURN_ON \
-                                              | MediaPlayerEntityFeature.VOLUME_MUTE \
-                                              | MediaPlayerEntityFeature.VOLUME_SET \
-                                              | MediaPlayerEntityFeature.VOLUME_STEP
+                                              | MediaPlayerEntityFeature.TURN_ON
 
             # we will (by default) set polling to true, as the SpotifyClient does not support websockets
             # for player update notifications.
@@ -436,6 +431,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         attributes[ATTR_SPOTIFYPLUS_DEVICE_NAME] = ATTRVALUE_NO_DEVICE
         attributes[ATTR_SPOTIFYPLUS_DEVICE_IS_BRAND_SONOS] = False
         attributes[ATTR_SPOTIFYPLUS_ITEM_TYPE] = ATTRVALUE_UNKNOWN
+        attributes[ATTR_SPOTIFYPLUS_PLAYING_TYPE] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_TRACK_IS_EXPLICIT] = False
         attributes[ATTR_SPOTIFYPLUS_USER_COUNTRY] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_USER_DISPLAY_NAME] = ATTRVALUE_UNKNOWN
@@ -462,7 +458,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 track:Track = self._playerState.Item
                 if track.Explicit:
                     attributes[ATTR_SPOTIFYPLUS_TRACK_IS_EXPLICIT] = track.Explicit
-                
+            if (self._playerState.CurrentlyPlayingType is not None):
+                attributes[ATTR_SPOTIFYPLUS_PLAYING_TYPE] = self._playerState.CurrentlyPlayingType
+
         # add currently active playlist information.
         if self._playlist is not None:
             attributes[ATTR_SPOTIFYPLUS_PLAYLIST_NAME] = self._playlist.Name
@@ -1064,9 +1062,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except Exception as ex:
             _logsi.LogException(None, ex)
             raise HomeAssistantError(str(ex)) from ex
@@ -1107,52 +1105,60 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             
             # get current Spotify Connect player state.
             self._playerState, self._spotifyConnectDevice, self._sonosDevice = self._GetPlayerPlaybackState()
-            
-            # try to automatically select a source for play.
-            # if spotify web api player is not found and a default spotify connect device is configured, then select it;
-            # otherwise, select the last active device source;
-            # otherwise, select the currently active Spotify Connect device source;
-            # otherwise, we cannot automatically select a source!
-            source:str = None
-            if (self._spotifyConnectDevice is None) and (self.data.OptionDeviceDefault is not None):
-                source = PlayerDevice.GetNameFromSelectItem(self.data.OptionDeviceDefault)
-                _logsi.LogVerbose("'%s': SpotifyPlus configuration default device source will be selected: '%s'" % (self.name, source))
-            elif (self._source_at_poweroff is not None):
-                source = self._source_at_poweroff
-                _logsi.LogVerbose("'%s': Last active device source will be selected: '%s'" % (self.name, source))
-            elif (self._spotifyConnectDevice is not None):
-                source = self._spotifyConnectDevice.DeviceInfo.RemoteName
-                _logsi.LogVerbose("'%s': Currently active Spotify Connect device source will be selected: '%s'" % (self.name, source))
-            else:
-                _logsi.LogVerbose("'%s': Could not auto-select a source for play" % (self.name))
 
-            # was a source selected?
-            if source is not None:    
-                # yes - is the source currently active?
-                if (self._playerState) \
-                and (self._playerState.Device) \
-                and ((self._playerState.Device.Name == source) or (self._playerState.Device.Id == source)) \
-                and (self._playerState.Device.IsActive):
-                    # yes - nothing to do since the source is active source.
-                    _logsi.LogVerbose("'%s': Previously active source '%s' is still the active source; bypassing select_source" % (self.name, source))
-                    pass
+            # is this a spotify premium account?
+            if (self.data.spotifyClient.UserProfile.IsProductPremium):
+    
+                # try to automatically select a source for play.
+                # if spotify web api player is not found and a default spotify connect device is configured, then select it;
+                # otherwise, select the last active device source;
+                # otherwise, select the currently active Spotify Connect device source;
+                # otherwise, we cannot automatically select a source!
+                source:str = None
+                if (self._spotifyConnectDevice is None) and (self.data.OptionDeviceDefault is not None):
+                    source = PlayerDevice.GetNameFromSelectItem(self.data.OptionDeviceDefault)
+                    _logsi.LogVerbose("'%s': SpotifyPlus configuration default device source will be selected: '%s'" % (self.name, source))
+                elif (self._source_at_poweroff is not None):
+                    source = self._source_at_poweroff
+                    _logsi.LogVerbose("'%s': Last active device source will be selected: '%s'" % (self.name, source))
+                elif (self._spotifyConnectDevice is not None):
+                    source = self._spotifyConnectDevice.DeviceInfo.RemoteName
+                    _logsi.LogVerbose("'%s': Currently active Spotify Connect device source will be selected: '%s'" % (self.name, source))
                 else:
-                    # no - activate (e.g. transfer playback to) the selected source.
-                    self.select_source(source)
+                    _logsi.LogVerbose("'%s': Could not auto-select a source for play" % (self.name))
+
+                # was a source selected?
+                if source is not None:    
+                    # yes - is the source currently active?
+                    if (self._playerState) \
+                    and (self._playerState.Device) \
+                    and ((self._playerState.Device.Name == source) or (self._playerState.Device.Id == source)) \
+                    and (self._playerState.Device.IsActive):
+                        # yes - nothing to do since the source is active source.
+                        _logsi.LogVerbose("'%s': Previously active source '%s' is still the active source; bypassing select_source" % (self.name, source))
+                        pass
+                    else:
+                        # no - activate (e.g. transfer playback to) the selected source.
+                        self.select_source(source)
+                        self._isInCommandEvent = True  # turn "in a command event" indicator back on.
+                else:
+                    # no - update the source list (spotify connect devices cache).
+                    self.data.spotifyClient.GetSpotifyConnectDevices(refresh=True)
+
+                # trace.
+                _logsi.LogVerbose("'%s': About to resume play; last known media content: ContextUri=%s, Uri=%s, Position=%d" % (self.name, self._lastMediaPlayedContextUri, self._lastMediaPlayedUri, self._lastMediaPlayedPosition))
+
+                # is playing content paused?  if so, then resume play.
+                if (self._playerState.Device.IsActive) \
+                and (self._playerState.Actions.Pausing):
+                    _logsi.LogVerbose("'%s': MediaPlayer turned on - resuming play on source device: '%s'" % (self.name, self._playerState.Device.Name))
+                    self.media_play()
                     self._isInCommandEvent = True  # turn "in a command event" indicator back on.
+
             else:
-                # no - update the source list (spotify connect devices cache).
-                self.data.spotifyClient.GetSpotifyConnectDevices(refresh=True)
 
-            # trace.
-            _logsi.LogVerbose("'%s': About to resume play; last known media content: ContextUri=%s, Uri=%s, Position=%d" % (self.name, self._lastMediaPlayedContextUri, self._lastMediaPlayedUri, self._lastMediaPlayedPosition))
-
-            # is playing content paused?  if so, then resume play.
-            if (self._playerState.Device.IsActive) \
-            and (self._playerState.Actions.Pausing):
-                _logsi.LogVerbose("'%s': MediaPlayer turned on - resuming play on source device: '%s'" % (self.name, self._playerState.Device.Name))
-                self.media_play()
-                self._isInCommandEvent = True  # turn "in a command event" indicator back on.
+                # trace.
+                _logsi.LogVerbose("'%s': Spotify account is not Premium; could not transfer playback, nor resume play" % (self.name))
 
             # trace.
             _logsi.LogVerbose("'%s': MediaPlayer turn_on complete" % (self.name))
@@ -1160,9 +1166,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except Exception as ex:
             _logsi.LogException(None, ex)
             raise HomeAssistantError(str(ex)) from ex
@@ -1326,7 +1332,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         except SpotifyWebApiError as ex:
             
             _logsi.LogException(None, ex)
-            raise HomeAssistantError(ex.Message) from ex
+            raise ServiceValidationError(ex.Message) from ex
         
         except Exception as ex:
 
@@ -1618,11 +1624,12 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self._attr_is_volume_muted = None
             
             # initialize supported features.
-            self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.NEXT_TRACK
-            self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.PREVIOUS_TRACK
-            self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.REPEAT_SET
-            self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.SEEK
-            self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.SHUFFLE_SET
+            if (self.data.spotifyClient.UserProfile.IsProductPremium):
+                self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.NEXT_TRACK
+                self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.PREVIOUS_TRACK
+                self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.REPEAT_SET
+                self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.SEEK
+                self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.SHUFFLE_SET
 
             # does player state exist?  if not, then we are done.
             if playerPlayState is None:
@@ -1738,32 +1745,33 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 
             # update supported features based upon available actions.
             # note if the selected action is true, then it is not allowed (disallowed).
-            if playerPlayState.Actions is not None:
+            if (self.data.spotifyClient.UserProfile.IsProductPremium):
+                if playerPlayState.Actions is not None:
 
-                # 2024/07/24
-                # commented some of the following, as some media players (e.g. mini-media player) do not 
-                # display / hide the corresponding transport button correctly!
+                    # 2024/07/24
+                    # commented some of the following, as some media players (e.g. mini-media player) do not 
+                    # display / hide the corresponding transport button correctly!
 
-                # if playerPlayState.Actions.SkippingNext:
-                #     self._attr_supported_features = self._attr_supported_features & (~MediaPlayerEntityFeature.NEXT_TRACK)
-                #     _logsi.LogVerbose("'%s': MediaPlayerState NEXT_TRACK is not allowed" % self.name)                
+                    # if playerPlayState.Actions.SkippingNext:
+                    #     self._attr_supported_features = self._attr_supported_features & (~MediaPlayerEntityFeature.NEXT_TRACK)
+                    #     _logsi.LogVerbose("'%s': MediaPlayerState NEXT_TRACK is not allowed" % self.name)                
                 
-                # if playerPlayState.Actions.SkippingPrev:
-                #     self._attr_supported_features = self._attr_supported_features & (~MediaPlayerEntityFeature.PREVIOUS_TRACK)
-                #     _logsi.LogVerbose("'%s': MediaPlayerState PREVIOUS_TRACK is not allowed" % self.name)
+                    # if playerPlayState.Actions.SkippingPrev:
+                    #     self._attr_supported_features = self._attr_supported_features & (~MediaPlayerEntityFeature.PREVIOUS_TRACK)
+                    #     _logsi.LogVerbose("'%s': MediaPlayerState PREVIOUS_TRACK is not allowed" % self.name)
                     
-                if playerPlayState.Actions.TogglingRepeatTrack:
-                    self._attr_supported_features = self._attr_supported_features & (~MediaPlayerEntityFeature.REPEAT_SET)
-                    _logsi.LogVerbose("'%s': MediaPlayerState REPEAT_SET is not allowed" % self.name)
+                    if playerPlayState.Actions.TogglingRepeatTrack:
+                        self._attr_supported_features = self._attr_supported_features & (~MediaPlayerEntityFeature.REPEAT_SET)
+                        _logsi.LogVerbose("'%s': MediaPlayerState REPEAT_SET is not allowed" % self.name)
                 
-                # if playerPlayState.Actions.Seeking:
-                #     self._attr_supported_features = self._attr_supported_features & (~MediaPlayerEntityFeature.SEEK)
-                #     _logsi.LogVerbose("'%s': MediaPlayerState SEEK is not allowed" % self.name)                
+                    # if playerPlayState.Actions.Seeking:
+                    #     self._attr_supported_features = self._attr_supported_features & (~MediaPlayerEntityFeature.SEEK)
+                    #     _logsi.LogVerbose("'%s': MediaPlayerState SEEK is not allowed" % self.name)                
                 
-                if playerPlayState.Actions.TogglingShuffle:
-                    self._attr_supported_features = self._attr_supported_features & (~MediaPlayerEntityFeature.SHUFFLE_SET)
-                    _logsi.LogVerbose("'%s': MediaPlayerState SHUFFLE_SET is not allowed" % self.name)
-                pass
+                    if playerPlayState.Actions.TogglingShuffle:
+                        self._attr_supported_features = self._attr_supported_features & (~MediaPlayerEntityFeature.SHUFFLE_SET)
+                        _logsi.LogVerbose("'%s': MediaPlayerState SHUFFLE_SET is not allowed" % self.name)
+                    pass
                     
         except Exception as ex:
 
@@ -1942,9 +1950,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -1995,9 +2003,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -2048,9 +2056,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -2101,9 +2109,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -2154,9 +2162,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -2215,9 +2223,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -2268,9 +2276,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -2321,9 +2329,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -2372,9 +2380,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -2413,9 +2421,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -2459,9 +2467,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -2499,9 +2507,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -2561,9 +2569,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -2639,9 +2647,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -2717,9 +2725,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -2798,9 +2806,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -2850,9 +2858,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -2944,9 +2952,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -2997,9 +3005,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -3062,9 +3070,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -3137,9 +3145,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -3207,9 +3215,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -3272,9 +3280,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -3353,9 +3361,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -3423,9 +3431,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -3503,9 +3511,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -3593,9 +3601,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -3656,9 +3664,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -3719,9 +3727,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -3789,9 +3797,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -3896,9 +3904,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -3963,9 +3971,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -4030,9 +4038,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -4098,9 +4106,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -4142,9 +4150,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError (ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError (ex.Message)
         
         finally:
         
@@ -4223,9 +4231,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -4293,9 +4301,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -4345,9 +4353,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -4415,9 +4423,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -4520,9 +4528,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -4595,9 +4603,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -4655,9 +4663,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -4735,9 +4743,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -4816,9 +4824,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -4907,9 +4915,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -4966,9 +4974,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -5019,9 +5027,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -5098,9 +5106,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -5466,9 +5474,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -5524,9 +5532,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -5604,9 +5612,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -5684,9 +5692,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -5739,11 +5747,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyZeroconfApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -5832,9 +5840,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -5996,10 +6004,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
-
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -6123,9 +6130,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -6255,9 +6262,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -6346,9 +6353,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -6470,9 +6477,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -6561,9 +6568,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -6652,9 +6659,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -6712,11 +6719,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyZeroconfApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -6820,9 +6827,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -6928,9 +6935,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -7016,9 +7023,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -7334,14 +7341,14 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # assume source could not be transferred if an exception occurred.
             _logsi.LogVerbose("'%s': SpotifyApiError while transferring playback source; resetting source to: '%s'" % (self.name, self._attr_source))
             self._attr_source = saveSource
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
 
         except SpotifyWebApiError as ex:
 
             # assume source could not be transferred if an exception occurred.
             _logsi.LogVerbose("'%s': SpotifyWebApiError while transferring playback source; resetting source to: '%s'" % (self.name, self._attr_source))
             self._attr_source = saveSource
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
 
         except Exception as ex:
 
@@ -7400,9 +7407,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -7465,9 +7472,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -7549,9 +7556,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -7618,9 +7625,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -7668,9 +7675,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -7733,9 +7740,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -7809,9 +7816,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -7869,9 +7876,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -7910,9 +7917,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -7951,9 +7958,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -7992,9 +7999,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -8033,9 +8040,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -8074,9 +8081,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -8115,9 +8122,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -8156,9 +8163,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -8197,9 +8204,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -8238,9 +8245,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -8279,9 +8286,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -8376,9 +8383,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -8473,9 +8480,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -8570,9 +8577,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -8667,9 +8674,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -8764,9 +8771,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -8861,9 +8868,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -8958,9 +8965,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -8999,9 +9006,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -9039,9 +9046,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -9079,9 +9086,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         
         finally:
         
@@ -9251,9 +9258,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyZeroconfApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except Exception as ex:
             _logsi.LogException("'%s': MediaPlayer %s exception: %s" % (self.name, apiMethodName, str(ex)), ex, logToSystemLogger=False)
             raise HomeAssistantError(str(ex)) from ex
@@ -9348,9 +9355,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyZeroconfApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except Exception as ex:
             _logsi.LogException("'%s': MediaPlayer %s exception: %s" % (self.name, apiMethodName, str(ex)), ex, logToSystemLogger=False)
             raise HomeAssistantError(str(ex)) from ex
@@ -9432,9 +9439,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyZeroconfApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except Exception as ex:
             _logsi.LogException("'%s': MediaPlayer %s exception: %s" % (self.name, apiMethodName, str(ex)), ex, logToSystemLogger=False)
             raise HomeAssistantError(str(ex)) from ex
@@ -9492,9 +9499,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
-            raise HomeAssistantError(ex.Message)
+            raise ServiceValidationError(ex.Message)
         except Exception as ex:
             _logsi.LogException("'%s': MediaPlayer %s exception: %s" % (self.name, apiMethodName, str(ex)), ex, logToSystemLogger=False)
             raise HomeAssistantError(str(ex)) from ex

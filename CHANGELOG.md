@@ -6,6 +6,13 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.71 ] - 2024/12/17
+
+  * Added extra state attribute: `sp_playing_type` - object type of the currently playing item, or null if nothing is playing.  If not null, it can be one of `track`, `episode`, `ad` or `unknown`.  This allows you to detect when an advertisement is playing for Spotify Free accounts.
+  * Bypassed logic in `turn_on` service for Spotify Free account to transfer playback and resume play.  These were failing for Spotify Free accounts, since they require Premium account to execute.
+  * Removed unsupported features for Spotify Free subscription: PAUSE, PLAY, PLAY_MEDIA, SELECT_SOURCE, VOLUME_MUTE, VOLUME_SET, VOLUME_STEP.  These features require Spotify premium membership.
+  * Replaced caught exception calls of `raise HomeAssistantError` with `raise ServiceValidationError`, which should reduce stack traces in the logs which are not necessary.
+  
 ###### [ 1.0.70 ] - 2024/12/12
 
   * Added [configuration option](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#spotify-polling-scan-interval) to specify the Spotify polling scan interval.  This option specifies the polling scan interval (in seconds) used to query Spotify Player playstate.
