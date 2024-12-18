@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.72 ] - 2024/12/18
+
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.126.  
+
 ###### [ 1.0.71 ] - 2024/12/17
 
   * Added extra state attribute: `sp_playing_type` - object type of the currently playing item, or null if nothing is playing.  If not null, it can be one of `track`, `episode`, `ad` or `unknown`.  This allows you to detect when an advertisement is playing for Spotify Free accounts.
