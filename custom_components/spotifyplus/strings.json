@@ -1488,7 +1488,7 @@
         },
         "limit_total": {
           "name": "Limit Total",
-          "description": "The maximum number of items to retrieve from favorites.  Default is 200."
+          "description": "The maximum number of items to retrieve from favorites.  Default is 200; Range is 1 - 750."
         }
       }
     },
