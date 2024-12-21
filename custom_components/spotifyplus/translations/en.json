@@ -640,6 +640,24 @@
         }
       }
     },
+    "get_cover_image_file": {
+      "name": "Get Cover Image File",
+      "description": "Gets the contents of an image url and transfers the contents to the local file system.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "image_url": {
+          "name": "Image URL",
+          "description": "The cover image url whose contents are to be retrieved."
+        },
+        "output_path": {
+          "name": "Output Path",
+          "description": "Fully-qualified path to store the downloaded image to."
+        }
+      }
+    },
     "get_episode": {
       "name": "Get Episode",
       "description": "Get Spotify catalog information for a single episode.",

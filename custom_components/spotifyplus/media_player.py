@@ -3674,6 +3674,56 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
+    def service_spotify_get_cover_image_file(
+            self, 
+            imageUrl:str,
+            outputPath:str,
+            ) -> None:
+        """
+        Gets the contents of an image url and transfers the contents to the local file system.
+
+        Args:
+            imageUrl (str | list[ImageObject]):
+                The cover image url whose contents are to be retrieved.
+            outputPath (str):
+                Fully-qualified path to store the downloaded image to.  
+
+        The output path supports the replacement of the following keyword parameters:
+        - `{dotfileextn}` - a "." followed by the file extension based on response content 
+          type (for known types: JPG,PNG,APNG,BMP,GIF - defaults to JPG).  
+
+        This method should only be used to download images for playlists that contain 
+        public domain images.  It should not be used to download copyright protected images, 
+        as that would violate the Spotify Web API Terms of Service.
+        """
+        apiMethodName:str = 'service_spotify_get_cover_image_file'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("imageUrl", imageUrl)
+            apiMethodParms.AppendKeyValue("outputPath", outputPath)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Cover Image File Service", apiMethodParms)
+                           
+            # get cover image file.
+            _logsi.LogVerbose("Retrieving cover image file")
+            self.data.spotifyClient.GetCoverImageFile(imageUrl, outputPath)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
     def service_spotify_get_episode(
             self, 
             episodeId:str=None, 

@@ -963,6 +963,34 @@ get_chapter:
       selector:
         text:
 
+get_cover_image_file:
+  name: Get Cover Image File
+  description: Gets the contents of an image url and transfers the contents to the local file system.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    image_url:
+      name: Image URL
+      description: The cover image url whose contents are to be retrieved.
+      example: "https://i.scdn.co/image/ab67616d0000b27316c019c87a927829804caf0b"
+      required: true
+      selector:
+        text:
+    output_path:
+      name: Output Path
+      description: Fully-qualified path to store the downloaded image to.  
+      example: "/config/www/images/cover_file_image.jpg"
+      required: true
+      selector:
+        text:
+
 get_episode:
   name: Get Episode
   description: Get Spotify catalog information for a single episode identified by its unique Spotify ID.

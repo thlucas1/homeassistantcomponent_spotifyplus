@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.75 ] - 2024/12/21
+
+  * Added service `get_cover_image_file` to get the contents of an image url and transfer the contents to the local file system.  This service should only be used to download images for playlists that contain public domain images.  It should not be used to download copyright protected images, as that would violate the Spotify Web API Terms of Service.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.129.  
+
 ###### [ 1.0.74 ] - 2024/12/20
 
   * Updated underlying `spotifywebapiPython` package requirement to version 1.0.128.  

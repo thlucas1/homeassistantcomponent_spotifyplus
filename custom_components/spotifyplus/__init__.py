@@ -114,6 +114,7 @@ SERVICE_SPOTIFY_GET_AUDIOBOOK_FAVORITES:str = 'get_audiobook_favorites'
 SERVICE_SPOTIFY_GET_BROWSE_CATEGORYS_LIST:str = 'get_browse_categorys_list'
 SERVICE_SPOTIFY_GET_CATEGORY_PLAYLISTS:str = 'get_category_playlists'
 SERVICE_SPOTIFY_GET_CHAPTER:str = 'get_chapter'
+SERVICE_SPOTIFY_GET_COVER_IMAGE_FILE:str = 'get_cover_image_file'
 SERVICE_SPOTIFY_GET_EPISODE:str = 'get_episode'
 SERVICE_SPOTIFY_GET_EPISODE_FAVORITES:str = 'get_episode_favorites'
 SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS:str = 'get_featured_playlists'
@@ -425,6 +426,14 @@ SERVICE_SPOTIFY_GET_CHAPTER_SCHEMA = vol.Schema(
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("chapter_id"): cv.string,
         vol.Optional("market"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_GET_COVER_IMAGE_FILE_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("image_url"): cv.string,
+        vol.Required("output_path"): cv.string,
     }
 )
 
@@ -1252,6 +1261,14 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     ids = service.data.get("ids")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     await hass.async_add_executor_job(entity.service_spotify_follow_users, ids)
+
+                elif service.service == SERVICE_SPOTIFY_GET_COVER_IMAGE_FILE:
+
+                    # get cover image file.
+                    image_url = service.data.get("image_url")
+                    output_path = service.data.get("output_path")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_get_cover_image_file, image_url, output_path)
 
                 elif service.service == SERVICE_SPOTIFY_PLAYER_MEDIA_PAUSE:
 
@@ -2552,6 +2569,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             service_handle_spotify_serviceresponse,
             schema=SERVICE_SPOTIFY_GET_CHAPTER_SCHEMA,
             supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_COVER_IMAGE_FILE, SERVICE_SPOTIFY_GET_COVER_IMAGE_FILE_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_GET_COVER_IMAGE_FILE,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_GET_COVER_IMAGE_FILE_SCHEMA,
+            supports_response=SupportsResponse.NONE,
         )
 
         _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_EPISODE, SERVICE_SPOTIFY_GET_EPISODE_SCHEMA)
