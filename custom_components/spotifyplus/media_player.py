@@ -142,6 +142,7 @@ ATTR_SPOTIFYPLUS_ITEM_TYPE = "sp_item_type"
 ATTR_SPOTIFYPLUS_PLAYING_TYPE = "sp_playing_type"
 ATTR_SPOTIFYPLUS_PLAYLIST_NAME = "sp_playlist_name"
 ATTR_SPOTIFYPLUS_PLAYLIST_URI = "sp_playlist_uri"
+ATTR_SPOTIFYPLUS_SOURCE_LIST_HIDE = "sp_source_list_hide"
 ATTR_SPOTIFYPLUS_TRACK_IS_EXPLICIT = "sp_track_is_explicit"
 ATTR_SPOTIFYPLUS_USER_COUNTRY = "sp_user_country"
 ATTR_SPOTIFYPLUS_USER_DISPLAY_NAME = "sp_user_display_name"
@@ -440,7 +441,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         attributes[ATTR_SPOTIFYPLUS_USER_PRODUCT] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_USER_URI] = ATTRVALUE_UNKNOWN
         
-        self.data.spotifyClient.UserProfile.DisplayName
+        # add configuration options information.
+        if (self.data is not None):
+            attributes[ATTR_SPOTIFYPLUS_SOURCE_LIST_HIDE] = self.data.OptionSourceListHide
         
         # add currently active playstate information.
         if self._playerState is not None:
@@ -1640,6 +1643,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             if self._attr_state is not MediaPlayerState.OFF:
                 if self._isInCommandEvent:
                     pass
+                elif (playerPlayState.IsEmpty):
+                    self._attr_state = MediaPlayerState.IDLE
                 elif playerPlayState.IsPlaying == True:
                     self._attr_state = MediaPlayerState.PLAYING
                 elif playerPlayState.IsPlaying == False:

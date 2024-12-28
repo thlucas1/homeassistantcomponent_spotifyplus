@@ -113,7 +113,7 @@ class InstanceDataSpotifyPlus:
     @property
     def OptionSourceListHide(self) -> list:
         """
-        The list of devices to hide from the source list.
+        The list of device names (in lower-case) to hide from the source list.
         """
         result:list = []
         
