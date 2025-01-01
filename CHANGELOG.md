@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.77 ] - 2025/01/01
+
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.131.  Modified `ZeroconfConnect.GetInformation` method logic to automatically retry the connection (after 250ms, 10s max) to the Spotify Connect Zeroconf device service if a "connection refused" was returned while trying to get device information.  Some Spotify Connect devices take a little bit longer to start accepting connections again after a change.
+
 ###### [ 1.0.76 ] - 2024/12/28
 
   * Updated logic to correctly account for idle state; the integration will go into idle state (instead of staying in paused state) after it detects that the Spotify Web API has dropped the current play state (e.g. the device disconnects from Spotify Connect).
