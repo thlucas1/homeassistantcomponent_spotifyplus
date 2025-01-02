@@ -148,7 +148,6 @@ SERVICE_SPOTIFY_PLAYER_MEDIA_RESUME:str = 'player_media_resume'
 SERVICE_SPOTIFY_PLAYER_MEDIA_SEEK:str = 'player_media_seek'
 SERVICE_SPOTIFY_PLAYER_MEDIA_SKIP_NEXT:str = 'player_media_skip_next'
 SERVICE_SPOTIFY_PLAYER_MEDIA_SKIP_PREVIOUS:str = 'player_media_skip_previous'
-SERVICE_SPOTIFY_PLAYER_RESOLVE_DEVICE_ID:str = 'player_resolve_device_id'
 SERVICE_SPOTIFY_PLAYER_SET_REPEAT_MODE:str = 'player_set_repeat_mode'
 SERVICE_SPOTIFY_PLAYER_SET_SHUFFLE_MODE:str = 'player_set_shuffle_mode'
 SERVICE_SPOTIFY_PLAYER_SET_VOLUME_LEVEL:str = 'player_set_volume_level'
@@ -789,15 +788,6 @@ SERVICE_SPOTIFY_PLAYER_MEDIA_SKIP_PREVIOUS_SCHEMA = vol.Schema(
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("device_id"): cv.string,
         vol.Optional("delay", default=0.50): vol.All(vol.Range(min=0,max=10.0)),
-    }
-)
-
-SERVICE_SPOTIFY_PLAYER_RESOLVE_DEVICE_ID_SCHEMA = vol.Schema(
-    {
-        vol.Required("entity_id"): cv.entity_id,
-        vol.Required("device_value"): cv.string,
-        vol.Optional("verify_user_context"): cv.boolean,
-        vol.Optional("verify_timeout", default=5.0): vol.All(vol.Range(min=0,max=10.0)),
     }
 )
 
@@ -2050,15 +2040,6 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_player_activate_devices, verify_user_context, delay)
 
-                elif service.service == SERVICE_SPOTIFY_PLAYER_RESOLVE_DEVICE_ID:
-
-                    # resolve spotify connect player device id.
-                    device_value = service.data.get("device_value")
-                    verify_user_context = service.data.get("verify_user_context")
-                    verify_timeout = service.data.get("verify_timeout")
-                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_player_resolve_device_id, device_value, verify_user_context, verify_timeout)
-
                 elif service.service == SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD:
 
                     # add items to playlist.
@@ -2875,15 +2856,6 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             service_handle_spotify_command,
             schema=SERVICE_SPOTIFY_PLAYER_MEDIA_SKIP_PREVIOUS_SCHEMA,
             supports_response=SupportsResponse.NONE,
-        )
-
-        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_PLAYER_RESOLVE_DEVICE_ID, SERVICE_SPOTIFY_PLAYER_RESOLVE_DEVICE_ID_SCHEMA)
-        hass.services.async_register(
-            DOMAIN,
-            SERVICE_SPOTIFY_PLAYER_RESOLVE_DEVICE_ID,
-            service_handle_spotify_serviceresponse,
-            schema=SERVICE_SPOTIFY_PLAYER_RESOLVE_DEVICE_ID_SCHEMA,
-            supports_response=SupportsResponse.ONLY,
         )
 
         _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_PLAYER_SET_REPEAT_MODE, SERVICE_SPOTIFY_PLAYER_SET_REPEAT_MODE_SCHEMA)

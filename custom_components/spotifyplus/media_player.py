@@ -6724,68 +6724,6 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
-    def service_spotify_player_resolve_device_id(
-            self,
-            deviceValue:str, 
-            verifyUserContext:bool=True,
-            verifyTimeout:float=5.0,
-            ) -> dict:
-        """
-        Resolves a Spotify Connect device identifier from a specified device id, name, alias id,
-        or alias name.  This will ensure that the device id can be found on the network, as well 
-        as connect to the device if necessary with the current user context.  
-        
-        Args:
-            deviceValue (str):
-                The device id / name value to check.
-            verifyUserContext (bool):
-                If True, the active user context of the resolved device is checked to ensure it
-                matches the user context specified on the class constructor.
-                If False, the user context will not be checked.
-                Default is True.
-            verifyTimeout (float):
-                Maximum time to wait (in seconds) for the device to become active in the Spotify
-                Connect device list.  This value is only used if a Connect command has to be
-                issued to activate the device.
-                Default is 5; value range is 0 - 10.
-        """
-        apiMethodName:str = 'service_spotify_player_resolve_device_id'
-        apiMethodParms:SIMethodParmListContext = None
-
-        try:
-
-            # trace.
-            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
-            apiMethodParms.AppendKeyValue("deviceValue", deviceValue)
-            apiMethodParms.AppendKeyValue("verifyUserContext", verifyUserContext)
-            apiMethodParms.AppendKeyValue("verifyTimeout", verifyTimeout)
-            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Resolve Device Id Service", apiMethodParms)
-                
-            # process Spotify Web API request.
-            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
-            result = self.data.spotifyClient.PlayerResolveDeviceId(deviceValue, verifyUserContext, verifyTimeout)
-            
-            # return the (partial) user profile that retrieved the result, as well as the result itself.
-            return {
-                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
-                "result": result
-            }
-
-        # the following exceptions have already been logged, so we just need to
-        # pass them back to HA for display in the log (or service UI).
-        except SpotifyApiError as ex:
-            raise ServiceValidationError(ex.Message)
-        except SpotifyWebApiError as ex:
-            raise ServiceValidationError(ex.Message)
-        except SpotifyZeroconfApiError as ex:
-            raise ServiceValidationError(ex.Message)
-        
-        finally:
-        
-            # trace.
-            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
-
-
     def service_spotify_player_set_repeat_mode(
         self, 
         state:str='off', 

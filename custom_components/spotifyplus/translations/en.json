@@ -1616,28 +1616,6 @@
         }
       }
     },
-    "player_resolve_device_id": {
-      "name": "Player Resolve Device ID",
-      "description": "Resolves a Spotify Connect device identifier from a specified device id, name, alias id, or alias name.  This will ensure that the device id can be found on the network, as well as connect to the device if necessary with the current user context.",
-      "fields": {
-        "entity_id": {
-          "name": "Entity ID",
-          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
-        },
-        "device_value": {
-          "name": "Device Value",
-          "description": "The device id (e.g. '0d1841b0976bae2a3a310dd74c0f337465899bc8') or name (e.g. 'Bose-ST10-1') value to resolve."
-        },
-        "verify_user_context": {
-          "name": "Verify User Context?",
-          "description": "If True, the active user context of the resolved device is checked to ensure it matches the user context specified on the class constructor. If False, the user context will not be checked.  Default is True."
-        },
-        "verify_timeout": {
-          "name": "Verify Timeout",
-          "description": "Time delay (in seconds) to wait AFTER issuing the final Connect command (if necessary). This delay will give the spotify web api time to process the device list change before another command is issued.  Default is 5.0; value range is 0 - 10."
-        }
-      }
-    },
     "player_set_repeat_mode": {
       "name": "Player Set Repeat Mode",
       "description": "Set repeat mode for the specified Spotify Connect device.",
