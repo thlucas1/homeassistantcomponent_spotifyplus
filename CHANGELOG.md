@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.79 ] - 2025/01/03
+
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.133.  Modified `SpotifyDiscovery._OnServiceStateChange` method to process Zeroconf Update and Remove notifications.
+
 ###### [ 1.0.78 ] - 2025/01/02
 
   * Updated underlying `spotifywebapiPython` package requirement to version 1.0.132.  Updated `SpotifyClient` methods `PlayerActivateDevices` and `GetSpotifyConnectDevice` to rediscover the Spotify Connect Zeroconf device after a Disconnect call is issued.  It has been found that some device manufacturers (e.g. Denon) stop and restart the Zeroconf server on the device after a `resetUsers` (e.g. disconnect) call is made, which changes the IP Port number that the device listens on for incoming connections.
