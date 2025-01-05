@@ -6,6 +6,14 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.81 ] - 2025/01/05
+
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.135.
+
+###### [ 1.0.80 ] - 2025/01/04
+
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.134.  Updated `SpotifyClient` methods `PlayerActivateDevices` and `GetSpotifyConnectDevice` to re-create the ZeroconfConnect connection instance if the device IP address or port changed after Zeroconf rediscovery on a Disconnect call sequence.
+
 ###### [ 1.0.79 ] - 2025/01/03
 
   * Updated underlying `spotifywebapiPython` package requirement to version 1.0.133.  Modified `SpotifyDiscovery._OnServiceStateChange` method to process Zeroconf Update and Remove notifications.
