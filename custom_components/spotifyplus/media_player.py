@@ -1461,6 +1461,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 spotifyId = self.data.spotifyClient.GetIdFromUri(spotifyUri) or ''
                 
                 # set base item properties.
+                playerState.IsEmpty = False
                 playerState.ItemType = spotifyType
                 sTimeValue:str = sonosTrackInfo.get('position',None)
                 playerState._ProgressMS = self.to_seconds(sTimeValue) * 1000        # convert h:mm:ss to milliseconds
@@ -1600,7 +1601,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug)
         
 
-    def _UpdateHAFromPlayerPlayState(self, playerPlayState:PlayerPlayState) -> None:
+    def _UpdateHAFromPlayerPlayState(
+        self, 
+        playerPlayState:PlayerPlayState, 
+        ) -> None:
         """
         Updates all media_player attributes that have to do with now playing information.
         """
@@ -1644,7 +1648,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 if self._isInCommandEvent:
                     pass
                 elif (playerPlayState.IsEmpty):
-                    self._attr_state = MediaPlayerState.IDLE
+                    self._attr_state = MediaPlayerState.IDLE    
                 elif playerPlayState.IsPlaying == True:
                     self._attr_state = MediaPlayerState.PLAYING
                 elif playerPlayState.IsPlaying == False:
