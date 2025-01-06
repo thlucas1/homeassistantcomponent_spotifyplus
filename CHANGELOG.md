@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.83 ] - 2025/01/06
+
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.138.
+
 ###### [ 1.0.82 ] - 2025/01/05
 
   * Corrected state being set to idle for Sonos devices, which was introduced with v1.0.76 release.  For Sonos devices, the Spotify Web API reports an empty playstate since the SoCo API is actually controlling player.
