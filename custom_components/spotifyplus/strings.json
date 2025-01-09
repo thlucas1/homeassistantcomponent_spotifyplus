@@ -31,6 +31,7 @@
         "title": "{name} Options",
         "description": "Configure SpotifyPlus integration options that control functionality.",
         "data": {
+          "always_on": "Disable turn on / off features, and keeps the player in an always on state.",
           "device_default": "Default Spotify Connect Player Device ID when none are active.",
           "device_loginid": "Spotify Connect canonical loginid to use when connecting to an inactive device.",
           "device_password": "Spotify Connect password to use when connecting to an inactive device.",

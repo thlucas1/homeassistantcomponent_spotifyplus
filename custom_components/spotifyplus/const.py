@@ -12,6 +12,7 @@ DOMAIN_SCRIPT = "script"
 
 LOGGER = logging.getLogger(__package__)
 
+CONF_OPTION_ALWAYS_ON = "always_on"
 CONF_OPTION_DEVICE_DEFAULT = "device_default"
 CONF_OPTION_DEVICE_LOGINID = "device_loginid"
 CONF_OPTION_DEVICE_PASSWORD = "device_password"

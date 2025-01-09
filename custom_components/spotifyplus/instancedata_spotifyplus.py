@@ -12,6 +12,7 @@ from homeassistant.helpers.config_entry_oauth2_flow import (
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
+    CONF_OPTION_ALWAYS_ON,
     CONF_OPTION_DEVICE_DEFAULT,
     CONF_OPTION_DEVICE_LOGINID,
     CONF_OPTION_DEVICE_PASSWORD,
@@ -59,6 +60,18 @@ class InstanceDataSpotifyPlus:
     The SpotifyClient instance used to interface with the Spotify Web API.
     """
     
+
+    @property
+    def OptionAlwaysOn(self) -> int:
+        """
+        True if player state should never be set to OFF;
+        Otherwise, False to allow turn on / off of the player.
+        Defaults to False if not set.
+
+        If True, the player TURN_ON / TURN_OFF features are disabled will not be able
+        to be called via the corresponding services.
+        """
+        return self.options.get(CONF_OPTION_ALWAYS_ON, False)
 
     @property
     def OptionDeviceDefault(self) -> str | None:

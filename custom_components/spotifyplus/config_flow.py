@@ -36,6 +36,7 @@ from homeassistant.helpers.selector import (
 )
 
 from .const import (
+    CONF_OPTION_ALWAYS_ON,
     CONF_OPTION_DEVICE_DEFAULT, 
     CONF_OPTION_DEVICE_LOGINID,
     CONF_OPTION_DEVICE_PASSWORD,
@@ -370,6 +371,7 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
             if user_input is not None:
             
                 # update config entry options from user input values.
+                self._Options[CONF_OPTION_ALWAYS_ON] = user_input.get(CONF_OPTION_ALWAYS_ON, None)
                 self._Options[CONF_OPTION_DEVICE_DEFAULT] = user_input.get(CONF_OPTION_DEVICE_DEFAULT, None)
                 self._Options[CONF_OPTION_DEVICE_LOGINID] = user_input.get(CONF_OPTION_DEVICE_LOGINID, None)
                 self._Options[CONF_OPTION_DEVICE_USERNAME] = user_input.get(CONF_OPTION_DEVICE_USERNAME, None)
@@ -456,6 +458,9 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                     vol.Optional(CONF_OPTION_SOURCE_LIST_HIDE, 
                                  description={"suggested_value": self._Options.get(CONF_OPTION_SOURCE_LIST_HIDE)},
                                  ): cv.string,
+                    vol.Optional(CONF_OPTION_ALWAYS_ON, 
+                                 description={"suggested_value": self._Options.get(CONF_OPTION_ALWAYS_ON)},
+                                 ): cv.boolean,
                 }
             )
             

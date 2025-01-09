@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.85 ] - 2025/01/09
+
+  * Added [configuration option](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#always-on) to specify the player state is to remain turned on at all times (True) or if TURN_ON / TURN_OFF features are emabled (False, default).
+  * Adding "auto-power on" processing to various services that can start / resume playing media: `player_media_play_context`, `player_media_play_track_favorites`, `player_media_play_tracks`, `player_media_resume`, and `media_play` (e.g. start / resume playback).  This feature was already available for the `play_media` service, but only if a supported media_type was specified and no enqueueing).
+
 ###### [ 1.0.84 ] - 2025/01/07
 
   * Updated underlying `spotifywebapiPython` package requirement to version 1.0.139.  Updated `SpotifyDiscovery._OnServiceStateChange` method to correctly update the Zeroconf DiscoveryResults instance.  The serviceinfo `Key` value must be used to update the device entry (not its `Id` value).
