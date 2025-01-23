@@ -1411,24 +1411,6 @@
         }
       }
     },
-    "player_activate_devices": {
-      "name": "Player Activate Devices",
-      "description": "Activates all Spotify Connect player devices, and (optionally) switches the active user context to the current user context.",
-      "fields": {
-        "entity_id": {
-          "name": "Entity ID",
-          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
-        },
-        "verify_user_context": {
-          "name": "Verify User Context?",
-          "description": "If True, the active user context of the resolved device is checked to ensure it matches the specified Spotify Connect user context.  If False, the user context will not be checked.  Default is False."
-        },
-        "delay": {
-          "name": "Delay",
-          "description": "Time delay (in seconds) to wait AFTER issuing the final Connect command (if necessary). This delay will give the spotify web api time to process the device list change before another command is issued.  Default is 0.50; value range is 0 - 10."
-        }
-      }
-    },
     "player_media_pause": {
       "name": "Player Media Pause",
       "description": "Pause media play for the specified Spotify Connect device.",
@@ -1710,6 +1692,10 @@
         "force_activate_device": {
           "name": "Force Activate Device?",
           "description": "True to issue a Spotify Connect Disconnect call prior to transfer, which will force the device to reconnect to Spotify Connect; otherwise, False to not disconnect. Default is True."
+        },
+        "device_id_from": {
+          "name": "Device ID From",
+          "description": "The player device identifier where play is being transferred from; only used to stop play on restricted devices prior to transferring playback."
         }
       }
     },

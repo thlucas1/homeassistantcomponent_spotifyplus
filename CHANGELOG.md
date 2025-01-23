@@ -6,10 +6,19 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.86 ] - 2025/01/22
+
+  * Added support for Google Chromecast devices.
+  * Moved support for Sonos devices to the underlying `spotifywebapiPython` package.
+  * Removed service `player_activate_devices`.  This method is no longer needed, as devices are automatically resolved / activated now.
+  * Removed `soco` package requirement.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.156.
+  * Updated underlying `smartinspectPython` package requirement to version 3.0.34.
+
 ###### [ 1.0.85 ] - 2025/01/09
 
-  * Added [configuration option](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#always-on) to specify the player state is to remain turned on at all times (True) or if TURN_ON / TURN_OFF features are emabled (False, default).
-  * Adding "auto-power on" processing to various services that can start / resume playing media: `player_media_play_context`, `player_media_play_track_favorites`, `player_media_play_tracks`, `player_media_resume`, and `media_play` (e.g. start / resume playback).  This feature was already available for the `play_media` service, but only if a supported media_type was specified and no enqueueing).
+  * Added [configuration option](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#always-on) to specify the player state is to remain turned on at all times (True) or if TURN_ON / TURN_OFF features are enabled (False, default).
+  * Added "auto-power on" processing to various services that can start / resume playing media: `player_media_play_context`, `player_media_play_track_favorites`, `player_media_play_tracks`, `player_media_resume`, and `media_play` (e.g. start / resume playback).  This feature was already available for the `play_media` service, but only if a supported media_type was specified and no enqueueing).
 
 ###### [ 1.0.84 ] - 2025/01/07
 

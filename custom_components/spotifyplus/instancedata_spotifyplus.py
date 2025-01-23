@@ -37,7 +37,7 @@ class InstanceDataSpotifyPlus:
     devices: DataUpdateCoordinator[SpotifyConnectDevices] 
     """
     List of Spotify Connect devices that are available.
-    This property is refreshed every 5 minutes by a DataUpdateCoordinator.
+    This property is refreshed at regular intervals by a DataUpdateCoordinator.
     """
     
     media_player: MediaPlayerEntity

@@ -38,11 +38,6 @@
     <Compile Include="custom_components\spotifyplus\system_health.py" />
     <Compile Include="custom_components\spotifyplus\utils.py" />
     <Compile Include="custom_components\spotifyplus\__init__.py" />
-    <Compile Include="test\testVS_Sonos_AvTransport.py" />
-    <Compile Include="test\testVS_Sonos_Base.py" />
-    <Compile Include="test\testVS_Sonos_MusicServices.py" />
-    <Compile Include="test\testVS_Sonos_MusicService_Spotify.py" />
-    <Compile Include="test\__init__.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include=".github\" />
@@ -54,7 +49,6 @@
     <Folder Include="custom_components\spotifyplus\" />
     <Folder Include="custom_components\spotifyplus\translations\" />
     <Folder Include="scripts\" />
-    <Folder Include="test\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include=".devcontainer.json" />
@@ -87,7 +81,6 @@
     <Content Include="scripts\develop" />
     <Content Include="scripts\lint" />
     <Content Include="scripts\setup" />
-    <Content Include="test\smartinspect.cfg" />
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include="env\">
