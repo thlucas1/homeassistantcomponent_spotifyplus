@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.87 ] - 2025/01/26
+
+  * Updated the `__init__._OnDataUpdateCoordinatorInterval` method to correct a possible thread deadlock when the Spotify authorization token expired.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.159.
+
 ###### [ 1.0.86 ] - 2025/01/22
 
   * Added support for Google Chromecast devices.

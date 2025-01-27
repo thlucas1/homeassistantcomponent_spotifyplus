@@ -1344,7 +1344,6 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                     if (self._attr_state in [MediaPlayerState.PLAYING, MediaPlayerState.PAUSED, MediaPlayerState.IDLE, MediaPlayerState.BUFFERING]):
                         _logsi.LogVerbose("'%s': Source value is not set; using Spotify Web API player name (\"%s\")" % (self.name, playerPlayState.Device.Name))
                         self._attr_source = playerPlayState.Device.Name
-                        #self.data.spotifyClient.DefaultDeviceId = self._attr_source    # TODO REMOVEME ?
                             
                 elif (self._attr_source != playerPlayState.Device.Name) and (playerPlayState.Device.Name is not None):
                     
@@ -1353,14 +1352,12 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                     # this seems to happen a lot for Sonos devices!
                     _logsi.LogVerbose("'%s': Source value (\"%s\") does not match Spotify Web API player name (\"%s\"); using Spotify Web API player name" % (self.name, self._attr_source, playerPlayState.Device.Name))
                     self._attr_source = playerPlayState.Device.Name
-                    #self.data.spotifyClient.DefaultDeviceId = self._attr_source    # TODO REMOVEME ?
                     
                     # check to see if currently active device is in the Spotify Connect device list cache.
                     # if it's not in the cache, then we need to refresh the Spotify Connect device list cache.
                     scDevices:SpotifyConnectDevices = self.data.spotifyClient.GetSpotifyConnectDevices(refresh=False)
                     if not scDevices.ContainsDeviceName(playerPlayState.Device.Name):
                         _logsi.LogVerbose("'%s': Spotify PlayerPlayState device name \"%s\" was not found in the Spotify Connect device list cache; refreshing cache" % (self.name, self._attr_source))
-                        # it's risky refreshing the Spotify Connect device list here, as this method fires every second.  
                         self.data.spotifyClient.GetSpotifyConnectDevices(refresh=True)
 
             # update seek-related attributes.

@@ -6,7 +6,6 @@ from __future__ import annotations
 
 from asyncio import run_coroutine_threadsafe
 from datetime import timedelta
-from typing import Any
 from urllib3._version import __version__ as urllib3_version
 
 import functools
@@ -14,7 +13,7 @@ import logging
 import voluptuous as vol
 
 from spotifywebapipython import SpotifyClient
-from spotifywebapipython.models import Device, SpotifyConnectDevices
+from spotifywebapipython.models import SpotifyConnectDevices
 
 from homeassistant.components import zeroconf
 from homeassistant.components.media_player import MediaPlayerEntity
@@ -3229,11 +3228,20 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
 
                 _logsi.LogVerbose("'%s': Component DataUpdateCoordinator is retrieving Spotify Connect device list" % entry.title)
 
-                # refresh Spotify Connect devices.
-                result = await hass.async_add_executor_job(
-                    spotifyClient.GetSpotifyConnectDevices,
-                    False
-                )
+                # just return the list of devices in the directory.
+                result = spotifyClient.SpotifyConnectDirectory.GetDevices()
+
+                # do not make any calls to the web api out of this method (or any underlying calls)
+                # since it could possibly invoke a "_TokenUpdater()" method call; that will repeat
+                # the token refresh and cause a thread deadlock since we call "async_refresh_token()"
+                # with a "run_coroutine_threadsafe()" method!
+
+                # for example, DO NOT call the following:
+                # # refresh Spotify Connect devices.
+                # result = await hass.async_add_executor_job(
+                #     spotifyClient.GetSpotifyConnectDevices,
+                #     False
+                # )
                 
                 # trace.
                 _logsi.LogDictionary(SILevel.Verbose, "'%s': Component DataUpdateCoordinator update results" % entry.title, result.ToDictionary(), prettyPrint=True)
