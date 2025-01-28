@@ -13,7 +13,7 @@ import logging
 import voluptuous as vol
 
 from spotifywebapipython import SpotifyClient
-from spotifywebapipython.models import SpotifyConnectDevices
+from spotifywebapipython.models import SpotifyConnectDevices, SpotifyConnectDevice
 
 from homeassistant.components import zeroconf
 from homeassistant.components.media_player import MediaPlayerEntity
@@ -3242,7 +3242,7 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
                 #     spotifyClient.GetSpotifyConnectDevices,
                 #     False
                 # )
-                
+
                 # trace.
                 _logsi.LogDictionary(SILevel.Verbose, "'%s': Component DataUpdateCoordinator update results" % entry.title, result.ToDictionary(), prettyPrint=True)
                 return result
@@ -3386,6 +3386,13 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
         # wait for first refresh of DataUpdateCoordinator to get the initial device list.
         _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry waiting for device DataUpdateCoordinator initial update" % entry.title, device_coordinator)
         await device_coordinator.async_config_entry_first_refresh()
+
+        # dump initial Spotify Connect device list (for HA debug log).
+        devices:SpotifyConnectDevices = spotifyClient.SpotifyConnectDirectory.GetDevices()
+        device:SpotifyConnectDevice
+        _logsi.LogVerbose("'%s': Spotify Connect devices discovered by DataUpdateCoordinator (%s items)" % (entry.title, devices.ItemsCount))
+        for device in devices:
+            _logsi.LogVerbose("'%s': Spotify Connect device: \"%s\" (%s) [%s]" % (entry.title, device.Name, device.Id, device.DiscoveryResult.Description))
 
         # create media player entity platform instance data.
         _logsi.LogVerbose("'%s': Component async_setup_entry is creating the media player platform instance data object" % entry.title)

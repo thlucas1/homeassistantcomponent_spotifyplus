@@ -655,7 +655,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         self.schedule_update_ha_state(force_refresh=False)
 
         # call Spotify Web API to process the request.
-        _logsi.LogVerbose("'%s': Issuing command to Spotify Player: RESUME" % (self.name))
+        _logsi.LogVerbose("'%s': Issuing command to Spotify Player: RESUME (source=\"%s\")" % (self.name, self._attr_source))
         self.data.spotifyClient.PlayerMediaResume(deviceId=self._attr_source)
 
 
@@ -669,7 +669,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         self.schedule_update_ha_state(force_refresh=False)
         
         # call Spotify Web API to process the request.
-        _logsi.LogVerbose("'%s': Issuing command to Spotify Player: PAUSE" % (self.name))
+        _logsi.LogVerbose("'%s': Issuing command to Spotify Player: PAUSE (source=\"%s\")" % (self.name, self._attr_source))
         self.data.spotifyClient.PlayerMediaPause(deviceId=self._attr_source)
 
 
@@ -679,7 +679,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         _logsi.LogVerbose(STAppMessages.MSG_MEDIAPLAYER_SERVICE, self.name, "media_previous_track")
         
         # call Spotify Web API to process the request.
-        _logsi.LogVerbose("'%s': Issuing command to Spotify Player: PREVIOUS" % (self.name))
+        _logsi.LogVerbose("'%s': Issuing command to Spotify Player: PREVIOUS (source=\"%s\")" % (self.name, self._attr_source))
         self.data.spotifyClient.PlayerMediaSkipPrevious(deviceId=self._attr_source)
 
 
@@ -689,7 +689,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         _logsi.LogVerbose(STAppMessages.MSG_MEDIAPLAYER_SERVICE, self.name, "media_next_track")
 
         # call Spotify Web API to process the request.
-        _logsi.LogVerbose("'%s': Issuing command to Spotify Player: NEXT" % (self.name))
+        _logsi.LogVerbose("'%s': Issuing command to Spotify Player: NEXT (source=\"%s\")" % (self.name, self._attr_source))
         self.data.spotifyClient.PlayerMediaSkipNext(deviceId=self._attr_source)
 
 
@@ -969,7 +969,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
             # just in case the OptionScriptTurnOn reset the state, set media player state to IDLE.
             self._attr_state = MediaPlayerState.IDLE
-            
+
             # get current Spotify Connect device player state.
             self._playerState = self.data.spotifyClient.GetDevicePlaybackState(deviceId=self._attr_source)
 
@@ -4618,7 +4618,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("refresh", refresh)
             apiMethodParms.AppendKeyValue("sortResult", sortResult)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Spotify Connect Devices Service", apiMethodParms)
-                
+                          
             # request information from Spotify Web API.
             _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
             result = self.data.spotifyClient.GetSpotifyConnectDevices(refresh, sortResult)
@@ -6395,15 +6395,15 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         except SpotifyApiError as ex:
 
             # assume source could not be transferred if an exception occurred.
-            _logsi.LogVerbose("'%s': SpotifyApiError while transferring playback source; resetting source to: \"%s\"" % (self.name, self._attr_source))
             self._attr_source = saveSource
+            _logsi.LogVerbose("'%s': SpotifyApiError while transferring playback source; resetting source to: \"%s\"" % (self.name, self._attr_source))
             raise ServiceValidationError(ex.Message)
 
         except SpotifyWebApiError as ex:
 
             # assume source could not be transferred if an exception occurred.
-            _logsi.LogVerbose("'%s': SpotifyWebApiError while transferring playback source; resetting source to: \"%s\"" % (self.name, self._attr_source))
             self._attr_source = saveSource
+            _logsi.LogVerbose("'%s': SpotifyWebApiError while transferring playback source; resetting source to: \"%s\"" % (self.name, self._attr_source))
             raise ServiceValidationError(ex.Message)
 
         except Exception as ex:
