@@ -27,8 +27,7 @@ add_player_queue_items:
         text:
     verify_device_id:
       name: Verify Device ID?
-      description: True to verify a device id is active; otherwise, false to assume that a device id is already active. Default is True.
-      example: "True"
+      description: DEPRECATED - no longer used, but left here to maintain compatibility.
       required: false
       selector:
         boolean:
@@ -1688,8 +1687,7 @@ get_spotify_connect_device:
         text:
     verify_user_context:
       name: Verify User Context?
-      description: If True, the active user context of the resolved device is checked to ensure it matches the Spotify Connect user context specified in the SpotifyPlus configuration options.  If False, the user context will not be checked.  Default is True.
-      example: "True"
+      description: DEPRECATED - no longer used, but left here to maintain compatibility.
       required: false
       selector:
         boolean:
@@ -1705,8 +1703,7 @@ get_spotify_connect_device:
           mode: box
     refresh_device_list:
       name: Refresh Device List?
-      description: True (default) to refresh the Spotify Connect device list; otherwise, False to use the Spotify Connect device list cache.
-      example: "True"
+      description: DEPRECATED - no longer used, but left here to maintain compatibility.
       required: false
       selector:
         boolean:
@@ -1750,8 +1747,7 @@ get_spotify_connect_devices:
         boolean:
     sort_result:
       name: Sort Result?
-      description: True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them.
-      example: "True"
+      description: DEPRECATED - no longer used, but left here to maintain compatibility.
       required: false
       selector:
         boolean:
@@ -2448,8 +2444,7 @@ player_media_play_track_favorites:
           mode: box
     resolve_device_id:
       name: Resolve Device Id?
-      description: True to resolve the supplied `deviceId` value; otherwise, False not resolve the `deviceId` value as it has already been resolved.  Default is True.
-      example: "True"
+      description: DEPRECATED - no longer used, but left here to maintain compatibility.
       required: false
       selector:
         boolean:
@@ -2815,8 +2810,7 @@ player_transfer_playback:
           mode: box
     refresh_device_list:
       name: Refresh Device List?
-      description: True to refresh the Spotify Connect device list; otherwise, False to use the Spotify Connect device list cache.  Default is True.
-      example: "True"
+      description: DEPRECATED - no longer used, but left here to maintain compatibility.
       required: false
       selector:
         boolean:

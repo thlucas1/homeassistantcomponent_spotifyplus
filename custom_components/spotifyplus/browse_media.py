@@ -18,7 +18,7 @@ from homeassistant.components.media_player import (
     MediaType,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.exceptions import IntegrationError
 
 from .const import DOMAIN
 
@@ -386,7 +386,7 @@ async def async_browse_media_library_index(hass:HomeAssistant,
             
         # trace.
         _logsi.LogException("'%s': BrowseMedia async_browse_media_library_index exception: %s" % (playerName, str(ex)), ex, logToSystemLogger=False)
-        raise HomeAssistantError(str(ex)) from ex
+        raise IntegrationError(str(ex)) from ex
         
     finally:
 
@@ -690,7 +690,7 @@ def browse_media_node(hass:HomeAssistant,
             
         # trace.
         _logsi.LogException("'%s': BrowseMedia browse_media_node exception: %s" % (playerName, str(ex)), ex, logToSystemLogger=False)
-        raise HomeAssistantError(str(ex)) from ex
+        raise IntegrationError(str(ex)) from ex
         
     finally:
 

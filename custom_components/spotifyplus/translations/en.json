@@ -83,7 +83,7 @@
         },
         "verify_device_id": {
           "name": "Verify Device ID?",
-          "description": "True to verify a device id is active; otherwise, false to assume that a device id is already active. Default is True."
+          "description": "DEPRECATED - no longer used, but left here to maintain compatibility."
         },
         "delay": {
           "name": "Delay",
@@ -1057,7 +1057,7 @@
         },
         "verify_user_context": {
           "name": "Verify User Context?",
-          "description": "If True, the active user context of the resolved device is checked to ensure it matches the Spotify Connect user context specified in the SpotifyPlus configuration options.  If False, the user context will not be checked.  Default is True."
+          "description": "DEPRECATED - no longer used, but left here to maintain compatibility."
         },
         "verify_timeout": {
           "name": "Verify Timeout",
@@ -1065,7 +1065,7 @@
         },
         "refresh_device_list": {
           "name": "Refresh Device List?",
-          "description": "True to refresh the Spotify Connect device list; otherwise, False to use the Spotify Connect device list cache.  Default is True."
+          "description": "DEPRECATED - no longer used, but left here to maintain compatibility."
         },
         "activate_device": {
           "name": "Activate Device?",
@@ -1091,7 +1091,7 @@
         },
         "sort_result": {
           "name": "Sort Result?",
-          "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
+          "description": "DEPRECATED - no longer used, but left here to maintain compatibility."
         }
       }
     },
@@ -1485,7 +1485,7 @@
         },
         "resolve_device_id": {
           "name": "Resolve Device Id?",
-          "description": "True to resolve the supplied `deviceId` value; otherwise, False not resolve the `deviceId` value as it has already been resolved.  Default is True."
+          "description": "DEPRECATED - no longer used, but left here to maintain compatibility."
         },
         "limit_total": {
           "name": "Limit Total",
@@ -1687,7 +1687,7 @@
         },
         "refresh_device_list": {
           "name": "Refresh Device List?",
-          "description": "True to refresh the Spotify Connect device list; otherwise, False to use the Spotify Connect device list cache.  Default is True."
+          "description": "DEPRECATED - no longer used, but left here to maintain compatibility."
         },
         "force_activate_device": {
           "name": "Force Activate Device?",

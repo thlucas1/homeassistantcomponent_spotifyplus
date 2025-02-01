@@ -9,7 +9,7 @@ from homeassistant.components.media_player import MediaPlayerEntity
 from homeassistant.helpers.config_entry_oauth2_flow import (
     OAuth2Session
 )
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+#from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
     CONF_OPTION_ALWAYS_ON,
@@ -34,11 +34,12 @@ class InstanceDataSpotifyPlus:
     modules.
     """
     
-    devices: DataUpdateCoordinator[SpotifyConnectDevices] 
-    """
-    List of Spotify Connect devices that are available.
-    This property is refreshed at regular intervals by a DataUpdateCoordinator.
-    """
+    # *** Don't need the DataUpdateCoordinator anymore; left here in case we need it for future needs.
+    # devices: DataUpdateCoordinator[SpotifyConnectDevices] 
+    # """
+    # List of Spotify Connect devices that are available.
+    # This property is refreshed at regular intervals by a DataUpdateCoordinator.
+    # """
     
     media_player: MediaPlayerEntity
     """

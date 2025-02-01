@@ -6,6 +6,14 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.90 ] - 2025/02/01
+
+  * Fixed `turn_on` logic to transfer playback to the correct source on initial startup.
+  * Removed `DataUpdateCoordinator` logic, as it is no longer required since the Spotify Connect device list is updated in real-time via Zeroconf notifications.
+  * Changed all references of `HomeAssistantError` to `IntegrationError` to more accurately reflect logging errors.
+  * Updated service descriptions and translation strings to indicate DEPRECATED parameters (e.g. parameters no longer used).
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.163.
+
 ###### [ 1.0.89 ] - 2025/01/28
 
   * Updated underlying `spotifywebapiPython` package requirement to version 1.0.162.

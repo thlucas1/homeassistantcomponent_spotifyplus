@@ -20,12 +20,12 @@ from homeassistant.components.media_player import MediaPlayerEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform, CONF_ID
 from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse
-from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady, HomeAssistantError
+from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady, HomeAssistantError, IntegrationError, ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.config_entry_oauth2_flow import (OAuth2Session, async_get_config_entry_implementation)
 from homeassistant.helpers.issue_registry import IssueSeverity, async_create_issue
 from homeassistant.helpers.typing import ConfigType
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+#from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .appmessages import STAppMessages
 from .const import (
@@ -1478,7 +1478,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
                 else:
                     
-                    raise HomeAssistantError("Unrecognized service identifier '%s' in method service_handle_spotify_command" % service.service)
+                    raise IntegrationError("Unrecognized service identifier \"%s\" in method \"service_handle_spotify_command\"." % service.service)
 
                 # return (no response).
                 return
@@ -2213,7 +2213,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     
                 else:
                     
-                    raise HomeAssistantError("Unrecognized service identifier '%s' in method service_handle_spotify_serviceresponse" % service.service)
+                    raise IntegrationError("Unrecognized service identifier \"%s\" in method \"service_handle_spotify_serviceresponse\"." % service.service)
 
                 # return the response.
                 _logsi.LogDictionary(SILevel.Verbose, "Service Response data: '%s'" % (service.service), response, prettyPrint=True)
@@ -2276,7 +2276,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
             # did we resolve it? if not, then log a message.
             if player is None:
-                raise HomeAssistantError("Entity id value of '%s' could not be resolved to a MediaPlayerEntity instance for the '%s' method call" % (str(entity_id), service.service))
+                raise ServiceValidationError("Entity id value of '%s' could not be resolved to a MediaPlayerEntity instance for the '%s' method call" % (str(entity_id), service.service))
 
             # return the MediaPlayerEntity instance.
             _logsi.LogVerbose("Entity id value of '%s' was resolved to MediaPlayerEntity instance for the '%s' method call" % (str(entity_id), service.service))
@@ -3207,50 +3207,50 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
         _logsi.LogVerbose("'%s': Component async_setup_entry is calling async_ensure_token_valid to ensure OAuth2 session is fully-established" % entry.title)
         await session.async_ensure_token_valid()
             
-        # -----------------------------------------------------------------------------------
-        # Define DataUpdateCoordinator function.
-        # -----------------------------------------------------------------------------------
-        async def _OnDataUpdateCoordinatorInterval() -> SpotifyConnectDevices:
-            """
-            This method will be executed by the DataUpdateCoordinator at regular intervals to 
-            provide data updates to the integration.
+        # *** Don't need the DataUpdateCoordinator anymore; left here in case we need it for future needs.
+        # # -----------------------------------------------------------------------------------
+        # # Define DataUpdateCoordinator function.
+        # # -----------------------------------------------------------------------------------
+        # async def _OnDataUpdateCoordinatorInterval() -> SpotifyConnectDevices:
+        #     """
+        #     This method will be executed by the DataUpdateCoordinator at regular intervals to 
+        #     provide data updates to the integration.
 
-            In our case, it will retrieve the list of Spotify Connect devices that are available.
-            Note that this is not really necessary starting with v1.0.86, but I left it in here
-            in case we wanted to re-enable it for other types of data updates in the future.
+        #     In our case, it will retrieve the list of Spotify Connect devices that are available.
+        #     Note that this is not really necessary starting with v1.0.86, but I left it in here
+        #     in case we wanted to re-enable it for other types of data updates in the future.
             
-            Returns:
-                A `SpotifyConnectDevices` instance.
-            """
-            result:SpotifyConnectDevices = None
+        #     Returns:
+        #         A `SpotifyConnectDevices` instance.
+        #     """
+        #     result:SpotifyConnectDevices = None
 
-            try:
+        #     try:
 
-                _logsi.LogVerbose("'%s': Component DataUpdateCoordinator is retrieving Spotify Connect device list" % entry.title)
+        #         _logsi.LogVerbose("'%s': Component DataUpdateCoordinator is retrieving Spotify Connect device list" % entry.title)
 
-                # just return the list of devices in the directory.
-                result = spotifyClient.SpotifyConnectDirectory.GetDevices()
+        #         # just return the list of devices in the directory.
+        #         result = spotifyClient.SpotifyConnectDirectory.GetDevices()
 
-                # do not make any calls to the web api out of this method (or any underlying calls)
-                # since it could possibly invoke a "_TokenUpdater()" method call; that will repeat
-                # the token refresh and cause a thread deadlock since we call "async_refresh_token()"
-                # with a "run_coroutine_threadsafe()" method!
+        #         # do not make any calls to the web api out of this method (or any underlying calls)
+        #         # since it could possibly invoke a "_TokenUpdater()" method call; that will repeat
+        #         # the token refresh and cause a thread deadlock since we call "async_refresh_token()"
+        #         # with a "run_coroutine_threadsafe()" method!
 
-                # for example, DO NOT call the following:
-                # # refresh Spotify Connect devices.
-                # result = await hass.async_add_executor_job(
-                #     spotifyClient.GetSpotifyConnectDevices,
-                #     False
-                # )
+        #         # # refresh Spotify Connect devices.
+        #         # result = await hass.async_add_executor_job(
+        #         #     spotifyClient.GetSpotifyConnectDevices,
+        #         #     True
+        #         # )
 
-                # trace.
-                _logsi.LogDictionary(SILevel.Verbose, "'%s': Component DataUpdateCoordinator update results" % entry.title, result.ToDictionary(), prettyPrint=True)
-                return result
+        #         # trace.
+        #         _logsi.LogDictionary(SILevel.Verbose, "'%s': Component DataUpdateCoordinator update results" % entry.title, result.ToDictionary(), prettyPrint=True)
+        #         return result
 
-            except Exception as ex:
+        #     except Exception as ex:
                 
-                _logsi.LogException("'%s': Component DataUpdateCoordinator update exception" % entry.title, ex)
-                raise UpdateFailed from ex
+        #         _logsi.LogException("'%s': Component DataUpdateCoordinator update exception" % entry.title, ex)
+        #         raise UpdateFailed from ex
 
 
         # -----------------------------------------------------------------------------------
@@ -3373,24 +3373,25 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
         _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry spotifyClient object (with AuthToken)" % entry.title, spotifyClient)
         _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry Spotify UserProfile object" % entry.title, spotifyClient.UserProfile)
 
-        # define a DataUpdateCoordinator that will poll for updated device entries every 60 minutes.
-        device_coordinator:DataUpdateCoordinator[SpotifyConnectDevices] = DataUpdateCoordinator(
-            hass,
-            _LOGGER,
-            name=f"{entry.title} Device List Refresh",
-            update_interval=timedelta(minutes=60),
-            update_method=_OnDataUpdateCoordinatorInterval,
-        )
-        _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry device DataUpdateCoordinator object" % entry.title, device_coordinator)
+        # *** Don't need the DataUpdateCoordinator anymore; left here in case we need it for future needs.
+        # # define a DataUpdateCoordinator that will poll for updated device entries every 60 minutes.
+        # device_coordinator:DataUpdateCoordinator[SpotifyConnectDevices] = DataUpdateCoordinator(
+        #     hass,
+        #     _LOGGER,
+        #     name=f"{entry.title} Device List Refresh",
+        #     update_interval=timedelta(minutes=60),
+        #     update_method=_OnDataUpdateCoordinatorInterval,
+        # )
+        # _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry device DataUpdateCoordinator object" % entry.title, device_coordinator)
 
-        # wait for first refresh of DataUpdateCoordinator to get the initial device list.
-        _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry waiting for device DataUpdateCoordinator initial update" % entry.title, device_coordinator)
-        await device_coordinator.async_config_entry_first_refresh()
+        # # wait for first refresh of DataUpdateCoordinator to get the initial device list.
+        # _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry waiting for device DataUpdateCoordinator initial update" % entry.title, device_coordinator)
+        # await device_coordinator.async_config_entry_first_refresh()
 
         # dump initial Spotify Connect device list (for HA debug log).
         devices:SpotifyConnectDevices = spotifyClient.SpotifyConnectDirectory.GetDevices()
         device:SpotifyConnectDevice
-        _logsi.LogVerbose("'%s': Spotify Connect devices discovered by DataUpdateCoordinator (%s items)" % (entry.title, devices.ItemsCount))
+        _logsi.LogVerbose("'%s': Spotify Connect devices discovered by Spotify Connect Directory task (%s items)" % (entry.title, devices.ItemsCount))
         for device in devices:
             _logsi.LogVerbose("'%s': Spotify Connect device: \"%s\" (%s) [%s]" % (entry.title, device.Name, device.Id, device.DiscoveryResult.Description))
 
@@ -3398,7 +3399,7 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
         _logsi.LogVerbose("'%s': Component async_setup_entry is creating the media player platform instance data object" % entry.title)
         hass.data.setdefault(DOMAIN, {})
         hass.data[DOMAIN][entry.entry_id] = InstanceDataSpotifyPlus(
-            devices=device_coordinator,
+            #devices=device_coordinator,
             session=session,
             spotifyClient=spotifyClient,
             media_player=None,
