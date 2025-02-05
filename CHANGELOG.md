@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.91 ] - 2025/02/05
+
+  * Properly dispose of SpotifyClient object when configuration updates are made and the integration is unloaded / reloaded.  Zeroconf Directory Task events were still registered after updating the configuration, which would cause the DeviceAdd / DeviceUpdate / DeviceRemove events to fire multiple times for the same service update event.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.164.
+
 ###### [ 1.0.90 ] - 2025/02/01
 
   * Fixed `turn_on` logic to transfer playback to the correct source on initial startup.

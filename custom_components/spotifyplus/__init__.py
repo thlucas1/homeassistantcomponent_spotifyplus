@@ -3389,11 +3389,12 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
         # await device_coordinator.async_config_entry_first_refresh()
 
         # dump initial Spotify Connect device list (for HA debug log).
-        devices:SpotifyConnectDevices = spotifyClient.SpotifyConnectDirectory.GetDevices()
-        device:SpotifyConnectDevice
-        _logsi.LogVerbose("'%s': Spotify Connect devices discovered by Spotify Connect Directory task (%s items)" % (entry.title, devices.ItemsCount))
-        for device in devices:
-            _logsi.LogVerbose("'%s': Spotify Connect device: \"%s\" (%s) [%s]" % (entry.title, device.Name, device.Id, device.DiscoveryResult.Description))
+        scDevices:SpotifyConnectDevices = spotifyClient.SpotifyConnectDirectory.GetDevices()
+        scDevice:SpotifyConnectDevice
+        _logsi.LogVerbose("'%s': Spotify Connect devices discovered by Spotify Connect Directory task (%s items)" % (entry.title, scDevices.ItemsCount))
+        for scDevice in scDevices:
+            isActive:str = " (active)" if (scDevice.IsActiveDevice) else ""
+            _logsi.LogVerbose("'%s': Spotify Connect device: %s [%s]%s" % (entry.title, scDevice.Title, scDevice.DiscoveryResult.Description, isActive))
 
         # create media player entity platform instance data.
         _logsi.LogVerbose("'%s': Component async_setup_entry is creating the media player platform instance data object" % entry.title)
@@ -3497,6 +3498,12 @@ async def async_unload_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
             _logsi.LogVerbose("'%s': Component async_unload_entry is removing our device instance data from the domain" % entry.title)
             data:InstanceDataSpotifyPlus = hass.data[DOMAIN].pop(entry.entry_id)
             _logsi.LogObject(SILevel.Verbose, "'%s': Component async_unload_entry unloaded configuration entry instance data" % entry.title, data)
+
+            # dispose of SpotifyClient resources (stops directory task, unwires events, etc).
+            if (data is not None):
+                if (data.spotifyClient is not None):
+                    _logsi.LogObject(SILevel.Verbose, "'%s': Component async_unload_entry is disposing the SpotifyClient object" % entry.title, data.spotifyClient)
+                    data.spotifyClient.Dispose()
 
             # a quick check to make sure all update listeners were removed (see method doc notes above).
             if len(entry.update_listeners) > 0:
