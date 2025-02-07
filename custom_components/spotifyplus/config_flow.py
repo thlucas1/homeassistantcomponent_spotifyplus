@@ -106,6 +106,8 @@ class SpotifyFlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
         Returns:
             A `FlowResult` object that indicates the flow result.
         """
+        spotifyClient:SpotifyClient = None
+
         try:
 
             # trace.
@@ -119,18 +121,24 @@ class SpotifyFlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
                 zeroconf_instance = await zeroconf.async_get_instance(self.hass)
 
                 # create new spotify web api python client instance - "SpotifyClient()".
+                # note that Spotify Connect Directory task will be disabled, since we don't need it
+                # for creating the OAuth2 application credentials.
                 _logsi.LogVerbose("Creating SpotifyClient instance")
                 tokenStorageDir:str = "%s/.storage" % (self.hass.config.config_dir)
                 tokenStorageFile:str = "%s_tokens.json" % (DOMAIN)
-                spotifyClient:SpotifyClient = await self.hass.async_add_executor_job(
+                spotifyClient = await self.hass.async_add_executor_job(
                     SpotifyClient, 
                     None,                   # manager:PoolManager=None,
                     tokenStorageDir,        # tokenStorageDir:str=None,
                     tokenStorageFile,       # tokenStorageFile:str=None,
                     None,                   # tokenUpdater:Callable=None,
-                    zeroconf_instance       # zeroconfClient:Zeroconf=None,
+                    zeroconf_instance,      # zeroconfClient:Zeroconf=None,
+                    None,                   # spotifyConnectUsername:str=None,
+                    None,                   # spotifyConnectPassword:str=None,
+                    None,                   # spotifyConnectLoginId:str=None,
+                    0,                      # spotifyConnectDiscoveryTimeout:float=2.0,   # 0 to disable Spotify Connect Zeroconf browsing features.
+                    False                   # spotifyConnectDirectoryEnabled:bool=True,   # disable Spotify Connect Directory Task.
                 )
-
                 _logsi.LogObject(SILevel.Verbose, "SpotifyClient instance created - object", spotifyClient)
 
                 clientId:str = None
@@ -183,6 +191,10 @@ class SpotifyFlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
             raise
         
         finally:
+
+            # dispose of resources.
+            if (spotifyClient is not None):
+                spotifyClient.Dispose()
 
             # trace.
             _logsi.LeaveMethod(SILevel.Debug)
