@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.93 ] - 2025/02/17
+
+  * Updated `SpotifyClient.PlayerMediaPlayContext` and `PlayerMediaPlayTracks` to utilize Spotify Web Player authorization token when starting play for Sonos and restricted devices.  This will cause play to start under Spotify Connect control, rather than using the Sonos Local Queue.  Refer to the [Spotify Web Player Authentication Setup](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#spotify-web-player-authentication-setup) wiki page for more information on how to configure it.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.165.
+
 ###### [ 1.0.92 ] - 2025/02/07
 
   * Updated `config_flow.async_oauth_create_entry` method to disable SpotifyClient Zeroconf directory browsing and properly dispose of resources when creating application credentials.
