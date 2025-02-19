@@ -10,6 +10,7 @@ from urllib3._version import __version__ as urllib3_version
 
 import functools
 import logging
+import threading
 import voluptuous as vol
 
 from spotifywebapipython import SpotifyClient
@@ -45,10 +46,11 @@ _LOGGER = logging.getLogger(__name__)
 
 TOKEN_STATUS:str = 'status'
 TOKEN_STATUS_REFRESH_EVENT:str = 'TokenRefreshEvent'
+TOKENUPDATER_LOCK = threading.Lock()   # syncronous lock to sync access to token updates.
 
 try:
 
-    from smartinspectpython.siauto import SIAuto, SILevel, SISession, SIConfigurationTimer
+    from smartinspectpython.siauto import SIAuto, SILevel, SISession, SIConfigurationTimer, SIColors
 
     # load SmartInspect settings from a configuration settings file.
     siConfigPath: str = "./smartinspect.cfg"
@@ -1119,6 +1121,17 @@ SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES_SCHEMA = vol.Schema(
 )
 
 
+# -----------------------------------------------------------------------------------
+# Custom Service Schemas - internal testing
+# -----------------------------------------------------------------------------------
+SERVICE_TEST_TOKEN_EXPIRE:str = 'test_token_expire'
+SERVICE_TEST_TOKEN_EXPIRE_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+    }
+)
+
+
 def _trace_LogTextFile(filePath: str, title: str) -> None:
     """
     Log the contents of the specified text file to the SmartInspect trace log.
@@ -1475,6 +1488,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     ids = service.data.get("ids")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     await hass.async_add_executor_job(entity.service_spotify_unfollow_users, ids)
+
+                elif service.service == SERVICE_TEST_TOKEN_EXPIRE:
+
+                    # test token expiration.
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_test_token_expire)
 
                 else:
                     
@@ -3157,6 +3176,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             supports_response=SupportsResponse.ONLY,
         )
 
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_TEST_TOKEN_EXPIRE, SERVICE_TEST_TOKEN_EXPIRE_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_TEST_TOKEN_EXPIRE,
+            service_handle_spotify_command,
+            schema=SERVICE_TEST_TOKEN_EXPIRE_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
         # indicate success.
         _logsi.LogVerbose("Component async_setup complete")
         return True
@@ -3266,73 +3294,85 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
             """
             token:dict = None
             
-            try:
+            # trace.
+            _logsi.LogVerbose("'%s': TOKENUPDATER_LOCK is preparing to set the lock for method _TokenUpdater" % entry.title, colorValue=SIColors.Gold)
+            if TOKENUPDATER_LOCK.locked():
+                _logsi.LogVerbose("'%s': _TokenUpdater is waiting on a previous token update to complete" % entry.title, colorValue=SIColors.Red)
+
+            # only allow one thread to update authorization token at a time; otherwise a deadlock
+            # occurs in the `run_coroutine_threadsafe(session.implementation.async_refresh_token)` line!
+            with TOKENUPDATER_LOCK:
 
                 # trace.
-                _logsi.EnterMethod(SILevel.Debug)
-                _logsi.LogVerbose("'%s': Component OAuth2 session token is either expired or not valid; calling async_refresh_token to refresh the token" % entry.title)
+                _logsi.LogVerbose("'%s': TOKENUPDATER_LOCK is set for method _TokenUpdater" % entry.title, colorValue=SIColors.Gold)
 
-                # note that we do NOT use the `async_ensure_token_valid` method here, as it may
-                # determine that the token does not yet need to be refreshed (via self.valid_token).
-                # at this point, the SpotifyClient instance KNOWS that the token needs to be refreshed.
-                # we will call HA to refresh the token, and store the new token in the integration config entry.
-                # 
-                # note that the `config_entry.data['token']` and `session.token` values should match, BUT
-                # the refreshed `session.token` value will not change until AFTER `async_update_entry` is processed!
-                #
-                # the following steps will be performed to accomplish the above:
-                # - get a reference to the HA OAuth2 session instance.
-                # - call `async_refresh_token` to refresh the expired token.
-                # - set a token `status` attribute to denote the configuration update is for a token refresh event.  this allows the
-                #   `options_update_listener` to bypass the configuration reload processing since we only need to reload the configuration
-                #   if the user initiated an options change via the UI (e.g. no need to reload the configuration for token updates).
-                # - call the `add_job` method to add a job that will call `async_update_entry` to persist the refreshed token to config storage.
-                # - return the refreshed token to the caller.
+                try:
 
-                # trace.
-                _logsi.LogObject(SILevel.Debug, "'%s': Component OAuth2 implementation object" % entry.title, implementation)
-                _logsi.LogDictionary(SILevel.Verbose, "'%s': Component OAuth2 session.token (pre-update)" % entry.title, session.token, prettyPrint=True)
+                    # trace.
+                    _logsi.EnterMethod(SILevel.Debug)
+                    _logsi.LogVerbose("'%s': Component OAuth2 session token is either expired or not valid; calling async_refresh_token to refresh the token" % entry.title, colorValue=SIColors.Gold)
+
+                    # note that we do NOT use the `async_ensure_token_valid` method here, as it may
+                    # determine that the token does not yet need to be refreshed (via self.valid_token).
+                    # at this point, the SpotifyClient instance KNOWS that the token needs to be refreshed.
+                    # we will call HA to refresh the token, and store the new token in the integration config entry.
+                    # 
+                    # note that the `config_entry.data['token']` and `session.token` values should match, BUT
+                    # the refreshed `session.token` value will not change until AFTER `async_update_entry` is processed!
+                    #
+                    # the following steps will be performed to accomplish the above:
+                    # - get a reference to the HA OAuth2 session instance.
+                    # - call `async_refresh_token` to refresh the expired token.
+                    # - set a token `status` attribute to denote the configuration update is for a token refresh event.  this allows the
+                    #   `options_update_listener` to bypass the configuration reload processing since we only need to reload the configuration
+                    #   if the user initiated an options change via the UI (e.g. no need to reload the configuration for token updates).
+                    # - call the `add_job` method to add a job that will call `async_update_entry` to persist the refreshed token to config storage.
+                    # - return the refreshed token to the caller.
+
+                    # trace.
+                    _logsi.LogObject(SILevel.Debug, "'%s': Component OAuth2 implementation object" % entry.title, implementation, colorValue=SIColors.Gold)
+                    _logsi.LogDictionary(SILevel.Verbose, "'%s': Component OAuth2 session.token (pre-update)" % entry.title, session.token, prettyPrint=True, colorValue=SIColors.Gold)
                 
-                # we will refresh the token from the `session.config_entry.data['token']` value (instead of
-                # the `session.token` value) in case the token was refreshed in the `update` method.
-                # note - the `session.token` value will not change until AFTER `async_update_entry` is processed!
+                    # we will refresh the token from the `session.config_entry.data['token']` value (instead of
+                    # the `session.token` value) in case the token was refreshed in the `update` method.
+                    # note - the `session.token` value will not change until AFTER `async_update_entry` is processed!
 
-                # refresh the session token. 
-                _logsi.LogVerbose("'%s': Component is calling async_refresh_token to refresh the session token" % entry.title)
-                token = run_coroutine_threadsafe(
-                    session.implementation.async_refresh_token(session.config_entry.data['token']), hass.loop
-                ).result()
-                token[TOKEN_STATUS] = TOKEN_STATUS_REFRESH_EVENT
+                    # refresh the session token. 
+                    _logsi.LogVerbose("'%s': Component is calling async_refresh_token to refresh the session token" % entry.title, colorValue=SIColors.Gold)
+                    token = run_coroutine_threadsafe(
+                        session.implementation.async_refresh_token(session.config_entry.data['token']), hass.loop
+                    ).result()
+                    token[TOKEN_STATUS] = TOKEN_STATUS_REFRESH_EVENT
 
-                # update token value in configuration entry data.
-                # updating a config entry must be done in the event loop thread, as there is no sync API to update config entries!
-                # the "hass.add_job" method is used to schedule a function in the event loop that calls hass.config_entries.async_update_entry.
-                _logsi.LogDictionary(SILevel.Verbose, "'%s': Component is submitting add_job to call async_update_entry to update configuration entry data with refreshed token" % entry.title, token, prettyPrint=True)
-                session.hass.add_job(
-                    functools.partial(
-                        session.hass.config_entries.async_update_entry,
-                        session.config_entry, 
-                        data={**session.config_entry.data, "token": token}
+                    # update token value in configuration entry data.
+                    # updating a config entry must be done in the event loop thread, as there is no sync API to update config entries!
+                    # the "hass.add_job" method is used to schedule a function in the event loop that calls hass.config_entries.async_update_entry.
+                    _logsi.LogDictionary(SILevel.Verbose, "'%s': Component is submitting add_job to call async_update_entry to update configuration entry data with refreshed token" % entry.title, token, prettyPrint=True, colorValue=SIColors.Gold)
+                    session.hass.add_job(
+                        functools.partial(
+                            session.hass.config_entries.async_update_entry,
+                            session.config_entry, 
+                            data={**session.config_entry.data, "token": token}
+                        )
                     )
-                )
                 
-                # trace.
-                #_logsi.LogDictionary(SILevel.Verbose, "'%s': Component OAuth2 session.token (post-update)" % entry.title, session.token, prettyPrint=True)
-                _logsi.LogVerbose("'%s': Component OAuth2 session token refresh complete" % entry.title)
+                    # trace.
+                    #_logsi.LogDictionary(SILevel.Verbose, "'%s': Component OAuth2 session.token (post-update)" % entry.title, session.token, prettyPrint=True, colorValue=SIColors.Gold)
+                    _logsi.LogVerbose("'%s': Component OAuth2 session token refresh complete" % entry.title, colorValue=SIColors.Gold)
 
-                # return refreshed token to caller.
-                return token
+                    # return refreshed token to caller.
+                    return token
 
-            except Exception as ex:
+                except Exception as ex:
 
-                # trace.
-                _logsi.LogException("'%s': Component OAuth2 session token refresh exception: %s" % (entry.title, str(ex)), ex)
-                raise
+                    # trace.
+                    _logsi.LogException("'%s': Component OAuth2 session token refresh exception: %s" % (entry.title, str(ex)), ex, colorValue=SIColors.Gold)
+                    raise
 
-            finally:
+                finally:
 
-                # trace.
-                _logsi.LeaveMethod(SILevel.Debug)
+                    # trace.
+                    _logsi.LeaveMethod(SILevel.Debug)
 
         # -----------------------------------------------------------------------------------
         # Continue with async_setup_entry
@@ -3404,7 +3444,8 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
             session=session,
             spotifyClient=spotifyClient,
             media_player=None,
-            options=entry.options
+            options=entry.options,
+            tokenUpdater_lock=TOKENUPDATER_LOCK,
         )
         _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry media player platform instance data object" % entry.title, hass.data[DOMAIN][entry.entry_id])
 
@@ -3582,42 +3623,54 @@ async def options_update_listener(hass:HomeAssistant, entry:ConfigEntry) -> None
       just the authentication token that is being udpated, which will occur every 1 hour (controlled by
       Spotify Web API token expiration).
     """
-    try:
+    # trace.
+    _logsi.LogVerbose("'%s': TOKENUPDATER_LOCK is preparing to set the lock for method options_update_listener" % entry.title, colorValue=SIColors.Gold)
+    if TOKENUPDATER_LOCK.locked():
+        _logsi.LogVerbose("'%s': options_update_listener is waiting on TOKENUPDATER_LOCK to free" % entry.title, colorValue=SIColors.Gold)
+
+    # only allow one thread to update authorization token at a time; otherwise a deadlock
+    # occurs in the `run_coroutine_threadsafe(session.implementation.async_refresh_token)` line!
+    with TOKENUPDATER_LOCK:
 
         # trace.
-        _logsi.EnterMethod(SILevel.Debug)
-        _logsi.LogObject(SILevel.Verbose, "'%s': Component detected configuration entry options update" % entry.title, entry)
-        _logsi.LogDictionary(SILevel.Verbose, "'%s': Component options_update_listener entry.data dictionary" % entry.title, entry.data)
-        _logsi.LogDictionary(SILevel.Verbose, "'%s': Component options_update_listener entry.options dictionary" % entry.title, entry.options)
+        _logsi.LogVerbose("'%s': TOKENUPDATER_LOCK is set for method options_update_listener" % entry.title)
 
-        # check if the authentication token was refreshed; if not, then it's a user-initiated
-        # change and the configuration should be reloaded to apply the changes.
-        # if it IS an authentication token refresh, then do NOT reload the configuration.
-        shouldReload:bool = True
-        _logsi.LogVerbose("'%s': Component options_update_listener is checking for authentication token refresh event" % entry.title)
-        if (entry.data is not None):
-            token:dict = entry.data.get('token', None)
-            if (token is not None):
-                _logsi.LogDictionary(SILevel.Verbose, "'%s': Component options_update_listener token data" % entry.title, token)
-                status = token.get(TOKEN_STATUS, None)
-                if (status == TOKEN_STATUS_REFRESH_EVENT):
-                    # token refresh detected; indicate configuration should not be reloaded, and remove
-                    # the token status key so it's not saved with the configuration data.
-                    shouldReload = False
-                    entry.data['token'].pop(TOKEN_STATUS, None)
-                    _logsi.LogVerbose("'%s': Component options_update_listener detected authentication token refresh; configuration will NOT be reloaded" % entry.title)
+        try:
+
+            # trace.
+            _logsi.EnterMethod(SILevel.Debug)
+            _logsi.LogObject(SILevel.Verbose, "'%s': Component detected configuration entry options update" % entry.title, entry)
+            _logsi.LogDictionary(SILevel.Verbose, "'%s': Component options_update_listener entry.data dictionary" % entry.title, entry.data)
+            _logsi.LogDictionary(SILevel.Verbose, "'%s': Component options_update_listener entry.options dictionary" % entry.title, entry.options)
+
+            # check if the authentication token was refreshed; if not, then it's a user-initiated
+            # change and the configuration should be reloaded to apply the changes.
+            # if it IS an authentication token refresh, then do NOT reload the configuration.
+            shouldReload:bool = True
+            _logsi.LogVerbose("'%s': Component options_update_listener is checking for authentication token refresh event" % entry.title)
+            if (entry.data is not None):
+                token:dict = entry.data.get('token', None)
+                if (token is not None):
+                    _logsi.LogDictionary(SILevel.Verbose, "'%s': Component options_update_listener token data" % entry.title, token)
+                    status = token.get(TOKEN_STATUS, None)
+                    if (status == TOKEN_STATUS_REFRESH_EVENT):
+                        # token refresh detected; indicate configuration should not be reloaded, and remove
+                        # the token status key so it's not saved with the configuration data.
+                        shouldReload = False
+                        entry.data['token'].pop(TOKEN_STATUS, None)
+                        _logsi.LogVerbose("'%s': Component options_update_listener detected authentication token refresh; configuration will NOT be reloaded" % entry.title)
         
-        # reload the configuration entry (if necessary).
-        if shouldReload:
-            _logsi.LogVerbose("'%s': Component options_update_listener is reloading the configuration (due to UI options change)" % entry.title)
-            await hass.config_entries.async_reload(entry.entry_id)
-        else:
-            _logsi.LogVerbose("'%s': Component options_update_listener is NOT reloading the configuration (due to token refresh)" % entry.title)
+            # reload the configuration entry (if necessary).
+            if shouldReload:
+                _logsi.LogVerbose("'%s': Component options_update_listener is reloading the configuration (due to UI options change)" % entry.title)
+                await hass.config_entries.async_reload(entry.entry_id)
+            else:
+                _logsi.LogVerbose("'%s': Component options_update_listener is NOT reloading the configuration (due to token refresh)" % entry.title)
 
-        # trace.
-        _logsi.LogVerbose("'%s': Component options_update_listener completed" % entry.title)
+            # trace.
+            _logsi.LogVerbose("'%s': Component options_update_listener completed" % entry.title)
 
-    finally:
+        finally:
 
-        # trace.
-        _logsi.LeaveMethod(SILevel.Debug)
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug)

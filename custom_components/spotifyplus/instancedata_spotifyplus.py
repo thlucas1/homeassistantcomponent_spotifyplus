@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Any
+import threading
 
 from spotifywebapipython import SpotifyClient
 from spotifywebapipython.models import SpotifyConnectDevices
@@ -59,6 +60,11 @@ class InstanceDataSpotifyPlus:
     spotifyClient: SpotifyClient
     """
     The SpotifyClient instance used to interface with the Spotify Web API.
+    """
+
+    tokenUpdater_lock: threading.Lock
+    """
+    Thread Lock object used to lock token refresh updates.
     """
     
 

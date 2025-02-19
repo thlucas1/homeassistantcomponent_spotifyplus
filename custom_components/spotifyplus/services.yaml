@@ -4094,3 +4094,17 @@ zeroconf_discover_devices:
           min: 1.0
           max: 10.0
           mode: box
+
+test_token_expire:
+  name: Test Token Expire
+  description: Forces Spotify Authorization token to expire within 10 seconds; used to test token refresh processing.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player

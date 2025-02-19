@@ -606,6 +606,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
     @property
     def source_list(self) -> list[str] | None:
         """ Return a list of source devices. """
+        # ** IMPORTANT **
+        # be careful what `SpotifyConnectDirectory` methods you access from HA state properties!
+        # some methods use the `self._SpotifyConnectDevices_RLock`, which will cause a thread deadlock
+        # when trying to refresh oauth2 token!
+
         # get Spotify Connect devices known to the local network.
         result:SpotifyConnectDevices = self.data.spotifyClient.SpotifyConnectDirectory.GetDevices()
 
@@ -1053,12 +1058,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         
         # is the media player enabled?  if not, then there is nothing to do.
         if not self.enabled:
-            #_logsi.LogVerbose("'%s': Update - Integration is disabled; nothing to do" % self.name)
             return
 
         # is the media player powered off?  if so, then there is nothing to do.
         if self._attr_state == MediaPlayerState.OFF:
-            #_logsi.LogVerbose("'%s': Update - Integration is powered off; nothing to do" % self.name)
             return
 
         # is the media player in a command event?  if so, then exit as updates are
@@ -1067,11 +1070,17 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogVerbose("'%s': Update - Integration is in a command event; bypassing update" % self.name)
             return
 
+        # is the authentication token being refreshed?  if so, then exit as updates are
+        # happening that we don't want to interfere with.
+        if self.data.tokenUpdater_lock.locked():
+            _logsi.LogVerbose("'%s': Update - Integration is refreshing authentication token; bypassing update" % self.name, colorValue=SIColors.Gold)
+            return
+
         try:
 
             # trace.
             _logsi.EnterMethod(SILevel.Debug)
-        
+
             _logsi.LogVerbose("'%s': Scan interval %d check - commandScanInterval=%d, currentScanInterval=%d, lastKnownTimeRemainingSeconds=%d, state=%s" % (self.name, self._spotifyScanInterval, self._commandScanInterval, self._currentScanInterval, self._lastKnownTimeRemainingSeconds, str(self._attr_state)))
             
             # have we reached a scan interval?
@@ -8417,6 +8426,44 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         except Exception as ex:
             _logsi.LogException("'%s': MediaPlayer %s exception: %s" % (self.name, apiMethodName, str(ex)), ex, logToSystemLogger=False)
             raise IntegrationError(str(ex)) from ex
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_test_token_expire(
+            self, 
+            ) -> None:
+        """
+        Forces Spotify authorization token to expire.
+        """
+        apiMethodName:str = 'service_test_token_expire'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            _logsi.LogMethodParmList(SILevel.Verbose, "TEST-SERVICE - Token Expire Service", apiMethodParms)
+            
+            # force Spotify authentication token expiration.
+            _logsi.LogWarning("Forcing token expiration for the next Spotify Web API call for testing purposes", colorValue=SIColors.Red)
+            self.data.spotifyClient.AuthToken._ExpiresIn = 10
+            unix_epoch = datetime(1970, 1, 1)
+            dtUtcNow:datetime = datetime.utcnow()
+            self.data.spotifyClient.AuthToken._ExpireDateTimeUtc = dtUtcNow + timedelta(seconds=self.data.spotifyClient.AuthToken._ExpiresIn)
+            self.data.spotifyClient.AuthToken._ExpiresAt = int((dtUtcNow - unix_epoch).total_seconds())  # seconds from epoch, current date
+            self.data.spotifyClient.AuthToken._ExpiresAt = self.data.spotifyClient.AuthToken._ExpiresAt + self.data.spotifyClient.AuthToken._ExpiresIn
+            _logsi.LogWarning("Token updated; it should be refreshed on the next Spotify Web API call", colorValue=SIColors.Red)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise ServiceValidationError(ex.Message)
         
         finally:
         

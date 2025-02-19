@@ -2442,6 +2442,16 @@
           "description": "Maximum amount of time to wait (in seconds) for the discovery to complete. Default is 5, range is 1 thru 10."
         }
       }
+    },
+    "test_token_expire": {
+      "name": "Test Token Expire",
+      "description": "Forces Spotify Authorization token to expire within 10 seconds; used to test token refresh processing.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the ZeroConf service."
+        }
+      }
     }
   }
 }
