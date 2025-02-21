@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.96 ] - 2025/02/21
+
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.171.
+
 ###### [ 1.0.95 ] - 2025/02/20
 
   * Updated `SpotifyConnectDirectoryTask.GetSonosPlayer` method to optionally return the Sonos Group Coordinator when retrieving the Sonos Controller instance for a device.  This should prevent any `"play" can only be called/used on the coordinator in a group` errors.
