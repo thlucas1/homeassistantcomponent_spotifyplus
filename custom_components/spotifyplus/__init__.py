@@ -1511,7 +1511,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             except Exception as ex:
 
                 # log exception, but not to system logger as HA will take care of it.
-                _logsi.LogException(STAppMessages.MSG_SERVICE_REQUEST_EXCEPTION % (service.service, "service_handle_getlist"), ex, logToSystemLogger=False)
+                _logsi.LogException(STAppMessages.MSG_SERVICE_REQUEST_EXCEPTION % (service.service, "service_handle_spotify_command"), ex, logToSystemLogger=False)
                 raise
 
             finally:
@@ -2247,7 +2247,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             except Exception as ex:
 
                 # log exception, but not to system logger as HA will take care of it.
-                _logsi.LogException(STAppMessages.MSG_SERVICE_REQUEST_EXCEPTION % (service.service, "service_handle_getlist"), ex, logToSystemLogger=False)
+                _logsi.LogException(STAppMessages.MSG_SERVICE_REQUEST_EXCEPTION % (service.service, "service_handle_spotify_serviceresponse"), ex, logToSystemLogger=False)
                 raise
 
             finally:

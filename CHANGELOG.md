@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.95 ] - 2025/02/20
+
+  * Updated `SpotifyConnectDirectoryTask.GetSonosPlayer` method to optionally return the Sonos Group Coordinator when retrieving the Sonos Controller instance for a device.  This should prevent any `"play" can only be called/used on the coordinator in a group` errors.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.170.
+
 ###### [ 1.0.94 ] - 2025/02/18
 
   * Corrected a bug in the underlying `spotifywebapiPython` package that was causing a thread deadlock condition, which in turn caused the HA UI to lock up / freeze. 
