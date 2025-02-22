@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.97 ] - 2025/02/22
+
+  * Updated `SpotifyClient` methods to restore functions that were previously deprecated by the Spotify development team.  Note that the [Spotify Web Player Authentication Setup](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#spotify-web-player-authentication-setup) must be enabled to use these specific functions; if not enabled, the functions will raise a `deprecated` exception.  The following methods were restored: `GetArtistRelatedArtists`, `GetTrackRecommendations`, `GetTracksAudioFeatures`, `GetFeaturedPlaylists`, `GetCategoryPlaylists`, `GetGenres`, `GetPlaylist`,  `GetPlaylistFavorites`, `GetPlaylistItems`.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.174.
+
 ###### [ 1.0.96 ] - 2025/02/21
 
   * Updated underlying `spotifywebapiPython` package requirement to version 1.0.171.
