@@ -134,6 +134,7 @@ ATTR_SPOTIFYPLUS_TRACK_IS_EXPLICIT = "sp_track_is_explicit"
 ATTR_SPOTIFYPLUS_USER_COUNTRY = "sp_user_country"
 ATTR_SPOTIFYPLUS_USER_DISPLAY_NAME = "sp_user_display_name"
 ATTR_SPOTIFYPLUS_USER_EMAIL = "sp_user_email"
+ATTR_SPOTIFYPLUS_USER_HAS_WEB_PLAYER_CREDENTIALS = "sp_user_has_web_player_credentials"
 ATTR_SPOTIFYPLUS_USER_ID = "sp_user_id"
 ATTR_SPOTIFYPLUS_USER_PRODUCT = "sp_user_product"
 ATTR_SPOTIFYPLUS_USER_URI = "sp_user_uri"
@@ -323,6 +324,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self._commandScanInterval:int = 0
             self._lastKnownTimeRemainingSeconds:int = 0
             self._isInCommandEvent:bool = False
+            self._isInUpdateEvent:bool = False
             self._source_at_poweroff:str = None
             self._source_at_poweron:str = None
             self._volume_level_saved:float = None
@@ -374,6 +376,25 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                                               | MediaPlayerEntityFeature.SEEK \
                                               | MediaPlayerEntityFeature.SELECT_SOURCE \
                                               | MediaPlayerEntityFeature.SHUFFLE_SET \
+                                              | MediaPlayerEntityFeature.TURN_OFF \
+                                              | MediaPlayerEntityFeature.TURN_ON \
+                                              | MediaPlayerEntityFeature.VOLUME_MUTE \
+                                              | MediaPlayerEntityFeature.VOLUME_SET \
+                                              | MediaPlayerEntityFeature.VOLUME_STEP
+            elif (self.data.spotifyClient.HasSpotifyWebPlayerCredentials):
+                _logsi.LogVerbose("'%s': MediaPlayer is setting supported features for Spotify Non-Premium user (SpotifyWebPlayerCredentials configured)" % self.name)
+                # certain features are disabled for non-premium accounts when using SpotifyWebPlayerCredentials.
+                                              # | MediaPlayerEntityFeature.PREVIOUS_TRACK \
+                                              # | MediaPlayerEntityFeature.SEEK \
+                                              # | MediaPlayerEntityFeature.SHUFFLE_SET \
+                self._attr_supported_features = MediaPlayerEntityFeature.BROWSE_MEDIA \
+                                              | MediaPlayerEntityFeature.MEDIA_ENQUEUE \
+                                              | MediaPlayerEntityFeature.NEXT_TRACK \
+                                              | MediaPlayerEntityFeature.PAUSE \
+                                              | MediaPlayerEntityFeature.PLAY \
+                                              | MediaPlayerEntityFeature.PLAY_MEDIA \
+                                              | MediaPlayerEntityFeature.REPEAT_SET \
+                                              | MediaPlayerEntityFeature.SELECT_SOURCE \
                                               | MediaPlayerEntityFeature.TURN_OFF \
                                               | MediaPlayerEntityFeature.TURN_ON \
                                               | MediaPlayerEntityFeature.VOLUME_MUTE \
@@ -436,6 +457,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         attributes[ATTR_SPOTIFYPLUS_USER_COUNTRY] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_USER_DISPLAY_NAME] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_USER_EMAIL] = ATTRVALUE_UNKNOWN
+        attributes[ATTR_SPOTIFYPLUS_USER_HAS_WEB_PLAYER_CREDENTIALS] = False
         attributes[ATTR_SPOTIFYPLUS_USER_ID] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_USER_PRODUCT] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_USER_URI] = ATTRVALUE_UNKNOWN
@@ -483,6 +505,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 attributes[ATTR_SPOTIFYPLUS_USER_ID] = profile.Id
                 attributes[ATTR_SPOTIFYPLUS_USER_PRODUCT] = profile.Product
                 attributes[ATTR_SPOTIFYPLUS_USER_URI] = profile.Uri
+                attributes[ATTR_SPOTIFYPLUS_USER_HAS_WEB_PLAYER_CREDENTIALS] = self.data.spotifyClient.HasSpotifyWebPlayerCredentials
             
         return attributes
 
@@ -924,8 +947,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogVerbose("'%s': MediaPlayerState set to '%s'" % (self.name, self._attr_state))
             self.schedule_update_ha_state(force_refresh=False)
 
-            # pause playback
-            if (self.data.spotifyClient.UserProfile.IsProductPremium):
+            # pause playback.
+            if (self.data.spotifyClient.UserProfile.IsProductPremium) or (self.data.spotifyClient.HasSpotifyWebPlayerCredentials):
                 if self._playerState.IsPlaying:
                     self.data.spotifyClient.PlayerMediaPause(deviceId=self._attr_source)
                                
@@ -980,7 +1003,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self._playerState = self.data.spotifyClient.GetDevicePlaybackState(deviceId=self._attr_source)
 
             # is this a spotify premium account?
-            if (self.data.spotifyClient.UserProfile.IsProductPremium):
+            if (self.data.spotifyClient.UserProfile.IsProductPremium) or (self.data.spotifyClient.HasSpotifyWebPlayerCredentials):
     
                 # try to automatically select a source for play, in this order:
                 # 1) Source at power on, if there is one (set in source_select if powered off).
@@ -1070,6 +1093,13 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogVerbose("'%s': Update - Integration is in a command event; bypassing update" % self.name)
             return
 
+        # is the media player still processing a previous update event?  if so, then exit
+        # as we want to avoid generating log file entries for updates that are taking longer
+        # than expected (which are usually due to temporary conditions anyway).
+        if self._isInUpdateEvent:
+            _logsi.LogVerbose("'%s': Update - Integration is still processing a previous update event; bypassing current update" % self.name, colorValue=SIColors.Red)
+            return
+
         # is the authentication token being refreshed?  if so, then exit as updates are
         # happening that we don't want to interfere with.
         if self.data.tokenUpdater_lock.locked():
@@ -1136,6 +1166,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # self.data.spotifyClient.AuthToken._ExpireDateTimeUtc = dtUtcNow + timedelta(seconds=self.data.spotifyClient.AuthToken._ExpiresIn)
             # self.data.spotifyClient.AuthToken._ExpiresAt = int((dtUtcNow - unix_epoch).total_seconds())  # seconds from epoch, current date
             # self.data.spotifyClient.AuthToken._ExpiresAt = self.data.spotifyClient.AuthToken._ExpiresAt + self.data.spotifyClient.AuthToken._ExpiresIn             # add ExpiresIn seconds
+
+            # indicate we are updating status.
+            self._isInUpdateEvent = True
 
             # are we monitoring a command response? if so, then decrement the interval count.
             if self._commandScanInterval > 0:
@@ -1213,6 +1246,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
         finally:
         
+            # indicate we are no longer updating status.
+            self._isInUpdateEvent = False
+
             # trace.
             _logsi.LeaveMethod(SILevel.Debug)
 
@@ -1281,6 +1317,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.REPEAT_SET
                 self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.SEEK
                 self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.SHUFFLE_SET
+            elif (self.data.spotifyClient.HasSpotifyWebPlayerCredentials):
+                self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.NEXT_TRACK
+                self._attr_supported_features = self._attr_supported_features | MediaPlayerEntityFeature.REPEAT_SET
 
             # does player state exist?  if not, then we are done.
             if playerPlayState is None:

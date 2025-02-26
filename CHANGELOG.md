@@ -6,6 +6,12 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.98 ] - 2025/02/26
+
+  * Added support for Spotify FREE accounts that utilize elevated credentials to control the Spotify Player.  This requires that you complete the SpotifyPlus Integration [Spotify Web Player Authentication Setup](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#spotify-web-player-authentication-setup) instructions.  Check out the [Limitations topic](https://github.com/thlucas1/spotifyplus_card/wiki#limitations) for complete details with what to expect for Spotify FREE accounts.
+  * Updated `SpotifyClient` methods to utilize the Spotify Web Player elevated access token (if configured) if a Spotify Player method is accessed.  This should prevent issues with Sonos devices.  This requires that you complete the SpotifyPlus Integration [Spotify Web Player Authentication Setup](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#spotify-web-player-authentication-setup) instructions; if not configured, then the Sonos Controller (e.g. SoCo) API is used to control the Sonos device.  The following methods were updated: `PlayerMediaPause`, `PlayerMediaResume`, `PlayerMediaSeek`, `PlayerMediaSkipNext`, `PlayerMediaSkipPrevious`, `PlayerSetRepeatMode`, `PlayerSetShuffleMode`, `PlayerSetVolume`, `PlayerTransferPlayback`, `AddPlayerQueueItems`.
+  * Updated underlying `spotifywebapiPython` package requirement to version 1.0.180.
+
 ###### [ 1.0.97 ] - 2025/02/22
 
   * Updated `SpotifyClient` methods to restore functions that were previously deprecated by the Spotify development team.  Note that the [Spotify Web Player Authentication Setup](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#spotify-web-player-authentication-setup) must be enabled to use these specific functions; if not enabled, the functions will raise a `deprecated` exception.  The following methods were restored: `GetArtistRelatedArtists`, `GetTrackRecommendations`, `GetTracksAudioFeatures`, `GetFeaturedPlaylists`, `GetCategoryPlaylists`, `GetGenres`, `GetPlaylist`,  `GetPlaylistFavorites`, `GetPlaylistItems`.
