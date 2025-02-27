@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.99 ] - 2025/02/26
+
+  * Added service `volume_set_step` to set level used for volume step services.
+
 ###### [ 1.0.98 ] - 2025/02/26
 
   * Added support for Spotify FREE accounts that utilize elevated credentials to control the Spotify Player.  This requires that you complete the SpotifyPlus Integration [Spotify Web Player Authentication Setup](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#spotify-web-player-authentication-setup) instructions.  Check out the [Limitations topic](https://github.com/thlucas1/spotifyplus_card/wiki#limitations) for complete details with what to expect for Spotify FREE accounts.

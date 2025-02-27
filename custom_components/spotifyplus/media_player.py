@@ -138,6 +138,7 @@ ATTR_SPOTIFYPLUS_USER_HAS_WEB_PLAYER_CREDENTIALS = "sp_user_has_web_player_crede
 ATTR_SPOTIFYPLUS_USER_ID = "sp_user_id"
 ATTR_SPOTIFYPLUS_USER_PRODUCT = "sp_user_product"
 ATTR_SPOTIFYPLUS_USER_URI = "sp_user_uri"
+ATTR_VOLUME_STEP = "volume_step"
 
 ATTRVALUE_NO_DEVICE = "no_device"
 ATTRVALUE_UNKNOWN = "unknown"
@@ -335,6 +336,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self._attr_icon = "mdi:spotify"
             self._attr_media_image_remotely_accessible = False
             self._attr_state = MediaPlayerState.OFF
+            self._attr_volume_step:float = 0.1
             
             # A unique_id for this entity within this domain.
             # Note: This is NOT used to generate the user visible Entity ID used in automations.
@@ -462,6 +464,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         attributes[ATTR_SPOTIFYPLUS_USER_PRODUCT] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_USER_URI] = ATTRVALUE_UNKNOWN
         
+        # add media player entity information.
+        attributes[ATTR_VOLUME_STEP] = self._attr_volume_step           
+
         # add configuration options information.
         if (self.data is not None):
             attributes[ATTR_SPOTIFYPLUS_SOURCE_LIST_HIDE] = self.data.OptionSourceListHide
@@ -506,7 +511,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 attributes[ATTR_SPOTIFYPLUS_USER_PRODUCT] = profile.Product
                 attributes[ATTR_SPOTIFYPLUS_USER_URI] = profile.Uri
                 attributes[ATTR_SPOTIFYPLUS_USER_HAS_WEB_PLAYER_CREDENTIALS] = self.data.spotifyClient.HasSpotifyWebPlayerCredentials
-            
+
+        # return to caller.
         return attributes
 
 
@@ -8496,6 +8502,59 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self.data.spotifyClient.AuthToken._ExpiresAt = int((dtUtcNow - unix_epoch).total_seconds())  # seconds from epoch, current date
             self.data.spotifyClient.AuthToken._ExpiresAt = self.data.spotifyClient.AuthToken._ExpiresAt + self.data.spotifyClient.AuthToken._ExpiresIn
             _logsi.LogWarning("Token updated; it should be refreshed on the next Spotify Web API call", colorValue=SIColors.Red)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_volume_set_step(
+            self, 
+            level:float=0.1,
+            ) -> None:
+        """
+        Set level used for volume step services.
+
+        Args:
+            level (float):
+                Level percentage to adjust the volume by.
+                Range is 0.1 to 1.0; Default is 0.1.
+        """
+        apiMethodName:str = 'service_volume_set_step'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("level", level)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Volume Set Step Service", apiMethodParms)
+            
+            # validations.
+            stepValue:float = 0.1
+            if (isinstance(level, int)):
+                level = float(level)
+            if (not isinstance(level, float)):
+                level = 0.1
+            if (isinstance(level, float)):
+                stepValue = level
+
+            # ensure range is between 0.1 and 1.0.
+            if (stepValue < 0.1) or (stepValue > 1.0):
+                _logsi.LogWarning("Volume Step level was not in the range of 0.1 to 1.0; defaulting to 0.1")
+                stepValue = 0.1
+
+            # update ha state.
+            self._attr_volume_step = stepValue
+            self.schedule_update_ha_state(force_refresh=False)
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).

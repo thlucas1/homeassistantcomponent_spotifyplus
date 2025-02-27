@@ -4108,3 +4108,28 @@ test_token_expire:
         entity:
           integration: spotifyplus
           domain: media_player
+
+volume_set_step:
+  name: Volume Set Step Level
+  description: Set level used for volume step services.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    level:
+      name: Level
+      description: Level percentage to adjust the volume by. Default is 0.1, range is 0.1 to 1.0.
+      example: 0.05
+      required: false
+      selector:
+        number:
+          min: 0.1
+          max: 1.0
+          mode: box
+

@@ -1122,6 +1122,17 @@ SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES_SCHEMA = vol.Schema(
 
 
 # -----------------------------------------------------------------------------------
+# Custom Service Schemas - MediaPlayerEntity enhancements.
+# -----------------------------------------------------------------------------------
+SERVICE_VOLUME_SET_STEP:str = 'volume_set_step'
+SERVICE_VOLUME_SET_STEP_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("level", default=0.10): vol.All(vol.Range(min=0,max=1.0)),
+    }
+)
+
+# -----------------------------------------------------------------------------------
 # Custom Service Schemas - internal testing
 # -----------------------------------------------------------------------------------
 SERVICE_TEST_TOKEN_EXPIRE:str = 'test_token_expire'
@@ -1494,6 +1505,13 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     # test token expiration.
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     await hass.async_add_executor_job(entity.service_test_token_expire)
+
+                elif service.service == SERVICE_VOLUME_SET_STEP:
+
+                    # test token expiration.
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    level = service.data.get("level")
+                    await hass.async_add_executor_job(entity.service_volume_set_step, level)
 
                 else:
                     
@@ -3182,6 +3200,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             SERVICE_TEST_TOKEN_EXPIRE,
             service_handle_spotify_command,
             schema=SERVICE_TEST_TOKEN_EXPIRE_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_VOLUME_SET_STEP, SERVICE_VOLUME_SET_STEP_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_VOLUME_SET_STEP,
+            service_handle_spotify_command,
+            schema=SERVICE_VOLUME_SET_STEP_SCHEMA,
             supports_response=SupportsResponse.NONE,
         )
 
