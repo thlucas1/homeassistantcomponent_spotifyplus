@@ -6,6 +6,13 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.100 ] - 2025/03/07
+
+  * Updated `smartinspectPython` package reference to `smartinspectpython` for PyPi.org requirements.
+  * Updated `spotifywebapiPython` package reference to `spotifywebapipython` for PyPi.org requirements.
+  * Updated underlying `smartinspectPython` package requirement to version 3.0.35.
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.184.
+
 ###### [ 1.0.99 ] - 2025/02/26
 
   * Added service `volume_set_step` to set level used for volume step services.

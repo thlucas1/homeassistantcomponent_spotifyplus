@@ -1123,9 +1123,6 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             if (self._currentScanInterval == self._spotifyScanInterval) \
             or (not ((self._currentScanInterval % self._spotifyScanInterval) == 0)):
 
-                # # no - decrement the current scan interval counts.
-                # self._currentScanInterval = self._currentScanInterval - 1
-
                 # if last known time remaining value is less than current scan interval then
                 # use the lesser last known time remaining value as the current scan interval.
                 # this can happen when a user seeks to a new position, and the track time

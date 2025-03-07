@@ -62,7 +62,7 @@ Check out the [Services Provided wiki](https://github.com/thlucas1/homeassistant
 
 ## Configuration 
 
-All configuration of the integration is done in the UI.
+[Integration configuration](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Installation-Instructions#configuration) is mostly done in the UI, but a configuration file is required for specific device functionality (e.g. Sonos, Chromecast, etc).
 
 <!---->
 

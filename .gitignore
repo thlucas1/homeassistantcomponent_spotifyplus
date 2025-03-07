@@ -25,9 +25,9 @@ config/*
 /Git*.txt
 
 # Local project files to ignore.
+/.github/workflows/lint.yml
 /custom_components/spotifyplus/zzz_Publish.cmd
 /developer_notes.txt
-/.github/workflows/lint.yml
 /New_Release_Instructions.txt
 /test/testdata/
 /test/*
