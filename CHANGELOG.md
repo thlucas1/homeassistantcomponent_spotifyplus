@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.102 ] - 2025/03/09
+
+  * Added more device `cast_type` values to check for supported Chromecast devices: `null`; if `cast_type` is null, then assume it supports audio.
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.188.
+
 ###### [ 1.0.101 ] - 2025/03/08
 
   * Fixed a bug in device name processing to properly display the Spotify Connect RemoteName value.  Prior code was causing the Zeroconf DeviceName to be displayed, which is sometimes not a user-friendly name.
