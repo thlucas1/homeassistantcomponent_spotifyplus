@@ -6,11 +6,18 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.101 ] - 2025/03/08
+
+  * Fixed a bug in device name processing to properly display the Spotify Connect RemoteName value.  Prior code was causing the Zeroconf DeviceName to be displayed, which is sometimes not a user-friendly name.
+  * Split the integration configuration options into 2 UI dialogs.
+  * Added Spotify Web Player credentials to integration configuration options.  These credentials can now be specified in configuration options dialog, instead of the `spotifyplus_tokens.json` Token Cache File.  The configuration options take precedence if the credentials are found in both places.  If you have these options configured in the Token Cache File, it is suggested that you move them to the UI configuration, as the Token Cache File support will be removed in a future release.
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.187.
+
 ###### [ 1.0.100 ] - 2025/03/07
 
   * Updated `smartinspectPython` package reference to `smartinspectpython` for PyPi.org requirements.
   * Updated `spotifywebapiPython` package reference to `spotifywebapipython` for PyPi.org requirements.
-  * Updated underlying `smartinspectPython` package requirement to version 3.0.35.
+  * Updated underlying `smartinspectpython` package requirement to version 3.0.35.
   * Updated underlying `spotifywebapipython` package requirement to version 1.0.184.
 
 ###### [ 1.0.99 ] - 2025/02/26

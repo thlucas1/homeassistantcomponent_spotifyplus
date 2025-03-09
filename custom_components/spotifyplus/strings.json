@@ -27,19 +27,28 @@
   },
   "options": {
     "step": {
-      "init": {
-        "title": "{name} Options",
-        "description": "Configure SpotifyPlus integration options that control functionality.",
+      "01_options_basic": {
+        "title": "SpotifyPlus {name} Basic Options",
+        "description": "Configure options to control basic integration functionality.",
         "data": {
-          "always_on": "Disable turn on / off features, and keeps the player in an always on state.",
+          "always_on": "Disable turn on / off features (media player is always on).",
           "device_default": "Default Spotify Connect Player Device ID when none are active.",
+          "script_turn_on": "Script called to turn on device that plays media content.",
+          "script_turn_off": "Script called to turn off device that plays media content.",
+          "source_list_hide": "The semi-colon delimited list of device names to hide in the source list.",
+          "spotify_scan_interval": "Scan interval (in seconds) used to query Spotify Player playstate (range 4 - 60)."
+        },
+        "submit": "Next"
+      },
+      "02_options_player": {
+        "title": "SpotifyPlus {name} Player Options",
+        "description": "Configure options used to control Spotify Connect player devices.",
+        "data": {
           "device_loginid": "Spotify Connect canonical loginid to use when connecting to an inactive device.",
           "device_password": "Spotify Connect password to use when connecting to an inactive device.",
           "device_username": "Spotify Connect username to use when connecting to an inactive device.",
-          "spotify_scan_interval": "Scan interval (in seconds) used to query Spotify Player playstate (range 4 - 60).",
-          "script_turn_on": "Script called to turn on device that plays media content.",
-          "script_turn_off": "Script called to turn off device that plays media content.",
-          "source_list_hide": "The semi-colon delimited list of device names to hide in the source list."
+          "spotify_webplayer_cookie_sp_dc": "Spotify Web Player cookie credentials SP_DC value.",
+          "spotify_webplayer_cookie_sp_key": "Spotify Web Player cookie credentials SP_KEY value."
         },
         "submit": "Save"
       }
@@ -47,8 +56,10 @@
     "error": {
       "no_player_devices": "Per Spotify Web API, there are currently no Spotify Connect devices active.  Please close the configuration options, play a track on any Spotify Connect player for a minute or two, and then open the configuration options again.",
       "device_password_required": "Spotify Connect Device Password is required if a Spotify Connect Device Username was specified.",
-      "device_loginid_required": "Spotify Connect Device LoginId is required if a Spotify Connect Device Username was specified.",
-      "spotify_scan_interval_range_invalid": "Spotify Scan Interval is invalid; please specify a whole number between 4 and 60, or leave blank to use the default (30)."
+      "device_username_required": "Spotify Connect Device Username is required if a Spotify Connect Device Password was specified.",
+      "spotify_scan_interval_range_invalid": "Spotify Scan Interval is invalid; please specify a whole number between 4 and 60, or leave blank to use the default (30).",
+      "spotify_webplayer_sp_dc_required": "Spotify Web Player cookie sp_dc value is required if the Spotify Web Player cookie sp_key value was specified.",
+      "spotify_webplayer_sp_key_required": "Spotify Web Player cookie sp_key value is required if the Spotify Web Player cookie sp_dc value was specified."
     }
   },
   "system_health": {

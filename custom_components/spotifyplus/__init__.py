@@ -30,6 +30,8 @@ from homeassistant.helpers.typing import ConfigType
 
 from .appmessages import STAppMessages
 from .const import (
+    CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_DC,
+    CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY,
     CONF_OPTION_DEVICE_LOGINID,
     CONF_OPTION_DEVICE_PASSWORD,
     CONF_OPTION_DEVICE_USERNAME,
@@ -3415,14 +3417,18 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
         tokenStorageFile:str = "%s_tokens.json" % (DOMAIN)
         spotifyClient:SpotifyClient = await hass.async_add_executor_job(
             SpotifyClient, 
-            None,                   # manager:PoolManager=None,
-            tokenStorageDir,        # tokenStorageDir:str=None,
-            tokenStorageFile,       # tokenStorageFile:str=None,
-            _TokenUpdater,          # tokenUpdater:Callable=None,
-            zeroconf_instance,      # zeroconfClient:Zeroconf=None,
-            entry.options.get(CONF_OPTION_DEVICE_USERNAME, None),
-            entry.options.get(CONF_OPTION_DEVICE_PASSWORD, None),
-            entry.options.get(CONF_OPTION_DEVICE_LOGINID, None),
+            None,                                                                   # manager:PoolManager=None,
+            tokenStorageDir,                                                        # tokenStorageDir:str=None,
+            tokenStorageFile,                                                       # tokenStorageFile:str=None,
+            _TokenUpdater,                                                          # tokenUpdater:Callable=None,
+            zeroconf_instance,                                                      # zeroconfClient:Zeroconf=None,
+            entry.options.get(CONF_OPTION_DEVICE_USERNAME, None),                   # spotifyConnectUsername:str=None,
+            entry.options.get(CONF_OPTION_DEVICE_PASSWORD, None),                   # spotifyConnectPassword:str=None,
+            entry.options.get(CONF_OPTION_DEVICE_LOGINID, None),                    # spotifyConnectLoginId:str=None,
+            2.0,                                                                    # spotifyConnectDiscoveryTimeout:float=2.0,   # 0 to disable Spotify Connect Zeroconf browsing features.
+            True,                                                                   # spotifyConnectDirectoryEnabled:bool=True,   # disable Spotify Connect Directory Task.
+            entry.options.get(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_DC, None),    # spotifyWebPlayerCookieSpdc:str=None,
+            entry.options.get(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY, None),   # spotifyWebPlayerCookieSpdc:str=None,
         )       
         _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry spotifyClient object" % entry.title, spotifyClient)
 

@@ -21,6 +21,8 @@ CONF_OPTION_SCRIPT_TURN_ON = "script_turn_on"
 CONF_OPTION_SCRIPT_TURN_OFF = "script_turn_off"
 CONF_OPTION_SOURCE_LIST_HIDE = "source_list_hide"
 CONF_OPTION_SPOTIFY_SCAN_INTERVAL = "spotify_scan_interval"
+CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_DC = "spotify_webplayer_cookie_sp_dc"
+CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY = "spotify_webplayer_cookie_sp_key"
 
 DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL = 30
 

@@ -17,6 +17,7 @@ dependencies and install the requirements of the component.
 from __future__ import annotations
 from collections.abc import Mapping
 import logging
+from pickle import NONE
 from typing import Any
 import voluptuous as vol
 
@@ -24,7 +25,12 @@ from spotifywebapipython import SpotifyClient
 from spotifywebapipython.models import Device, SpotifyConnectDevices
 
 from homeassistant.components import zeroconf
-from homeassistant.config_entries import ConfigEntry, OptionsFlow
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlow,
+)
 from homeassistant.const import CONF_DESCRIPTION, CONF_ID, CONF_NAME, Platform
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
@@ -41,10 +47,12 @@ from .const import (
     CONF_OPTION_DEVICE_LOGINID,
     CONF_OPTION_DEVICE_PASSWORD,
     CONF_OPTION_DEVICE_USERNAME,
-    CONF_OPTION_SPOTIFY_SCAN_INTERVAL,
     CONF_OPTION_SCRIPT_TURN_OFF,
     CONF_OPTION_SCRIPT_TURN_ON,
     CONF_OPTION_SOURCE_LIST_HIDE,
+    CONF_OPTION_SPOTIFY_SCAN_INTERVAL,
+    CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_DC,
+    CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY,
     DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL,
     DOMAIN, 
     DOMAIN_SCRIPT,
@@ -137,7 +145,9 @@ class SpotifyFlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
                     None,                   # spotifyConnectPassword:str=None,
                     None,                   # spotifyConnectLoginId:str=None,
                     0,                      # spotifyConnectDiscoveryTimeout:float=2.0,   # 0 to disable Spotify Connect Zeroconf browsing features.
-                    False                   # spotifyConnectDirectoryEnabled:bool=True,   # disable Spotify Connect Directory Task.
+                    False,                  # spotifyConnectDirectoryEnabled:bool=True,   # disable Spotify Connect Directory Task.
+                    None,                   # spotifyWebPlayerCookieSpdc:str=None,
+                    None,                   # spotifyWebPlayerCookieSpkey:str=None,
                 )
                 _logsi.LogObject(SILevel.Verbose, "SpotifyClient instance created - object", spotifyClient)
 
@@ -349,9 +359,19 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
             _logsi.LeaveMethod(SILevel.Debug)
 
 
-    async def async_step_init(self, user_input:dict[str,Any]=None) -> FlowResult:
+    async def async_step_init(self, user_input: None = None) -> ConfigFlowResult:
         """
         Manage the options for the custom component.
+
+        Since we have multiple options dialog forms, we will simply return the first
+        options form reference.
+        """
+        return await self.async_step_01_options_basic()
+
+
+    async def async_step_01_options_basic(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """
+        Manage the basic options for the custom component.
 
         Args:
             user_input (dict[str,Any]):
@@ -359,8 +379,8 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                 This argument defaults to None when this step is first called.  
                 When the user clicks the submit button on the form, the argument will contain
                 a dictionary of the data that was entered.  Home Assistant will do some basic 
-                # validation on your behalf based on the data schema that you defined (e.g. 
-                # required field, port number is within a numeric range, etc). 
+                validation on your behalf based on the data schema that you defined (e.g. 
+                required field, port number is within a numeric range, etc). 
                 
         For a good example, look at HA demo source code:
             /home-assistant-core/homeassistant/components/demo/config_flow.py
@@ -377,7 +397,7 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
 
             # trace.
             _logsi.EnterMethod(SILevel.Debug)
-            _logsi.LogDictionary(SILevel.Verbose, "'%s': OptionsFlow async_step_init is starting - user_input" % self._name, user_input)
+            _logsi.LogDictionary(SILevel.Verbose, "'%s': OptionsFlow async_step_01_options_basic is starting - user_input" % self._name, user_input)
 
             # if not the initial entry, then save the entered options; otherwise, prepare the form.
             if user_input is not None:
@@ -385,38 +405,26 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                 # update config entry options from user input values.
                 self._Options[CONF_OPTION_ALWAYS_ON] = user_input.get(CONF_OPTION_ALWAYS_ON, None)
                 self._Options[CONF_OPTION_DEVICE_DEFAULT] = user_input.get(CONF_OPTION_DEVICE_DEFAULT, None)
-                self._Options[CONF_OPTION_DEVICE_LOGINID] = user_input.get(CONF_OPTION_DEVICE_LOGINID, None)
-                self._Options[CONF_OPTION_DEVICE_USERNAME] = user_input.get(CONF_OPTION_DEVICE_USERNAME, None)
-                self._Options[CONF_OPTION_DEVICE_PASSWORD] = user_input.get(CONF_OPTION_DEVICE_PASSWORD, None)
                 self._Options[CONF_OPTION_SPOTIFY_SCAN_INTERVAL] = user_input.get(CONF_OPTION_SPOTIFY_SCAN_INTERVAL, DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL)
                 self._Options[CONF_OPTION_SCRIPT_TURN_OFF] = user_input.get(CONF_OPTION_SCRIPT_TURN_OFF, None)
                 self._Options[CONF_OPTION_SCRIPT_TURN_ON] = user_input.get(CONF_OPTION_SCRIPT_TURN_ON, None)
                 self._Options[CONF_OPTION_SOURCE_LIST_HIDE] = user_input.get(CONF_OPTION_SOURCE_LIST_HIDE, None)
                 
                 # validations.
-                # if device username was entered then device password is required.
-                deviceLoginid:str = user_input.get(CONF_OPTION_DEVICE_LOGINID, None)
-                deviceUsername:str = user_input.get(CONF_OPTION_DEVICE_USERNAME, None)
-                devicePassword:str = user_input.get(CONF_OPTION_DEVICE_PASSWORD, None)
-                if (deviceUsername is not None) and (devicePassword is None):
-                    errors["base"] = "device_password_required"
-                if (deviceUsername is not None) and (deviceLoginid is None):
-                    errors["base"] = "device_loginid_required"
-
                 # spotify scan interval must be in the 4 to 60 range (if specified).
                 spotifyScanInterval:int = user_input.get(CONF_OPTION_SPOTIFY_SCAN_INTERVAL, DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL)
                 if (spotifyScanInterval is not None) and ((spotifyScanInterval < 4) or (spotifyScanInterval > 60)):
                     errors["base"] = "spotify_scan_interval_range_invalid"
 
-                # any validation errors? if not, then ...
+                # any validation errors?
                 if "base" not in errors:
                     
-                    # store the updated config entry options.
+                    # no - store the updated config entry options.
                     _logsi.LogDictionary(SILevel.Verbose, "'%s': OptionsFlow is updating configuration options - options" % self._name, self._Options)
-                    return self.async_create_entry(
-                        title="", 
-                        data=self._Options
-                    )
+                    self._Options.update(user_input)
+
+                    # show the next configuration options form.
+                    return await self.async_step_02_options_player()
 
             # load available spotify connect devices.
             device_list:list[str] = await self.hass.async_add_executor_job(self._GetPlayerDevicesList)
@@ -426,10 +434,6 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
             # log device that is currently selected.
             device_default:str = self._Options.get(CONF_OPTION_DEVICE_DEFAULT, None)
             _logsi.LogVerbose("'%s': OptionsFlow option '%s' - SELECTED value: '%s'" % (self._name, CONF_OPTION_DEVICE_DEFAULT, device_default))
-            device_loginid:str = self._Options.get(CONF_OPTION_DEVICE_LOGINID, None)
-            _logsi.LogVerbose("'%s': OptionsFlow option '%s' - SELECTED value: '%s'" % (self._name, CONF_OPTION_DEVICE_LOGINID, device_loginid))
-            device_username:str = self._Options.get(CONF_OPTION_DEVICE_USERNAME, None)
-            _logsi.LogVerbose("'%s': OptionsFlow option '%s' - SELECTED value: '%s'" % (self._name, CONF_OPTION_DEVICE_USERNAME, device_username))
                    
             # create validation schema.
             schema = vol.Schema(
@@ -445,18 +449,9 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                                     mode=SelectSelectorMode.DROPDOWN
                         )
                     ),
-                    vol.Optional(CONF_OPTION_DEVICE_LOGINID, 
-                                 description={"suggested_value": self._Options.get(CONF_OPTION_DEVICE_LOGINID)},
+                    vol.Optional(CONF_OPTION_SOURCE_LIST_HIDE, 
+                                 description={"suggested_value": self._Options.get(CONF_OPTION_SOURCE_LIST_HIDE)},
                                  ): cv.string,
-                    vol.Optional(CONF_OPTION_DEVICE_USERNAME, 
-                                 description={"suggested_value": self._Options.get(CONF_OPTION_DEVICE_USERNAME)},
-                                 ): cv.string,
-                    vol.Optional(CONF_OPTION_DEVICE_PASSWORD, 
-                                 description={"suggested_value": self._Options.get(CONF_OPTION_DEVICE_PASSWORD)},
-                                 ): cv.string,
-                    vol.Optional(CONF_OPTION_SPOTIFY_SCAN_INTERVAL, 
-                                 description={"suggested_value": self._Options.get(CONF_OPTION_SPOTIFY_SCAN_INTERVAL)},
-                                 ): cv.positive_int,
                     vol.Optional(CONF_OPTION_SCRIPT_TURN_ON, 
                                  description={"suggested_value": self._Options.get(CONF_OPTION_SCRIPT_TURN_ON)},
                                  ): selector.EntitySelector(selector.EntitySelectorConfig(integration=DOMAIN_SCRIPT, 
@@ -467,9 +462,9 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                                  ): selector.EntitySelector(selector.EntitySelectorConfig(integration=DOMAIN_SCRIPT, 
                                                             multiple=False),
                     ),
-                    vol.Optional(CONF_OPTION_SOURCE_LIST_HIDE, 
-                                 description={"suggested_value": self._Options.get(CONF_OPTION_SOURCE_LIST_HIDE)},
-                                 ): cv.string,
+                    vol.Optional(CONF_OPTION_SPOTIFY_SCAN_INTERVAL, 
+                                 description={"suggested_value": self._Options.get(CONF_OPTION_SPOTIFY_SCAN_INTERVAL)},
+                                 ): cv.positive_int,
                     vol.Optional(CONF_OPTION_ALWAYS_ON, 
                                  description={"suggested_value": self._Options.get(CONF_OPTION_ALWAYS_ON)},
                                  ): cv.boolean,
@@ -478,14 +473,145 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
             
             # any validation errors? if so, then log them.
             if "base" in errors:
-                _logsi.LogDictionary(SILevel.Warning, "'%s': OptionsFlow contained validation errors" % self._name, errors)
+                _logsi.LogDictionary(SILevel.Warning, "'%s': OptionsFlow 01_options_basic contained validation errors" % self._name, errors)
 
-            _logsi.LogVerbose("'%s': OptionsFlow is showing the init configuration options form" % self._name)
+            _logsi.LogVerbose("'%s': OptionsFlow is showing the 01_options_basic configuration options form" % self._name)
             return self.async_show_form(
-                step_id="init", 
+                step_id="01_options_basic", 
                 data_schema=schema, 
                 description_placeholders={CONF_NAME: self._name},
-                errors=errors or {}
+                errors=errors or {},
+                last_step=False,
+            )
+
+        except Exception as ex:
+            
+            # trace.
+            _logsi.LogException(None, ex, logToSystemLogger=False)
+            raise
+        
+        finally:
+
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug)
+
+    
+    async def async_step_02_options_player(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """
+        Manage the credential options for the custom component.
+
+        Args:
+            user_input (dict[str,Any]):
+                User input gathered from the input form.  
+                This argument defaults to None when this step is first called.  
+                When the user clicks the submit button on the form, the argument will contain
+                a dictionary of the data that was entered.  Home Assistant will do some basic 
+                validation on your behalf based on the data schema that you defined (e.g. 
+                required field, port number is within a numeric range, etc). 
+                
+        For a good example, look at HA demo source code:
+            /home-assistant-core/homeassistant/components/demo/config_flow.py
+            
+        Note that the "self.hass.data[DOMAIN][entry.entry_id]" object is present in the
+        OptionsFlow "async_step_init" step.  This allows you to access the client if one
+        is assigned to the data area.  All you need to do is assign a reference to the 
+        "entry:ConfigEntry" in the "__init__" in order to access it.  This saves you from
+        instantiating a new instance of the client to retrieve settings.  
+        """
+        errors: dict[str, str] = {}
+        
+        try:
+
+            # trace.
+            _logsi.EnterMethod(SILevel.Debug)
+            _logsi.LogDictionary(SILevel.Verbose, "'%s': OptionsFlow async_step_02_options_player is starting - user_input" % self._name, user_input)
+
+            # if not the initial entry, then save the entered options; otherwise, prepare the form.
+            if user_input is not None:
+            
+                # update config entry options from user input values.
+                self._Options[CONF_OPTION_DEVICE_LOGINID] = user_input.get(CONF_OPTION_DEVICE_LOGINID, None)
+                self._Options[CONF_OPTION_DEVICE_USERNAME] = user_input.get(CONF_OPTION_DEVICE_USERNAME, None)
+                self._Options[CONF_OPTION_DEVICE_PASSWORD] = user_input.get(CONF_OPTION_DEVICE_PASSWORD, None)
+                self._Options[CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_DC] = user_input.get(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_DC, None)
+                self._Options[CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY] = user_input.get(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY, None)
+                
+                # validations.
+                # if device username was entered then device password is required.
+                deviceLoginid:str = user_input.get(CONF_OPTION_DEVICE_LOGINID, None)
+                deviceUsername:str = user_input.get(CONF_OPTION_DEVICE_USERNAME, None)
+                devicePassword:str = user_input.get(CONF_OPTION_DEVICE_PASSWORD, None)
+                webplayerCookieSpdc:str = user_input.get(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_DC, None)
+                webplayerCookieSpkey:str = user_input.get(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY, None)
+                if (deviceUsername is not None) and (devicePassword is None):
+                    errors["base"] = "device_password_required"
+                if (deviceUsername is None) and (devicePassword is not None):
+                    errors["base"] = "device_username_required"
+                if (webplayerCookieSpdc is not None) and (webplayerCookieSpkey is None):
+                    errors["base"] = "spotify_webplayer_sp_key_required"
+                if (webplayerCookieSpkey is not None) and (webplayerCookieSpdc is None):
+                    errors["base"] = "spotify_webplayer_sp_dc_required"
+
+                # any validation errors? if not, then ...
+                if "base" not in errors:
+                    
+                    # store the updated config entry options.
+                    _logsi.LogDictionary(SILevel.Verbose, "'%s': OptionsFlow is updating configuration options - options" % self._name, self._Options)
+
+                    # for the last options form, we will call "async_create_entry" to update 
+                    # the options and store them to disk.
+                    return self.async_create_entry(
+                        title="", 
+                        data=self._Options
+                    )
+
+            # load available spotify connect devices.
+            device_list:list[str] = await self.hass.async_add_executor_job(self._GetPlayerDevicesList)
+            if (device_list is None) or (len(device_list) == 0):
+                errors["base"] = "no_player_devices"
+
+            # log device that is currently selected.
+            device_loginid:str = self._Options.get(CONF_OPTION_DEVICE_LOGINID, None)
+            _logsi.LogVerbose("'%s': OptionsFlow option '%s' - value: '%s'" % (self._name, CONF_OPTION_DEVICE_LOGINID, device_loginid))
+            device_username:str = self._Options.get(CONF_OPTION_DEVICE_USERNAME, None)
+            _logsi.LogVerbose("'%s': OptionsFlow option '%s' - value: '%s'" % (self._name, CONF_OPTION_DEVICE_USERNAME, device_username))
+            webplayer_cookie_sp_key:str = self._Options.get(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY, None)
+            _logsi.LogVerbose("'%s': OptionsFlow option '%s' - value: '%s'" % (self._name, CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY, webplayer_cookie_sp_key))
+                   
+            # create validation schema.
+            schema = vol.Schema(
+                {
+                    # note - DO NOT use "default" argument on the following - use "suggested_value" instead.
+                    # using "default=" does not allow a null value to be selected!
+                    vol.Optional(CONF_OPTION_DEVICE_LOGINID, 
+                                 description={"suggested_value": self._Options.get(CONF_OPTION_DEVICE_LOGINID)},
+                                 ): cv.string,
+                    vol.Optional(CONF_OPTION_DEVICE_USERNAME, 
+                                 description={"suggested_value": self._Options.get(CONF_OPTION_DEVICE_USERNAME)},
+                                 ): cv.string,
+                    vol.Optional(CONF_OPTION_DEVICE_PASSWORD, 
+                                 description={"suggested_value": self._Options.get(CONF_OPTION_DEVICE_PASSWORD)},
+                                 ): cv.string,
+                    vol.Optional(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_DC, 
+                                 description={"suggested_value": self._Options.get(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_DC)},
+                                 ): cv.string,
+                    vol.Optional(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY, 
+                                 description={"suggested_value": self._Options.get(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY)},
+                                 ): cv.string,
+                }
+            )
+            
+            # any validation errors? if so, then log them.
+            if "base" in errors:
+                _logsi.LogDictionary(SILevel.Warning, "'%s': OptionsFlow 02_options_player contained validation errors" % self._name, errors)
+
+            _logsi.LogVerbose("'%s': OptionsFlow is showing the 02_options_player configuration options form" % self._name)
+            return self.async_show_form(
+                step_id="02_options_player", 
+                data_schema=schema, 
+                description_placeholders={CONF_NAME: self._name},
+                errors=errors or {},
+                last_step=True
             )
         
         except Exception as ex:
