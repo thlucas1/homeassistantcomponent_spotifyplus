@@ -425,8 +425,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
             # set default device name to use for player transport functions that are executed
             # but there is no active Spotify player device.
-            self.data.spotifyClient.DefaultDeviceId = self.data.OptionDeviceDefault
-
+            self.data.spotifyClient.DefaultDeviceId = PlayerDevice.GetNameFromSelectItem(self.data.OptionDeviceDefault)
+            
             # trace.
             _logsi.LogObject(SILevel.Verbose, "'%s': MediaPlayer SpotifyClient object" % self.name, self.data.spotifyClient)
             _logsi.LogObject(SILevel.Verbose, "'%s': MediaPlayer initialization complete" % self.name, self)
@@ -651,7 +651,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         device:PlayerDevice
         for device in result.GetDeviceList():
             if (device.Name.lower() not in sourceListHide):
-                deviceNames.append(device.Name)
+                if (device.Id.lower() not in sourceListHide):
+                    deviceNames.append(device.Name)
         return deviceNames
         
 
@@ -997,7 +998,6 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # set media player state to IDLE.
             self._attr_state = MediaPlayerState.IDLE
             _logsi.LogVerbose("'%s': MediaPlayerState set to '%s'" % (self.name, self._attr_state))
-            # self.schedule_update_ha_state(force_refresh=False)
 
             # call script to power on device.
             self._CallScriptPower(self.data.OptionScriptTurnOn, "turn_on")
@@ -8308,6 +8308,13 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             
             # disconnect the device from Spotify Connect.
             result = zconn.Disconnect(delay)
+
+            # update ha state.
+            self._attr_state = MediaPlayerState.IDLE
+            self.schedule_update_ha_state(force_refresh=False)
+
+            # device was disconnected, so force a scan window at the next interval.
+            self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_TRACK_ENDSTART
 
             # return the (partial) user profile that retrieved the result, as well as the result itself.
             return {

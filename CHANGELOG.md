@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.103 ] - 2025/03/13
+
+  * Corrected DefaultDeviceID behavior to select the configured device name when no active player was detected.
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.189.
+
 ###### [ 1.0.102 ] - 2025/03/09
 
   * Added more device `cast_type` values to check for supported Chromecast devices: `null`; if `cast_type` is null, then assume it supports audio.
