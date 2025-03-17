@@ -675,6 +675,12 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
 
     @property
+    def volume_step(self) -> float:
+        """Return the step to be used by the volume_up and volume_down services."""
+        return self._attr_volume_step
+
+
+    @property
     def is_volume_muted(self):
         """ Boolean if volume is currently muted. """
         return self._attr_is_volume_muted
@@ -8522,7 +8528,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
     def service_volume_set_step(
             self, 
-            level:float=0.1,
+            level:float=0.10,
             ) -> None:
         """
         Set level used for volume step services.
@@ -8530,7 +8536,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             level (float):
                 Level percentage to adjust the volume by.
-                Range is 0.1 to 1.0; Default is 0.1.
+                Range is 0.01 to 1.0; Default is 0.10.
+
+        A system log warning is issued if level is less than 0.01 or greater than 1.0, 
+        and the level is defaulted to 0.10.
         """
         apiMethodName:str = 'service_volume_set_step'
         apiMethodParms:SIMethodParmListContext = None
@@ -8543,18 +8552,18 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogMethodParmList(SILevel.Verbose, "Volume Set Step Service", apiMethodParms)
             
             # validations.
-            stepValue:float = 0.1
+            stepValue:float = 0.10
             if (isinstance(level, int)):
                 level = float(level)
             if (not isinstance(level, float)):
-                level = 0.1
+                level = 0.10
             if (isinstance(level, float)):
                 stepValue = level
 
-            # ensure range is between 0.1 and 1.0.
-            if (stepValue < 0.1) or (stepValue > 1.0):
-                _logsi.LogWarning("Volume Step level was not in the range of 0.1 to 1.0; defaulting to 0.1")
-                stepValue = 0.1
+            # ensure range is between 0.01 and 1.0.
+            if (stepValue < 0.01) or (stepValue > 1.0):
+                _logsi.LogWarning(f'Volume Step level \"{stepValue:.3f}\" was not in the range of 0.01 to 1.0; defaulting to 0.10')
+                stepValue = 0.10
 
             # update ha state.
             self._attr_volume_step = stepValue

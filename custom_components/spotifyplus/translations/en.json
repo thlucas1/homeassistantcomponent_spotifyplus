@@ -2472,9 +2472,9 @@
           "name": "Entity ID",
           "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
         },
-        "timeout": {
-          "name": "Timeout",
-          "description": "Level percentage to adjust the volume by. Default is 0.1, range is 0.1 to 1.0."
+        "level": {
+          "name": "Level",
+          "description": "Level percentage to adjust the volume by. Default is 0.10 (e.g. 10 percent), range is 0.01 to 1.00 (e.g. 1 to 100 percent)."
         }
       }
     }
