@@ -1130,9 +1130,14 @@ SERVICE_VOLUME_SET_STEP:str = 'volume_set_step'
 SERVICE_VOLUME_SET_STEP_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Required("level", default=0.10): vol.All(vol.Range(min=0,max=1.0)),
+        vol.Required("level", default=0.10): vol.All(vol.Range(min=0.01,max=1.00)),
+        #vol.Required("level", default=0.10): vol.All(float, vol.Range(min=.01,max=.99)),
+        #vol.Required("level", default=0.10): vol.All(vol.Range(min=0.01,max=0.99)),
+        #vol.Required("level", default=0.10): vol.All(float, vol.Range(min=0.01,max=1.00)),
+        #vol.Required("level", default=0.10): vol.All(vol.Coerce(float), vol.Range(min=0.01,max=1.00)),
     }
 )
+
 
 # -----------------------------------------------------------------------------------
 # Custom Service Schemas - internal testing

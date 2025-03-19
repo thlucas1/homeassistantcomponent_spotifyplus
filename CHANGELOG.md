@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.106 ] - 2025/03/19
+
+  * Added Time-based One Time Password processing. 
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.191.
+
 ###### [ 1.0.105 ] - 2025/03/17
 
   * Updated service `volume_set_step` to accept a range of 0.01 to 1.00 for the step level.
