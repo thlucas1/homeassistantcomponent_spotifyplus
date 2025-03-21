@@ -489,12 +489,6 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 track:Track = self._playerState.Item
                 if track.Explicit:
                     attributes[ATTR_SPOTIFYPLUS_TRACK_IS_EXPLICIT] = track.Explicit
-                if (self._attr_state == MediaPlayerState.PLAYING):
-                    if (self._playTimeRemainingEst <= self._spotifyScanInterval):
-                        attributes[ATTR_SPOTIFYPLUS_PLAY_TIME_REMAINING_EST] = self._playTimeRemainingEst
-                        _logsi.LogVerbose("'%s': Estimated play time remaining is %s seconds; in last interval window" % (self.name, self._playTimeRemainingEst))
-                    else:
-                        attributes[ATTR_SPOTIFYPLUS_PLAY_TIME_REMAINING_EST] = self._lastKnownTimeRemainingSeconds
             if (self._playerState.CurrentlyPlayingType is not None):
                 attributes[ATTR_SPOTIFYPLUS_PLAYING_TYPE] = self._playerState.CurrentlyPlayingType
 
@@ -508,7 +502,17 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             attributes[ATTR_SPOTIFYPLUS_PLAYLIST_NAME] = self._playlist.Name
             attributes[ATTR_SPOTIFYPLUS_PLAYLIST_URI] = self._playlist.Uri
             attributes['media_playlist_content_id'] = self._playlist.Uri
-                       
+
+        # add estimated play time remaining (if media position and duration are present).
+        if (self._attr_media_position is not None) and (self._attr_media_duration is not None):
+            # only update the state value with real-time info if in the last scan interval;
+            # otherwise, we will use the difference of the duration minus the last known position.
+            if (self._playTimeRemainingEst <= self._spotifyScanInterval):
+                _logsi.LogVerbose("'%s': Estimated play time remaining is %s seconds; in last interval window" % (self.name, self._playTimeRemainingEst))
+                attributes[ATTR_SPOTIFYPLUS_PLAY_TIME_REMAINING_EST] = self._playTimeRemainingEst
+            else:
+                attributes[ATTR_SPOTIFYPLUS_PLAY_TIME_REMAINING_EST] = int(self._attr_media_duration - self._attr_media_position)
+
         # add userprofile information.
         if self.data.spotifyClient is not None:
             profile:UserProfile = self.data.spotifyClient.UserProfile
@@ -1132,7 +1136,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # trace.
             _logsi.EnterMethod(SILevel.Debug)
 
-            _logsi.LogVerbose("'%s': Scan interval %d check - commandScanInterval=%d, currentScanInterval=%d, lastKnownTimeRemainingSeconds=%d, playTimeRemainingEst=%d, state=%s" % (self.name, self._spotifyScanInterval, self._commandScanInterval, self._currentScanInterval, self._lastKnownTimeRemainingSeconds, self._playTimeRemainingEst, str(self._attr_state)))
+            _logsi.LogVerbose("'%s': Scan interval %d check - commandScanInterval=%d, currentScanInterval=%d, playTimeRemainingEst=%d, state=%s" % (self.name, self._spotifyScanInterval, self._commandScanInterval, self._currentScanInterval, self._playTimeRemainingEst, str(self._attr_state)))
             
             # have we reached a scan interval?
             if (self._currentScanInterval == self._spotifyScanInterval) \
@@ -1174,8 +1178,14 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                         # add scan interval time value to last media played position since it's not a real-time value.
                         self._lastMediaPlayedPosition = (self._lastMediaPlayedPosition + SCAN_INTERVAL.seconds)
                         
-                        # update estimated play time remaining.
-                        self._playTimeRemainingEst = self._playTimeRemainingEst - 1
+                        # does the media position have a last update date? if so, then calculate play time remaining.
+                        if (isinstance(self._attr_media_position_updated_at, datetime)):
+                            # calculate play time remaining by subtracting current UTC time from 
+                            # the last UTC time when the media_position was provided by Spotify player state.
+                            dtUtc:datetime = utcnow()
+                            timeDifference:timedelta = (dtUtc - self._attr_media_position_updated_at)
+                            self._playTimeRemainingEst = int(self._attr_media_duration - self._attr_media_position - int(timeDifference.total_seconds()))
+                            #_logsi.LogVerbose("'%s': Estimated time remaining (timeDifference) - media Duration=%d, Position=%s, Remaining=%d, TimeDiffSecs=%d, state=%s" % (self.name, int(self._attr_media_duration), int(self._attr_media_position), self._playTimeRemainingEst, timeDifference.total_seconds(), str(self._attr_state)))
 
                     # bypass HA state update.
                     return
@@ -1438,10 +1448,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 self._lastMediaPlayedPosition = self._attr_media_position
         
             # calculate the time (in seconds) remaining on the playing track.
-            if (self._attr_media_position is not None) and (self._attr_media_duration):
+            if (self._attr_media_position is not None) and (self._attr_media_duration is not None):
                 self._lastKnownTimeRemainingSeconds = int(self._attr_media_duration - self._attr_media_position)
-                self._playTimeRemainingEst = self._lastKnownTimeRemainingSeconds
-                _logsi.LogVerbose("'%s': Estimated time remaining - track DurationMS=%d, Position=%s, Remaining=%d" % (self.name, int(self._attr_media_duration), int(self._attr_media_position), self._playTimeRemainingEst))
+                self._playTimeRemainingEst = int(self._attr_media_duration - self._attr_media_position)
+                _logsi.LogVerbose("'%s': Estimated time remaining (playstateUpdate) - media Duration=%d, Position=%s, Remaining=%d" % (self.name, int(self._attr_media_duration), int(self._attr_media_position), self._playTimeRemainingEst))
 
             # update repeat related attributes.
             if playerPlayState.RepeatState is not None:

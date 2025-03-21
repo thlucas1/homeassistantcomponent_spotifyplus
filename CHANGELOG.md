@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.108 ] - 2025/03/20
+
+  * Fixed a bug that was causing state attribute `sp_play_time_remaining_est` to be calculated incorrectly.
+
 ###### [ 1.0.107 ] - 2025/03/19
 
   * Added extra state attribute: `sp_play_time_remaining_est` - Contains the number of seconds remaining to be played in the currently playing track or episode, or `null` if nothing is playing.  The value is only updated at every scan interval (e.g. 30 seconds) initially, but then reverts to updating every second for the final scan interval of the playing track.  This allows you to create automations that can reliably detect when the track is nearing (within 30 seconds of) end of play.
