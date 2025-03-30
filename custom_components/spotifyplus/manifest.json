@@ -16,11 +16,11 @@
     "platformdirs>=4.1.0",
     "requests>=2.31.0",
     "requests_oauthlib>=1.3.1",
-    "smartinspectpython>=3.0.35",
-    "spotifywebapipython>=1.0.191",
+    "smartinspectpython>=3.0.37",
+    "spotifywebapipython>=1.0.194",
     "urllib3>=1.21.1,<1.27",
     "zeroconf>=0.132.2"
   ],
-  "version": "1.0.108",
+  "version": "1.0.109",
   "zeroconf": [ "_spotify-connect._tcp.local.", "_googlecast._tcp.local." ]
 }

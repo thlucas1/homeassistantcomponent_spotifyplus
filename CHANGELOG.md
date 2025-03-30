@@ -6,6 +6,12 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.109 ] - 2025/03/29
+
+  * Added support for re-awakening Amazon devices from sleep mode.
+  * Updated underlying `smartinspectpython` package requirement to version 3.0.37.
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.194.
+
 ###### [ 1.0.108 ] - 2025/03/20
 
   * Fixed a bug that was causing state attribute `sp_play_time_remaining_est` to be calculated incorrectly.

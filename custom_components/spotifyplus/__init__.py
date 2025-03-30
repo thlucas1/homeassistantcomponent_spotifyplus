@@ -54,13 +54,10 @@ try:
 
     from smartinspectpython.siauto import SIAuto, SILevel, SISession, SIConfigurationTimer, SIColors
 
-    # load SmartInspect settings from a configuration settings file.
+    # load SmartInspect settings from a configuration settings file;
+    # configuration file will be monitored for changes, and reloaded if required.
     siConfigPath: str = "./smartinspect.cfg"
     SIAuto.Si.LoadConfiguration(siConfigPath)
-
-    # start monitoring the configuration file for changes, and reload it when it changes.
-    # this will check the file for changes every 60 seconds.
-    siConfig:SIConfigurationTimer = SIConfigurationTimer(SIAuto.Si, siConfigPath)
 
     # get smartinspect logger reference; create a new session for this module name.
     _logsi:SISession = SIAuto.Si.GetSession(__name__)
