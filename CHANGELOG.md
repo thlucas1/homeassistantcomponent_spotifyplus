@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.110 ] - 2025/04/03
+
+  * Changed transfer playback behavior to resume playback of the last playing track instead of defaulting to playing of track favorites if no active device was found and Spotify Web Player cookie credentials are in use.  Note that track favorites will be used if no active device was found and Spotify Web Player cookie credentials are NOT in use.
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.195.
+
 ###### [ 1.0.109 ] - 2025/03/29
 
   * Added support for re-awakening Amazon devices from sleep mode.
