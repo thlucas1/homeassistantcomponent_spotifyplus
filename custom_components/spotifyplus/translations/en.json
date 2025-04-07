@@ -754,7 +754,7 @@
     },
     "get_image_vibrant_colors": {
       "name": "Get Image Vibrant Colors",
-      "description": "Get vibrant color palette RGB values from the specified image source.",
+      "description": "Get vibrant color palette values from the specified image source.",
       "fields": {
         "entity_id": {
           "name": "Entity ID",

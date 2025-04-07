@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.112 ] - 2025/04/07
+
+  * Updated service `get_image_vibrant_colors` to include the rgb, hsl, and population values along with the rgb_hex values.  
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.199.
+
 ###### [ 1.0.111 ] - 2025/04/06
 
   * Added service `get_image_vibrant_colors` to get vibrant color palette RGB values from the specified image source, or the currently playing Spotify track / episode.
