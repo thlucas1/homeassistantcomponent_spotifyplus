@@ -118,6 +118,7 @@ SERVICE_SPOTIFY_GET_COVER_IMAGE_FILE:str = 'get_cover_image_file'
 SERVICE_SPOTIFY_GET_EPISODE:str = 'get_episode'
 SERVICE_SPOTIFY_GET_EPISODE_FAVORITES:str = 'get_episode_favorites'
 SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS:str = 'get_featured_playlists'
+SERVICE_SPOTIFY_GET_IMAGE_VIBRANT_COLORS:str = 'get_image_vibrant_colors'
 SERVICE_SPOTIFY_GET_PLAYER_DEVICES:str = 'get_player_devices'
 SERVICE_SPOTIFY_GET_PLAYER_NOW_PLAYING:str = 'get_player_now_playing'
 SERVICE_SPOTIFY_GET_PLAYER_PLAYBACK_STATE:str = 'get_player_playback_state'
@@ -134,6 +135,7 @@ SERVICE_SPOTIFY_GET_SHOW_FAVORITES:str = 'get_show_favorites'
 SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICE:str = 'get_spotify_connect_device'
 SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES:str = 'get_spotify_connect_devices'
 SERVICE_SPOTIFY_GET_TRACK:str = 'get_track'
+SERVICE_SPOTIFY_GET_TRACK_AUDIO_FEATURES:str = 'get_track_audio_features'
 SERVICE_SPOTIFY_GET_TRACK_FAVORITES:str = 'get_track_favorites'
 SERVICE_SPOTIFY_GET_TRACK_RECOMMENDATIONS:str = 'get_track_recommendations'
 SERVICE_SPOTIFY_GET_TRACKS_AUDIO_FEATURES:str = 'get_tracks_audio_features'
@@ -466,6 +468,15 @@ SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS_SCHEMA = vol.Schema(
     }
 )
 
+SERVICE_SPOTIFY_GET_IMAGE_VIBRANT_COLORS_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("image_source"): cv.string,
+        vol.Optional("color_count", default=64): vol.All(vol.Range(min=1,max=256)),
+        vol.Optional("color_quality", default=1): vol.All(vol.Range(min=1,max=10)),
+    }
+)
+
 SERVICE_SPOTIFY_GET_PLAYER_DEVICES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
@@ -611,6 +622,13 @@ SERVICE_SPOTIFY_GET_TRACK_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("track_id"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_GET_TRACK_AUDIO_FEATURES_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("track_id"): cv.string,
     }
 )
 
@@ -1806,6 +1824,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_get_featured_playlists, limit, offset, country, locale, timestamp, limit_total, sort_result)
 
+                elif service.service == SERVICE_SPOTIFY_GET_IMAGE_VIBRANT_COLORS:
+
+                    # get image vibrant colors.
+                    image_source = service.data.get("image_source")
+                    color_count = service.data.get("color_count")
+                    color_quality = service.data.get("color_quality")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_image_vibrant_colors, image_source, color_count, color_quality)
+
                 elif service.service == SERVICE_SPOTIFY_GET_PLAYER_DEVICES:
 
                     # get spotify player device list.
@@ -1953,6 +1980,14 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     track_id = service.data.get("track_id")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_get_track, track_id)
+
+                elif service.service == SERVICE_SPOTIFY_GET_TRACK_AUDIO_FEATURES:
+
+                    # get spotify album favorites.
+                    limit = service.data.get("limit")
+                    track_id = service.data.get("track_id")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_track_audio_features, track_id)
 
                 elif service.service == SERVICE_SPOTIFY_GET_TRACK_FAVORITES:
 
@@ -2613,6 +2648,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             supports_response=SupportsResponse.ONLY,
         )
 
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_IMAGE_VIBRANT_COLORS, SERVICE_SPOTIFY_GET_IMAGE_VIBRANT_COLORS_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_GET_IMAGE_VIBRANT_COLORS,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_GET_IMAGE_VIBRANT_COLORS_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
         _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_PLAYER_DEVICES, SERVICE_SPOTIFY_GET_PLAYER_DEVICES_SCHEMA)
         hass.services.async_register(
             DOMAIN,
@@ -2754,6 +2798,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             SERVICE_SPOTIFY_GET_TRACK,
             service_handle_spotify_serviceresponse,
             schema=SERVICE_SPOTIFY_GET_TRACK_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_TRACK_AUDIO_FEATURES, SERVICE_SPOTIFY_GET_TRACK_AUDIO_FEATURES_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_GET_TRACK_AUDIO_FEATURES,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_GET_TRACK_AUDIO_FEATURES_SCHEMA,
             supports_response=SupportsResponse.ONLY,
         )
 

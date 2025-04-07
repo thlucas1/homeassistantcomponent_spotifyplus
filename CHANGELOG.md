@@ -6,6 +6,12 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.111 ] - 2025/04/06
+
+  * Added service `get_image_vibrant_colors` to get vibrant color palette RGB values from the specified image source, or the currently playing Spotify track / episode.
+  * Added service `get_track_audio_features` to get audio features for a single track based on the Spotify ID, or the currently playing track.
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.198.
+
 ###### [ 1.0.110 ] - 2025/04/03
 
   * Changed transfer playback behavior to resume playback of the last playing track instead of defaulting to playing of track favorites if no active device was found and Spotify Web Player cookie credentials are in use.  Note that track favorites will be used if no active device was found and Spotify Web Player cookie credentials are NOT in use.

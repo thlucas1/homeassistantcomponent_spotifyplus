@@ -752,6 +752,28 @@
         }
       }
     },
+    "get_image_vibrant_colors": {
+      "name": "Get Image Vibrant Colors",
+      "description": "Get vibrant color palette RGB values from the specified image source.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "image_source": {
+          "name": "Image Source",
+          "description": "The image source to extract color palette information from.  If the prefix of the value is `http:` or `https:`, then the image is downloaded from the url.  This can also point to a filename on the local file system.  If null, the currently playing Spotify track image url is used.  Example = `https://i.scdn.co/image/ab67616d0000b2733deaee5f76ab2da15dd8db86`, `c:/image1.jpg`"
+        },
+        "color_count": {
+          "name": "Color Count",
+          "description": "The number of colors in the initial palette from which swatches will be generated.  Default is 64; Range is 1 to 256."
+        },
+        "color_quality": {
+          "name": "Color Quality",
+          "description": "Controls the processing time and quality of the palette generation.  A lower value (e.g. 1) results in higher quality but takes more processing time, while a higher value (e.g. 5) is faster but may result in a lower-quality palette.  Default is 5; Range is 1 to 10."
+        }
+      }
+    },
     "get_player_devices": {
       "name": "Get Player Devices",
       "description": "Get information about a user's available Spotify Connect player devices.  Some device models are not supported and will not be listed in the API response.",
@@ -1117,6 +1139,20 @@
         "track_id": {
           "name": "Track Id",
           "description": "The Spotify ID of the track.  If omitted, the currently playing track uri id value is used."
+        }
+      }
+    },
+    "get_track_audio_features": {
+      "name": "Get Track Audio Features",
+      "description": "Get audio feature information for a single track identified by its unique Spotify ID.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "track_id": {
+          "name": "Track ID",
+          "description": "The Spotify ID of the track.  Example = `1kWUud3vY5ij5r62zxpTRy`.  If null, the currently playing track uri id value is used."
         }
       }
     },

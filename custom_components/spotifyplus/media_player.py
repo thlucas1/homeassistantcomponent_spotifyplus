@@ -36,6 +36,7 @@ from spotifywebapipython.models import (
     Episode, 
     EpisodePageSaved,
     EpisodePageSimplified,
+    ImageVibrantColors,
     PlayerPlayState, 
     PlayerQueueInfo,
     PlayHistoryPage,
@@ -3658,6 +3659,74 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
+    def service_spotify_get_image_vibrant_colors(
+            self, 
+            imageSource:str=None, 
+            colorCount:int=64, 
+            colorQuality:int=5, 
+            ) -> dict:
+        """
+        Extracts vibrant color palette RGB values from the specified image source.  
+        
+        Args:
+            imageSource (str):  
+                The image source to extract color palette information from.  If the prefix of the 
+                value is `http:` or `https:`, then the image is downloaded from the url.  
+                This can also point to a filename on the local file system.  
+                If null, the currently playing Spotify track image url is used.  
+                Example: `http://mydomain/image1.jpg`  
+                Example: `c:/image1.jpg`  
+            colorCount (int):  
+                The number of colors in the initial palette from which swatches will be generated.  
+                Default is 64.
+            colorQuality (int):  
+                Controls the processing time and quality of the palette generation.  
+                A lower value (e.g. 1) results in higher quality but takes more processing time, 
+                while a higher value (e.g. 5) is faster but may result in a lower-quality palette.   
+                Default is 5.
+                
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: An `ImageVibrantColors` object that contains extracted color information.
+        """
+        apiMethodName:str = 'service_spotify_get_image_vibrant_colors'
+        apiMethodParms:SIMethodParmListContext = None
+        result:ImageVibrantColors = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("imageSource", imageSource)
+            apiMethodParms.AppendKeyValue("colorCount", colorCount)
+            apiMethodParms.AppendKeyValue("colorQuality", colorQuality)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get vibrant colors from an image url", apiMethodParms)
+                
+            # request information from Spotify Web API.
+            # have to treat this one a little bit differently due to return of a Tuple[] value.
+            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
+            result = self.data.spotifyClient.GetImageVibrantColors(imageSource, colorCount, colorQuality)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
     def service_spotify_get_player_devices(
             self,
             refresh:bool=True,
@@ -4761,6 +4830,59 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # request information from Spotify Web API.
             _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
             result = self.data.spotifyClient.GetTrack(trackId)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_get_track_audio_features(
+            self, 
+            track_id:str,
+            ) -> dict:
+        """
+        Get audio feature information for a single track identified by its unique Spotify ID.
+        
+        Args:
+            trackId (str):  
+                The Spotify ID of the track.  
+                Example: `1kWUud3vY5ij5r62zxpTRy`
+                If null, the currently playing track uri id value is used; a Spotify Free or Premium account 
+                is required to correctly read the currently playing context.
+            
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A `AudioFeatures` object that contain the audio feature details.
+        """
+        apiMethodName:str = 'service_spotify_get_track_audio_features'
+        apiMethodParms:SIMethodParmListContext = None
+        result:AudioFeatures = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("track_id", track_id)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Track Audio Features Service", apiMethodParms)
+                
+            # request information from Spotify Web API.
+            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
+            result = self.data.spotifyClient.GetTrackAudioFeatures(track_id)
 
             # return the (partial) user profile that retrieved the result, as well as the result itself.
             return {
