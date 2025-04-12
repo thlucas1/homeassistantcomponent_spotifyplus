@@ -178,6 +178,7 @@ SERVICE_SPOTIFY_SEARCH_EPISODES:str = 'search_episodes'
 SERVICE_SPOTIFY_SEARCH_PLAYLISTS:str = 'search_playlists'
 SERVICE_SPOTIFY_SEARCH_SHOWS:str = 'search_shows'
 SERVICE_SPOTIFY_SEARCH_TRACKS:str = 'search_tracks'
+SERVICE_SPOTIFY_TRIGGER_SCAN_INTERVAL:str = 'trigger_scan_interval'
 SERVICE_SPOTIFY_UNFOLLOW_ARTISTS:str = 'unfollow_artists'
 SERVICE_SPOTIFY_UNFOLLOW_PLAYLIST:str = 'unfollow_playlist'
 SERVICE_SPOTIFY_UNFOLLOW_USERS:str = 'unfollow_users'
@@ -1069,6 +1070,12 @@ SERVICE_SPOTIFY_SEARCH_TRACKS_SCHEMA = vol.Schema(
     }
 )
 
+SERVICE_SPOTIFY_TRIGGER_SCAN_INTERVAL_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+    }
+)
+
 SERVICE_SPOTIFY_UNFOLLOW_ARTISTS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
@@ -1155,7 +1162,7 @@ SERVICE_VOLUME_SET_STEP_SCHEMA = vol.Schema(
 
 
 # -----------------------------------------------------------------------------------
-# Custom Service Schemas - internal testing
+# Custom Service Schemas - non-Spotify Web API related.
 # -----------------------------------------------------------------------------------
 SERVICE_TEST_TOKEN_EXPIRE:str = 'test_token_expire'
 SERVICE_TEST_TOKEN_EXPIRE_SCHEMA = vol.Schema(
@@ -1500,6 +1507,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     ids = service.data.get("ids")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     await hass.async_add_executor_job(entity.service_spotify_save_track_favorites, ids)
+
+                elif service.service == SERVICE_SPOTIFY_TRIGGER_SCAN_INTERVAL:
+
+                    # test token expiration.
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    await hass.async_add_executor_job(entity.service_spotify_trigger_scan_interval)
 
                 elif service.service == SERVICE_SPOTIFY_UNFOLLOW_ARTISTS:
 
@@ -3186,6 +3199,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             service_handle_spotify_serviceresponse,
             schema=SERVICE_SPOTIFY_SEARCH_TRACKS_SCHEMA,
             supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_TRIGGER_SCAN_INTERVAL, SERVICE_SPOTIFY_TRIGGER_SCAN_INTERVAL_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_TRIGGER_SCAN_INTERVAL,
+            service_handle_spotify_command,
+            schema=SERVICE_SPOTIFY_TRIGGER_SCAN_INTERVAL_SCHEMA,
+            supports_response=SupportsResponse.NONE,
         )
 
         _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_UNFOLLOW_ARTISTS, SERVICE_SPOTIFY_UNFOLLOW_ARTISTS_SCHEMA)

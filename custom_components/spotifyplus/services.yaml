@@ -3859,6 +3859,20 @@ search_tracks:
         number:
           mode: box
 
+trigger_scan_interval:
+  name: Trigger Scan Interval
+  description: Triggers a scan interval sequence, which will update HA State values from content currently being played on the user's Spotify account.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+
 unfollow_artists:
   name: Unfollow Artists
   description: Remove the current user as a follower of one or more artists.

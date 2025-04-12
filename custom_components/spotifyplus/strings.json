@@ -36,7 +36,9 @@
           "script_turn_on": "Script called to turn on device that plays media content.",
           "script_turn_off": "Script called to turn off device that plays media content.",
           "source_list_hide": "The semi-colon delimited list of device names to hide in the source list.",
-          "spotify_scan_interval": "Scan interval (in seconds) used to query Spotify Player playstate (range 4 - 60)."
+          "spotify_scan_interval": "Scan interval (in seconds) used to query Spotify Player playstate (range 4 - 60).",
+          "turn_off_auto_pause": "Automatically pause Spotify Player when media player is turned off.",
+          "turn_on_auto_resume": "Automatically resume Spotify Player when media player is turned on."
         },
         "submit": "Next"
       },
@@ -2313,6 +2315,16 @@
         "limit_total": {
           "name": "Limit Total",
           "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        }
+      }
+    },
+    "trigger_scan_interval": {
+      "name": "Trigger Scan Interval",
+      "description": "Triggers a scan interval sequence, which will update HA State values from content currently being played on the user's Spotify account.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
         }
       }
     },

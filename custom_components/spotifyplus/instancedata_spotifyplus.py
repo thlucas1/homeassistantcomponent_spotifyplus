@@ -24,6 +24,8 @@ from .const import (
     CONF_OPTION_SPOTIFY_SCAN_INTERVAL,
     CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_DC,
     CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY,
+    CONF_OPTION_TURN_OFF_AUTO_PAUSE,
+    CONF_OPTION_TURN_ON_AUTO_RESUME,
     DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL,
 )
 
@@ -151,3 +153,20 @@ class InstanceDataSpotifyPlus:
         # return result.
         return result
 
+    @property
+    def OptionTurnOffAutoPause(self) -> bool:
+        """
+        Automatically pause (True) or not (False) the Spotify Player when the media player is turned off.
+
+        This option is only relevant if the player TURN_ON / TURN_OFF features are enabled.
+        """
+        return self.options.get(CONF_OPTION_TURN_OFF_AUTO_PAUSE, True)
+
+    @property
+    def OptionTurnOnAutoResume(self) -> bool:
+        """
+        Automatically resume (True) or not (False) the Spotify Player when the media player is turned on.
+
+        This option is only relevant if the player TURN_ON / TURN_OFF features are enabled.
+        """
+        return self.options.get(CONF_OPTION_TURN_ON_AUTO_RESUME, True)

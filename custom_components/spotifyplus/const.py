@@ -23,6 +23,8 @@ CONF_OPTION_SOURCE_LIST_HIDE = "source_list_hide"
 CONF_OPTION_SPOTIFY_SCAN_INTERVAL = "spotify_scan_interval"
 CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_DC = "spotify_webplayer_cookie_sp_dc"
 CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY = "spotify_webplayer_cookie_sp_key"
+CONF_OPTION_TURN_OFF_AUTO_PAUSE = "turn_off_auto_pause"
+CONF_OPTION_TURN_ON_AUTO_RESUME = "turn_on_auto_resume"
 
 DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL = 30
 

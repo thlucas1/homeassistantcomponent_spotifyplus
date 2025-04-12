@@ -6,6 +6,12 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.113 ] - 2025/04/12
+
+  * Added service `trigger_scan_interval` to trigger a scan interval sequence, which will update HA State values from content currently being played on the user's Spotify account.  Use this service if you have external processes or automations that detect changes to the Spotify Player.  This service will then force the integration to immediately scan the Spotify Web API Player for updated player state.
+  * Added configuration option [Auto Pause on Turn OFF](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#auto-pause-on-turn-off) to automatically pause the Spotify Player when the media player is turned off (enabled by default).
+  * Added configuration option [Auto Resume on Turn ON](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#auto-resume-on-turn-on) to automatically resume the Spotify Player when the media player is turned on (enabled by default).
+
 ###### [ 1.0.112 ] - 2025/04/07
 
   * Updated service `get_image_vibrant_colors` to include the rgb, hsl, and population values along with the rgb_hex values.  

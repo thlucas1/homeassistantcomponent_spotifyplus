@@ -509,7 +509,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # only update the state value with real-time info if in the last scan interval;
             # otherwise, we will use the difference of the duration minus the last known position.
             if (self._playTimeRemainingEst <= self._spotifyScanInterval):
-                _logsi.LogVerbose("'%s': Estimated play time remaining is %s seconds; in last interval window" % (self.name, self._playTimeRemainingEst))
+                if (self._attr_state == MediaPlayerState.PLAYING):
+                    _logsi.LogVerbose("'%s': Estimated play time remaining is %s seconds; in last interval window" % (self.name, self._playTimeRemainingEst))
                 attributes[ATTR_SPOTIFYPLUS_PLAY_TIME_REMAINING_EST] = self._playTimeRemainingEst
             else:
                 attributes[ATTR_SPOTIFYPLUS_PLAY_TIME_REMAINING_EST] = int(self._attr_media_duration - self._attr_media_position)
@@ -894,7 +895,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 # transfer playback to the specified source.
                 self.service_spotify_player_transfer_playback(
                     source, 
-                    play=True,
+                    play=self.data.OptionTurnOnAutoResume,
                     refreshDeviceList=True,
                     forceActivateDevice=True,
                     deviceIdFrom=self._attr_source)
@@ -977,7 +978,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # pause playback.
             if (self.data.spotifyClient.UserProfile.IsProductPremium) or (self.data.spotifyClient.HasSpotifyWebPlayerCredentials):
                 if self._playerState.IsPlaying:
-                    self.data.spotifyClient.PlayerMediaPause(deviceId=self._attr_source)
+                    if (self.data.OptionTurnOffAutoPause):
+                        self.data.spotifyClient.PlayerMediaPause(deviceId=self._attr_source)
                                
             # call script to power off device.
             self._CallScriptPower(self.data.OptionScriptTurnOff, "turn_off")
@@ -1067,7 +1069,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
                 # is playing content paused?  if so, then resume play.
                 if (self._playerState.Device.IsActive) \
-                and (self._playerState.Actions.Pausing):
+                and (self._playerState.Actions.Pausing) \
+                and (self.data.OptionTurnOnAutoResume):
                     _logsi.LogVerbose("'%s': MediaPlayer turned on - resuming play on source device: '%s'" % (self.name, self._playerState.Device.Name))
                     self.media_play()
                     self._isInCommandEvent = True  # turn "in a command event" indicator back on.
@@ -8074,6 +8077,39 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 "result": searchResponse.Tracks.ToDictionary()
             }
 
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_trigger_scan_interval(
+            self, 
+            ) -> None:
+        """
+        Triggers a scan interval sequence, which will update HA State values 
+        from content currently being played on the user's Spotify account.
+        """
+        apiMethodName:str = 'service_spotify_trigger_scan_interval'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Trigger Scan Interval Sequence", apiMethodParms)
+
+            # force a scan window at the next interval.
+            _logsi.LogVerbose("'%s': Forcing a playerState scan window for the next %d updates" % (self.name, SPOTIFY_SCAN_INTERVAL_COMMAND))
+            self._commandScanInterval = SPOTIFY_SCAN_INTERVAL_COMMAND
+                
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
