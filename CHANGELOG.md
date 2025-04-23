@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.114 ] - 2025/04/23
+
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.200.
+
 ###### [ 1.0.113 ] - 2025/04/12
 
   * Added service `trigger_scan_interval` to trigger a scan interval sequence, which will update HA State values from content currently being played on the user's Spotify account.  Use this service if you have external processes or automations that detect changes to the Spotify Player.  This service will then force the integration to immediately scan the Spotify Web API Player for updated player state.
