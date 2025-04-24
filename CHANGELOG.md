@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.115 ] - 2025/04/24
+
+  * Updated `media_player` initialization logic to use the default device id instead of the name if a DefaultDeviceId configuration option was specified.
+  * Updated `media_player.turn_on` service logic to use the default device id instead of the name if a DefaultDeviceId configuration option was specified.
+
 ###### [ 1.0.114 ] - 2025/04/23
 
   * Updated underlying `spotifywebapipython` package requirement to version 1.0.200.

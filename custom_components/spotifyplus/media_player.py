@@ -426,9 +426,12 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 self._attr_supported_features &= ~MediaPlayerEntityFeature.TURN_ON
                 self._attr_state = MediaPlayerState.IDLE
 
-            # set default device name to use for player transport functions that are executed
-            # but there is no active Spotify player device.
-            self.data.spotifyClient.DefaultDeviceId = PlayerDevice.GetNameFromSelectItem(self.data.OptionDeviceDefault)
+            # set default device id to use for player transport functions that are executed
+            # when there is no active Spotify player device.
+            value:str = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
+            if (value is None):
+                value = PlayerDevice.GetNameFromSelectItem(self.data.OptionDeviceDefault)
+            self.data.spotifyClient.DefaultDeviceId = value
             
             # trace.
             _logsi.LogObject(SILevel.Verbose, "'%s': MediaPlayer SpotifyClient object" % self.name, self.data.spotifyClient)
@@ -1052,7 +1055,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                     source = self._source_at_poweroff
                     _logsi.LogVerbose("'%s': Source at last power off will be selected: \"%s\"" % (self.name, source))
                 elif (self.data.OptionDeviceDefault is not None):
-                    source = PlayerDevice.GetNameFromSelectItem(self.data.OptionDeviceDefault)
+                    source = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
+                    if (source is None):
+                        source = PlayerDevice.GetNameFromSelectItem(self.data.OptionDeviceDefault)
                     _logsi.LogVerbose("'%s': SpotifyPlus configuration option default device will be selected: \"%s\"" % (self.name, source))
                 else:
                     _logsi.LogVerbose("'%s': Could not auto-select a source for play" % (self.name))
