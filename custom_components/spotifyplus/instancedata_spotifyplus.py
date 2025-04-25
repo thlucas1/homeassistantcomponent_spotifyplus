@@ -26,6 +26,7 @@ from .const import (
     CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY,
     CONF_OPTION_TURN_OFF_AUTO_PAUSE,
     CONF_OPTION_TURN_ON_AUTO_RESUME,
+    CONF_OPTION_TURN_OFF_AUTO_TRANSFER,
     DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL,
 )
 
@@ -160,7 +161,7 @@ class InstanceDataSpotifyPlus:
 
         This option is only relevant if the player TURN_ON / TURN_OFF features are enabled.
         """
-        return self.options.get(CONF_OPTION_TURN_OFF_AUTO_PAUSE, True)
+        return self.options.get(CONF_OPTION_TURN_OFF_AUTO_PAUSE, False)
 
     @property
     def OptionTurnOnAutoResume(self) -> bool:
@@ -170,3 +171,13 @@ class InstanceDataSpotifyPlus:
         This option is only relevant if the player TURN_ON / TURN_OFF features are enabled.
         """
         return self.options.get(CONF_OPTION_TURN_ON_AUTO_RESUME, True)
+    
+    @property
+    def OptionTurnOffAutoTransfer(self) -> bool:
+        """
+        Automatically transfer music to the default device (True) or not (False) when the media player is turned on.
+
+        This option is only relevant if the player TURN_ON / TURN_OFF features are enabled.
+        """
+        return self.options.get(CONF_OPTION_TURN_OFF_AUTO_TRANSFER, False)
+

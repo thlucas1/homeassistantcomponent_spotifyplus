@@ -1031,7 +1031,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self._playerState = self.data.spotifyClient.GetDevicePlaybackState(deviceId=self._attr_source)
 
             # is this a spotify premium account?
-            if (self.data.spotifyClient.UserProfile.IsProductPremium) or (self.data.spotifyClient.HasSpotifyWebPlayerCredentials):
+            if (self.data.OptionTurnOffAutoTransfer == False) and ((self.data.spotifyClient.UserProfile.IsProductPremium) or (self.data.spotifyClient.HasSpotifyWebPlayerCredentials)):
     
                 # try to automatically select a source for play, in this order:
                 # 1) Source at power on, if there is one (set in source_select if powered off).
