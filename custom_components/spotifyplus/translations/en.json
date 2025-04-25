@@ -38,7 +38,8 @@
           "source_list_hide": "The semi-colon delimited list of device names to hide in the source list.",
           "spotify_scan_interval": "Scan interval (in seconds) used to query Spotify Player playstate (range 4 - 60).",
           "turn_off_auto_pause": "Automatically pause Spotify Player when media player is turned off.",
-          "turn_on_auto_resume": "Automatically resume Spotify Player when media player is turned on."
+          "turn_on_auto_resume": "Automatically resume Spotify Player when media player is turned on.",
+          "turn_on_auto_source_select": "Automatically select source when media player is turned on."
         },
         "submit": "Next"
       },

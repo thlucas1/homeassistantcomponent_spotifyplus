@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.116 ] - 2025/04/25
+
+  * Added configuration option [Auto Select Source on Turn ON](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#auto-select-source-on-turn-on) to automatically select the source device to transfer playback to (True) or not (False) when the media player is turned on (enabled by default).
+
 ###### [ 1.0.115 ] - 2025/04/24
 
   * Updated `media_player` initialization logic to use the default device id instead of the name if a DefaultDeviceId configuration option was specified.

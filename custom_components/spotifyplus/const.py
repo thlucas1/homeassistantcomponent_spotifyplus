@@ -25,6 +25,7 @@ CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_DC = "spotify_webplayer_cookie_sp_dc"
 CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY = "spotify_webplayer_cookie_sp_key"
 CONF_OPTION_TURN_OFF_AUTO_PAUSE = "turn_off_auto_pause"
 CONF_OPTION_TURN_ON_AUTO_RESUME = "turn_on_auto_resume"
+CONF_OPTION_TURN_ON_AUTO_SOURCE_SELECT = "turn_on_auto_source_select"
 
 DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL = 30
 

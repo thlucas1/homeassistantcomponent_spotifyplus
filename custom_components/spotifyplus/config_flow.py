@@ -55,6 +55,7 @@ from .const import (
     CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY,
     CONF_OPTION_TURN_OFF_AUTO_PAUSE,
     CONF_OPTION_TURN_ON_AUTO_RESUME,
+    CONF_OPTION_TURN_ON_AUTO_SOURCE_SELECT,
     DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL,
     DOMAIN, 
     DOMAIN_SCRIPT,
@@ -413,7 +414,8 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                 self._Options[CONF_OPTION_SOURCE_LIST_HIDE] = user_input.get(CONF_OPTION_SOURCE_LIST_HIDE, None)
                 self._Options[CONF_OPTION_TURN_OFF_AUTO_PAUSE] = user_input.get(CONF_OPTION_TURN_OFF_AUTO_PAUSE, True)
                 self._Options[CONF_OPTION_TURN_ON_AUTO_RESUME] = user_input.get(CONF_OPTION_TURN_ON_AUTO_RESUME, True)
-                
+                self._Options[CONF_OPTION_TURN_ON_AUTO_SOURCE_SELECT] = user_input.get(CONF_OPTION_TURN_ON_AUTO_SOURCE_SELECT, True)
+
                 # validations.
                 # spotify scan interval must be in the 4 to 60 range (if specified).
                 spotifyScanInterval:int = user_input.get(CONF_OPTION_SPOTIFY_SCAN_INTERVAL, DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL)
@@ -478,6 +480,10 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                                  ): cv.boolean,
                     vol.Optional(CONF_OPTION_TURN_ON_AUTO_RESUME, 
                                  description={"suggested_value": self._Options.get(CONF_OPTION_TURN_ON_AUTO_RESUME)},
+                                 default=True,  # default to True if not supplied
+                                 ): cv.boolean,
+                    vol.Optional(CONF_OPTION_TURN_ON_AUTO_SOURCE_SELECT, 
+                                 description={"suggested_value": self._Options.get(CONF_OPTION_TURN_ON_AUTO_SOURCE_SELECT)},
                                  default=True,  # default to True if not supplied
                                  ): cv.boolean,
                 }

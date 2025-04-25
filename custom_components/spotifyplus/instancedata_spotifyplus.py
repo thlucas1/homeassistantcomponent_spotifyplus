@@ -26,6 +26,7 @@ from .const import (
     CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY,
     CONF_OPTION_TURN_OFF_AUTO_PAUSE,
     CONF_OPTION_TURN_ON_AUTO_RESUME,
+    CONF_OPTION_TURN_ON_AUTO_SOURCE_SELECT,
     DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL,
 )
 
@@ -170,3 +171,16 @@ class InstanceDataSpotifyPlus:
         This option is only relevant if the player TURN_ON / TURN_OFF features are enabled.
         """
         return self.options.get(CONF_OPTION_TURN_ON_AUTO_RESUME, True)
+
+    @property
+    def OptionTurnOnAutoSelectSource(self) -> bool:
+        """
+        Automatically select the source device to transfer playback to (True) or not (False) when the 
+        media player is turned on (enabled by default).
+        
+        If False, then source will be obtained from Spotify Player Playback state.  If there is no active 
+        Spotify Player device, then a source will not be selected.
+
+        This option is only relevant if the player TURN_ON / TURN_OFF features are enabled.
+        """
+        return self.options.get(CONF_OPTION_TURN_ON_AUTO_SOURCE_SELECT, True)
