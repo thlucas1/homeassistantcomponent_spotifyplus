@@ -426,9 +426,12 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 self._attr_supported_features &= ~MediaPlayerEntityFeature.TURN_ON
                 self._attr_state = MediaPlayerState.IDLE
 
-            # set default device name to use for player transport functions that are executed
-            # but there is no active Spotify player device.
-            self.data.spotifyClient.DefaultDeviceId = PlayerDevice.GetNameFromSelectItem(self.data.OptionDeviceDefault)
+            # set default device id to use for player transport functions that are executed
+            # when there is no active Spotify player device.
+            value:str = PlayerDevice.GetIdFromSelectItem(self.data.OptionDeviceDefault)
+            if (value is None):
+                value = PlayerDevice.GetNameFromSelectItem(self.data.OptionDeviceDefault)
+            self.data.spotifyClient.DefaultDeviceId = value
             
             # trace.
             _logsi.LogObject(SILevel.Verbose, "'%s': MediaPlayer SpotifyClient object" % self.name, self.data.spotifyClient)
