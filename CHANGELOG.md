@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.118 ] - 2025/04/27
+
+  * Updated `media_player.select_source` service to pass the device id for the `deviceIdFrom` argument when calling the transfer playback service.
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.202.
+
 ###### [ 1.0.117 ] - 2025/04/26
 
   * Updated underlying `spotifywebapipython` package requirement to version 1.0.201.

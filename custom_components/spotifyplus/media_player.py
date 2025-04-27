@@ -895,13 +895,19 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 
             else:
 
+                # resolve from device id.
+                fromDeviceId:str = self._attr_source
+                if (self._playerState is not None):
+                    if (self._playerState.Device is not None):
+                        fromDeviceId = self._playerState.Device.Id
+
                 # transfer playback to the specified source.
                 self.service_spotify_player_transfer_playback(
                     source, 
                     play=self.data.OptionTurnOnAutoResume,
                     refreshDeviceList=True,
                     forceActivateDevice=True,
-                    deviceIdFrom=self._attr_source)
+                    deviceIdFrom=fromDeviceId)
         
             # set the selected source.
             _logsi.LogVerbose("'%s': Selected source was changed to \"%s\"" % (self.name, self._attr_source))
