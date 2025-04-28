@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.119 ] - 2025/04/28
+
+  * Added extra state attribute `sp_device_is_restricted` that denotes if the source device is considered a restricted device (true) or not (false) by the Spotify Web API.
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.203.
+
 ###### [ 1.0.118 ] - 2025/04/27
 
   * Updated `media_player.select_source` service to pass the device id for the `deviceIdFrom` argument when calling the transfer playback service.

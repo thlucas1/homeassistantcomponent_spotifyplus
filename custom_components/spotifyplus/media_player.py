@@ -125,6 +125,7 @@ ATTR_SPOTIFYPLUS_DEVICE_ID = "sp_device_id"
 ATTR_SPOTIFYPLUS_DEVICE_NAME = "sp_device_name"
 ATTR_SPOTIFYPLUS_DEVICE_IS_BRAND_SONOS = "sp_device_is_brand_sonos"
 ATTR_SPOTIFYPLUS_DEVICE_IS_CHROMECAST = "sp_device_is_chromecast"
+ATTR_SPOTIFYPLUS_DEVICE_IS_RESTRICTED = "sp_device_is_restricted"
 ATTR_SPOTIFYPLUS_DEVICE_MUSIC_SOURCE = "sp_device_music_source"
 ATTR_SPOTIFYPLUS_ITEM_TYPE = "sp_item_type"
 ATTR_SPOTIFYPLUS_PLAY_TIME_REMAINING_EST = "sp_play_time_remaining_est"
@@ -457,6 +458,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         attributes[ATTR_SPOTIFYPLUS_DEVICE_ID] = ATTRVALUE_NO_DEVICE
         attributes[ATTR_SPOTIFYPLUS_DEVICE_IS_BRAND_SONOS] = False
         attributes[ATTR_SPOTIFYPLUS_DEVICE_IS_CHROMECAST] = False
+        attributes[ATTR_SPOTIFYPLUS_DEVICE_IS_RESTRICTED] = False
         attributes[ATTR_SPOTIFYPLUS_DEVICE_MUSIC_SOURCE] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_DEVICE_NAME] = ATTRVALUE_NO_DEVICE
         attributes[ATTR_SPOTIFYPLUS_ITEM_TYPE] = ATTRVALUE_UNKNOWN
@@ -500,6 +502,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         if self._spotifyConnectDevice is not None:
             attributes[ATTR_SPOTIFYPLUS_DEVICE_IS_BRAND_SONOS] = self._spotifyConnectDevice.IsSonos
             attributes[ATTR_SPOTIFYPLUS_DEVICE_IS_CHROMECAST] = self._spotifyConnectDevice.IsChromeCast
+            attributes[ATTR_SPOTIFYPLUS_DEVICE_IS_RESTRICTED] = self._spotifyConnectDevice.IsRestricted
 
         # add currently active playlist information.
         if self._playlist is not None:
