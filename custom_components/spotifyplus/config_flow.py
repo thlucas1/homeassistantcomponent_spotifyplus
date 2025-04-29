@@ -432,14 +432,18 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                     # show the next configuration options form.
                     return await self.async_step_02_options_player()
 
-            # load available spotify connect devices.
+            # load available spotify connect devices;
             device_list:list[str] = await self.hass.async_add_executor_job(self._GetPlayerDevicesList)
-            if (device_list is None) or (len(device_list) == 0):
-                errors["base"] = "no_player_devices"
 
             # log device that is currently selected.
             device_default:str = self._Options.get(CONF_OPTION_DEVICE_DEFAULT, None)
             _logsi.LogVerbose("'%s': OptionsFlow option '%s' - SELECTED value: '%s'" % (self._name, CONF_OPTION_DEVICE_DEFAULT, device_default))
+
+            # if no devices, then remove device default value.
+            if (device_list is None):
+                device_list = []
+                _logsi.LogVerbose("'%s': OptionsFlow option '%s' - Spotify Connect device list is empty; removing default device selection" % (self._name, CONF_OPTION_DEVICE_DEFAULT))
+                self._Options.pop(CONF_OPTION_DEVICE_DEFAULT, None)
                    
             # create validation schema.
             schema = vol.Schema(
@@ -583,11 +587,6 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                         data=self._Options
                     )
 
-            # load available spotify connect devices.
-            device_list:list[str] = await self.hass.async_add_executor_job(self._GetPlayerDevicesList)
-            if (device_list is None) or (len(device_list) == 0):
-                errors["base"] = "no_player_devices"
-
             # log device that is currently selected.
             device_loginid:str = self._Options.get(CONF_OPTION_DEVICE_LOGINID, None)
             _logsi.LogVerbose("'%s': OptionsFlow option '%s' - value: '%s'" % (self._name, CONF_OPTION_DEVICE_LOGINID, device_loginid))
@@ -676,7 +675,7 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
         except Exception as ex:
             
             _logsi.LogError("'%s': OptionsFlow could not retrieve Spotify Connect player device list: %s" % (self._name, str(ex)))
-            return None
+            return []
         
         finally:
 

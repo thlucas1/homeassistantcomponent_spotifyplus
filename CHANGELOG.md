@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.120 ] - 2025/04/29
+
+  * Removed requirement that devices are required when configuring the integration, as some devices are not registered until AFTER configuration.
+
 ###### [ 1.0.119 ] - 2025/04/28
 
   * Added extra state attribute `sp_device_is_restricted` that denotes if the source device is considered a restricted device (true) or not (false) by the Spotify Web API.

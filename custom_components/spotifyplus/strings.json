@@ -57,7 +57,6 @@
       }
     },
     "error": {
-      "no_player_devices": "Per Spotify Web API, there are currently no Spotify Connect devices active.  Please close the configuration options, play a track on any Spotify Connect player for a minute or two, and then open the configuration options again.",
       "device_password_required": "Spotify Connect Device Password is required if a Spotify Connect Device Username was specified.",
       "device_username_required": "Spotify Connect Device Username is required if a Spotify Connect Device Password was specified.",
       "spotify_scan_interval_range_invalid": "Spotify Scan Interval is invalid; please specify a whole number between 4 and 60, or leave blank to use the default (30).",
