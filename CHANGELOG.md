@@ -6,6 +6,13 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.121 ] - 2025/05/04
+
+  * Updated the `__init__.py.options_update_listener` method to only acquire a token updater lock if the token is being refreshed.  Prior to the fix, the lock was being acquired if the token was refreshed OR if integration configuration options were updated.  This was causing a thread deadlock to arise if the Spotify token was refreshed while configuration options were being updated, which would hang the Home Assistant user-interface.
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.204.
+  * The above `spotifywebapiPython` package will now return an exception due to the functions being re-deprecated by the Spotify development team as of 2025/05/03.  More information can be found on the [Spotify Developer Forum Blog post](https://developer.spotify.com/blog/2024-11-27-changes-to-the-web-api) that was conveyed on November 27, 2024.  The following methods will now raise a `SpotifyApiError` exception due to the Spotify development team changes: `GetTrackRecommendations`, `GetGenres`.
+  * Due to the above changes made by Spotify, any Algorithmic and Spotify-owned editorial playlists are no longer accessible by certain services (returns a `404 Not Found` error).  This means that any "Made For You" playlists cannot be returned in the `GetPlaylistFavorites` method results.  User-defined playlist favorites will be returned as normal.
+
 ###### [ 1.0.120 ] - 2025/04/29
 
   * Removed requirement that devices are required when configuring the integration, as some devices are not registered until AFTER configuration.
