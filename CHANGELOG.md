@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.122 ] - 2025/05/08
+
+  * Restored logic in the `__init__.py.options_update_listener` method to acquire a token updater lock if the token is being refreshed OR if integration configuration options were updated.
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.206.
+
 ###### [ 1.0.121 ] - 2025/05/04
 
   * Updated the `__init__.py.options_update_listener` method to only acquire a token updater lock if the token is being refreshed.  Prior to the fix, the lock was being acquired if the token was refreshed OR if integration configuration options were updated.  This was causing a thread deadlock to arise if the Spotify token was refreshed while configuration options were being updated, which would hang the Home Assistant user-interface.
