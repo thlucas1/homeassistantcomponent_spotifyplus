@@ -6,6 +6,13 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.123 ] - 2025/05/12
+
+  * Restored ability to activate Google Chromecast devices from idle / sleep state.  Follow the steps in the [Spotify Desktop Player Authentication Configuration](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#spotify-desktop-player-authentication-configuration) guide to enable this functionality.
+  * Removed Spotify Web Player credentials from integration configuration options.  These credentials were disabled by Spotify for use with the spotify Web API on 2025/05/07.
+  * Removed extra state attribute `sp_user_has_web_player_credentials`.
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.207.
+
 ###### [ 1.0.122 ] - 2025/05/08
 
   * Restored logic in the `__init__.py.options_update_listener` method to acquire a token updater lock if the token is being refreshed OR if integration configuration options were updated.

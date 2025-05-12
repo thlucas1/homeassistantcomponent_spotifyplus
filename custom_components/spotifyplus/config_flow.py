@@ -51,8 +51,6 @@ from .const import (
     CONF_OPTION_SCRIPT_TURN_ON,
     CONF_OPTION_SOURCE_LIST_HIDE,
     CONF_OPTION_SPOTIFY_SCAN_INTERVAL,
-    CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_DC,
-    CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY,
     CONF_OPTION_TURN_OFF_AUTO_PAUSE,
     CONF_OPTION_TURN_ON_AUTO_RESUME,
     CONF_OPTION_TURN_ON_AUTO_SOURCE_SELECT,
@@ -555,24 +553,16 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                 self._Options[CONF_OPTION_DEVICE_LOGINID] = user_input.get(CONF_OPTION_DEVICE_LOGINID, None)
                 self._Options[CONF_OPTION_DEVICE_USERNAME] = user_input.get(CONF_OPTION_DEVICE_USERNAME, None)
                 self._Options[CONF_OPTION_DEVICE_PASSWORD] = user_input.get(CONF_OPTION_DEVICE_PASSWORD, None)
-                self._Options[CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_DC] = user_input.get(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_DC, None)
-                self._Options[CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY] = user_input.get(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY, None)
                 
                 # validations.
                 # if device username was entered then device password is required.
                 deviceLoginid:str = user_input.get(CONF_OPTION_DEVICE_LOGINID, None)
                 deviceUsername:str = user_input.get(CONF_OPTION_DEVICE_USERNAME, None)
                 devicePassword:str = user_input.get(CONF_OPTION_DEVICE_PASSWORD, None)
-                webplayerCookieSpdc:str = user_input.get(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_DC, None)
-                webplayerCookieSpkey:str = user_input.get(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY, None)
                 if (deviceUsername is not None) and (devicePassword is None):
                     errors["base"] = "device_password_required"
                 if (deviceUsername is None) and (devicePassword is not None):
                     errors["base"] = "device_username_required"
-                if (webplayerCookieSpdc is not None) and (webplayerCookieSpkey is None):
-                    errors["base"] = "spotify_webplayer_sp_key_required"
-                if (webplayerCookieSpkey is not None) and (webplayerCookieSpdc is None):
-                    errors["base"] = "spotify_webplayer_sp_dc_required"
 
                 # any validation errors? if not, then ...
                 if "base" not in errors:
@@ -592,8 +582,6 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
             _logsi.LogVerbose("'%s': OptionsFlow option '%s' - value: '%s'" % (self._name, CONF_OPTION_DEVICE_LOGINID, device_loginid))
             device_username:str = self._Options.get(CONF_OPTION_DEVICE_USERNAME, None)
             _logsi.LogVerbose("'%s': OptionsFlow option '%s' - value: '%s'" % (self._name, CONF_OPTION_DEVICE_USERNAME, device_username))
-            webplayer_cookie_sp_key:str = self._Options.get(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY, None)
-            _logsi.LogVerbose("'%s': OptionsFlow option '%s' - value: '%s'" % (self._name, CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY, webplayer_cookie_sp_key))
                    
             # create validation schema.
             schema = vol.Schema(
@@ -608,12 +596,6 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
                                  ): cv.string,
                     vol.Optional(CONF_OPTION_DEVICE_PASSWORD, 
                                  description={"suggested_value": self._Options.get(CONF_OPTION_DEVICE_PASSWORD)},
-                                 ): cv.string,
-                    vol.Optional(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_DC, 
-                                 description={"suggested_value": self._Options.get(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_DC)},
-                                 ): cv.string,
-                    vol.Optional(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY, 
-                                 description={"suggested_value": self._Options.get(CONF_OPTION_SPOTIFY_WEBPLAYER_COOKIE_SP_KEY)},
                                  ): cv.string,
                 }
             )

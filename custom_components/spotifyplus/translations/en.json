@@ -49,9 +49,7 @@
         "data": {
           "device_loginid": "Spotify Connect canonical loginid to use when connecting to an inactive device.",
           "device_password": "Spotify Connect password to use when connecting to an inactive device.",
-          "device_username": "Spotify Connect username to use when connecting to an inactive device.",
-          "spotify_webplayer_cookie_sp_dc": "Spotify Web Player cookie credentials SP_DC value.",
-          "spotify_webplayer_cookie_sp_key": "Spotify Web Player cookie credentials SP_KEY value."
+          "device_username": "Spotify Connect username to use when connecting to an inactive device."
         },
         "submit": "Save"
       }
@@ -59,9 +57,7 @@
     "error": {
       "device_password_required": "Spotify Connect Device Password is required if a Spotify Connect Device Username was specified.",
       "device_username_required": "Spotify Connect Device Username is required if a Spotify Connect Device Password was specified.",
-      "spotify_scan_interval_range_invalid": "Spotify Scan Interval is invalid; please specify a whole number between 4 and 60, or leave blank to use the default (30).",
-      "spotify_webplayer_sp_dc_required": "Spotify Web Player cookie sp_dc value is required if the Spotify Web Player cookie sp_key value was specified.",
-      "spotify_webplayer_sp_key_required": "Spotify Web Player cookie sp_key value is required if the Spotify Web Player cookie sp_dc value was specified."
+      "spotify_scan_interval_range_invalid": "Spotify Scan Interval is invalid; please specify a whole number between 4 and 60, or leave blank to use the default (30)."
     }
   },
   "system_health": {
