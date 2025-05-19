@@ -12,7 +12,7 @@ import logging
 import threading
 import voluptuous as vol
 
-from spotifywebapipython import SpotifyClient
+from spotifywebapipython import SpotifyClient, SpotifyAuthToken
 from spotifywebapipython.models import SpotifyConnectDevices, SpotifyConnectDevice
 
 from homeassistant.components import zeroconf
@@ -25,7 +25,6 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.config_entry_oauth2_flow import (OAuth2Session, async_get_config_entry_implementation)
 from homeassistant.helpers.issue_registry import IssueSeverity, async_create_issue
 from homeassistant.helpers.typing import ConfigType
-#from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .appmessages import STAppMessages
 from .const import (
@@ -3329,62 +3328,15 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
 
         # get OAuth2 implementation and create an OAuth2 session.
         implementation = await async_get_config_entry_implementation(hass, entry)
-        session = OAuth2Session(hass, entry, implementation)
-
         _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry OAuth2 implementation object" % entry.title, implementation)
+        session = OAuth2Session(hass, entry, implementation)
         _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry OAuth2 session object" % entry.title, session)
-        _logsi.LogDictionary(SILevel.Verbose, "'%s': Component async_setup_entry OAuth2 session.token (dictionary)" % entry.title, session.token, prettyPrint=True)
 
         # ensure we have a valid session token, and that the session is fully created.
+        _logsi.LogDictionary(SILevel.Verbose, "'%s': Component async_setup_entry OAuth2 session.token (dictionary)" % entry.title, session.token, prettyPrint=True)
         _logsi.LogVerbose("'%s': Component async_setup_entry is calling async_ensure_token_valid to ensure OAuth2 session is fully-established" % entry.title)
         await session.async_ensure_token_valid()
             
-        # *** Don't need the DataUpdateCoordinator anymore; left here in case we need it for future needs.
-        # # -----------------------------------------------------------------------------------
-        # # Define DataUpdateCoordinator function.
-        # # -----------------------------------------------------------------------------------
-        # async def _OnDataUpdateCoordinatorInterval() -> SpotifyConnectDevices:
-        #     """
-        #     This method will be executed by the DataUpdateCoordinator at regular intervals to 
-        #     provide data updates to the integration.
-
-        #     In our case, it will retrieve the list of Spotify Connect devices that are available.
-        #     Note that this is not really necessary starting with v1.0.86, but I left it in here
-        #     in case we wanted to re-enable it for other types of data updates in the future.
-            
-        #     Returns:
-        #         A `SpotifyConnectDevices` instance.
-        #     """
-        #     result:SpotifyConnectDevices = None
-
-        #     try:
-
-        #         _logsi.LogVerbose("'%s': Component DataUpdateCoordinator is retrieving Spotify Connect device list" % entry.title)
-
-        #         # just return the list of devices in the directory.
-        #         result = spotifyClient.SpotifyConnectDirectory.GetDevices()
-
-        #         # do not make any calls to the web api out of this method (or any underlying calls)
-        #         # since it could possibly invoke a "_TokenUpdater()" method call; that will repeat
-        #         # the token refresh and cause a thread deadlock since we call "async_refresh_token()"
-        #         # with a "run_coroutine_threadsafe()" method!
-
-        #         # # refresh Spotify Connect devices.
-        #         # result = await hass.async_add_executor_job(
-        #         #     spotifyClient.GetSpotifyConnectDevices,
-        #         #     True
-        #         # )
-
-        #         # trace.
-        #         _logsi.LogDictionary(SILevel.Verbose, "'%s': Component DataUpdateCoordinator update results" % entry.title, result.ToDictionary(), prettyPrint=True)
-        #         return result
-
-        #     except Exception as ex:
-                
-        #         _logsi.LogException("'%s': Component DataUpdateCoordinator update exception" % entry.title, ex)
-        #         raise UpdateFailed from ex
-
-
         # -----------------------------------------------------------------------------------
         # Define OAuth2 Session Token Updater.
         # -----------------------------------------------------------------------------------
@@ -3401,7 +3353,7 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
             # trace.
             _logsi.LogVerbose("'%s': TOKENUPDATER_LOCK is preparing to set the lock for method _TokenUpdater" % entry.title, colorValue=SIColors.Gold)
             if TOKENUPDATER_LOCK.locked():
-                _logsi.LogVerbose("'%s': _TokenUpdater is waiting on a previous token update to complete" % entry.title, colorValue=SIColors.Red)
+                _logsi.LogVerbose("'%s': _TokenUpdater is waiting on a previous token update to complete" % entry.title, colorValue=SIColors.Orange)
 
             # only allow one thread to update authorization token at a time; otherwise a deadlock
             # occurs in the `run_coroutine_threadsafe(session.implementation.async_refresh_token)` line!
@@ -3414,7 +3366,7 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
 
                     # trace.
                     _logsi.EnterMethod(SILevel.Debug)
-                    _logsi.LogVerbose("'%s': Component OAuth2 session token is either expired or not valid; calling async_refresh_token to refresh the token" % entry.title, colorValue=SIColors.Gold)
+                    _logsi.LogVerbose("'%s': Component OAuth2 session token is either expired, not valid, or just refreshed by another HA worker thread; starting token refresh processing" % entry.title, colorValue=SIColors.Gold)
 
                     # note that we do NOT use the `async_ensure_token_valid` method here, as it may
                     # determine that the token does not yet need to be refreshed (via self.valid_token).
@@ -3435,8 +3387,19 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
 
                     # trace.
                     _logsi.LogObject(SILevel.Debug, "'%s': Component OAuth2 implementation object" % entry.title, implementation, colorValue=SIColors.Gold)
-                    _logsi.LogDictionary(SILevel.Verbose, "'%s': Component OAuth2 session.token (pre-update)" % entry.title, session.token, prettyPrint=True, colorValue=SIColors.Gold)
-                
+                    _logsi.LogDictionary(SILevel.Verbose, "'%s': Component OAuth2 session.token (pre-update, dictionary)" % entry.title, session.token, prettyPrint=True, colorValue=SIColors.Gold)
+
+                    # get formatted token, to make expiration checks easier.
+                    formattedToken0:SpotifyAuthToken = SpotifyAuthToken("TokenRefreshAuthType", "TokenRefreshProfileId", root=session.token)
+                    _logsi.LogObject(SILevel.Verbose, "'%s': Component OAuth2 session token (pre-update, session.token)" % entry.title, formattedToken0, excludeNonPublic=True, colorValue=SIColors.Gold)
+
+                    # a quick check to see if session token is expired.  the session token update may have already occured
+                    # by another HA worker thread while we were waiting for the lock to free; if that is the case, then we 
+                    # don't need to refresh the token since it was just refreshed by the other thread!
+                    if (not formattedToken0.IsExpired):
+                        _logsi.LogObject(SILevel.Verbose, "'%s': Component OAuth2 session.token was updated by another HA worker thread; refresh not necessary" % entry.title, formattedToken0, excludeNonPublic=True, colorValue=SIColors.Gold)
+                        return session.token
+
                     # we will refresh the token from the `session.config_entry.data['token']` value (instead of
                     # the `session.token` value) in case the token was refreshed in the `update` method.
                     # note - the `session.token` value will not change until AFTER `async_update_entry` is processed!
@@ -3444,7 +3407,8 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
                     # refresh the session token. 
                     _logsi.LogVerbose("'%s': Component is calling async_refresh_token to refresh the session token" % entry.title, colorValue=SIColors.Gold)
                     token = run_coroutine_threadsafe(
-                        session.implementation.async_refresh_token(session.config_entry.data['token']), hass.loop
+                        session.implementation.async_refresh_token(session.config_entry.data['token']), 
+                        hass.loop
                     ).result()
                     token[TOKEN_STATUS] = TOKEN_STATUS_REFRESH_EVENT
 
@@ -3461,8 +3425,9 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
                     )
                 
                     # trace.
-                    #_logsi.LogDictionary(SILevel.Verbose, "'%s': Component OAuth2 session.token (post-update)" % entry.title, session.token, prettyPrint=True, colorValue=SIColors.Gold)
                     _logsi.LogVerbose("'%s': Component OAuth2 session token refresh complete" % entry.title, colorValue=SIColors.Gold)
+                    formattedToken2:SpotifyAuthToken = SpotifyAuthToken("TokenRefreshAuthType", "TokenRefreshProfileId", root=token)
+                    _logsi.LogObject(SILevel.Verbose, "'%s': Component OAuth2 session token (post-update, token)" % entry.title, formattedToken2, excludeNonPublic=True, colorValue=SIColors.Gold)
 
                     # return refreshed token to caller.
                     return token
@@ -3525,21 +3490,6 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
         _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry spotifyClient object (with AuthToken)" % entry.title, spotifyClient)
         _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry Spotify UserProfile object" % entry.title, spotifyClient.UserProfile)
 
-        # *** Don't need the DataUpdateCoordinator anymore; left here in case we need it for future needs.
-        # # define a DataUpdateCoordinator that will poll for updated device entries every 60 minutes.
-        # device_coordinator:DataUpdateCoordinator[SpotifyConnectDevices] = DataUpdateCoordinator(
-        #     hass,
-        #     _LOGGER,
-        #     name=f"{entry.title} Device List Refresh",
-        #     update_interval=timedelta(minutes=60),
-        #     update_method=_OnDataUpdateCoordinatorInterval,
-        # )
-        # _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry device DataUpdateCoordinator object" % entry.title, device_coordinator)
-
-        # # wait for first refresh of DataUpdateCoordinator to get the initial device list.
-        # _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry waiting for device DataUpdateCoordinator initial update" % entry.title, device_coordinator)
-        # await device_coordinator.async_config_entry_first_refresh()
-
         # dump initial Spotify Connect device list (for HA debug log).
         scDevices:SpotifyConnectDevices = spotifyClient.SpotifyConnectDirectory.GetDevices()
         scDevice:SpotifyConnectDevice
@@ -3552,7 +3502,6 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
         _logsi.LogVerbose("'%s': Component async_setup_entry is creating the media player platform instance data object" % entry.title)
         hass.data.setdefault(DOMAIN, {})
         hass.data[DOMAIN][entry.entry_id] = InstanceDataSpotifyPlus(
-            #devices=device_coordinator,
             session=session,
             spotifyClient=spotifyClient,
             media_player=None,

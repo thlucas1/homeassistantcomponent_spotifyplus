@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.124 ] - 2025/05/19
+
+  * Updated logic in the `__init__._TokenUpdater` method to only refresh the Spotify authorization token once if required.  Prior logic would refresh the token numerous times if multiple HA worker threads detected an expired token.  This makes it less likely to cause a multi-thread deadlock that can lead to the HA user-interface freezing.
+  * Removed unused `DataUpdateCoordinator` logic, as it is no longer used.
+
 ###### [ 1.0.123 ] - 2025/05/12
 
   * Restored ability to activate Google Chromecast devices from idle / sleep state.  Follow the steps in the [Spotify Desktop Player Authentication Configuration](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#spotify-desktop-player-authentication-configuration) guide to enable this functionality.

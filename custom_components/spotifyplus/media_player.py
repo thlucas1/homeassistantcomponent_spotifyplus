@@ -1303,19 +1303,6 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug)
 
 
-    # *** Don't need the DataUpdateCoordinator anymore; left here in case we need it for future needs.
-    # @callback
-    # def _OnDataUpdateCoordinatorUpdate(self) -> None:
-    #     """
-    #     Handle updated data from the DataUpdateCoordinator.
-    #     """
-    #     if not self.enabled:
-    #         return
-        
-    #     # inform HA of our current state.
-    #     self.schedule_update_ha_state(force_refresh=False)
-
-
     def _AutoPowerOnCheck(self) -> None:
         """
         Checks to see if media player state is OFF, and will switch state to ON if so.
@@ -8694,6 +8681,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             ) -> None:
         """
         Forces Spotify authorization token to expire.
+
+        Note that this will only expire the `SpotifyClient.AuthToken` token;
+        It will NOT expire the `session.token` token!
         """
         apiMethodName:str = 'service_test_token_expire'
         apiMethodParms:SIMethodParmListContext = None
@@ -8712,6 +8702,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self.data.spotifyClient.AuthToken._ExpireDateTimeUtc = dtUtcNow + timedelta(seconds=self.data.spotifyClient.AuthToken._ExpiresIn)
             self.data.spotifyClient.AuthToken._ExpiresAt = int((dtUtcNow - unix_epoch).total_seconds())  # seconds from epoch, current date
             self.data.spotifyClient.AuthToken._ExpiresAt = self.data.spotifyClient.AuthToken._ExpiresAt + self.data.spotifyClient.AuthToken._ExpiresIn
+
             _logsi.LogWarning("Token updated; it should be refreshed on the next Spotify Web API call", colorValue=SIColors.Red)
 
         # the following exceptions have already been logged, so we just need to
@@ -8803,12 +8794,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # call base class method.
             await super().async_added_to_hass()
 
-            # *** Don't need the DataUpdateCoordinator anymore; left here in case we need it for future needs.
-            # # add listener that will inform HA of our state if a user removes the device instance.
-            # _logsi.LogVerbose("'%s': adding '_OnDataUpdateCoordinatorUpdate' listener" % self.name)
-            # self.async_on_remove(
-            #     self.data.devices.async_add_listener(self._OnDataUpdateCoordinatorUpdate)
-            # )
+            # nothing to do here.
+            # left this here in case we add a DataUpdateCoordinator later.
 
         finally:
                 
