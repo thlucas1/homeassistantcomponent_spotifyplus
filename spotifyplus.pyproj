@@ -15,7 +15,7 @@
     <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
     <SuppressEnvironmentCreationPrompt>True</SuppressEnvironmentCreationPrompt>
     <SuppressPackageInstallationPrompt>True</SuppressPackageInstallationPrompt>
-    <TestFramework>unittest</TestFramework>
+    <TestFramework>none</TestFramework>
     <UnitTestPattern>testVS*.py</UnitTestPattern>
     <UnitTestRootDirectory>C:\Users\thluc\source\repos\HomeAssistant\spotifyplus\test</UnitTestRootDirectory>
   </PropertyGroup>

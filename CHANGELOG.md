@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.125 ] - 2025/05/30
+
+  * Updated the `__init__.py.options_update_listener` method to only acquire a token updater lock if reloading the configuration (due to UI options change).  Prior to the fix, the lock was being acquired if the token was refreshed OR if reloading the configuration (due to UI options change); this caused a thread deadlock to arise on the HA event-loop thread (configuration reload is performed on the event-loop thread), which caused the HA user-interface to hang / stop responsing.
+
 ###### [ 1.0.124 ] - 2025/05/19
 
   * Updated logic in the `__init__._TokenUpdater` method to only refresh the Spotify authorization token once if required.  Prior logic would refresh the token numerous times if multiple HA worker threads detected an expired token.  This makes it less likely to cause a multi-thread deadlock that can lead to the HA user-interface freezing.

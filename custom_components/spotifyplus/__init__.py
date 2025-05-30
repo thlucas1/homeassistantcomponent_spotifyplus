@@ -3684,58 +3684,65 @@ async def options_update_listener(hass:HomeAssistant, entry:ConfigEntry) -> None
       just the authentication token that is being udpated, which will occur every 1 hour (controlled by
       Spotify Web API token expiration).
     """
-    # trace.
-    _logsi.LogVerbose("'%s': TOKENUPDATER_LOCK is preparing to set the lock for method options_update_listener" % entry.title, colorValue=SIColors.Gold)
-    if TOKENUPDATER_LOCK.locked():
-        _logsi.LogVerbose("'%s': options_update_listener is waiting on TOKENUPDATER_LOCK to free" % entry.title, colorValue=SIColors.Gold)
-
-    # only allow one thread to update authorization token at a time; otherwise a deadlock
-    # occurs in the `run_coroutine_threadsafe(session.implementation.async_refresh_token)` line!
-    with TOKENUPDATER_LOCK:
+    try:
 
         # trace.
-        _logsi.LogVerbose("'%s': TOKENUPDATER_LOCK is set for method options_update_listener" % entry.title, colorValue=SIColors.Gold)
+        _logsi.EnterMethod(SILevel.Debug)
+        _logsi.LogObject(SILevel.Verbose, "'%s': Component detected configuration entry options update" % entry.title, entry)
+        _logsi.LogDictionary(SILevel.Verbose, "'%s': Component options_update_listener entry.data dictionary" % entry.title, entry.data)
+        _logsi.LogDictionary(SILevel.Verbose, "'%s': Component options_update_listener entry.options dictionary" % entry.title, entry.options)
 
-        try:
-
-            # trace.
-            _logsi.EnterMethod(SILevel.Debug)
-            _logsi.LogObject(SILevel.Verbose, "'%s': Component detected configuration entry options update" % entry.title, entry)
-            _logsi.LogDictionary(SILevel.Verbose, "'%s': Component options_update_listener entry.data dictionary" % entry.title, entry.data)
-            _logsi.LogDictionary(SILevel.Verbose, "'%s': Component options_update_listener entry.options dictionary" % entry.title, entry.options)
-
-            # check if the authentication token was refreshed; if not, then it's a user-initiated
-            # change and the configuration should be reloaded to apply the changes.
-            # if it IS an authentication token refresh, then do NOT reload the configuration.
-            shouldReload:bool = True
-            _logsi.LogVerbose("'%s': Component options_update_listener is checking for authentication token refresh event" % entry.title)
-            if (entry.data is not None):
-                token:dict = entry.data.get('token', None)
-                if (token is not None):
-                    _logsi.LogDictionary(SILevel.Verbose, "'%s': Component options_update_listener token data" % entry.title, token)
-                    status = token.get(TOKEN_STATUS, None)
-                    if (status == TOKEN_STATUS_REFRESH_EVENT):
-                        # token refresh detected; indicate configuration should not be reloaded, and remove
-                        # the token status key so it's not saved with the configuration data.
-                        shouldReload = False
-                        entry.data['token'].pop(TOKEN_STATUS, None)
-                        _logsi.LogVerbose("'%s': Component options_update_listener detected authentication token refresh; configuration will NOT be reloaded" % entry.title)
+        # check if the authentication token was refreshed; if not, then it's a user-initiated
+        # change and the configuration should be reloaded to apply the changes.
+        # if it IS an authentication token refresh, then do NOT reload the configuration.
+        shouldReload:bool = True
+        _logsi.LogVerbose("'%s': Component options_update_listener is checking for authentication token refresh event" % entry.title)
+        if (entry.data is not None):
+            token:dict = entry.data.get('token', None)
+            if (token is not None):
+                _logsi.LogDictionary(SILevel.Verbose, "'%s': Component options_update_listener token data" % entry.title, token)
+                status = token.get(TOKEN_STATUS, None)
+                if (status == TOKEN_STATUS_REFRESH_EVENT):
+                    # token refresh detected; indicate configuration should not be reloaded, and remove
+                    # the token status key so it's not saved with the configuration data.
+                    shouldReload = False
+                    entry.data['token'].pop(TOKEN_STATUS, None)
+                    _logsi.LogVerbose("'%s': Component options_update_listener detected authentication token refresh; configuration will NOT be reloaded" % entry.title)
         
-            # reload the configuration entry (if necessary).
-            if shouldReload:
-                _logsi.LogVerbose("'%s': Component options_update_listener is reloading the configuration (due to UI options change)" % entry.title)
-                await hass.config_entries.async_reload(entry.entry_id)
-            else:
-                _logsi.LogVerbose("'%s': Component options_update_listener is NOT reloading the configuration (due to token refresh)" % entry.title)
+        # reload the configuration entry (if necessary).
+        if shouldReload:
 
             # trace.
-            _logsi.LogVerbose("'%s': Component options_update_listener completed" % entry.title)
+            _logsi.LogVerbose("'%s': TOKENUPDATER_LOCK is preparing to set the lock for method options_update_listener" % entry.title, colorValue=SIColors.Gold)
+            if TOKENUPDATER_LOCK.locked():
+                _logsi.LogVerbose("'%s': options_update_listener is waiting on TOKENUPDATER_LOCK to free" % entry.title, colorValue=SIColors.Gold)
 
-        finally:
+            try:
+
+                # only allow one thread to update authorization token at a time; otherwise a deadlock
+                # occurs in the `run_coroutine_threadsafe(session.implementation.async_refresh_token)` line!
+                with TOKENUPDATER_LOCK:
+
+                    # trace.
+                    _logsi.LogVerbose("'%s': TOKENUPDATER_LOCK is set for method options_update_listener" % entry.title, colorValue=SIColors.Gold)
+
+                    _logsi.LogVerbose("'%s': Component options_update_listener is reloading the configuration (due to UI options change)" % entry.title)
+                    await hass.config_entries.async_reload(entry.entry_id)
+
+            finally:
+
+                # trace.
+                _logsi.LogVerbose("'%s': TOKENUPDATER_LOCK is RESET for method options_update_listener" % entry.title, colorValue=SIColors.Gold)
+
+        else:
 
             # trace.
-            _logsi.LeaveMethod(SILevel.Debug)
+            _logsi.LogVerbose("'%s': Component options_update_listener is NOT reloading the configuration (due to token refresh)" % entry.title)
 
-    # trace.
-    _logsi.LogVerbose("'%s': TOKENUPDATER_LOCK is RESET for method options_update_listener" % entry.title, colorValue=SIColors.Gold)
+        # trace.
+        _logsi.LogVerbose("'%s': Component options_update_listener completed" % entry.title)
 
+    finally:
+
+        # trace.
+        _logsi.LeaveMethod(SILevel.Debug)
