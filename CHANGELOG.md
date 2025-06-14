@@ -6,9 +6,13 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.126 ] - 2025/06/14
+
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.208.
+
 ###### [ 1.0.125 ] - 2025/05/30
 
-  * Updated the `__init__.py.options_update_listener` method to only acquire a token updater lock if reloading the configuration (due to UI options change).  Prior to the fix, the lock was being acquired if the token was refreshed OR if reloading the configuration (due to UI options change); this caused a thread deadlock to arise on the HA event-loop thread (configuration reload is performed on the event-loop thread), which caused the HA user-interface to hang / stop responsing.
+  * Updated the `__init__.py.options_update_listener` method to only acquire a token updater lock if reloading the configuration (due to UI options change).  Prior to the fix, the lock was being acquired if the token was refreshed OR if reloading the configuration (due to UI options change); this caused a thread deadlock to arise on the HA event-loop thread (configuration reload is performed on the event-loop thread), which caused the HA user-interface to hang / stop responding.
 
 ###### [ 1.0.124 ] - 2025/05/19
 
