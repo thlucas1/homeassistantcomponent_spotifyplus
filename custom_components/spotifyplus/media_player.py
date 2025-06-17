@@ -5650,6 +5650,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         positionMS:int=-1, 
         deviceId:str=None, 
         delay:float=0.50,
+        shuffle:bool=None,
         ) -> None:
         """
         Start playing one or more tracks of the specified context on a Spotify Connect device.
@@ -5691,6 +5692,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 This delay will give the spotify web api time to process the change before 
                 another command is issued.  
                 Default is 0.50; value range is 0 - 10.
+            shuffle (bool):
+                True to enable player shuffle mode; False to disable player shuffle mode; 
+                None to use current player shuffle mode.  
+                Default is None.  
         """
         apiMethodName:str = 'service_spotify_player_media_play_context'
         apiMethodParms:SIMethodParmListContext = None
@@ -5705,13 +5710,14 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("positionMS", positionMS)
             apiMethodParms.AppendKeyValue("deviceId", deviceId)
             apiMethodParms.AppendKeyValue("delay", delay)
+            apiMethodParms.AppendKeyValue("shuffle", shuffle)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Media Play Context Service", apiMethodParms)
             
             # validations.
             delay = validateDelay(delay, 0.50, 10)
 
             # play one or more items of the specified context on a Spotify Connect device.
-            self.data.spotifyClient.PlayerMediaPlayContext(contextUri, offsetUri, offsetPosition, positionMS, deviceId, delay)
+            self.data.spotifyClient.PlayerMediaPlayContext(contextUri, offsetUri, offsetPosition, positionMS, deviceId, delay, None, shuffle)
 
             # check if we need to automatically power on the player.
             self._AutoPowerOnCheck()
@@ -5818,6 +5824,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         positionMS:int=-1, 
         deviceId:str=None, 
         delay:float=0.50,
+        shuffle:bool=None,
         ) -> None:
         """
         Start playing one or more tracks on the specified Spotify Connect device.
@@ -5848,6 +5855,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 This delay will give the spotify web api time to process the change before 
                 another command is issued.  
                 Default is 0.50; value range is 0 - 10.
+            shuffle (bool):
+                True to enable player shuffle mode; False to disable player shuffle mode; 
+                None to use current player shuffle mode.  
+                Default is None.  
         """
         apiMethodName:str = 'service_spotify_player_media_play_tracks'
         apiMethodParms:SIMethodParmListContext = None
@@ -5860,13 +5871,14 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("positionMS", positionMS)
             apiMethodParms.AppendKeyValue("deviceId", deviceId)
             apiMethodParms.AppendKeyValue("delay", delay)
+            apiMethodParms.AppendKeyValue("shuffle", shuffle)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Media Play Tracks Service", apiMethodParms)
             
             # validations.
             delay = validateDelay(delay, 0.50, 10)
 
             # play one or more tracks on the specified Spotify Connect device.
-            self.data.spotifyClient.PlayerMediaPlayTracks(uris, positionMS, deviceId, delay)
+            self.data.spotifyClient.PlayerMediaPlayTracks(uris, positionMS, deviceId, delay, None, shuffle)
             
             # check if we need to automatically power on the player.
             self._AutoPowerOnCheck()

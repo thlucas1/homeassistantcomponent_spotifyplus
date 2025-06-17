@@ -2466,6 +2466,13 @@ player_media_play_context:
           min: 0.0
           max: 10.0
           mode: box
+    shuffle:
+      name: Shuffle?
+      description: True to enable player shuffle mode; False to disable player shuffle mode; None to use current player shuffle mode. Default is None.
+      example: "True"
+      required: false
+      selector:
+        boolean:
 
 player_media_play_track_favorites:
   name: Player Media Play Track Favorites
@@ -2566,6 +2573,13 @@ player_media_play_tracks:
           min: 0.0
           max: 10.0
           mode: box
+    shuffle:
+      name: Shuffle?
+      description: True to enable player shuffle mode; False to disable player shuffle mode; None to use current player shuffle mode. Default is None.
+      example: "True"
+      required: false
+      selector:
+        boolean:
 
 player_media_resume:
   name: Player Media Resume

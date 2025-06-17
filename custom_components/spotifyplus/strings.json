@@ -1505,6 +1505,10 @@
         "delay": {
           "name": "Delay",
           "description": "Time delay (in seconds) to wait AFTER issuing the final Connect command (if necessary). This delay will give the spotify web api time to process the device list change before another command is issued.  Default is 0.50; value range is 0 - 10."
+        },
+        "shuffle": {
+          "name": "Shuffle?",
+          "description": "True to enable player shuffle mode; False to disable player shuffle mode; None to use current player shuffle mode. Default is None."
         }
       }
     },
@@ -1561,6 +1565,10 @@
         "delay": {
           "name": "Delay",
           "description": "Time delay (in seconds) to wait AFTER issuing the final Connect command (if necessary). This delay will give the spotify web api time to process the device list change before another command is issued.  Default is 0.50; value range is 0 - 10."
+        },
+        "shuffle": {
+          "name": "Shuffle?",
+          "description": "True to enable player shuffle mode; False to disable player shuffle mode; None to use current player shuffle mode. Default is None."
         }
       }
     },

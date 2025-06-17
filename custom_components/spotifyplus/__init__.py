@@ -739,6 +739,7 @@ SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT_SCHEMA = vol.Schema(
         vol.Optional("position_ms", default=-1): vol.All(vol.Range(min=-1,max=999999999)),
         vol.Optional("device_id"): cv.string,
         vol.Optional("delay", default=0.50): vol.All(vol.Range(min=0,max=10.0)),
+        vol.Optional("shuffle"): cv.boolean,
     }
 )
 
@@ -760,6 +761,7 @@ SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS_SCHEMA = vol.Schema(
         vol.Optional("position_ms", default=-1): vol.All(vol.Range(min=-1,max=999999999)),
         vol.Optional("device_id"): cv.string,
         vol.Optional("delay", default=0.50): vol.All(vol.Range(min=0,max=10.0)),
+        vol.Optional("shuffle"): cv.boolean,
     }
 )
 
@@ -1318,8 +1320,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     position_ms = service.data.get("position_ms")
                     device_id = service.data.get("device_id")
                     delay = service.data.get("delay")
+                    shuffle = service.data.get("shuffle")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    await hass.async_add_executor_job(entity.service_spotify_player_media_play_context, context_uri, offset_uri, offset_position, position_ms, device_id, delay)
+                    await hass.async_add_executor_job(entity.service_spotify_player_media_play_context, context_uri, offset_uri, offset_position, position_ms, device_id, delay, shuffle)
 
                 elif service.service == SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACK_FAVORITES:
 
@@ -1339,8 +1342,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     position_ms = service.data.get("position_ms")
                     device_id = service.data.get("device_id")
                     delay = service.data.get("delay")
+                    shuffle = service.data.get("shuffle")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    await hass.async_add_executor_job(entity.service_spotify_player_media_play_tracks, uris, position_ms, device_id, delay)
+                    await hass.async_add_executor_job(entity.service_spotify_player_media_play_tracks, uris, position_ms, device_id, delay, shuffle)
 
                 elif service.service == SERVICE_SPOTIFY_PLAYER_MEDIA_RESUME:
 
