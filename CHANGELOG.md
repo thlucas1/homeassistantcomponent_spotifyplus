@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.128 ] - 2025/06/18
+
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.210.
+
 ###### [ 1.0.127 ] - 2025/06/17
 
   * Updated `player_media_play_context` service, adding the `shuffle` argument: True to enable player shuffle mode; False to disable player shuffle mode; None to use current player shuffle mode. Default is None.
