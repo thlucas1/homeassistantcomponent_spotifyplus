@@ -14,6 +14,7 @@ import voluptuous as vol
 
 from spotifywebapipython import SpotifyClient, SpotifyAuthToken
 from spotifywebapipython.models import SpotifyConnectDevices, SpotifyConnectDevice
+from spotifywebapipython.const import VERSION as spotifywebapipython_VERSION
 
 from homeassistant.components import zeroconf
 from homeassistant.components.media_player import MediaPlayerEntity
@@ -1217,6 +1218,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     
             # log verion information for supporting packages.
             _logsi.LogValue(SILevel.Verbose, "urllib3 version", urllib3_version)
+            _logsi.LogValue(SILevel.Verbose, "spotifywebapipython version", spotifywebapipython_VERSION, colorValue=SIColors.Coral)
 
             # log configuration data.
             for item in config:
