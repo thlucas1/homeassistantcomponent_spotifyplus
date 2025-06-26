@@ -915,8 +915,15 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # set the selected source.
             _logsi.LogVerbose("'%s': Selected source was changed to \"%s\"" % (self.name, self._attr_source))
 
-        except HomeAssistantError: raise  # pass handled exceptions on thru
-        
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        except HomeAssistantError: 
+            raise  # pass handled exceptions on thru
+
         finally:
         
             # trace.
