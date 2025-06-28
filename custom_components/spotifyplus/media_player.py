@@ -917,12 +917,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
+        except HomeAssistantError: raise  # pass handled exceptions on thru
         except SpotifyApiError as ex:
             raise ServiceValidationError(ex.Message)
         except SpotifyWebApiError as ex:
             raise ServiceValidationError(ex.Message)
-        except HomeAssistantError: 
-            raise  # pass handled exceptions on thru
 
         finally:
         
