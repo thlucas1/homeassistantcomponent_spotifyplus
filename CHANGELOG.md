@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.139 ] - 2025/07/02
+
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.222.
+  * Updated requirements: from `urllib3>=1.21.1,<1.27` to `urllib3>=2.0`.  Due to Home Assistant Core 2025.7.0 update requirements.
+
 ###### [ 1.0.138 ] - 2025/06/30
 
   * Re-published with a new version number due to wrong `spotifywebapipython` package requirement version (1.0.220 instead of 1.0.221).
