@@ -2437,7 +2437,7 @@ player_media_play_context:
       selector:
         number:
           min: 0
-          max: 500
+          max: 11000
           mode: box
     position_ms:
       name: Seek Position

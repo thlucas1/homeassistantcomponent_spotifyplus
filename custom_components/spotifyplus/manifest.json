@@ -21,6 +21,6 @@
     "urllib3>=2.0",
     "zeroconf>=0.132.2"
   ],
-  "version": "1.0.139",
+  "version": "1.0.140",
   "zeroconf": [ "_spotify-connect._tcp.local.", "_googlecast._tcp.local." ]
 }

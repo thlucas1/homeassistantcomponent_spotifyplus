@@ -736,7 +736,7 @@ SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT_SCHEMA = vol.Schema(
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("context_uri"): cv.string,
         vol.Optional("offset_uri"): cv.string,
-        vol.Optional("offset_position", default=-1): vol.All(vol.Range(min=-1,max=500)),
+        vol.Optional("offset_position", default=-1): vol.All(vol.Range(min=-1,max=11000)),
         vol.Optional("position_ms", default=-1): vol.All(vol.Range(min=-1,max=999999999)),
         vol.Optional("device_id"): cv.string,
         vol.Optional("delay", default=0.50): vol.All(vol.Range(min=0,max=10.0)),

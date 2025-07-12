@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.140 ] - 2025/07/12
+
+  * Updated `player_media_play_context` service, increasing the `offset_position` argument max value from 500 to 11000 (max playlist items allowed by Spotify).
+
 ###### [ 1.0.139 ] - 2025/07/02
 
   * Updated underlying `spotifywebapipython` package requirement to version 1.0.222.
