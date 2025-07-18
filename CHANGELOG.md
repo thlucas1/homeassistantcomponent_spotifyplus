@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.142 ] - 2025/07/18
+
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.225.
+
 ###### [ 1.0.141 ] - 2025/07/13
 
   * Updated underlying `spotifywebapipython` package requirement to version 1.0.223.
