@@ -68,6 +68,8 @@ from homeassistant.components.media_player import (
     MediaPlayerState,
     MediaType,
     RepeatMode,
+    SearchMedia,
+    SearchMediaQuery,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -86,6 +88,9 @@ from .browse_media import (
     browse_media_node, 
     PLAYABLE_MEDIA_TYPES,
     SPOTIFY_LIBRARY_MAP
+)
+from .search_media import (
+    search_media_node,
 )
 from .instancedata_spotifyplus import InstanceDataSpotifyPlus
 from .const import (
@@ -379,6 +384,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                                               | MediaPlayerEntityFeature.PLAY_MEDIA \
                                               | MediaPlayerEntityFeature.PREVIOUS_TRACK \
                                               | MediaPlayerEntityFeature.REPEAT_SET \
+                                              | MediaPlayerEntityFeature.SEARCH_MEDIA \
                                               | MediaPlayerEntityFeature.SEEK \
                                               | MediaPlayerEntityFeature.SELECT_SOURCE \
                                               | MediaPlayerEntityFeature.SHUFFLE_SET \
@@ -400,6 +406,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                                               | MediaPlayerEntityFeature.PLAY \
                                               | MediaPlayerEntityFeature.PLAY_MEDIA \
                                               | MediaPlayerEntityFeature.REPEAT_SET \
+                                              | MediaPlayerEntityFeature.SEARCH_MEDIA \
                                               | MediaPlayerEntityFeature.SELECT_SOURCE \
                                               | MediaPlayerEntityFeature.TURN_OFF \
                                               | MediaPlayerEntityFeature.TURN_ON \
@@ -409,6 +416,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             else:
                 _logsi.LogVerbose("'%s': MediaPlayer is setting supported features for Spotify Non-Premium user" % self.name)
                 self._attr_supported_features = MediaPlayerEntityFeature.BROWSE_MEDIA \
+                                              | MediaPlayerEntityFeature.SEARCH_MEDIA \
                                               | MediaPlayerEntityFeature.TURN_OFF \
                                               | MediaPlayerEntityFeature.TURN_ON
 
@@ -7438,6 +7446,101 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
+    def service_spotify_search_all(
+            self, 
+            criteria:str, 
+            criteriaType:str=None, 
+            market:str=None,
+            includeExternal:str=None,
+            limitTotal:int=None,
+            ) -> dict:
+        """
+        Get Spotify catalog information about albums, artists, playlists, tracks, shows, episodes 
+        or audiobooks that match a keyword string. Audiobooks are only available within the US, UK, 
+        Canada, Ireland, New Zealand and Australia markets.
+        
+        Args:
+            criteria (str):
+                Your search query.  
+                You can narrow down your search using field filters.  
+                The available filters are album, artist, track, year, upc, tag:hipster, tag:new, 
+                isrc, and genre. Each field filter only applies to certain result types.  
+                The artist and year filters can be used while searching albums, artists and tracks.
+                You can filter on a single year or a range (e.g. 1955-1960).  
+                The album filter can be used while searching albums and tracks.  
+                The genre filter can be used while searching artists and tracks.  
+                The isrc and track filters can be used while searching tracks.  
+                The upc, tag:new and tag:hipster filters can only be used while searching albums. 
+                The tag:new filter will return albums released in the past two weeks and tag:hipster 
+                can be used to return only albums with the lowest 10% popularity.
+            criteriaType (str):
+                A comma-separated list of item types to search across.  
+                Search results include hits from all the specified item types.  
+                For example: "album,track" returns both albums and tracks matching criteria argument.  
+                Allowed values: "album", "artist", "playlist", "track", "show", "episode", "audiobook".
+                Default: "track"
+            market (str):
+                An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that 
+                is available in that market will be returned.  If a valid user access token is specified 
+                in the request header, the country associated with the user account will take priority over 
+                this parameter.  
+                Note: If neither market or user country are provided, the content is considered unavailable for the client.  
+                Users can view the country that is associated with their account in the account settings.  
+                Example: `ES`
+            includeExternal (str):
+                If "audio" is specified it signals that the client can play externally hosted audio content, and 
+                marks the content as playable in the response. By default externally hosted audio content is marked 
+                as unplayable in the response.  
+                Allowed values: "audio"
+            limitTotal (int):
+                The maximum number of items to return for the request, per criteria type.
+                Paging is automatically used to retrieve all available items up to the
+                maximum number specified per type.
+                Default: 20
+
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: An `SearchResponse` object of matching results.            
+        """
+        apiMethodName:str = 'service_spotify_search_all'
+        apiMethodParms:SIMethodParmListContext = None
+        result:SearchResponse = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("criteria", criteria)
+            apiMethodParms.AppendKeyValue("criteriaType", criteriaType)
+            apiMethodParms.AppendKeyValue("market", market)
+            apiMethodParms.AppendKeyValue("includeExternal", includeExternal)
+            apiMethodParms.AppendKeyValue("limitTotal", limitTotal)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Search All Service", apiMethodParms)
+                
+            # get Spotify catalog information about objects that match a keyword string.
+            _logsi.LogVerbose("Searching Spotify for criteria")
+            searchResponse:SearchResponse = self.data.spotifyClient.Search(criteria, criteriaType, market, includeExternal, limitTotal)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": searchResponse.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
     def service_spotify_search_albums(
             self, 
             criteria:str, 
@@ -8914,6 +9017,56 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             
             # trace.
             _logsi.LogException("'%s': MediaPlayer async_browse_media exception: %s" % (self.name, str(ex)), ex, logToSystemLogger=False)
+            raise IntegrationError(str(ex)) from ex
+        
+        finally:
+
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug)
+
+
+
+    async def async_search_media(self, query: SearchMediaQuery) -> SearchMedia:
+        """
+        Implement the media search helper.
+
+        Args:
+            query (SearchMediaQuery):
+                A `SearchMediaQuery` object that contains search parameters.  
+                Some parameters may have null values, depending on what the user is asking for.
+
+        Returns:
+            A list of `BrowseMedia` objects that contain the search results.
+            Note that this differs from the method signature, which indicates a `SearchMedia` 
+            object is returned (it is not)!
+        """
+        methodParms:SIMethodParmListContext = None
+        
+        try:
+
+            # trace.
+            methodParms = _logsi.EnterMethodParmList(SILevel.Debug)
+            methodParms.AppendKeyValue("query.media_content_id", query.media_content_id)
+            methodParms.AppendKeyValue("query.media_content_type", query.media_content_type)
+            methodParms.AppendKeyValue("query.media_filter_classes", query.media_filter_classes)
+            methodParms.AppendKeyValue("query.search_query", query.search_query)
+            _logsi.LogMethodParmList(SILevel.Verbose, "'%s': MediaPlayer is searching for media content types '%s'" % (self.name, query.media_content_type), methodParms)
+
+            # handle spotifysplus media library selection.
+            # note that this is NOT async, as SpotifyClient is not async!
+            _logsi.LogVerbose("'%s': MediaPlayer is searching media node content id '%s'" % (self.name, query.media_content_id))
+            return await self.hass.async_add_executor_job(
+                search_media_node,
+                self.hass,
+                self.data.spotifyClient,
+                self.name,
+                query,
+            )
+
+        except Exception as ex:
+            
+            # trace.
+            _logsi.LogException("'%s': MediaPlayer async_search_media exception: %s" % (self.name, str(ex)), ex, logToSystemLogger=False)
             raise IntegrationError(str(ex)) from ex
         
         finally:

@@ -6,6 +6,13 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.146 ] - 2025/07/26
+
+  * Added support for `search_media` service.  Search Spotify catalog information for albums, artists, playlists, tracks, shows, episodes or audiobooks that match a keyword string.  It is suggested that you utilize the various search custom services for searching Spotify catalog content, as they return much more detailed information.  The `search_media` service simply returns a list of HA `Broswmedia` objects of basic data (e.g. Title, Id, and Image URL).
+  * Added service `search_all` to search Spotify catalog information about albums, artists, playlists, tracks, shows, episodes or audiobooks that match a keyword string. Audiobooks are only available within the US, UK, Canada, Ireland, New Zealand and Australia markets.
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.231.
+  * Updated Python version from 3.12.3 to 3.13.5 due to HA 2025.7 release requirements.
+
 ###### [ 1.0.145 ] - 2025/07/23
 
   * Updated underlying `spotifywebapipython` package requirement to version 1.0.228.

@@ -35,6 +35,7 @@
     <Compile Include="custom_components\spotifyplus\const.py" />
     <Compile Include="custom_components\spotifyplus\instancedata_spotifyplus.py" />
     <Compile Include="custom_components\spotifyplus\media_player.py" />
+    <Compile Include="custom_components\spotifyplus\search_media.py" />
     <Compile Include="custom_components\spotifyplus\system_health.py" />
     <Compile Include="custom_components\spotifyplus\utils.py" />
     <Compile Include="custom_components\spotifyplus\__init__.py" />
@@ -86,7 +87,7 @@
     <Interpreter Include="env\">
       <Id>env</Id>
       <Version>0.0</Version>
-      <Description>env (Python 3.12 (64-bit))</Description>
+      <Description>env (Python 3.13 (64-bit))</Description>
       <InterpreterPath>Scripts\python.exe</InterpreterPath>
       <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
       <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>

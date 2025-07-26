@@ -274,15 +274,16 @@ def serialize_object(obj:object) -> str:
     return txt
 
 
-async def async_browse_media_library_index(hass:HomeAssistant,
-                                           client:SpotifyClient,
-                                           playerName:str,
-                                           source:str|None,
-                                           libraryMap:dict,
-                                           libraryIndex:BrowsableMedia,
-                                           media_content_type:str|None,
-                                           media_content_id:str|None,
-                                           ) -> BrowseMedia:
+async def async_browse_media_library_index(
+    hass:HomeAssistant,
+    client:SpotifyClient,
+    playerName:str,
+    source:str|None,
+    libraryMap:dict,
+    libraryIndex:BrowsableMedia,
+    media_content_type:str|None,
+    media_content_id:str|None,
+    ) -> BrowseMedia:
     """
     Builds a BrowseMedia object for the top level index page, and all of it's
     child nodes.
@@ -394,14 +395,15 @@ async def async_browse_media_library_index(hass:HomeAssistant,
         _logsi.LeaveMethod(SILevel.Debug)
 
 
-def browse_media_node(hass:HomeAssistant,
-                      client:SpotifyClient,
-                      playerName:str,
-                      source:str|None,
-                      libraryMap:dict,
-                      media_content_type:str|None,
-                      media_content_id:str|None,
-                      ) -> BrowseMedia:
+def browse_media_node(
+    hass:HomeAssistant,
+    client:SpotifyClient,
+    playerName:str,
+    source:str|None,
+    libraryMap:dict,
+    media_content_type:str|None,
+    media_content_id:str|None,
+    ) -> BrowseMedia:
     """
     Builds a BrowseMedia object for a selected media content type, and all of it's
     child nodes.

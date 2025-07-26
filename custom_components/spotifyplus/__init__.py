@@ -168,6 +168,7 @@ SERVICE_SPOTIFY_SAVE_AUDIOBOOK_FAVORITES:str = 'save_audiobook_favorites'
 SERVICE_SPOTIFY_SAVE_EPISODE_FAVORITES:str = 'save_episode_favorites'
 SERVICE_SPOTIFY_SAVE_SHOW_FAVORITES:str = 'save_show_favorites'
 SERVICE_SPOTIFY_SAVE_TRACK_FAVORITES:str = 'save_track_favorites'
+SERVICE_SPOTIFY_SEARCH_ALL:str = 'search_all'
 SERVICE_SPOTIFY_SEARCH_ALBUMS:str = 'search_albums'
 SERVICE_SPOTIFY_SEARCH_ARTISTS:str = 'search_artists'
 SERVICE_SPOTIFY_SEARCH_AUDIOBOOKS:str = 'search_audiobooks'
@@ -982,6 +983,17 @@ SERVICE_SPOTIFY_SAVE_TRACK_FAVORITES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("ids"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_SEARCH_ALL_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("criteria"): cv.string,
+        vol.Optional("criteria_type"): cv.string,
+        vol.Optional("market"): cv.string,
+        vol.Optional("include_external"): cv.string,
+        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
     }
 )
 
@@ -2172,6 +2184,17 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_playlist_items_replace, playlist_id, uris)
 
+                elif service.service == SERVICE_SPOTIFY_SEARCH_ALL:
+
+                    # search Spotify for specified criteria.
+                    criteria = service.data.get("criteria")
+                    criteria_type = service.data.get("criteria_type")
+                    market = service.data.get("market")
+                    include_external = service.data.get("include_external")
+                    limit_total = service.data.get("limit_total")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_search_all, criteria, criteria_type, market, include_external, limit_total)
+                    
                 elif service.service == SERVICE_SPOTIFY_SEARCH_ALBUMS:
 
                     # search Spotify for specified criteria.
@@ -3139,6 +3162,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             service_handle_spotify_command,
             schema=SERVICE_SPOTIFY_SAVE_TRACK_FAVORITES_SCHEMA,
             supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_SEARCH_ALL, SERVICE_SPOTIFY_SEARCH_ALL_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_SEARCH_ALL,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_SEARCH_ALL_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
         )
 
         _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_SEARCH_ALBUMS, SERVICE_SPOTIFY_SEARCH_ALBUMS_SCHEMA)

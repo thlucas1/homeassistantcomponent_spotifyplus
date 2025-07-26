@@ -2084,6 +2084,36 @@
         }
       }
     },
+    "search_all": {
+      "name": "Search All",
+      "description": "Get Spotify catalog information about albums, artists, playlists, tracks, shows, episodes or audiobooks that match a keyword string. Audiobooks are only available within the US, UK, Canada, Ireland, New Zealand and Australia markets.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API."
+        },
+        "criteria": {
+          "name": "Search Criteria",
+          "description": "The criteria to search for."
+        },
+        "criteria_type": {
+          "name": "Search Criteria",
+          "description": "A comma-separated list of item types to search across.  Search results include hits from all the specified item types.  For example, 'album,track' returns both albums and tracks matching criteria argument.  Allowed values are 'album', 'artist', 'playlist', 'track', 'show', 'episode', 'audiobook'.  Default is 'track'."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter."
+        },
+        "include_external": {
+          "name": "Include External",
+          "description": "If 'audio' is specified it signals that the client can play externally hosted audio content, and marks the content as playable in the response. By default externally hosted audio content is marked as unplayable in the response.  Allowed values are 'audio'."
+        },
+        "limit_total": {
+          "name": "Limit Total",
+          "description": "The maximum number of items to return for the request, per criteria type. Paging is automatically used to retrieve all available items up to the maximum number specified per type. Default is 20."
+        }
+      }
+    },
     "search_albums": {
       "name": "Search Albums",
       "description": "Get Spotify catalog information about Albums that match a keyword string.",

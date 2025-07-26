@@ -1,7 +1,8 @@
 ---
 name: "Feature request"
 description: "Suggest an idea for this project"
-labels: "Feature+Request"
+labels: 
+- "enhancement"
 body:
 - type: markdown
   attributes:
