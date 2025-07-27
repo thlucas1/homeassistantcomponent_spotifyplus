@@ -16,7 +16,7 @@ from pprint import pformat
 from typing import Any, Callable, Concatenate, ParamSpec, TypeVar, Tuple
 from yarl import URL
 
-from spotifywebapipython import SpotifyClient, SpotifyDiscovery, SpotifyApiError, SpotifyWebApiError
+from spotifywebapipython import SpotifyClient, SpotifyDiscovery, SpotifyApiError, SpotifyMediaTypes, SpotifyWebApiError
 from spotifywebapipython.zeroconfapi import *
 from spotifywebapipython.models import (
     Album,
@@ -125,6 +125,7 @@ SONOS_TO_REPEAT = {meaning: mode for mode, meaning in REPEAT_TO_SONOS.items()}
 
 
 # our extra state attribute names.
+ATTR_SPOTIFYPLUS_ARTIST_URI = "sp_artist_uri"
 ATTR_SPOTIFYPLUS_CONTEXT_URI = "sp_context_uri"
 ATTR_SPOTIFYPLUS_DEVICE_ID = "sp_device_id"
 ATTR_SPOTIFYPLUS_DEVICE_NAME = "sp_device_name"
@@ -503,6 +504,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 track:Track = self._playerState.Item
                 if track.Explicit:
                     attributes[ATTR_SPOTIFYPLUS_TRACK_IS_EXPLICIT] = track.Explicit
+                if track.Type == SpotifyMediaTypes.TRACK.value:
+                    if len(track.Artists) > 0:
+                        attributes[ATTR_SPOTIFYPLUS_ARTIST_URI] = track.Artists[0].Uri
             if (self._playerState.CurrentlyPlayingType is not None):
                 attributes[ATTR_SPOTIFYPLUS_PLAYING_TYPE] = self._playerState.CurrentlyPlayingType
 

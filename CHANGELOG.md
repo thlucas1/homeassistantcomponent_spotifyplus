@@ -6,6 +6,12 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.147 ] - 2025/07/27
+
+  * Added extra state attribute `sp_artist_uri` that denotes the currently playing artist uri.
+  * Updated underlying `spotifywebapipython` package requirement to version 1.0.233.
+  * Updated package requirement from `smartinspectpython>=3.0.37` to `smartinspectpython>=3.0.38`.
+
 ###### [ 1.0.146 ] - 2025/07/26
 
   * Added support for `search_media` service.  Search Spotify catalog information for albums, artists, playlists, tracks, shows, episodes or audiobooks that match a keyword string.  It is suggested that you utilize the various search custom services for searching Spotify catalog content, as they return much more detailed information.  The `search_media` service simply returns a list of HA `Broswmedia` objects of basic data (e.g. Title, Id, and Image URL).
