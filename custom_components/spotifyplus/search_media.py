@@ -100,8 +100,8 @@ def search_media_node(
         _ProcessFoundItems(result, SpotifyMediaTypes.SHOW, searchResp.Shows.Items)
         _ProcessFoundItems(result, SpotifyMediaTypes.TRACK, searchResp.Tracks.Items)
 
-        # return search results.
-        return result
+        # return search results as SearchMedia object.
+        return SearchMedia(result=result)
 
     except Exception as ex:
             
