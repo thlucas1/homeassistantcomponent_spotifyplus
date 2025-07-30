@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.148 ] - 2025/07/30
+
+  * Updated `search_media` service to return a SearchMedia object.
+ 
 ###### [ 1.0.147 ] - 2025/07/27
 
   * Added extra state attribute `sp_artist_uri` that denotes the currently playing artist uri.

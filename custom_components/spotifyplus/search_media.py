@@ -51,9 +51,7 @@ def search_media_node(
             which differs from the method signature which indicates a `list[MediaClass]`.
 
     Returns:
-        A list of `BrowseMedia` objects that contain the search results.
-        Note that this differs from the method signature, which indicates a `SearchMedia` 
-        object is returned (it is not).
+        A `SearchMedia` object that contains the search results.
     """
     methodParms:SIMethodParmListContext = None
         
@@ -101,12 +99,12 @@ def search_media_node(
         _ProcessFoundItems(result, SpotifyMediaTypes.TRACK, searchResp.Tracks.Items)
 
         # return search results.
-        return result
+        return SearchMedia(result=result)
 
     except Exception as ex:
             
         # trace.
-        _logsi.LogException("'%s': BrowseMedia search_media_node exception: %s" % (playerName, str(ex)), ex, logToSystemLogger=False)
+        _logsi.LogException("'%s': SearchMedia search_media_node exception: %s" % (playerName, str(ex)), ex, logToSystemLogger=False)
         raise IntegrationError(str(ex)) from ex
         
     finally:
@@ -121,8 +119,8 @@ def _ProcessFoundItems(
     items:list[SearchResultBase],
     ) -> None:
     """
-    Builds a list of BrowseMedia objects that contain the search results and
-    appends them to the result collection.
+    Builds a BrowseMedia object for each search result returned, and appends 
+    them to the result collection.
     
     Args:
         result (list[BrowseMedia]):
@@ -164,9 +162,6 @@ def _ProcessFoundItems(
 
         # append object to results.
         result.append(browseMedia)
-
-    # return results to caller.
-    return result
 
 
 def _GetMediaClassFromSpotifyMediaType(media_type:str) -> MediaClass|None:
