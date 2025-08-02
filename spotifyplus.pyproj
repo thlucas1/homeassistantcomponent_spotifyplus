@@ -57,7 +57,7 @@
     <Content Include=".github\dependabot.yml" />
     <Content Include=".github\ISSUE_TEMPLATE\bug.yml" />
     <Content Include=".github\ISSUE_TEMPLATE\config.yml" />
-    <Content Include=".github\ISSUE_TEMPLATE\feature_request.yml" />
+    <Content Include=".github\ISSUE_TEMPLATE\enhancement.yml" />
     <Content Include=".github\workflows\lint.yml" />
     <Content Include=".github\workflows\release.yml" />
     <Content Include=".github\workflows\validate.yml" />

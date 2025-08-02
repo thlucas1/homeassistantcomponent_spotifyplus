@@ -1,5 +1,5 @@
 ---
-name: "Feature request"
+name: "Enhancement"
 description: "Suggest an idea for this project"
 labels: 
 - "enhancement"
@@ -8,7 +8,7 @@ body:
 
 - type: markdown
   attributes:
-    value: Before you open a new feature request, search through the existing feature requests to see if others have had the same idea.
+    value: Before you open a new enhancement request, search through the existing enhancement requests to see if others have had the same idea.
 
 - type: checkboxes
   attributes:
@@ -16,14 +16,14 @@ body:
     options:
       - label: I have filled out the template to the best of my ability.
         required: true
-      - label: This only contains 1 feature request (if you have multiple feature requests, open one feature request for each feature request).
+      - label: This only contains 1 enhancement request (if you have multiple requests, open a new request for each enhancement).
         required: true
-      - label: This issue is not a duplicate feature request of [previous feature requests](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/issues?q=is%3Aissue+label%3A%22Feature+Request%22+).
+      - label: This issue is not a duplicate enhancement request ([search previous requests](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/issues?q=is%3Aissue+label%3Aenhancement).
         required: true
 
 - type: textarea
   attributes:
-    label: "Is your feature request related to a problem? Please describe."
+    label: "Is your enhancement request related to a problem? Please describe."
     description: "A clear and concise description of what the problem is."
     placeholder: "I'm always frustrated when [...]"
   validations:
@@ -39,13 +39,13 @@ body:
 - type: textarea
   attributes:
     label: "Describe alternatives you've considered"
-    description: "A clear and concise description of any alternative solutions or features you've considered."
+    description: "A clear and concise description of any alternative solutions or enhancements you've considered."
   validations:
     required: true
 
 - type: textarea
   attributes:
     label: "Additional context"
-    description: "Add any other context or screenshots about the feature request here."
+    description: "Add any other context or screenshots about the enhancement request here."
   validations:
     required: true
