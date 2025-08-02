@@ -1,6 +1,6 @@
 ---
-name: "Enhancement"
-description: "Suggest an idea for this project"
+name: "Enhancement Request"
+description: "Request a new feature for the integration."
 labels: 
 - "enhancement"
 
@@ -18,7 +18,7 @@ body:
         required: true
       - label: This only contains 1 enhancement request (if you have multiple requests, open a new request for each enhancement).
         required: true
-      - label: This issue is not a duplicate enhancement request ([search previous requests](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/issues?q=is%3Aissue+label%3Aenhancement).
+      - label: This issue is not a duplicate enhancement request ([search previous requests](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/issues?q=is%3Aissue+label%3Aenhancement)).
         required: true
 
 - type: textarea
