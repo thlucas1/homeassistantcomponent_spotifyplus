@@ -79,7 +79,7 @@ Submit a [Bug Report](https://github.com/thlucas1/homeassistantcomponent_spotify
 
 ## Request a New Feature
 
-Do you have an idea for a new feature that could be added to the integration?  Submit a [Feature Request](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/issues/new?labels=enhancement&template=enhancement.yml) to get your idea into the queue. I receive a notification when a new request is opened, and will do my best to turn your idea into the latest and greatest feature.
+Do you have an idea for a new feature that could be added to the integration?  Submit a [Enhancement Request](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/issues/new?labels=enhancement&template=enhancement.yml) to get your idea into the queue. I receive a notification when a new request is opened, and will do my best to turn your idea into the latest and greatest feature.
 
 ***
 
