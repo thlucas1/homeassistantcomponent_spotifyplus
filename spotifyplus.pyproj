@@ -67,7 +67,6 @@
     <Content Include="CHANGELOG.md" />
     <Content Include="config\configuration.yaml" />
     <Content Include="config\smartinspect.cfg" />
-    <Content Include="CONTRIBUTING.md" />
     <Content Include="custom_components\spotifyplus\manifest.json" />
     <Content Include="custom_components\spotifyplus\services.yaml" />
     <Content Include="custom_components\spotifyplus\strings.json" />
