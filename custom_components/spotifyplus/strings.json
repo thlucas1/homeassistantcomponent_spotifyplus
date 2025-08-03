@@ -1137,6 +1137,10 @@
         "track_id": {
           "name": "Track Id",
           "description": "The Spotify ID of the track.  If omitted, the currently playing track uri id value is used."
+        },
+        "market": {
+          "name": "Market / Country Code",
+          "description": "An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the user account will take priority over this parameter."
         }
       }
     },

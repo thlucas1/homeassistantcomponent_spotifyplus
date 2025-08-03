@@ -6,6 +6,20 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.150 ] - 2025/08/02
+
+  * Updated the following services to support [Spotify Track Re-Linking](https://developer.spotify.com/documentation/web-api/concepts/track-relinking) functionality:  `get_album`, `get_albums`, `get_album_tracks`, `get_playlist_items`, `get_track`, `get_tracks`, `get_track_favorites`.  These services will now return the track re-linking properties (see below).
+  * Added new properties for returned track data relating to track re-linking:
+    * `id_origin` property that contains the origin Spotify ID for the track.  The `linked_from.id` value is returned if present; otherwise, the `id` value is returned.  This is a helper property, and is not part of the Spotify Web API specification.
+    * `uri_origin` property that contains the origin Spotify URI for the track.  The `linked_from.Uri` value is returned if present; otherwise, the `Uri` value is returned.  This is a helper property, and is not part of the Spotify Web API specification.
+    * `is_linked_from` property that determines whether or not the track is linked from another track (True) or not (False).  This is a helper property, and is not part of the Spotify Web API specification.
+    * Added `linked_from` property that is part of the response when Track Relinking is applied, and the requested track has been replaced with a different track.  The track in the LinkedFrom object contains information about the originally requested track.
+  * Updated package requirement from `spotifywebapipython>=1.0.233` to `spotifywebapipython>=1.0.234`.
+ 
+###### [ 1.0.149 ] - 2025/08/02
+
+  * Forgot to commit before publishing!  See next release.
+
 ###### [ 1.0.148 ] - 2025/07/30
 
   * Updated `search_media` service to return a SearchMedia object.

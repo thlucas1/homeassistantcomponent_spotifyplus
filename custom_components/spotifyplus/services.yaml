@@ -1813,6 +1813,13 @@ get_track:
       required: false
       selector:
         text:
+    market:
+      name: Market / Country Code
+      description: An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.  The country associated with the Spotify user account will take priority over this parameter.
+      example: "ES"
+      required: false
+      selector:
+        text:
 
 get_track_audio_features:
   name: Get Track Audio Features

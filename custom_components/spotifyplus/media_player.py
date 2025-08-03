@@ -4830,6 +4830,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
     def service_spotify_get_track(
             self, 
             trackId:str=None, 
+            market:str=None, 
             ) -> dict:
         """
         Get Spotify catalog information for a single track identified by its unique Spotify ID.
@@ -4840,6 +4841,14 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 Example: `1kWUud3vY5ij5r62zxpTRy`
                 If null, the currently playing track uri id value is used; a Spotify Free or Premium account 
                 is required to correctly read the currently playing context.
+            market (str):
+                An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that 
+                is available in that market will be returned.  If a valid user access token is specified 
+                in the request header, the country associated with the user account will take priority over 
+                this parameter.  
+                Note: If neither market or user country are provided, the content is considered unavailable for the client.  
+                Users can view the country that is associated with their account in the account settings.  
+                Example: `ES`
                 
         Returns:
             A dictionary that contains the following keys:
@@ -4855,11 +4864,12 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # trace.
             apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
             apiMethodParms.AppendKeyValue("trackId", trackId)
+            apiMethodParms.AppendKeyValue("market", market)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Track Service", apiMethodParms)
                 
             # request information from Spotify Web API.
             _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
-            result = self.data.spotifyClient.GetTrack(trackId)
+            result = self.data.spotifyClient.GetTrack(trackId, market)
 
             # return the (partial) user profile that retrieved the result, as well as the result itself.
             return {

@@ -621,6 +621,7 @@ SERVICE_SPOTIFY_GET_TRACK_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("track_id"): cv.string,
+        vol.Optional("market"): cv.string,
     }
 )
 
@@ -2006,8 +2007,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
                     # get spotify track details.
                     track_id = service.data.get("track_id")
+                    market = service.data.get("market")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_track, track_id)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_track, track_id, market)
 
                 elif service.service == SERVICE_SPOTIFY_GET_TRACK_AUDIO_FEATURES:
 
