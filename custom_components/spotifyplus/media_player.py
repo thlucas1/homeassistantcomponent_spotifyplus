@@ -140,6 +140,7 @@ ATTR_SPOTIFYPLUS_PLAYLIST_NAME = "sp_playlist_name"
 ATTR_SPOTIFYPLUS_PLAYLIST_URI = "sp_playlist_uri"
 ATTR_SPOTIFYPLUS_SOURCE_LIST_HIDE = "sp_source_list_hide"
 ATTR_SPOTIFYPLUS_TRACK_IS_EXPLICIT = "sp_track_is_explicit"
+ATTR_SPOTIFYPLUS_TRACK_URI_ORIGIN = "sp_track_uri_origin"
 ATTR_SPOTIFYPLUS_USER_COUNTRY = "sp_user_country"
 ATTR_SPOTIFYPLUS_USER_DISPLAY_NAME = "sp_user_display_name"
 ATTR_SPOTIFYPLUS_USER_EMAIL = "sp_user_email"
@@ -474,6 +475,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         attributes[ATTR_SPOTIFYPLUS_PLAY_TIME_REMAINING_EST] = None
         attributes[ATTR_SPOTIFYPLUS_PLAYING_TYPE] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_TRACK_IS_EXPLICIT] = False
+        attributes[ATTR_SPOTIFYPLUS_TRACK_URI_ORIGIN] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_USER_COUNTRY] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_USER_DISPLAY_NAME] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_USER_EMAIL] = ATTRVALUE_UNKNOWN
@@ -502,6 +504,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 attributes[ATTR_SPOTIFYPLUS_ITEM_TYPE] = self._playerState.ItemType
             if self._playerState.Item is not None:
                 track:Track = self._playerState.Item
+                attributes[ATTR_SPOTIFYPLUS_TRACK_URI_ORIGIN] = track.UriOrigin
                 if track.Explicit:
                     attributes[ATTR_SPOTIFYPLUS_TRACK_IS_EXPLICIT] = track.Explicit
                 if track.Type == SpotifyMediaTypes.TRACK.value:

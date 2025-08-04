@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.151 ] - 2025/08/04
+
+  * Added extra state attribute `sp_track_uri_origin` that denotes the currently playing track origin uri value resolved from playerstate `linked_from` data.  This value contains the origin track uri value if track re-linking is in effect; otherwise, it contains the same value as the `media_content_id` value.
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.235`.
+
 ###### [ 1.0.150 ] - 2025/08/02
 
   * Updated the following services to support [Spotify Track Re-Linking](https://developer.spotify.com/documentation/web-api/concepts/track-relinking) functionality:  `get_album`, `get_albums`, `get_album_tracks`, `get_playlist_items`, `get_track`, `get_tracks`, `get_track_favorites`.  These services will now return the track re-linking properties (see below).
