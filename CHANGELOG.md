@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.152 ] - 2025/08/06
+
+  * Fixed a bug that was causing `AttributeError: 'Episode' object has no attribute 'UriOrigin'` errors when playing podcast episodes.
+
 ###### [ 1.0.151 ] - 2025/08/04
 
   * Added extra state attribute `sp_track_uri_origin` that denotes the currently playing track origin uri value resolved from playerstate `linked_from` data.  This value contains the origin track uri value if track re-linking is in effect; otherwise, it contains the same value as the `media_content_id` value.

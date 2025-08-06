@@ -504,10 +504,10 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 attributes[ATTR_SPOTIFYPLUS_ITEM_TYPE] = self._playerState.ItemType
             if self._playerState.Item is not None:
                 track:Track = self._playerState.Item
-                attributes[ATTR_SPOTIFYPLUS_TRACK_URI_ORIGIN] = track.UriOrigin
                 if track.Explicit:
                     attributes[ATTR_SPOTIFYPLUS_TRACK_IS_EXPLICIT] = track.Explicit
                 if track.Type == SpotifyMediaTypes.TRACK.value:
+                    attributes[ATTR_SPOTIFYPLUS_TRACK_URI_ORIGIN] = track.UriOrigin
                     if len(track.Artists) > 0:
                         attributes[ATTR_SPOTIFYPLUS_ARTIST_URI] = track.Artists[0].Uri
             if (self._playerState.CurrentlyPlayingType is not None):
