@@ -1530,7 +1530,7 @@
         },
         "shuffle": {
           "name": "Shuffle?",
-          "description": "True to set player shuffle mode to on; otherwise, False for no shuffle."
+          "description": "True to enable player shuffle mode; False to disable player shuffle mode; None to use current player shuffle mode. Default is None."
         },
         "delay": {
           "name": "Delay",

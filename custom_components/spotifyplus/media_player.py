@@ -504,6 +504,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 attributes[ATTR_SPOTIFYPLUS_ITEM_TYPE] = self._playerState.ItemType
             if self._playerState.Item is not None:
                 track:Track = self._playerState.Item
+                attributes[ATTR_SPOTIFYPLUS_TRACK_URI_ORIGIN] = track.Uri
                 if track.Explicit:
                     attributes[ATTR_SPOTIFYPLUS_TRACK_IS_EXPLICIT] = track.Explicit
                 if track.Type == SpotifyMediaTypes.TRACK.value:
@@ -5777,7 +5778,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
     def service_spotify_player_media_play_track_favorites(
         self, 
         deviceId:str=None, 
-        shuffle:bool=False,
+        shuffle:bool=None,
         delay:float=0.50,
         resolveDeviceId:bool=True,
         limitTotal:int=None,
@@ -5795,7 +5796,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 not be resolved or activated.
                 Examples are `0d1841b0976bae2a3a310dd74c0f3df354899bc8`, `Office`, `*`, None.  
             shuffle (bool):
-                True to set player shuffle mode to on; otherwise, False for no shuffle.
+                True to set player shuffle mode to on; False to set player shuffle mode to off;
+                null to leave the shuffle mode as-is.  
+                Default is null.
             delay (float):
                 Time delay (in seconds) to wait AFTER issuing the command to the player.  
                 This delay will give the spotify web api time to process the change before 

@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.153 ] - 2025/08/10
+
+  * Changed the `player_media_play_track_favorites` service to default the shuffle argument to `null`, which will match the `player_media_play_tracks` and `player_media_play_context` services.  Specify the following for the `shuffle` argument: True to set player shuffle mode to on; False to set player shuffle mode to off; null to leave the shuffle mode as-is. Default is null.
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.236`.
+
 ###### [ 1.0.152 ] - 2025/08/06
 
   * Fixed a bug that was causing `AttributeError: 'Episode' object has no attribute 'UriOrigin'` errors when playing podcast episodes.
