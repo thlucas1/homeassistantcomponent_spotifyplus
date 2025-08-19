@@ -37,6 +37,7 @@ from spotifywebapipython.models import (
     EpisodePageSaved,
     EpisodePageSimplified,
     ImageVibrantColors,
+    PlayerLastPlayedInfo,
     PlayerPlayState, 
     PlayerQueueInfo,
     PlayHistoryPage,
@@ -328,8 +329,6 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self._spotifyScanInterval = DEFAULT_OPTION_SPOTIFY_SCAN_INTERVAL
             self._playlist:Playlist = None
             self._lastMediaPlayedPosition:int = 0
-            self._lastMediaPlayedContextUri:str = None
-            self._lastMediaPlayedUri:str = None
             self.data = data
             self._currentScanInterval:int = 0
             self._commandScanInterval:int = 0
@@ -1104,7 +1103,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                         self._isInCommandEvent = True  # turn "in a command event" indicator back on.
 
                     # trace.
-                    _logsi.LogVerbose("'%s': About to resume play; last known media content: ContextUri=%s, Uri=%s, Position=%d" % (self.name, self._lastMediaPlayedContextUri, self._lastMediaPlayedUri, self._lastMediaPlayedPosition))
+                    _logsi.LogObject(SILevel.Verbose, "'%s': About to resume play; Last known media content: %s" % (self.name, self.data.spotifyClient.PlayerLastPlayedInfo.Summary), self.data.spotifyClient.PlayerLastPlayedInfo, excludeNonPublic=True)
 
                     # is playing content paused?  if so, then resume play.
                     if (self._playerState.Device.IsActive) \
@@ -1272,7 +1271,6 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 
                 # yes - if it's a playlist, then we need to update the stored playlist reference.
                 self._playlist = None
-                self._lastMediaPlayedContextUri = context.Uri
                 if context.Type == MediaType.PLAYLIST:
                 
                     # as of 2024/11/27, Spotify deprecated API support for various Spotify-owned playlists!
@@ -1412,9 +1410,6 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 self._attr_media_duration = item.DurationMS / 1000
                 self._attr_media_title = item.Name
 
-                # save currently playing track uri in case we need to restore it later.
-                self._lastMediaPlayedUri = playerPlayState.Item.Uri
-                    
                 # update media album name attribute.
                 if item.Type == MediaType.EPISODE.value:
                     self._attr_media_album_name = episode.Show.Name
@@ -3813,6 +3808,51 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             return {
                 "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
                 "result": resultArray
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_get_player_last_played_info(
+            self, 
+            ) -> dict:
+        """
+        Get information about the content that was last playing on the Spotify Player,
+        including context, item (track / episode), progress, and active device.
+        
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A `PlayerLastPlayedInfo` object that contains the player last played details.
+        """
+        apiMethodName:str = 'service_spotify_get_player_last_played_info'
+        apiMethodParms:SIMethodParmListContext = None
+        result:PlayerLastPlayedInfo = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Player Last Played Service", apiMethodParms)
+                
+            # request information from Spotify Web API.
+            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
+            result = self.data.spotifyClient.PlayerLastPlayedInfo
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result.ToDictionary()
             }
 
         # the following exceptions have already been logged, so we just need to
@@ -6479,7 +6519,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
             # trace.
             _logsi.LogVerbose("'%s': Transferring playback from device \"%s\" to device \"%s\"" % (self.name, deviceIdFrom, deviceId))
-            _logsi.LogVerbose("'%s': Last known media content: ContextUri=%s, Uri=%s, Position=%d" % (self.name, self._lastMediaPlayedContextUri, self._lastMediaPlayedUri, self._lastMediaPlayedPosition))
+            _logsi.LogObject(SILevel.Verbose, "'%s': Last known media content: %s" % (self.name, self.data.spotifyClient.PlayerLastPlayedInfo.Summary), self.data.spotifyClient.PlayerLastPlayedInfo, excludeNonPublic=True)
 
             # transfer playback to the specified device.
             scDevice:SpotifyConnectDevice = self.data.spotifyClient.PlayerTransferPlayback(

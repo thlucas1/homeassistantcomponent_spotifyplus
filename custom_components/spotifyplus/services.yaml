@@ -1206,6 +1206,20 @@ get_player_devices:
       selector:
         boolean:
 
+get_player_last_played_info:
+  name: Get Player Last Played Information
+  description: Get information about the content that was last playing on the Spotify Player, including context, item (track / episode), progress, and active device.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+
 get_player_now_playing:
   name: Get Player Now Playing 
   description: Get the object currently being played on the user's Spotify account.

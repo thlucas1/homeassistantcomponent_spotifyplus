@@ -6,6 +6,13 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.154 ] - 2025/08/18
+
+  * Updated service `player_media_play_context` to fix `Malformed JSON` errors that would occur if the `positionMS` argument was used.
+  * Updated service `player_transfer_playback` to utilize the new `PlayerLastPlayedInfo` class to resume play when there is no active device.  The track favorites will be used if there is no last played information set.
+  * Added service `get_player_last_played_info` to get information about the content that was last playing on the Spotify Player, including context, item (track / episode), progress, and active device.
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.237`.
+
 ###### [ 1.0.153 ] - 2025/08/10
 
   * Changed the `player_media_play_track_favorites` service to default the shuffle argument to `null`, which will match the `player_media_play_tracks` and `player_media_play_context` services.  Specify the following for the `shuffle` argument: True to set player shuffle mode to on; False to set player shuffle mode to off; null to leave the shuffle mode as-is. Default is null.

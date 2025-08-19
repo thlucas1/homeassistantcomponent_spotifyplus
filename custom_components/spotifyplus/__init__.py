@@ -117,6 +117,7 @@ SERVICE_SPOTIFY_GET_EPISODE_FAVORITES:str = 'get_episode_favorites'
 SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS:str = 'get_featured_playlists'
 SERVICE_SPOTIFY_GET_IMAGE_VIBRANT_COLORS:str = 'get_image_vibrant_colors'
 SERVICE_SPOTIFY_GET_PLAYER_DEVICES:str = 'get_player_devices'
+SERVICE_SPOTIFY_GET_PLAYER_LAST_PLAYED_INFO:str = 'get_player_last_played_info'
 SERVICE_SPOTIFY_GET_PLAYER_NOW_PLAYING:str = 'get_player_now_playing'
 SERVICE_SPOTIFY_GET_PLAYER_PLAYBACK_STATE:str = 'get_player_playback_state'
 SERVICE_SPOTIFY_GET_PLAYER_QUEUE_INFO:str = 'get_player_queue_info'
@@ -481,6 +482,12 @@ SERVICE_SPOTIFY_GET_PLAYER_DEVICES_SCHEMA = vol.Schema(
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("refresh"): cv.boolean,
         vol.Optional("sort_result"): cv.boolean,
+    }
+)
+
+SERVICE_SPOTIFY_GET_PLAYER_LAST_PLAYED_INFO_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
     }
 )
 
@@ -1870,6 +1877,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_get_player_devices, refresh, sort_result)
 
+                elif service.service == SERVICE_SPOTIFY_GET_PLAYER_LAST_PLAYED_INFO:
+
+                    # get spotify player last played information.
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_player_last_played_info)
+
                 elif service.service == SERVICE_SPOTIFY_GET_PLAYER_NOW_PLAYING:
 
                     # get spotify player now playing.
@@ -2713,6 +2726,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             SERVICE_SPOTIFY_GET_PLAYER_PLAYBACK_STATE,
             service_handle_spotify_serviceresponse,
             schema=SERVICE_SPOTIFY_GET_PLAYER_PLAYBACK_STATE_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_PLAYER_LAST_PLAYED_INFO, SERVICE_SPOTIFY_GET_PLAYER_LAST_PLAYED_INFO_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_GET_PLAYER_LAST_PLAYED_INFO,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_GET_PLAYER_LAST_PLAYED_INFO_SCHEMA,
             supports_response=SupportsResponse.ONLY,
         )
 
