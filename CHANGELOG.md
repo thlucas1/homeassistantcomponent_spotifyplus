@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.155 ] - 2025/08/24
+
+  * Added support for [`go-librespot`](https://github.com/devgianlu/go-librespot) Spotify Connect Zeroconf clients.
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.238`.
+
 ###### [ 1.0.154 ] - 2025/08/18
 
   * Updated service `player_media_play_context` to fix `Malformed JSON` errors that would occur if the `positionMS` argument was used.
