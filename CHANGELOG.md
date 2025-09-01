@@ -6,6 +6,14 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.158 ] - 2025/08/31
+
+  * Removed `"homeassistant": ">=2025.7.0",` from `manifest.json`; was causing github HASSFest Validation errors.
+
+###### [ 1.0.157 ] - 2025/08/31
+
+  * Removed `"homeassistant": ">=2025.7.0",` from `manifest.json`; was causing github HASSFest Validation errors.
+
 ###### [ 1.0.156 ] - 2025/08/30
 
   * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.239`.
