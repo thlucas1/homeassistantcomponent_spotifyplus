@@ -39,7 +39,7 @@ class STAppMessages:
 
     MSG_SERVICE_REQUEST_REGISTER:str = "Component async_setup is registering async service: '%s'"
     """
-    Component async_setup is registering component async service request: '%s'
+    Component async_setup is registering async service: '%s'
     """
 
     MSG_SERVICE_REQUEST_UNKNOWN:str = "Service request '%s' was not recognized by the '%s' method"
@@ -49,7 +49,7 @@ class STAppMessages:
 
     MSG_SERVICE_REQUEST_EXCEPTION:str = "An unhandled exception occurred in Service request method '%s'; exception: %s"
     """
-    Service request '%s' was not recognized by the '%s' method
+    An unhandled exception occurred in Service request method '%s'; exception: %s
     """
 
     MSG_SERVICE_EXECUTE:str = "Executing '%s' service on media player '%s'"

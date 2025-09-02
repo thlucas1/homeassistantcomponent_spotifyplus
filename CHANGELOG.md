@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.159 ] - 2025/09/02
+
+  * Added service `list_application_credential_mappings`; List Home Assistant application credential mappings to determine which configuration entitys use which credential.  See [wiki documentation](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Services-Provided#list-application-credential-mappings) for more information.
+
 ###### [ 1.0.158 ] - 2025/08/31
 
   * Removed `"homeassistant": ">=2025.7.0",` from `manifest.json`; was causing github HASSFest Validation errors.

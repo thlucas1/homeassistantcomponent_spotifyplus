@@ -8,7 +8,9 @@ from asyncio import run_coroutine_threadsafe
 from urllib3._version import __version__ as urllib3_version
 
 import functools
+import json
 import logging
+import os
 import threading
 import voluptuous as vol
 
@@ -1168,6 +1170,7 @@ SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES_SCHEMA = vol.Schema(
 # Custom Service Schemas - MediaPlayerEntity enhancements.
 # -----------------------------------------------------------------------------------
 SERVICE_VOLUME_SET_STEP:str = 'volume_set_step'
+
 SERVICE_VOLUME_SET_STEP_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
@@ -1183,12 +1186,40 @@ SERVICE_VOLUME_SET_STEP_SCHEMA = vol.Schema(
 # -----------------------------------------------------------------------------------
 # Custom Service Schemas - non-Spotify Web API related.
 # -----------------------------------------------------------------------------------
+SERVICE_LIST_APPLICATION_CREDENTIAL_MAPPPINGS:str = 'list_application_credential_mappings'
 SERVICE_TEST_TOKEN_EXPIRE:str = 'test_token_expire'
+
+SERVICE_LIST_APPLICATION_CREDENTIAL_MAPPPINGS_SCHEMA = vol.Schema(
+    {
+        vol.Optional("filter_domain"): cv.string,
+        vol.Optional("filter_credentials_only", default=True): cv.boolean,
+        vol.Optional("list_domain_entities", default=False): cv.boolean,
+    }
+)
+
 SERVICE_TEST_TOKEN_EXPIRE_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
     }
 )
+
+
+def _get_file_contents_json(filePath: str, title: str) -> dict:
+    """
+    Retrieves the contents of the specified JSON text file.
+    
+    Args:
+        filePath (str):
+            Fully-qualified file path whose contents will be read.
+        title (str):
+            Title to assign to the log entry.
+    Returns:
+        A dictionary object loaded from JSON file.
+    """
+    result = None
+    with open(filePath, "r") as f:
+        result = json.load(f)
+    return result
 
 
 def _trace_LogTextFile(filePath: str, title: str) -> None:
@@ -1263,6 +1294,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 translation_key="removed_yaml",
             )
 
+        # storage directory path.
+        storage_dir = hass.config.path(".storage")
 
         async def service_handle_spotify_command(service: ServiceCall) -> None:
             """
@@ -2367,6 +2400,212 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 _logsi.LeaveMethod(SILevel.Debug)
 
 
+        async def service_list_application_credential_mappings(service: ServiceCall):
+            """
+            List Application Credential mappings.
+
+            Args:
+                service (ServiceCall):
+                    ServiceCall instance that contains service data (requested service name, field parameters, etc).
+            """
+            apiMethodName:str = "service_list_application_credential_mappings"
+
+            try:
+
+                # trace.
+                _logsi.EnterMethod(SILevel.Debug)
+                _logsi.LogVerbose(STAppMessages.MSG_SERVICE_CALL_START, service.service, apiMethodName)
+                _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_CALL_PARM, service)
+                _logsi.LogDictionary(SILevel.Verbose, STAppMessages.MSG_SERVICE_CALL_DATA, service.data)
+
+                # get optional filter criteria.
+                filter_domain = service.data.get("filter_domain")
+                filter_credentials_only = service.data.get("filter_credentials_only")
+                list_domain_entities = service.data.get("list_domain_entities")
+
+                try:
+                    _logsi.LogVerbose("Opening configuration files")
+
+                    # read file contents via an "async_add_executor_job" to avoid the following
+                    # error: "Detected blocking call to open with args inside the event loop
+                    app_creds = await hass.async_add_executor_job(_get_file_contents_json, os.path.join(storage_dir, "application_credentials"), "Application Credentials")
+                    config_entries = await hass.async_add_executor_job(_get_file_contents_json, os.path.join(storage_dir, "core.config_entries"), "Core Config Entries")
+                    entity_registry = await hass.async_add_executor_job(_get_file_contents_json, os.path.join(storage_dir, "core.entity_registry"), "Core Entity Registry")
+
+                except Exception as e:
+
+                    # log exception, but not to system logger as HA will take care of it.
+                    _logsi.LogException("AppCred Mapper - Error reading storage files: %s" % (str(ex)), ex, logToSystemLogger=False)
+                    return
+
+                # Map domain to application credentials.
+                # A domain may have multiple application credentials.
+                _logsi.LogVerbose("Mapping Domain to Credentials")
+                domain_to_creds = {}
+                for cred in app_creds.get("data", {}).get("items", []):
+                    domain = cred.get("domain")
+                    domain_to_creds.setdefault(domain, []).append({
+                        "id": cred.get("id"),
+                        "client_id": cred.get("client_id"),
+                        "name": cred.get("name"),
+                    })
+                _logsi.LogDictionary(SILevel.Verbose, "Domain to Credentials dictionary", domain_to_creds)
+
+                # Map config entry id to domain.
+                _logsi.LogVerbose("Mapping Config Entry ID to Domain")
+                entry_to_domain = {}
+                for entry in config_entries.get("data", {}).get("entries", []):
+                    config_entry_id = entry.get("entry_id")
+                    domain = entry.get("domain")
+                    if not domain:
+                        continue
+                    if filter_domain and domain != filter_domain:
+                        continue
+                    entry_to_domain.setdefault(config_entry_id, domain)
+                _logsi.LogDictionary(SILevel.Verbose, "Config Entry ID to Domain dictionary", entry_to_domain)
+
+                # Map config entry id to application credential.
+                # A config entry only has a single (or none) application credential.
+                _logsi.LogVerbose("Mapping Config Entry ID to Application Credential")
+                entry_to_creds = {}
+                for entry in config_entries.get("data", {}).get("entries", []):
+                    config_entry_id = entry.get("entry_id")
+                    domain = entry.get("domain")
+                    entry_data = entry.get("data", {})
+                    auth_implementation = entry_data.get("auth_implementation")
+                    if not domain:
+                        continue
+                    if filter_domain and domain != filter_domain:
+                        continue
+                    if filter_credentials_only and (auth_implementation is None):
+                        continue
+                    #entry_to_creds.setdefault(config_entry_id, []).append({
+                    entry_to_creds.setdefault(config_entry_id, {
+                        "domain": domain,
+                        "name": entry_data.get("name"),
+                        "title": entry.get("title"),
+                        "auth_implementation": auth_implementation,
+                        "id": entry_data.get("id"), # could be null
+                        "description": entry_data.get("description"), # could be null
+                    })
+                _logsi.LogDictionary(SILevel.Verbose, "Config Entry ID to Application Credential dictionary", entry_to_creds)
+                _logsi.LogDictionary(SILevel.Verbose, "Config Entry ID to Application Credential dictionary (prettyPrint)", entry_to_creds, prettyPrint=True)
+
+                # Map entity id to application credential.
+                # An entity only has a single (or none) application credential.
+                _logsi.LogVerbose("Mapping Entity ID to Application Credential")
+                entity_to_creds = {}
+                for ent in entity_registry.get("data", {}).get("entities", []):
+                    config_entry_id = ent["config_entry_id"]
+                    domain = entry_to_domain.get(config_entry_id)
+                    credential = entry_to_creds.get(config_entry_id, {})
+                    entity_id = ent.get("entity_id")
+                    name = ent.get("name") or ent.get("original_name")
+                    id_value = ent.get("id")
+                    if not domain:
+                        continue
+                    if filter_domain and domain != filter_domain:
+                        continue
+                    if filter_credentials_only and (credential == {}):
+                        continue
+                    #entity_to_creds.setdefault(id_value, []).append({
+                    entity_to_creds.setdefault(id_value, {
+                        "domain": domain,
+                        "entity_id": entity_id,
+                        "name": name,
+                        "config_entry_id": config_entry_id,
+                        "credential": credential,
+                    })
+                _logsi.LogDictionary(SILevel.Verbose, "Entity ID to Application Credential dictionary", entity_to_creds)
+                _logsi.LogDictionary(SILevel.Verbose, "Entity ID to Application Credential dictionary (prettyPrint)", entity_to_creds, prettyPrint=True)
+
+                # Map entities to domains/creds.
+                # An entity only has a single (or none) application credential.
+                _logsi.LogVerbose("Mapping Entities to Domains / Credentials")
+                results = {}
+                for ent in entity_registry.get("data", {}).get("entities", []):
+                    config_entry_id = ent["config_entry_id"]
+                    domain = entry_to_domain.get(config_entry_id)
+                    id_value = ent.get("id")
+                    entity_id = ent["entity_id"]
+                    name = ent["name"] or ent["original_name"]
+                    credential = entity_to_creds.get(id_value, {})
+                    if not domain:
+                        continue
+                    if filter_domain and domain != filter_domain:
+                        continue
+                    if filter_credentials_only and (credential == {}):
+                        continue
+                    results.setdefault(domain, []).append({
+                    #results.setdefault(domain, {
+                        "id": id_value,
+                        "entity_id": entity_id,
+                        "unique_id": ent.get("unique_id"),
+                        "name": name,
+                        "credential": credential
+                    })
+                _logsi.LogDictionary(SILevel.Verbose, "Entities to Domains / Credentials dictionary", results)
+                _logsi.LogDictionary(SILevel.Verbose, "Entities to Domains / Credentials dictionary (prettyPrint)", results, prettyPrint=True)
+
+                # Format text.
+                _logsi.LogVerbose("Formatting results")
+                lines = []
+                for domain, entities in results.items():
+                    lines.append(f"**Domain: {domain}**")
+
+                    # list application credentials.
+                    credentials = domain_to_creds.get(domain, [])
+                    lines.append("  Application Credentials:")
+                    if credentials:
+                        for c in credentials:
+                            lines.append(f"    - ID: `{c['id']}`, Client ID: `{c['client_id']}`, Name: `{c['name']}`")
+                            for e in entities:
+                                entity_cred_id = e.get("credential", {}).get("credential", {}).get("auth_implementation")
+                                if c['id'] == entity_cred_id:
+                                    lines.append(f"      - Entity ID: `{e['entity_id']}`, Name: `{e['name']}`, Unique ID: `{e['unique_id']}`")
+                    else:
+                        lines.append("    - No credentials found")
+
+                    # list defined entities.
+                    if (list_domain_entities):
+                        lines.append("  Entities:")
+                        for e in entities:
+                            lines.append(f"    - ID: `{e['entity_id']}`, Name: `{e['name']}`, Unique ID: `{e['unique_id']}`")
+
+                    lines.append("")
+
+                text = "\n".join(lines) if lines else (
+                    f"No entities found for domain '{filter_domain}'"
+                    if filter_domain else "No entities found."
+                )
+
+                # Log and return results.
+                _logsi.LogText(SILevel.Message, "List Application Credential Mappings by Domain result", text)
+                _LOGGER.info("Application Credential Mapping:\n%s", text)
+
+                # return the result as a dictionary.
+                return {
+                    "result": text
+                }
+
+            except HomeAssistantError as ex: 
+                
+                # log error, but not to system logger as HA will take care of it.
+                _logsi.LogError(str(ex), logToSystemLogger=False)
+                raise
+            
+            except Exception as ex:
+
+                # log exception, but not to system logger as HA will take care of it.
+                _logsi.LogException(STAppMessages.MSG_SERVICE_REQUEST_EXCEPTION % (service.service, apiMethodName), ex, logToSystemLogger=False)
+                raise
+            
+            finally:
+                
+                # trace.
+                _logsi.LeaveMethod(SILevel.Debug)
+
+
         @staticmethod
         def _GetEntityFromServiceData(hass:HomeAssistant, service:ServiceCall, field_id:str) -> MediaPlayerEntity:
             """
@@ -3332,21 +3571,30 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             supports_response=SupportsResponse.ONLY,
         )
 
-        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_TEST_TOKEN_EXPIRE, SERVICE_TEST_TOKEN_EXPIRE_SCHEMA)
-        hass.services.async_register(
-            DOMAIN,
-            SERVICE_TEST_TOKEN_EXPIRE,
-            service_handle_spotify_command,
-            schema=SERVICE_TEST_TOKEN_EXPIRE_SCHEMA,
-            supports_response=SupportsResponse.NONE,
-        )
-
         _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_VOLUME_SET_STEP, SERVICE_VOLUME_SET_STEP_SCHEMA)
         hass.services.async_register(
             DOMAIN,
             SERVICE_VOLUME_SET_STEP,
             service_handle_spotify_command,
             schema=SERVICE_VOLUME_SET_STEP_SCHEMA,
+            supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_LIST_APPLICATION_CREDENTIAL_MAPPPINGS, SERVICE_LIST_APPLICATION_CREDENTIAL_MAPPPINGS_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_LIST_APPLICATION_CREDENTIAL_MAPPPINGS,
+            service_list_application_credential_mappings,
+            schema=SERVICE_LIST_APPLICATION_CREDENTIAL_MAPPPINGS_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_TEST_TOKEN_EXPIRE, SERVICE_TEST_TOKEN_EXPIRE_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_TEST_TOKEN_EXPIRE,
+            service_handle_spotify_command,
+            schema=SERVICE_TEST_TOKEN_EXPIRE_SCHEMA,
             supports_response=SupportsResponse.NONE,
         )
 

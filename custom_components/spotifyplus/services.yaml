@@ -2392,6 +2392,32 @@ get_users_top_tracks:
       selector:
         boolean:
 
+list_application_credential_mappings:
+  name: List Application Credential Mappings
+  description: List Home Assistant application credential mappings to determine which configuration entitys use which credential.
+  fields:
+    filter_domain:
+      name: Domain Name Filter
+      description: Limit entries displayed to the specified domain name (e.g. 'spotifyplus', 'spotify', etc).
+      example: "spotifyplus"
+      required: false
+      selector:
+        text:
+    filter_credentials_only:
+      name: Application Credentials Filter?
+      description: True (default) to limit entries displayed to those that have Application Credentials defined; otherwise, False to include all entries.
+      example: "true"
+      required: false
+      selector:
+        boolean:
+    list_domain_entities:
+      name: List Domain Entities?
+      description: True to list entities that are children of the domain; otherwise, False (default) to exclude domain entity details.
+      example: "false"
+      required: false
+      selector:
+        boolean:
+
 player_media_pause:
   name: Player Media Pause
   description: Pause media play for the specified Spotify Connect device.
