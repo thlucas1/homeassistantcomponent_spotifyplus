@@ -350,7 +350,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             
             # A unique_id for this entity within this domain.
             # Note: This is NOT used to generate the user visible Entity ID used in automations.
-            self._attr_unique_id = data.spotifyClient.UserProfile.Id
+            # this value should match the value assigned in config_flow `async_set_unique_id` method call.
+            self._attr_unique_id = data.spotifyClient.UserProfile.Id + "_" + DOMAIN
 
             # we will set "self._attr_has_entity_name = False", which causes the "self._attr_name"
             # to be used as-is.  use "self._attr_has_entity_name = True", to append the "self._attr_name"

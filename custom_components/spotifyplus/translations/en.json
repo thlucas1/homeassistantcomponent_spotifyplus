@@ -6,10 +6,11 @@
       },
       "reauth_confirm": {
         "title": "SpotifyPlus Re-Authentication Required",
-        "description": "The Spotify integration needs to re-authenticate with Spotify for account: {account}"
+        "description": "The SpotifyPlus integration needs to re-authenticate with Spotify for account: {account}"
       }
     },
     "abort": {
+      "already_configured": "Service is already configured for the associated Spotify User ID.  Please modify the existing service entry.",
       "authorize_url_timeout": "Timeout generating authorize URL.",
       "missing_configuration": "The Spotify integration is not configured. Please follow the documentation.",
       "no_url_available": "[%key:common::config_flow::abort::oauth2_no_url_available%]",

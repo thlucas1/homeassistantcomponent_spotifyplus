@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.160 ] - 2025/09/08
+
+  * Added configuration migration logic to update the config entry `unique_id` value to a truly unique id value (across all HA domains).  The previous versions were using the same `unique_id` value as the HA Spotify integration.  This was causing system log warnings to be generated when using both the HA Spotify integration and SpotifyPlus, which would turn into errors with the HA 2026.03 release.
+
 ###### [ 1.0.159 ] - 2025/09/02
 
   * Added service `list_application_credential_mappings`; List Home Assistant application credential mappings to determine which configuration entitys use which credential.  See [wiki documentation](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Services-Provided#list-application-credential-mappings) for more information.

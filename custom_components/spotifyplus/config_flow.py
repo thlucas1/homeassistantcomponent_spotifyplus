@@ -17,7 +17,6 @@ dependencies and install the requirements of the component.
 from __future__ import annotations
 from collections.abc import Mapping
 import logging
-from pickle import NONE
 from typing import Any
 import voluptuous as vol
 
@@ -25,13 +24,13 @@ from spotifywebapipython import SpotifyClient
 from spotifywebapipython.models import Device, SpotifyConnectDevices
 
 from homeassistant.components import zeroconf
+from homeassistant import config_entries
 from homeassistant.config_entries import (
     ConfigEntry,
-    ConfigFlow,
     ConfigFlowResult,
     OptionsFlow,
 )
-from homeassistant.const import CONF_DESCRIPTION, CONF_ID, CONF_NAME, Platform
+from homeassistant.const import CONF_DESCRIPTION, CONF_ID, CONF_NAME
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_entry_oauth2_flow, config_validation as cv, selector
@@ -70,15 +69,20 @@ if (_logsi == None):
 _logsi.SystemLogger = logging.getLogger(__name__)
 
 
-class SpotifyFlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, domain=DOMAIN):
+class SpotifyPlusConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, domain=DOMAIN):
     """
-    Config flow to handle Spotify OAuth2 authentication.
+    Config flow to handle SpotifyPlus OAuth2 authentication.
     """
 
+    # integration DOMAIN (must be a local variable; can't use the constant reference).
     DOMAIN = DOMAIN
-    VERSION = 1
 
+    # integration configuration entry major version number.
+    VERSION = 2
+
+    # re-authorization request entry.
     reauth_entry: ConfigEntry | None = None
+
 
     @property
     def logger(self) -> logging.Logger:
@@ -177,8 +181,19 @@ class SpotifyFlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
                     return self.async_abort(reason="reauth_account_mismatch")
        
             # set configuration entry unique id (e.g. spotify profile id).
-            await self.async_set_unique_id(spotifyClient.UserProfile.Id)
+            # this value should match the value assigned in media_player `_attr_unique_id` attribute.
+            await self.async_set_unique_id(spotifyClient.UserProfile.Id + "_" + DOMAIN)
             _logsi.LogVerbose("ConfigFlow assigned unique_id of '%s' for Spotify UserProfile '%s'" % (self.unique_id, spotifyClient.UserProfile.DisplayName))
+
+            # the following code would display an error if the unique_id already exists, and
+            # would force the user to modify the existing entry.
+            # in our case, just overlay the configuration if unique_id is already configured.
+
+            # # one final check to see if a configuration entry already exists for the unique id.
+            # # if it IS already configured, then we will send an "already_configured" message 
+            # # to the user and halt the flow to prevent a duplicate configuration entry.
+            # _logsi.LogVerbose("ConfigFlow is verifying USER ENTRY device details have not already been configured: unique_id=%s, display name=%s" % (self.unique_id, spotifyClient.UserProfile.DisplayName))
+            # self._abort_if_unique_id_configured()
 
             # set configuration data parameters.
             data[CONF_ID] = spotifyClient.UserProfile.Id
@@ -304,9 +319,10 @@ class SpotifyFlowHandler(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
             # trace.
             _logsi.LeaveMethod(SILevel.Debug)
 
+
     @staticmethod
     @callback
-    def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
+    def async_get_options_flow(config_entry: ConfigEntry) -> SpotifyPlusOptionsFlow:
         """
         Get the options flow for this handler, which enables options support.
 
