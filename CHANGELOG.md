@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.161 ] - 2025/09/13
+
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.242`.
+
 ###### [ 1.0.160 ] - 2025/09/08
 
   * Added configuration migration logic to update the config entry `unique_id` value to a truly unique id value (across all HA domains).  The previous versions were using the same `unique_id` value as the HA Spotify integration.  This was causing system log warnings to be generated when using both the HA Spotify integration and SpotifyPlus, which would turn into errors with the HA 2026.03 release.
