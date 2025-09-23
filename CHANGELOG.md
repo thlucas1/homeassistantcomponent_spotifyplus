@@ -6,6 +6,17 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.163 ] - 2025/09/22
+
+  * Added service `get_image_palette_colors` to get color palette RGB values from the specified image source, or the currently playing Spotify track / episode.
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.245`.
+  * re-published.
+
+###### [ 1.0.162 ] - 2025/09/22
+
+  * Added service `get_image_palette_colors` to get color palette RGB values from the specified image source, or the currently playing Spotify track / episode.
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.245`.
+
 ###### [ 1.0.161 ] - 2025/09/13
 
   * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.242`.

@@ -117,6 +117,7 @@ SERVICE_SPOTIFY_GET_COVER_IMAGE_FILE:str = 'get_cover_image_file'
 SERVICE_SPOTIFY_GET_EPISODE:str = 'get_episode'
 SERVICE_SPOTIFY_GET_EPISODE_FAVORITES:str = 'get_episode_favorites'
 SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS:str = 'get_featured_playlists'
+SERVICE_SPOTIFY_GET_IMAGE_PALETTE_COLORS:str = 'get_image_palette_colors'
 SERVICE_SPOTIFY_GET_IMAGE_VIBRANT_COLORS:str = 'get_image_vibrant_colors'
 SERVICE_SPOTIFY_GET_PLAYER_DEVICES:str = 'get_player_devices'
 SERVICE_SPOTIFY_GET_PLAYER_LAST_PLAYED_INFO:str = 'get_player_last_played_info'
@@ -467,6 +468,18 @@ SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS_SCHEMA = vol.Schema(
         vol.Optional("timestamp"): cv.string,
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
         vol.Optional("sort_result"): cv.boolean,
+    }
+)
+
+SERVICE_SPOTIFY_GET_IMAGE_PALETTE_COLORS_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("image_source"): cv.string,
+        vol.Optional("color_count", default=10): vol.All(vol.Range(min=1,max=256)),
+        vol.Optional("color_quality", default=None): vol.All(vol.Range(min=1,max=10)),
+        vol.Optional("brightness_filter_low", default=None): vol.All(vol.Range(min=0,max=765)),
+        vol.Optional("brightness_filter_high", default=None): vol.All(vol.Range(min=0,max=765)),
+        vol.Optional("hue_distance_filter", default=None): vol.All(vol.Range(min=0,max=360)),
     }
 )
 
@@ -1893,6 +1906,18 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_get_featured_playlists, limit, offset, country, locale, timestamp, limit_total, sort_result)
 
+                elif service.service == SERVICE_SPOTIFY_GET_IMAGE_PALETTE_COLORS:
+
+                    # get image palette colors.
+                    image_source = service.data.get("image_source")
+                    color_count = service.data.get("color_count")
+                    color_quality = service.data.get("color_quality")
+                    brightness_filter_low = service.data.get("brightness_filter_low")
+                    brightness_filter_high = service.data.get("brightness_filter_high")
+                    hue_distance_filter = service.data.get("hue_distance_filter")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_image_palette_colors, image_source, color_count, color_quality, brightness_filter_low, brightness_filter_high, hue_distance_filter)
+
                 elif service.service == SERVICE_SPOTIFY_GET_IMAGE_VIBRANT_COLORS:
 
                     # get image vibrant colors.
@@ -2938,6 +2963,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS,
             service_handle_spotify_serviceresponse,
             schema=SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_IMAGE_PALETTE_COLORS, SERVICE_SPOTIFY_GET_IMAGE_PALETTE_COLORS_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_GET_IMAGE_PALETTE_COLORS,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_GET_IMAGE_PALETTE_COLORS_SCHEMA,
             supports_response=SupportsResponse.ONLY,
         )
 

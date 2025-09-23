@@ -36,6 +36,7 @@ from spotifywebapipython.models import (
     Episode, 
     EpisodePageSaved,
     EpisodePageSimplified,
+    ImagePaletteColors,
     ImageVibrantColors,
     PlayerLastPlayedInfo,
     PlayerPlayState, 
@@ -135,6 +136,7 @@ ATTR_SPOTIFYPLUS_DEVICE_IS_CHROMECAST = "sp_device_is_chromecast"
 ATTR_SPOTIFYPLUS_DEVICE_IS_RESTRICTED = "sp_device_is_restricted"
 ATTR_SPOTIFYPLUS_DEVICE_MUSIC_SOURCE = "sp_device_music_source"
 ATTR_SPOTIFYPLUS_ITEM_TYPE = "sp_item_type"
+ATTR_SPOTIFYPLUS_NOWPLAYING_IMAGE_URL = "sp_nowplaying_image_url"
 ATTR_SPOTIFYPLUS_PLAY_TIME_REMAINING_EST = "sp_play_time_remaining_est"
 ATTR_SPOTIFYPLUS_PLAYING_TYPE = "sp_playing_type"
 ATTR_SPOTIFYPLUS_PLAYLIST_NAME = "sp_playlist_name"
@@ -472,6 +474,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         attributes[ATTR_SPOTIFYPLUS_DEVICE_MUSIC_SOURCE] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_DEVICE_NAME] = ATTRVALUE_NO_DEVICE
         attributes[ATTR_SPOTIFYPLUS_ITEM_TYPE] = ATTRVALUE_UNKNOWN
+        attributes[ATTR_SPOTIFYPLUS_NOWPLAYING_IMAGE_URL] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_PLAY_TIME_REMAINING_EST] = None
         attributes[ATTR_SPOTIFYPLUS_PLAYING_TYPE] = ATTRVALUE_UNKNOWN
         attributes[ATTR_SPOTIFYPLUS_TRACK_IS_EXPLICIT] = False
@@ -511,6 +514,16 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                     attributes[ATTR_SPOTIFYPLUS_TRACK_URI_ORIGIN] = track.UriOrigin
                     if len(track.Artists) > 0:
                         attributes[ATTR_SPOTIFYPLUS_ARTIST_URI] = track.Artists[0].Uri
+                    # for tracks, use the album image if present.
+                    if track.Album.ImageUrl is not None:
+                        attributes[ATTR_SPOTIFYPLUS_NOWPLAYING_IMAGE_URL] = track.Album.ImageUrl
+                elif track.Type == SpotifyMediaTypes.EPISODE.value:
+                    episode:Episode = self._playerState.Item
+                    # for episodes, use the episode image if present; otherwise use the show image if present.
+                    if episode.ImageUrl is not None:
+                        attributes[ATTR_SPOTIFYPLUS_NOWPLAYING_IMAGE_URL] = episode.ImageUrl
+                    if episode.Show.ImageUrl is not None:
+                        attributes[ATTR_SPOTIFYPLUS_NOWPLAYING_IMAGE_URL] = episode.Show.ImageUrl
             if (self._playerState.CurrentlyPlayingType is not None):
                 attributes[ATTR_SPOTIFYPLUS_PLAYING_TYPE] = self._playerState.CurrentlyPlayingType
 
@@ -3674,6 +3687,96 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
                 "result": result.ToDictionary(),
                 "message": message
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_get_image_palette_colors(
+            self, 
+            imageSource:str=None, 
+            colorCount:int=10, 
+            colorQuality:int=3, 
+            brightnessFilterLow:int=None, 
+            brightnessFilterHigh:int=None, 
+            hueDistanceFilter:int=None, 
+            ) -> dict:
+        """
+        Extracts color palette RGB values from the specified image source.  
+        
+        Args:
+            imageSource (str):  
+                The image source to extract color palette information from.  If the prefix of the 
+                value is `http:` or `https:`, then the image is downloaded from the url.  
+                This can also point to a filename on the local file system.  
+                If null, the currently playing Spotify track image url is used; if no track
+                is playing, then an exception is raised.
+                Example: `http://mydomain/image1.jpg`  
+                Example: `c:/image1.jpg`  
+                Default is None.  
+            colorCount (int):  
+                The size of the palette (max number of colors).  
+                Range is 1 to 256.  
+                Default is 10.  
+            colorQuality (int):  
+                Controls the processing time and quality of the palette generation.  
+                A lower value (e.g. 1) results in higher quality but takes more processing time, 
+                while a higher value (e.g. 5) is faster but may result in a lower-quality palette.   
+                Default is 3.  
+            brightnessFilterLow (int):  
+                Removes colors that are too dark based on their brightness value.  
+                Range is 0 to 765.  
+                Default is None.  
+            brightnessFilterHigh (int):  
+                Remove colors that are too light based on their brightness value.  
+                Range is 0 to 765.  
+                Default is None.  
+            hueDistanceFilter (int):  
+                Remove colors that are too close to each other for the specified hue.  
+                This keeps the colors looking fairly distinct.  
+                Range is 0 to 360.  
+                Default is None.  
+                
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: An `ImagePaletteColors` object that contains extracted color information.
+        """
+        apiMethodName:str = 'service_spotify_get_image_palette_colors'
+        apiMethodParms:SIMethodParmListContext = None
+        result:ImagePaletteColors = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("imageSource", imageSource)
+            apiMethodParms.AppendKeyValue("colorCount", colorCount)
+            apiMethodParms.AppendKeyValue("colorQuality", colorQuality)
+            apiMethodParms.AppendKeyValue("brightnessFilterLow", brightnessFilterLow)
+            apiMethodParms.AppendKeyValue("brightnessFilterHigh", brightnessFilterHigh)
+            apiMethodParms.AppendKeyValue("hueDistanceFilter", hueDistanceFilter)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get palette colors from an image url", apiMethodParms)
+                
+            # request information from Spotify Web API.
+            # have to treat this one a little bit differently due to return of a Tuple[] value.
+            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
+            result = self.data.spotifyClient.GetImagePaletteColors(imageSource, colorCount, colorQuality, brightnessFilterLow, brightnessFilterHigh, hueDistanceFilter)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result.ToDictionary()
             }
 
         # the following exceptions have already been logged, so we just need to
