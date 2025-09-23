@@ -2,7 +2,13 @@
   "config": {
     "step": {
       "pick_implementation": {
-        "title": "Select SpotifyPlus OAuth Credential"
+        "title": "Select SpotifyPlus OAuth Credential",
+        "data": {
+          "implementation": "SpotifyPlus Application Credentials"
+        },
+        "data_description": {
+          "implementation": "Select an application credential to authenticate to Spotify."
+        }
       },
       "reauth_confirm": {
         "title": "SpotifyPlus Re-Authentication Required",
@@ -10,17 +16,22 @@
       }
     },
     "abort": {
+      "_comment_01": " ***** IMPORTANT ***** some of these resources are not referenced in our config_flow, but are still required by OAuth2 processing!",
       "already_configured": "Service is already configured for the associated Spotify User ID.  Please modify the existing service entry.",
       "authorize_url_timeout": "Timeout generating authorize URL.",
-      "missing_configuration": "The Spotify integration is not configured. Please follow the documentation.",
-      "no_url_available": "[%key:common::config_flow::abort::oauth2_no_url_available%]",
-      "reauth_account_mismatch": "Spotify account authenticated with does not match the account needing re-authentication for the SpotifyPlus integration; please check the System Log for further information.",
+      "connection_error": "Could not retrieve Spotify account information. Is the user registered in the Spotify Developer Dashboard?",
       "invalid_access_token": "OAuth access token is invalid for the SpotifyPlus integration; please check the System Log for further information.",
+      "missing_configuration": "The Spotify integration is not configured. Please follow the documentation.",
+      "missing_credentials": "The integration requires application credentials.",
+      "no_url_available": "Redirect URL is not available; URL is required since you have not configured an external URL in Home Assistant.",
       "oauth_error": "OAuth error occurred while processing SpotifyPlus OAuth Application Credentials; please check the System Log for further information.",
+      "oauth_failed": "OAuth request failed while processing SpotifyPlus OAuth Application Credentials; please check the System Log for further information.",
       "oauth_timeout": "OAuth timeout error occurred while processing SpotifyPlus OAuth Application Credentials.  This usually indicates a temporary condition; please check the System Log for further information.",
       "oauth_unauthorized": "OAuth Application Credentials are unauthorized for use by the SpotifyPlus integration; please check the System Log for further information.",
-      "oauth_failed": "OAuth request failed while processing SpotifyPlus OAuth Application Credentials; please check the System Log for further information.",
-      "setauthtoken_error": "SpotifyClient authorization token could not be set from OAuth2 session token; please check the System Log for further information."
+      "reauth_account_mismatch": "Spotify account authenticated with does not match the account needing re-authentication for the SpotifyPlus integration; please check the System Log for further information.",
+      "reauth_successful": "Re-authentication was successful",
+      "setauthtoken_error": "SpotifyClient authorization token could not be set from OAuth2 session token; please check the System Log for further information.",
+      "user_rejected_authorize": "Account linking rejected: {error}"
     },
     "create_entry": {
       "default": "Successfully authenticated with Spotify."

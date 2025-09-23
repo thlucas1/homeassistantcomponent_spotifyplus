@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.164 ] - 2025/09/23
+
+  * Added some string resources for config_flow processing.
+  * Removed auto-discovery of zeroconf configuration to avoid setup confusion.  Some users would experience the auto-discovery of the integration and others would not based upon current Spotify Connect resource definitions.
+
 ###### [ 1.0.163 ] - 2025/09/22
 
   * Added service `get_image_palette_colors` to get color palette RGB values from the specified image source, or the currently playing Spotify track / episode.
