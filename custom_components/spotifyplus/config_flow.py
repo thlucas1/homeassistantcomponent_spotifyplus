@@ -192,15 +192,14 @@ class SpotifyPlusConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, 
             await self.async_set_unique_id(spotifyClient.UserProfile.Id + "_" + DOMAIN)
             _logsi.LogVerbose("ConfigFlow assigned unique_id of '%s' for Spotify UserProfile '%s'" % (self.unique_id, spotifyClient.UserProfile.DisplayName))
 
-            # the following code would display an error if the unique_id already exists, and
-            # would force the user to modify the existing entry.
-            # in our case, just overlay the configuration if unique_id is already configured.
-
-            # # one final check to see if a configuration entry already exists for the unique id.
-            # # if it IS already configured, then we will send an "already_configured" message 
-            # # to the user and halt the flow to prevent a duplicate configuration entry.
-            # _logsi.LogVerbose("ConfigFlow is verifying USER ENTRY device details have not already been configured: unique_id=%s, display name=%s" % (self.unique_id, spotifyClient.UserProfile.DisplayName))
-            # self._abort_if_unique_id_configured()
+            # one final check to see if a configuration entry already exists for the unique id.
+            # if it IS already configured, then we will send an "already_configured" message 
+            # to the user and halt the flow to prevent a duplicate configuration entry.
+            _logsi.LogVerbose("ConfigFlow is verifying USER ENTRY device details have not already been configured: unique_id=%s, display name=%s" % (self.unique_id, spotifyClient.UserProfile.DisplayName))
+            self._abort_if_unique_id_configured(
+                error="already_configured",
+                description_placeholders={"userinfo": "%s (%s)" % (spotifyClient.UserProfile.DisplayName, spotifyClient.UserProfile.Id)},
+            )
 
             # set configuration data parameters.
             data[CONF_ID] = spotifyClient.UserProfile.Id

@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.165 ] - 2025/09/23
+
+  * Added "already configured" check to config_flow to ensure user-specific configuration entry does not exist prior to saving the configuration.
+
 ###### [ 1.0.164 ] - 2025/09/23
 
   * Added some string resources for config_flow processing.
