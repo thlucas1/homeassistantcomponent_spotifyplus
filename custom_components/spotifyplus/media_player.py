@@ -5092,13 +5092,15 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
 
     def service_spotify_get_track_favorites(
-            self, 
-            limit:int=20, 
-            offset:int=0,
-            market:str=None,
-            limitTotal:int=None,
-            sortResult:bool=True,
-            ) -> dict:
+        self, 
+        limit:int=20, 
+        offset:int=0,
+        market:str=None,
+        limitTotal:int=None,
+        sortResult:bool=True,
+        filterArtist:str=None,
+        filterAlbum:str=None,
+        ) -> dict:
         """
         Get a list of the tracks saved in the current Spotify user's 'Your Library'.
         
@@ -5126,6 +5128,12 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 True to sort the items by name; otherwise, False to leave the items in the same order they 
                 were returned in by the Spotify Web API.  
                 Default: True
+            filterArtist (str):
+                Filter returned entries by an artist name.  
+                Value can be the full name of the artist (e.g. "Jeremy Camp"), or a partial name (e.g. "Camp").
+            filterAlbum (str):
+                Filter returned entries by an album name.
+                Value can be the full name of the album (e.g. "Carried Me"), or a partial name (e.g. "Carried").
                 
         Returns:
             A dictionary that contains the following keys:
@@ -5145,11 +5153,13 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("market", market)
             apiMethodParms.AppendKeyValue("limitTotal", limitTotal)
             apiMethodParms.AppendKeyValue("sortResult", sortResult)
+            apiMethodParms.AppendKeyValue("filterArtist", filterArtist)
+            apiMethodParms.AppendKeyValue("filterAlbum", filterAlbum)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Track Favorites Service", apiMethodParms)
                 
             # request information from Spotify Web API.
             _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
-            result:TrackPageSaved = self.data.spotifyClient.GetTrackFavorites(limit, offset, market, limitTotal, sortResult)
+            result:TrackPageSaved = self.data.spotifyClient.GetTrackFavorites(limit, offset, market, limitTotal, sortResult, filterArtist, filterAlbum)
 
             # return the (partial) user profile that retrieved the result, as well as the result itself.
             return {
@@ -5926,6 +5936,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         delay:float=0.50,
         resolveDeviceId:bool=True,
         limitTotal:int=None,
+        filterArtist:str=None,
+        filterAlbum:str=None,
         ) -> None:
         """
         Start playing one or more tracks on the specified Spotify Connect device.
@@ -5955,6 +5967,12 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             limitTotal (int):
                 The maximum number of items to retrieve from favorites.  
                 Default: 200.
+            filterArtist (str):
+                Filter returned entries by an artist name.  
+                Value can be the full name of the artist (e.g. "Jeremy Camp"), or a partial name (e.g. "Camp").
+            filterAlbum (str):
+                Filter returned entries by an album name.
+                Value can be the full name of the album (e.g. "Carried Me"), or a partial name (e.g. "Carried").
         """
         apiMethodName:str = 'service_spotify_player_media_play_track_favorites'
         apiMethodParms:SIMethodParmListContext = None
@@ -5968,13 +5986,15 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("delay", delay)
             apiMethodParms.AppendKeyValue("resolveDeviceId", resolveDeviceId)
             apiMethodParms.AppendKeyValue("limitTotal", limitTotal)
+            apiMethodParms.AppendKeyValue("filterArtist", filterArtist)
+            apiMethodParms.AppendKeyValue("filterAlbum", filterAlbum)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Media Play Favorite Tracks Service", apiMethodParms)
 
             # validations.
             delay = validateDelay(delay, 0.50, 10)
 
             # play track favorites on the specified Spotify Connect device.
-            self.data.spotifyClient.PlayerMediaPlayTrackFavorites(deviceId, shuffle, delay, resolveDeviceId, limitTotal)
+            self.data.spotifyClient.PlayerMediaPlayTrackFavorites(deviceId, shuffle, delay, resolveDeviceId, limitTotal, filterArtist, filterAlbum)
 
             # check if we need to automatically power on the player.
             self._AutoPowerOnCheck()

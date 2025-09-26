@@ -1241,6 +1241,14 @@
         "sort_result": {
           "name": "Sort Result?",
           "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
+        },
+        "filter_artist": {
+          "name": "Filter By Artist",
+          "description": "Filter returned entries by an artist name.  Value can be the full name of the artist (e.g. \"Jeremy Camp\"), or a partial name (e.g. \"Camp\")."
+        },
+        "filter_album": {
+          "name": "Filter By Album",
+          "description": "Filter returned entries by an album name.  Value can be the full name of the album (e.g. \"Carried Me\"), or a partial name (e.g. \"Carried\")."
         }
       }
     },
@@ -1617,6 +1625,14 @@
         "limit_total": {
           "name": "Limit Total",
           "description": "The maximum number of items to retrieve from favorites.  Default is 200; Range is 1 - 750."
+        },
+        "filter_artist": {
+          "name": "Filter By Artist",
+          "description": "Filter returned entries by an artist name.  Value can be the full name of the artist (e.g. \"Jeremy Camp\"), or a partial name (e.g. \"Camp\")."
+        },
+        "filter_album": {
+          "name": "Filter By Album",
+          "description": "Filter returned entries by an album name.  Value can be the full name of the album (e.g. \"Carried Me\"), or a partial name (e.g. \"Carried\")."
         }
       }
     },

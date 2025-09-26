@@ -6,6 +6,12 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.166 ] - 2025/09/26
+
+  * Updated `player_media_play_track_favorites` service to add the `filter_artist` and `filter_album` arguments, which will filter track favorites by artist name, album name, or both.
+  * Updated `get_track_favorites` service to add the `filter_artist` and `filter_album` arguments, which will filter track favorites by artist name, album name, or both.
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.246`.
+
 ###### [ 1.0.165 ] - 2025/09/23
 
   * Added "already configured" check to config_flow to ensure user-specific configuration entry does not exist prior to saving the configuration.

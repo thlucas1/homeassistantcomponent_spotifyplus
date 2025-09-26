@@ -662,6 +662,8 @@ SERVICE_SPOTIFY_GET_TRACK_FAVORITES_SCHEMA = vol.Schema(
         vol.Optional("market"): cv.string,
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
         vol.Optional("sort_result"): cv.boolean,
+        vol.Optional("filter_artist"): cv.string,
+        vol.Optional("filter_album"): cv.string,
     }
 )
 
@@ -776,6 +778,8 @@ SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACK_FAVORITES_SCHEMA = vol.Schema(
         vol.Optional("delay", default=0.50): vol.All(vol.Range(min=0,max=10.0)),
         vol.Optional("resolve_device_id"): cv.boolean,
         vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=999999)),
+        vol.Optional("filter_artist"): cv.string,
+        vol.Optional("filter_album"): cv.string,
     }
 )
 
@@ -1400,8 +1404,10 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     delay = service.data.get("delay")
                     resolve_device_id = service.data.get("resolve_device_id")
                     limit_total = service.data.get("limit_total")
+                    filter_artist = service.data.get("filter_artist")
+                    filter_album = service.data.get("filter_album")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    await hass.async_add_executor_job(entity.service_spotify_player_media_play_track_favorites, device_id, shuffle, delay, resolve_device_id, limit_total)
+                    await hass.async_add_executor_job(entity.service_spotify_player_media_play_track_favorites, device_id, shuffle, delay, resolve_device_id, limit_total, filter_artist, filter_album)
 
                 elif service.service == SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS:
 
@@ -2098,8 +2104,10 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     market = service.data.get("market")
                     limit_total = service.data.get("limit_total")
                     sort_result = service.data.get("sort_result")
+                    filter_artist = service.data.get("filter_artist")
+                    filter_album = service.data.get("filter_album")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_track_favorites, limit, offset, market, limit_total, sort_result)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_track_favorites, limit, offset, market, limit_total, sort_result, filter_artist, filter_album)
 
                 elif service.service == SERVICE_SPOTIFY_GET_TRACK_RECOMMENDATIONS:
 

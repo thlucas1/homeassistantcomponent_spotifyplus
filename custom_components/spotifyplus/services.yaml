@@ -1982,6 +1982,18 @@ get_track_favorites:
       required: false
       selector:
         boolean:
+    filter_artist:
+      name: Filter By Artist
+      description: Filter returned entries by an artist name.  Value can be the full name of the artist (e.g. "Jeremy Camp"), or a partial name (e.g. "Camp").
+      required: false
+      selector:
+        text:
+    filter_album:
+      name: Filter By Album
+      description: Filter returned entries by an album name.  Value can be the full name of the album (e.g. "Carried Me"), or a partial name (e.g. "Carried").
+      required: false
+      selector:
+        text:
 
 get_track_recommendations:
   name: Get Track Recommendations
@@ -2643,6 +2655,18 @@ player_media_play_track_favorites:
       selector:
         number:
           mode: box
+    filter_artist:
+      name: Filter By Artist
+      description: Filter returned entries by an artist name.  Value can be the full name of the artist (e.g. "Jeremy Camp"), or a partial name (e.g. "Camp").
+      required: false
+      selector:
+        text:
+    filter_album:
+      name: Filter By Album
+      description: Filter returned entries by an album name.  Value can be the full name of the album (e.g. "Carried Me"), or a partial name (e.g. "Carried").
+      required: false
+      selector:
+        text:
 
 player_media_play_tracks:
   name: Player Media Play Tracks
