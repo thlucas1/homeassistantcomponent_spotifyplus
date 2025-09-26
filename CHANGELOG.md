@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.167 ] - 2025/09/26
+
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.247`.
+
 ###### [ 1.0.166 ] - 2025/09/26
 
   * Updated `player_media_play_track_favorites` service to add the `filter_artist` and `filter_album` arguments, which will filter track favorites by artist name, album name, or both.
