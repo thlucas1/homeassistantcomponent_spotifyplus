@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.170 ] - 2025/10/01
+
+  * Updated sample code `voice_assist_spotifyplus.yaml`.
+
 ###### [ 1.0.169 ] - 2025/09/30
 
   * Added service `get_id_from_uri` to get the Id portion (e.g. `6vc9OTcyd3hyzabCmsdnwE`) of a Spotify URI value (e.g. `spotify:track:6vc9OTcyd3hyzabCmsdnwE`).
