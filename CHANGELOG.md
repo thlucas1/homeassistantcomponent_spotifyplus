@@ -11,7 +11,7 @@ Change are listed in reverse chronological order (newest to oldest).
   * Added service `get_id_from_uri` to get the Id portion (e.g. `6vc9OTcyd3hyzabCmsdnwE`) of a Spotify URI value (e.g. `spotify:track:6vc9OTcyd3hyzabCmsdnwE`).
   * Updated service `volume_set_step` to add the `level_percent` argument, which can be used to express the step level as a percentage (1 to 100) instead of a float value.
   * Added state refresh call for all add / remove favorites services.
-  * Added folder `automations` under the base `spotifyplus` folder that will house sample automations`spotifywebapipython` package requirement to `spotifywebapipython>=1.0.248`.
+  * Added folder `automations` under the base `spotifyplus` folder that will house sample automations for HA Voice Assist commands for SpotifyPlus.
   * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.249`.
 
 ###### [ 1.0.168 ] - 2025/09/27

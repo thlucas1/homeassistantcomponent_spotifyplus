@@ -41,7 +41,7 @@
   # - Go to "Developer Tools \ YAML" and click on the "Automations" button under 
   #   the "YAML Configuration Reloading" to reload all automation scripts.
   # - Issue a Voice Assist Command to test:
-  #   Say "Play my favorite tracks" and wait for the magic to happen.
+  #   Say "Play Spotify Favorite Tracks" and wait for the magic to happen.
   #
   #################################################################################
 
@@ -51,6 +51,15 @@
 - alias: "Voice: SpotifyPlus: Playlist Create"
   description: |
     Create an empty playlist.  The playlist will remain empty until you add tracks.
+    A default description is assigned, and the playlist is marked private / not collaborative.
+
+    #### Trigger Command Arguments
+    - `playlist_name` - Name of the playlist.
+
+    #### Phrase Examples
+    - `Create Spotify playlist named My New Playlist`
+    - `Create Spotify playlist titled My New Playlist`
+    - `Create Spotify playlist called My New Playlist`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_playlist_create_english
@@ -85,7 +94,17 @@
   #################################################################################
 - alias: "Voice: SpotifyPlus: Search and Play Audiobook"
   description: |
-    Searches Spotify for the given audiobook, and plays the first result returned in the list.
+    Searches Spotify for the given audiobook, by the given author, and plays the first result returned in the list.
+
+    #### Trigger Command Arguments
+    - `audiobook_name` - Name of the audiobook.
+    - `author_name` (optional) - Name of the author.
+    - `device_name` (optional) - Device name to transfer playback to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Play Spotify audiobook Elfstones of Shannara by author Terry Brooks on device Office Speaker`
+    - `Play Spotify audiobook Elfstones of Shannara on device Office Speaker`
+    - `Play Spotify audiobook Elfstones of Shannara`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_search_play_audiobook_english
@@ -134,6 +153,16 @@
 - alias: "Voice: SpotifyPlus: Search and Play Podcast Episode"
   description: |
     Searches Spotify for the given podcast show episode, and plays the first result returned in the list.
+
+    #### Trigger Command Arguments
+    - `show_name` - Name of the show / podcast.
+    - `episode_name` - Name of the episode.
+    - `device_name` (optional) - Device name to transfer playback to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Play Spotify podcast Armchair Expert with Dax Sheppard episode Jason Aldean on device Office Speaker`
+    - `Play Spotify podcast Armchair Expert with Dax Sheppard episode Jason Aldean`
+    - `Play Spotify show Armchair Expert with Dax Sheppard episode Jason Aldean`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_search_play_podcast_episode_english
@@ -188,6 +217,15 @@
 - alias: "Voice: SpotifyPlus: Search and Play Podcast"
   description: |
     Searches Spotify for the given podcast show, and plays the first result returned in the list.
+
+    #### Trigger Command Arguments
+    - `show_name` - Name of the show / podcast.
+    - `device_name` (optional) - Device name to transfer playback to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Play Spotify podcast Armchair Expert with Dax Sheppard on device Office Speaker`
+    - `Play Spotify podcast Armchair Expert with Dax Sheppard`
+    - `Play Spotify show Armchair Expert with Dax Sheppard`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_search_play_podcast_english
@@ -233,11 +271,21 @@
 - alias: "Voice: SpotifyPlus: Search and Play Artist Radio"
   description: |
     Searches Spotify for the given artist radio station, and plays the first result returned in the list.
+
+    #### Trigger Command Arguments
+    - `artist_name` - Name of the artist to search for; the word "Radio" is automatically appended.
+    - `device_name` (optional) - Device name to transfer playback to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Play Spotify radio station for artist MercyMe on device Office Speaker`
+    - `Play Spotify radio station for artist MercyMe`
+    - `Play Spotify radio for artist MercyMe`
+    - `Play Spotify radio artist MercyMe`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_search_play_artist_radio_english
       command:
-        - "Play Spotify radio [station] [for] [artist {artist_name}] [on device {device_name}]"
+        - "Play Spotify radio [station] [for] (artist {artist_name}) [on device {device_name}]"
   variables:
     artist_name: "{{ trigger.slots.artist_name | default(null) }}"
     artist_name_title: "{{ trigger.slots.artist_name | default('Not Specified') }}"
@@ -279,11 +327,22 @@
 - alias: "Voice: SpotifyPlus: Search and Play Album"
   description: |
     Searches Spotify for the given album, and plays the first result returned in the list.
+    Shuffle mode is auto-enabled.
+
+    #### Trigger Command Arguments
+    - `album_name` - Name of the album to search for.
+    - `artist_name` (optional) - Name of the artist to search for.
+    - `device_name` (optional) - Device name to transfer playback to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Play Spotify album Greatest Hits for artist Journey on device Office Speaker`
+    - `Play Spotify album Greatest Hits by artist Journey`
+    - `Play Spotify album Beyond Belief`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_search_play_album_english
       command:
-        - "Play Spotify album {album_name} [by artist {artist_name}] [on device {device_name}]"
+        - "Play Spotify album {album_name} [by|for artist {artist_name}] [on device {device_name}]"
   variables:
     album_name: "{{ trigger.slots.album_name | default(null) }}"
     album_name_title: "{{ trigger.slots.album_name | default('Not Specified') }}"
@@ -327,11 +386,21 @@
 - alias: "Voice: SpotifyPlus: Search and Play Track"
   description: |
     Searches Spotify for the given track, and plays the first result returned in the list.
+
+    #### Trigger Command Arguments
+    - `track_name` - Name of the track to search for.
+    - `artist_name` (optional) - Name of the artist to search for.
+    - `device_name` (optional) - Device name to transfer playback to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Play Spotify track Child of Love for artist We The Kingdom on device Office Speaker`
+    - `Play Spotify song Child of Love by artist We The Kingdom`
+    - `Play Spotify track Child of Love`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_search_play_track_english
       command:
-        - "Play Spotify (track|song) {track_name} [by artist {artist_name}] [on device {device_name}]"
+        - "Play Spotify (track|song) {track_name} [by|for|from artist {artist_name}] [on device {device_name}]"
   variables:
     track_name: "{{ trigger.slots.track_name | default(null) }}"
     track_name_title: "{{ trigger.slots.track_name | default('Not Specified') }}"
@@ -374,6 +443,15 @@
 - alias: "Voice: SpotifyPlus: Search and Play Playlist"
   description: |
     Searches Spotify for the given playlist, and plays the first result returned in the list.
+    Shuffle mode is auto-enabled.
+
+    #### Trigger Command Arguments
+    - `playlist_name` - Name of the playlist to search for.
+    - `device_name` (optional) - Device name to transfer playback to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Play Spotify playlist Worship Playlist on device Office Speaker`
+    - `Play Spotify playlist Worship Playlist`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_search_play_playlist_english
@@ -419,11 +497,24 @@
 - alias: "Voice: SpotifyPlus: Player Volume Mute Off"
   description: |
     Set volume to unmuted.
+    The command is applied to the currently playing Spotify player device.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Restore Spotify Player Volume Level`
+    - `Restore Spotify Player Volume`
+    - `Restore Spotify Volume`
+    - `Unmute Spotify Player Volume`
+    - `Unmute Spotify Player`
+    - `Unmute Spotify Volume`
+    - `Unmute Spotify`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_player_volume_mute_off_english
       command:
-        - "(UnMute|Restore) Spotify [Player] Volume [level]"
+        - "(UnMute|Restore) Spotify [Player] [Volume] [Level]"
   conditions: []
   actions:
     - if:
@@ -448,11 +539,22 @@
 - alias: "Voice: SpotifyPlus: Player Volume Mute On"
   description: |
     Set volume to mute.
+    The command is applied to the currently playing Spotify player device.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Mute Spotify Player Volume Level`
+    - `Mute Spotify Player Volume`
+    - `Mute Spotify Player`
+    - `Mute Spotify Volume`
+    - `Mute Spotify`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_player_volume_mute_on_english
       command:
-        - "Mute Spotify [Player] Volume [level]"
+        - "Mute Spotify [Player] [Volume] [Level]"
   conditions: []
   actions:
     - if:
@@ -477,11 +579,24 @@
 - alias: "Voice: SpotifyPlus: Player Volume Level Set"
   description: |
     Set player volume level for the specified Spotify Connect device.
+
+    #### Trigger Command Arguments
+    - `volume_pct` - Volume level percentage to set (0 to 100).
+    - `device_name` (optional) - Device name to apply the command to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Set Spotify Player Volume level to 10 percent on device Office Speaker`
+    - `Set Spotify Player Volume level to 10 on device Office Speaker`
+    - `Set Spotify Player Volume level to 10 percent`
+    - `Set Spotify Player Volume level to 10`
+    - `Set Spotify Volume level to 10`
+    - `Set Spotify Volume to 10`
+    - `Set Spotify Volume 10`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_player_volume_level_set_english
       command:
-        - "Set Spotify [Player] Volume [level] [to] {volume_pct} [percent|%] [on device {device_name}]"
+        - "Set Spotify [Player] Volume [level] [to|2] {volume_pct} [percent|%] [on device {device_name}]"
   variables:
     volume_pct: "{{ trigger.slots.volume_pct | default(20) }}"
     device_name: "{{ trigger.slots.device_name | default('*') }}"
@@ -511,11 +626,21 @@
 - alias: "Voice: SpotifyPlus: Player Volume Level Decrease"
   description: |
     Decrease player volume level by the preset volume step level amount.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Decrease Spotify Player Volume Level`
+    - `Decrease Spotify Volume Level`
+    - `Decrease Spotify Volume`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_player_volume_level_decrease_english
       command:
-        - "Decrease Spotify [Player] Volume [level]"
+        - "(Decrease|Decreased) Spotify [Player] Volume [Level]"
+  variables:
+    volume_step_pct: "{{ ((state_attr('media_player.spotifyplus_todd_l', 'volume_step') | default(0.10)) * 100) }}"
   conditions: []
   actions:
     - if:
@@ -528,7 +653,7 @@
           - action: media_player.volume_down
             data:
               entity_id: media_player.spotifyplus_todd_l        
-          - set_conversation_response: "{{ 'Okay, Spotify volume level was decreased.' }}"
+          - set_conversation_response: "{{ 'Okay, Spotify volume level was decreased by ' + (volume_step_pct | int) | string + '%.' }}"
       else:
         - set_conversation_response: The Spotify media player is currently not playing media.
   mode: single
@@ -539,11 +664,21 @@
 - alias: "Voice: SpotifyPlus: Player Volume Level Increase"
   description: |
     Increase player volume level by the preset volume step level amount.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Increase Spotify Player Volume Level`
+    - `Increase Spotify Volume Level`
+    - `Increase Spotify Volume`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_player_volume_level_increase_english
       command:
-        - "Increase Spotify [Player] Volume [level]"
+        - "(Increase|Increased) Spotify [Player] Volume [level]"
+  variables:
+    volume_step_pct: "{{ ((state_attr('media_player.spotifyplus_todd_l', 'volume_step') | default(0.10)) * 100) }}"
   conditions: []
   actions:
     - if:
@@ -556,7 +691,7 @@
           - action: media_player.volume_up
             data:
               entity_id: media_player.spotifyplus_todd_l        
-          - set_conversation_response: "{{ 'Okay, Spotify volume level was increased.' }}"
+          - set_conversation_response: "{{ 'Okay, Spotify volume level was increased by ' + (volume_step_pct | int) | string + '%.' }}"
       else:
         - set_conversation_response: The Spotify media player is currently not playing media.
   mode: single
@@ -568,11 +703,24 @@
   description: |
     Set player volume step level value for the volume increase and decrease commands.
     Value should be in the range of 1 - 40.
+
+    #### Trigger Command Arguments
+    - `volume_pct` - Volume level percentage to set (0 to 100).
+    - `device_name` (optional) - Device name to apply the command to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Set Spotify Player Volume Step Level to 10 percent`
+    - `Set Spotify Player Volume Step Level to 10`
+    - `Set Spotify Player Volume Step to 10 percent`
+    - `Set Spotify Player Volume Step to 10`
+    - `Set Spotify Volume Step Level to 10`
+    - `Set Spotify Volume Step to 10`
+    - `Set Spotify Volume Step 10`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_player_volume_set_step_level_english
       command:
-        - "Set Spotify [Player] Volume Step [level] [to] {volume_pct} [percent|%]"
+        - "Set Spotify [Player] Volume Step [Level] [to|2] {volume_pct} [percent|%]"
   variables:
     volume_pct: "{{ trigger.slots.volume_pct | default(10) }}"
   conditions: []
@@ -588,7 +736,7 @@
             data:
               entity_id: media_player.spotifyplus_todd_l
               level_percent: "{{ volume_pct | string }}"
-          - set_conversation_response: "{{ 'Okay, media player Volume Step Level was set to ' + volume_pct | string + '%.' }}"
+          - set_conversation_response: "{{ 'Okay, Spotify media player Volume Step Level was set to ' + volume_pct | string + '%.' }}"
       else:
         - set_conversation_response: The Spotify media player is currently not playing media.
   mode: single
@@ -599,11 +747,22 @@
 - alias: "Voice: SpotifyPlus: Player Repeat Mode All"
   description: |
     Sets the Spotify player repeat mode to ALL for the specified Spotify Connect device.
+
+    #### Trigger Command Arguments
+    - `device_name` (optional) - Device name to apply the command to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Set Spotify Player Repeat Mode To All on device Office Speaker`
+    - `Set Spotify Player Repeat Mode To All`
+    - `Set Spotify Player Repeat Mode All`
+    - `Set Spotify Repeat Mode All`
+    - `Set Spotify Repeat All`
+    - `Set Spotify Repeat Context`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_player_repeat_mode_all_english
       command:
-        - "[Set|Enable] Spotify Repeat [mode] [all|context] [on device {device_name}]"
+        - "Set Spotify [Player] Repeat [Mode] [to|2] (all|context) [on device {device_name}]"
   variables:
     device_name: "{{ trigger.slots.device_name | default('*') }}"
     device_name_title: "{{ trigger.slots.device_name | default('default') }}"
@@ -632,11 +791,22 @@
 - alias: "Voice: SpotifyPlus: Player Repeat Mode One"
   description: |
     Sets the Spotify player repeat mode to ONE for the specified Spotify Connect device.
+
+    #### Trigger Command Arguments
+    - `device_name` (optional) - Device name to apply the command to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Set Spotify Player Repeat Mode To One on device Office Speaker`
+    - `Set Spotify Player Repeat Mode To One`
+    - `Set Spotify Player Repeat Mode One`
+    - `Set Spotify Repeat Mode One`
+    - `Set Spotify Repeat One`
+    - `Set Spotify Repeat Track`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_player_repeat_mode_one_english
       command:
-        - "[Set|Enable] Spotify Repeat [mode] [1|one|track] [on device {device_name}]"
+        - "Set Spotify [Player] Repeat [Mode] [to|2] (1|one|track) [on device {device_name}]"
   variables:
     device_name: "{{ trigger.slots.device_name | default('*') }}"
     device_name_title: "{{ trigger.slots.device_name | default('default') }}"
@@ -665,11 +835,22 @@
 - alias: "Voice: SpotifyPlus: Player Repeat Mode Off"
   description: |
     Sets the Spotify player repeat mode to OFF for the specified Spotify Connect device.
+
+    #### Trigger Command Arguments
+    - `device_name` (optional) - Device name to apply the command to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Set Spotify Player Repeat Mode To Off on device Office Speaker`
+    - `Set Spotify Player Repeat Mode To Off`
+    - `Set Spotify Player Repeat Mode Off`
+    - `Set Spotify Repeat Mode Off`
+    - `Set Spotify Repeat Off`
+    - `Set Spotify Repeat Disabled`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_player_repeat_mode_off_english
       command:
-        - "[Set|Disable] Spotify Repeat [mode] [off|disabled] [on device {device_name}]"
+        - "Set Spotify [Player] Repeat [Mode] [to|2] (off|disabled) [on device {device_name}]"
   variables:
     device_name: "{{ trigger.slots.device_name | default('*') }}"
     device_name_title: "{{ trigger.slots.device_name | default('default') }}"
@@ -698,11 +879,27 @@
 - alias: "Voice: SpotifyPlus: Player Shuffle Mode Off"
   description: |
     Sets the Spotify player shuffle mode to OFF for the specified Spotify Connect device.
+
+    #### Trigger Command Arguments
+    - `device_name` (optional) - Device name to apply the command to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Set Spotify Player Shuffle Mode To Off on device Office Speaker`
+    - `Set Spotify Player Shuffle Mode To Off`
+    - `Set Spotify Player Shuffle Mode Off`
+    - `Set Spotify Shuffle Mode Off`
+    - `Set Spotify Shuffle Off`
+    - `Set Spotify Shuffle Disabled`
+    - `Disable Spotify Player Shuffle Mode on device Office Speaker`
+    - `Disable Spotify Player Shuffle Mode`
+    - `Disable Spotify Player Shuffle`
+    - `Disable Spotify Shuffle`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_player_shuffle_mode_off_english
       command:
-        - "[Set|Disable] Spotify Shuffle [mode] [off|disabled] [on device {device_name}]"
+        - "Set Spotify [Player] Shuffle [Mode] [to|2] (off|disabled) [on device {device_name}]"
+        - "Disable Spotify [Player] Shuffle [Mode] [on device {device_name}]"
   variables:
     device_name: "{{ trigger.slots.device_name | default('*') }}"
     device_name_title: "{{ trigger.slots.device_name | default('default') }}"
@@ -731,11 +928,27 @@
 - alias: "Voice: SpotifyPlus: Player Shuffle Mode On"
   description: |
     Sets the Spotify player shuffle mode to ON for the specified Spotify Connect device.
+
+    #### Trigger Command Arguments
+    - `device_name` (optional) - Device name to apply the command to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Set Spotify Player Shuffle Mode To On on device Office Speaker`
+    - `Set Spotify Player Shuffle Mode To On`
+    - `Set Spotify Player Shuffle Mode On`
+    - `Set Spotify Shuffle Mode On`
+    - `Set Spotify Shuffle On`
+    - `Set Spotify Shuffle Enabled`
+    - `Enable Spotify Player Shuffle Mode on device Office Speaker`
+    - `Enable Spotify Player Shuffle Mode`
+    - `Enable Spotify Player Shuffle`
+    - `Enable Spotify Shuffle`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_player_shuffle_mode_on_english
       command:
-        - "[Set|Enable] Spotify Shuffle [mode] [on|enabled] [on device {device_name}]"
+        - "Set Spotify [Player] Shuffle [Mode] [to|2] (on|enabled) [on device {device_name}]"
+        - "Enable Spotify [Player] Shuffle [Mode] [on device {device_name}]"
   variables:
     device_name: "{{ trigger.slots.device_name | default('*') }}"
     device_name_title: "{{ trigger.slots.device_name | default('default') }}"
@@ -764,11 +977,26 @@
 - alias: "Voice: SpotifyPlus: Player Media Skip Start"
   description: |
     Skips to start of the currently playing track for the specified Spotify Connect device.
+
+    #### Trigger Command Arguments
+    - `device_name` (optional) - Device name to apply the command to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Skip Spotify Player to Start of Track on device Office Speaker`
+    - `Skip Spotify Player to Start of Track`
+    - `Skip Spotify Player to Start of Song`
+    - `Spotify Restart Track`
+    - `Spotify Restart Song`
+    - `Restart Spotify Player Track on device Office Speaker`
+    - `Restart Spotify Player Track`
+    - `Restart Spotify Track`
+    - `Restart Spotify Song`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_player_media_skip_start_english
       command:
         - "[Skip] Spotify [Play|Player|Music] [to|2] (Start|Restart) [of] (track|song) [on device {device_name}]"
+        - "Restart Spotify [Play|Player|Music] (track|song) [on device {device_name}]"
   variables:
     device_name: "{{ trigger.slots.device_name | default('*') }}"
     device_name_title: "{{ trigger.slots.device_name | default('default') }}"
@@ -797,11 +1025,25 @@
 - alias: "Voice: SpotifyPlus: Player Media Skip Previous"
   description: |
     Skips to previous track in the user's queue for the specified Spotify Connect device.
+
+    #### Trigger Command Arguments
+    - `device_name` (optional) - Device name to apply the command to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Skip Spotify Player Previous Track on device Office Speaker`
+    - `Skip Spotify Player Previous Track`
+    - `Skip Spotify Previous Track`
+    - `Spotify Previous Track`
+    - `Previous Spotify Player Track on device Office Speaker`
+    - `Previous Spotify Player Track`
+    - `Previous Spotify Track`
+    - `Previous Spotify Song`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_player_media_skip_previous_english
       command:
         - "[Skip] Spotify [Play|Player|Music] Previous [track|song] [on device {device_name}]"
+        - "Previous Spotify [Play|Player|Music] [track|song] [on device {device_name}]"
   variables:
     device_name: "{{ trigger.slots.device_name | default('*') }}"
     device_name_title: "{{ trigger.slots.device_name | default('default') }}"
@@ -829,11 +1071,25 @@
 - alias: "Voice: SpotifyPlus: Player Media Skip Next"
   description: |
     Skips to next track in the user's queue for the specified Spotify Connect device.
+
+    #### Trigger Command Arguments
+    - `device_name` (optional) - Device name to apply the command to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Skip Spotify Player Next Track on device Office Speaker`
+    - `Skip Spotify Player Next Track`
+    - `Skip Spotify Next Track`
+    - `Spotify Next Track`
+    - `Next Spotify Player Track on device Office Speaker`
+    - `Next Spotify Player Track`
+    - `Next Spotify Track`
+    - `Next Spotify Song`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_player_media_skip_next_english
       command:
         - "[Skip] Spotify [Play|Player|Music] Next [track|song] [on device {device_name}]"
+        - "Next Spotify [Play|Player|Music] [track|song] [on device {device_name}]"
   variables:
     device_name: "{{ trigger.slots.device_name | default('*') }}"
     device_name_title: "{{ trigger.slots.device_name | default('default') }}"
@@ -861,11 +1117,26 @@
 - alias: "Voice: SpotifyPlus: Player Media Resume"
   description: |
     Resume media play on the specified Spotify Connect device.
+
+    #### Trigger Command Arguments
+    - `device_name` (optional) - Device name to apply the command to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Resume Spotify Player on device Office Speaker`
+    - `Resume Spotify Player`
+    - `Resume Spotify Play`
+    - `Resume Spotify Music`
+    - `Resume Spotify`
+    - `Start Spotify Player on device Office Speaker`
+    - `Start Spotify Player`
+    - `Start Spotify Play`
+    - `Start Spotify Music`
+    - `Start Spotify`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_player_media_resume_english
       command:
-        - "Resume [the] Spotify [Play|Player|Music] [on device {device_name}]"
+        - "(Start|Resume) [the] Spotify [Play|Player|Music] [on device {device_name}]"
   variables:
     device_name: "{{ trigger.slots.device_name | default('*') }}"
     device_name_title: "{{ trigger.slots.device_name | default('default') }}"
@@ -893,6 +1164,21 @@
 - alias: "Voice: SpotifyPlus: Player Media Pause"
   description: |
     Pause media play for the specified Spotify Connect device.
+
+    #### Trigger Command Arguments
+    - `device_name` (optional) - Device name to apply the command to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Pause Spotify Player on device Office Speaker`
+    - `Pause Spotify Player`
+    - `Pause Spotify Play`
+    - `Pause Spotify Music`
+    - `Pause Spotify`
+    - `Stop Spotify Player on device Office Speaker`
+    - `Stop Spotify Player`
+    - `Stop Spotify Play`
+    - `Stop Spotify Music`
+    - `Stop Spotify`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_player_media_pause_english
@@ -925,6 +1211,15 @@
 - alias: "Voice: SpotifyPlus: Users Favorite Show Episodes Remove"
   description: |
     Remove currently playing episode from the current user's favorite show episodes.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Remove Spotify Podcast Episode from Favorites`
+    - `Remove Spotify Podcast Episode Favorite`
+    - `Remove Spotify Show Episode from Favorites`
+    - `Remove Spotify Show Episode Favorite`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_favorite_show_episodes_remove_english
@@ -956,6 +1251,15 @@
 - alias: "Voice: SpotifyPlus: Users Favorite Show Episodes Add"
   description: |
     Add currently playing episode to the current user's favorite show episodes.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Add Spotify Podcast Episode to Favorites`
+    - `Add Spotify Podcast Episode Favorite`
+    - `Add Spotify Show Episode to Favorites`
+    - `Add Spotify Show Episode Favorite`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_favorite_show_episodes_add_english
@@ -987,6 +1291,15 @@
 - alias: "Voice: SpotifyPlus: Users Favorite Shows Remove"
   description: |
     Remove currently playing show from the current user's favorite shows.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Remove Spotify Podcast from Favorites`
+    - `Remove Spotify Podcast Favorite`
+    - `Remove Spotify Show from Favorites`
+    - `Remove Spotify Show Favorite`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_favorite_shows_remove_english
@@ -1017,6 +1330,15 @@
 - alias: "Voice: SpotifyPlus: Users Favorite Shows Add"
   description: |
     Add currently playing show to the current user's favorite shows.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Add Spotify Podcast to Favorites`
+    - `Add Spotify Podcast Favorite`
+    - `Add Spotify Show to Favorites`
+    - `Add Spotify Show Favorite`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_favorite_shows_add_english
@@ -1047,6 +1369,15 @@
 - alias: "Voice: SpotifyPlus: Users Favorite Audiobooks Remove"
   description: |
     Remove currently playing track audiobook from the current user's favorite audiobooks.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Remove Spotify Audiobook from Favorites`
+    - `Remove Spotify Audiobook Favorite`
+    - `Remove Spotify Book from Favorites`
+    - `Remove Spotify Book Favorite`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_favorite_audiobooks_remove_english
@@ -1078,6 +1409,15 @@
 - alias: "Voice: SpotifyPlus: Users Favorite Audiobooks Add"
   description: |
     Add currently playing track audiobook to the current user's favorite audiobooks.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Add Spotify Audiobook to Favorites`
+    - `Add Spotify Audiobook Favorite`
+    - `Add Spotify Book to Favorites`
+    - `Add Spotify Book Favorite`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_favorite_audiobooks_add_english
@@ -1109,6 +1449,13 @@
 - alias: "Voice: SpotifyPlus: Users Favorite Artists Remove"
   description: |
     Remove currently playing track artist from the current user's favorite artists.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Remove Spotify Artist from Favorites`
+    - `Remove Spotify Artist Favorite`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_favorite_artists_remove_english
@@ -1139,6 +1486,13 @@
 - alias: "Voice: SpotifyPlus: Users Favorite Artists Add"
   description: |
     Add currently playing track artist to the current user's favorite artists.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Add Spotify Artist from Favorites`
+    - `Add Spotify Artist Favorite`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_favorite_artists_add_english
@@ -1169,6 +1523,15 @@
 - alias: "Voice: SpotifyPlus: Users Favorite Albums Remove"
   description: |
     Remove currently playing track album from the current user's favorite albums.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Remove Spotify Album from Favorites`
+    - `Remove Spotify Album Favorite`
+    - `Remove Spotify LP from Favorites`
+    - `Remove Spotify LP Favorite`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_favorite_albums_remove_english
@@ -1200,6 +1563,15 @@
 - alias: "Voice: SpotifyPlus: Users Favorite Albums Add"
   description: |
     Add currently playing track album to the current user's favorite albums.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Add Spotify Album to Favorites`
+    - `Add Spotify Album Favorite`
+    - `Add Spotify LP to Favorites`
+    - `Add Spotify LP Favorite`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_favorite_albums_add_english
@@ -1231,6 +1603,13 @@
 - alias: "Voice: SpotifyPlus: Users Favorite Playlists Remove"
   description: |
     Remove currently playing playlist from the current user's favorite playlists.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Remove Spotify Playlist from Favorites`
+    - `Remove Spotify Playlist Favorite`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_favorite_playlists_remove_english
@@ -1261,6 +1640,13 @@
 - alias: "Voice: SpotifyPlus: Users Favorite Playlists Add"
   description: |
     Add currently playing playlist to the current user's favorite playlists.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Add Spotify Playlist to Favorites`
+    - `Add Spotify Playlist Favorite`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_favorite_playlists_add_english
@@ -1291,6 +1677,15 @@
 - alias: "Voice: SpotifyPlus: Users Favorite Tracks Remove"
   description: |
     Remove currently playing track from the current user's favorite tracks.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Remove Spotify Track from Favorites`
+    - `Remove Spotify Track Favorite`
+    - `Remove Spotify Song from Favorites`
+    - `Remove Spotify Song Favorite`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_favorite_tracks_remove_english
@@ -1322,6 +1717,15 @@
 - alias: "Voice: SpotifyPlus: Users Favorite Tracks Add"
   description: |
     Add currently playing track to the current user's favorite tracks.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Add Spotify Track to Favorites`
+    - `Add Spotify Track Favorite`
+    - `Add Spotify Song to Favorites`
+    - `Add Spotify Song Favorite`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_favorite_tracks_add_english
@@ -1353,16 +1757,32 @@
 - alias: "Voice: SpotifyPlus: Users Favorite Tracks Play All"
   description: |
     Play users favorite Spotify tracks using a SpotifyPlus media player.
+    Shuffle mode is auto-enabled.
+
+    #### Trigger Command Arguments
+    - `device_name` (optional) - Device name to apply the command to, or current | default device if not supplied.
+
+    #### Phrase Examples
+    - `Play Spotify Favorite Tracks for Artist Jeremy Camp on device Office Speaker`
+    - `Play Spotify Favorite Tracks for Artist Jeremy Camp`
+    - `Play Spotify Favorite Tracks by Artist Jeremy Camp`
+    - `Play Spotify Favorite Tracks`
+    - `Play Spotify Favorite Songs for Artist Jeremy Camp on device Office Speaker`
+    - `Play Spotify Favorite Songs for Artist Jeremy Camp`
+    - `Play Spotify Favorite Songs by Artist Jeremy Camp`
+    - `Play Spotify Favorite Songs`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_favorite_tracks_play_all_english
       command:
-        - "Play my favorite (tracks|songs) [for artist {filter_artist}] [on device {device_name}]"
+        - "Play Spotify Favorite (tracks|songs) [(for|by) (artist|artists) {filter_artist}] [on device {device_name}]"
   variables:
     device_name: "{{ trigger.slots.device_name | default('*') }}"
     device_name_title: "{{ trigger.slots.device_name | default('default') }}"
     filter_artist: "{{ trigger.slots.filter_artist | default(null) }}"        
+    filter_artist_title: "{{ trigger.slots.filter_artist | default('Not Specified') }}"
     filter_album: "{{ trigger.slots.filter_album | default(null) }}"        
+    filter_album_title: "{{ trigger.slots.filter_album | default('Not Specified') }}"        
   conditions: []
   actions:
     - action: spotifyplus.player_media_play_track_favorites
@@ -1373,7 +1793,7 @@
         device_id: "{{ device_name }}"
         filter_artist: "{{ filter_artist }}"
         filter_album: "{{ filter_album }}"
-    - set_conversation_response: "{{ 'Okay, playing Spotify track favorites on the ' + device_name_title + ' device.' }}"
+    - set_conversation_response: "{{ 'Okay, playing Spotify track favorites, for artist \"' + filter_artist_title + '\", on the ' + device_name_title + ' device.' }}"
   mode: single
 
   #################################################################################
@@ -1382,11 +1802,23 @@
 - alias: "Voice: SpotifyPlus: Now Playing Info Track"
   description: |
     Queries Spotify player state for currently playing track information.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Get Spotify Now Playing Track Info`
+    - `Get Spotify Track Info`
+    - `Get Spotify Track Information`
+    - `Get Spotify Track Details`
+    - `Get Spotify Song Info`
+    - `Get Spotify Song Details`
+    - `Get Spotify Song Information`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_now_playing_info_track_english
       command:
-        - "[get] [Spotify] [now playing] (track|song) [info|details]"
+        - "Get Spotify [nowplaying|now playing] (track|song) [info|information|details]"
   variables:
     album_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_album_name') }}"
     artist_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_artist') }}"
@@ -1399,6 +1831,21 @@
           value_template: >
             {{ state_attr('media_player.spotifyplus_todd_l', 'sp_item_type') == 'track' }}
       then:
+        # was using the following to get the external link.
+        # commented out, as the TTS was saying the link text (annoying).
+        # it's a cool feature if not spoken aloud though - ability to click on the 
+        # album or artist and opens up the Spotify App to that artist or album.
+        # - action: spotifyplus.get_player_now_playing
+        #   data:
+        #     entity_id: media_player.spotifyplus_todd_l
+        #     additional_types: episode
+        #   response_variable: nowplaying_result
+        # - variables:
+        #     artist_link: "{{ nowplaying_result.result.item.artists[0].external_urls.spotify | default('https://open.spotify.com') }}"
+        #     album_link: "{{ nowplaying_result.result.item.album.external_urls.spotify | default('https://open.spotify.com') }}"
+        #     #track_link: "{{ nowplaying_result.result.item.external_urls.spotify | default('https://open.spotify.com') }}"
+        #     # linking to the track causes the song to play when clicked, so just display the track name without the link.
+        # #- set_conversation_response: "{{ 'Spotify is playing track \"' + track_name + '\", by the artist \"[' + artist_name + '](' + artist_link + ')\", from the album \"[' + album_name + '](' + album_link + ')\".' }}"
         - set_conversation_response: "{{ 'Spotify is playing track \"' + track_name + '\", by the artist \"' + artist_name + '\", from the album \"' + album_name + '\".' }}"
       else:
         - set_conversation_response: The Spotify media player is currently not playing media that contains Track information.
@@ -1410,11 +1857,23 @@
 - alias: "Voice: SpotifyPlus: Now Playing Info Podcast Episode"
   description: |
     Queries Spotify player state for currently playing podcast episode information.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Get Spotify Now Playing Podcast Info`
+    - `Get Spotify Podcast Info`
+    - `Get Spotify Podcast Information`
+    - `Get Spotify Podcast Details`
+    - `Get Spotify Show Info`
+    - `Get Spotify Show Details`
+    - `Get Spotify Show Information`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_now_playing_info_episode_podcast_english
       command:
-        - "[get] [Spotify] [now playing] (podcast|pod cast|show) [info|details]"
+        - "Get Spotify [nowplaying|now playing] (podcast|pod cast|show) [info|information|details]"
   variables:
     show_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_album_name') }}"
     episode_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_title') }}"
@@ -1437,11 +1896,23 @@
 - alias: "Voice: SpotifyPlus: Now Playing Info Audiobook Episode"
   description: |
     Queries Spotify player state for currently playing audiobook episode information.
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Get Spotify Now Playing Audiobook Info`
+    - `Get Spotify Audiobook Info`
+    - `Get Spotify Audiobook Information`
+    - `Get Spotify Audiobook Details`
+    - `Get Spotify Book Info`
+    - `Get Spotify Book Details`
+    - `Get Spotify Book Information`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_now_playing_info_episode_audiobook_english
       command:
-        - "[get] [Spotify] [now playing] (audiobook|audio book) [info|details]"
+        - "Get Spotify [nowplaying|now playing] (audiobook|audio book|book) [info|information|details]"
   variables:
     audiobook_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_album_name') }}"
     chapter_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_title') }}"
@@ -1465,11 +1936,22 @@
 - alias: "Voice: SpotifyPlus: Now Playing Info Track Artist"
   description: |
     Queries Spotify artist information for the currently playing track.
+    Up to 400 characters of information are returned (if bio was found).
+
+    #### Trigger Command Arguments
+    - none
+
+    #### Phrase Examples
+    - `Get Spotify Now Playing Artist Info`
+    - `Get Spotify Artist Info`
+    - `Get Spotify Artist Information`
+    - `Get Spotify Artist Details`
+    - `Get Spotify Artist Bio`
   triggers:
     - trigger: conversation
       id: voice_spotifyplus_now_playing_info_track_artist_english
       command:
-        - "[get] [Spotify] [now playing] artist [bio|info|details]"
+        - "Get Spotify [nowplaying|now playing] artist [info|information|details|bio]"
   variables:
     artist_uri: "{{ state_attr('media_player.spotifyplus_todd_l', 'sp_artist_uri') }}"
     artist_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_artist') }}"
@@ -1496,7 +1978,77 @@
               artist_bio: >-
                 {{ info_result.result.bio | default('Artist information could
                 not be found for "' + artist_name + '".') }}
-          - set_conversation_response: "{{ artist_bio | truncate(400) }}"
+          - set_conversation_response: "{{ 'Artist bio for \"' + artist_name + '\".  \n\n' + artist_bio | truncate(400, end=' ...') }}"
       else:
         - set_conversation_response: The Spotify media player is currently not playing media that contains Artist information.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Artist Bio
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Artist Information"
+  description: |
+    Searches Spotify for the given artist name, and returns artist bio information.
+    Also returns a link to the Spotify web-site for the artist.
+
+    #### Trigger Command Arguments
+    - `artist_name_title` - Name of the artist.
+
+    #### Phrase Examples
+    - `Get Spotify Artist Info For Jeremy Camp`
+    - `Get Spotify Artist Bio For Jeremy Camp`
+    - `Get Spotify Artist Details For Jeremy Camp`
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_artist_bio_english
+      command:
+        - "Get Spotify Artist (info|information|details|bio) [for|4] {artist_name}"
+  variables:
+    artist_name: "{{ trigger.slots.artist_name | default(null) }}"
+    artist_name_title: "{{ trigger.slots.artist_name | default('Not Specified') }}"
+  conditions: []
+  actions:
+    - sequence:
+      - action: spotifyplus.search_artists
+        data:
+          entity_id: media_player.spotifyplus_todd_l
+          criteria: "{{ artist_name }}"
+          limit_total: 2
+          include_external: audio
+        response_variable: search_result
+      - if:
+          - condition: template
+            alias: Were any search matches found?
+            value_template: >
+              {{ search_result.result.items_count > 0 }}
+        then:
+          - sequence:
+            - variables:
+                artist_name_title: "{{ search_result.result[\"items\"][0].name | default('Not Known') }}"
+                artist_id: "{{ search_result.result[\"items\"][0].id | default(0) }}"
+                artist_url: "{{ search_result.result[\"items\"][0].external_urls.spotify | default(None) }}"
+            - action: spotifyplus.get_artist_info
+              data:
+                entity_id: media_player.spotifyplus_todd_l
+                artist_id: "{{ artist_id }}"
+              response_variable: info_result
+            - variables:
+                artist_bio: >-
+                  {{ info_result.result.bio | default('Artist information could
+                  not be found for "' + artist_name_title + '".') }}
+            - if:
+                - condition: template
+                  alias: Is external url defined for artist?
+                  value_template: >
+                    {{ search_result.result["items"][0].external_urls is defined
+                      and search_result.result["items"][0].external_urls.spotify is defined }}
+              then:
+                - variables:
+                    artist_url: "{{ search_result.result['items'][0].external_urls.spotify }}"
+              else:
+                - variables:
+                    artist_url: "https://open.spotify.com"
+            - set_conversation_response: "{{ 'Artist bio for \"[' + artist_name_title + '](' + artist_url + ')\".  \n\n' + artist_bio | truncate(400) }}"
+        else:
+          - set_conversation_response: "{{ 'A Spotify Artist named \"' + artist_name_title + '\" could not be found.' }}"
   mode: single
