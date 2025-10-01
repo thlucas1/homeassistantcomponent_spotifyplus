@@ -1,0 +1,1502 @@
+  #################################################################################
+  # SpotifyPlus Sample Automation for Voice Assist Support
+  # Author: Todd Lucas
+  # GitHub Project: https://github.com/thlucas1/homeassistantcomponent_spotifyplus
+  #
+  # The listed automations in this example will enable HA Voice Assist support for 
+  # the specified SpotifyPlus media player entity.  You can clone this example for
+  # as many SpotifyPlus media players that you have defined.
+  #
+  # Reporting Issues / Problems:
+  # - use the SpotifyPlus Integration github repository issue link to report any
+  #   problems with these automations:
+  #   https://github.com/thlucas1/homeassistantcomponent_spotifyplus/issues
+  #
+  # configuration.yaml changes:
+  # - If you have not done so, I recommend adding a subfolder structure under
+  #   your HA <config> path that contains an "automations" folder which can
+  #   store multiple automation YAML files.  For example:
+  #   <config>
+  #   .. myconfigs
+  #   .... automations
+  #   ...... voice_assist_spotifyplus_todd_l.yaml
+  #   ...... voice_assist_spotifyplus_todd_l_free.yaml
+  #   ...... your_other_yaml_file.yaml
+  # - You can then add the following to your configuration.yaml file to load
+  #   all automation *.yaml files in that folder into your HA configuration:
+  #   automation ui: !include automations.yaml                           # Automations created by the UI.
+  #   automation manual: !include_dir_merge_list myconfigs/automations/  # Automations created outside of the UI.
+  # - Refer to the "Splitting up the Configuration" document for more information.
+  #   https://www.home-assistant.io/docs/configuration/splitting_configuration/#advanced-usage
+  #
+  # Do the following to add this to your HA environment:
+  # - Make a copy of this YAML and save to your HA "<config>/automations" folder.
+  #   The file should be named as "voice_assist_SPOTIFYPLUS_ENTITY.yaml", 
+  #   where "SPOTIFYPLUS_ENTITY" is YOUR SpotifyPlus media player entity id suffix.
+  #   For example, mine would be "voice_assist_spotifyplus_todd_l.yaml"
+  #   since my SpotifyPlus media player entity_id suffix is "spotifyplus_todd_l".
+  # - Open the file copy that you just made in your YAML editor of choice.
+  # - Change all references of "spotifyplus_todd_l" to YOUR SpotifyPlus entity id suffix.
+  # - Save your changes.
+  # - Go to "Developer Tools \ YAML" and click on the "Automations" button under 
+  #   the "YAML Configuration Reloading" to reload all automation scripts.
+  # - Issue a Voice Assist Command to test:
+  #   Say "Play my favorite tracks" and wait for the magic to happen.
+  #
+  #################################################################################
+
+  #################################################################################
+  # SpotifyPlus Voice - Playlist Create
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Playlist Create"
+  description: |
+    Create an empty playlist.  The playlist will remain empty until you add tracks.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_playlist_create_english
+      command:
+        - "Create Spotify (playlist|play list) [name|named|called|titled] [{playlist_name}]"
+  variables:
+    playlist_name: "{{ trigger.slots.playlist_name | default(null) }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Was a playlist name supplied?
+          value_template: >
+            {{ playlist_name is defined and playlist_name is not none }}
+      then:
+        - sequence:
+          - action: spotifyplus.playlist_create
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+              name: "{{ playlist_name }}"
+              description: A Playlist created by the SpotifyPlus integration using Voice Assist.
+              public: false
+              collaborative: false
+            response_variable: playlist_result
+          - set_conversation_response: "{{ 'Okay, created Spotify playlist \"' + playlist_name + '\".' }}"
+      else:
+        - set_conversation_response: A playlist name was not supplied.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Search and Play Audiobook
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Search and Play Audiobook"
+  description: |
+    Searches Spotify for the given audiobook, and plays the first result returned in the list.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_search_play_audiobook_english
+      command:
+        - "Play Spotify (audiobook|audio book|book) {audiobook_name} [by|for] [author {author_name}] [on device {device_name}]"
+  variables:
+    audiobook_name: "{{ trigger.slots.audiobook_name | default(null) }}"
+    audiobook_name_title: "{{ trigger.slots.audiobook_name | default('Not Specified') }}"
+    author_name: "{{ trigger.slots.author_name | default(null) }}"
+    author_name_title: "{{ trigger.slots.author_name | default('Not Specified') }}"
+    device_name: "{{ trigger.slots.device_name | default('*') }}"
+    device_name_title: "{{ trigger.slots.device_name | default('default') }}"
+  conditions: []
+  actions:
+    - sequence:
+      - action: spotifyplus.search_audiobooks
+        data:
+          entity_id: media_player.spotifyplus_todd_l
+          criteria: "{{ audiobook_name + ' ' + author_name }}"
+          limit_total: 2
+          include_external: audio
+        response_variable: search_result
+      - if:
+          - condition: template
+            alias: Were any search matches found?
+            value_template: >
+              {{ search_result.result.items_count > 0 }}
+        then:
+          - sequence:
+            - variables:
+                audiobook_name_title: "{{ search_result.result[\"items\"][0].name | default('Not Known') }}"
+                author_name_title: "{{ search_result.result[\"items\"][0].authors[0].name | default('Not Known') }}"
+            - action: spotifyplus.player_media_play_context
+              data:
+                entity_id: media_player.spotifyplus_todd_l
+                context_uri: "{{ search_result.result[\"items\"][0].uri }}"
+                device_id: "{{ device_name }}"
+            - set_conversation_response: "{{ 'Okay, playing found audiobook \"' + audiobook_name_title + '\", by author \"' + author_name_title + '\", on the ' + device_name_title + ' device.' }}"
+        else:
+          - set_conversation_response: "{{ 'A Spotify Audiobook named \"' + audiobook_name_title + '\" could not be found.' }}"
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Search and Play Podcast Episode
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Search and Play Podcast Episode"
+  description: |
+    Searches Spotify for the given podcast show episode, and plays the first result returned in the list.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_search_play_podcast_episode_english
+      command:
+        - "Play Spotify (podcast|pod cast|show) {show_name} episode {episode_name} [on device {device_name}]"
+  variables:
+    show_name: "{{ trigger.slots.show_name | default(null) }}"
+    show_name_title: "{{ trigger.slots.show_name | default('Not Specified') }}"
+    episode_name: "{{ trigger.slots.episode_name | default(null) }}"
+    episode_name_title: "{{ trigger.slots.episode_name | default('Not Specified') }}"
+    device_name: "{{ trigger.slots.device_name | default('*') }}"
+    device_name_title: "{{ trigger.slots.device_name | default('default') }}"
+  conditions: []
+  actions:
+    - sequence:
+      - action: spotifyplus.search_episodes
+        data:
+          entity_id: media_player.spotifyplus_todd_l
+          criteria: "{{ show_name + ' ' + episode_name }}"
+          limit_total: 2
+          include_external: audio
+        response_variable: search_result
+      - if:
+          - condition: template
+            alias: Were any search matches found?
+            value_template: >
+              {{ search_result.result.items_count > 0 }}
+        then:
+          - sequence:
+            - action: spotifyplus.get_episode
+              alias: Get full episode details, including parent show info
+              data:
+                entity_id: media_player.spotifyplus_todd_l
+                episode_id: "{{ search_result.result[\"items\"][0].id }}"
+              response_variable: episode_result
+            - variables:
+                episode_name_title: "{{ episode_result.result.name | default('Not Known') }}"
+                show_name_title: "{{ episode_result.result.show.name | default('Not Known') }}"
+            - action: spotifyplus.player_media_play_tracks
+              data:
+                entity_id: media_player.spotifyplus_todd_l
+                uris: "{{ episode_result.result.uri }}"
+                device_id: "{{ device_name }}"
+            - set_conversation_response: "{{ 'Okay, playing found episode \"' + episode_name_title + '\", from pod cast show \"' + show_name_title + '\", on the ' + device_name_title + ' device.' }}"
+        else:
+          - set_conversation_response: "{{ 'A Spotify Podcast Episode named \"' + episode_name_title + '\", from pod cast show \"' + show_name_title + '\", could not be found.' }}"
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Search and Play Podcast
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Search and Play Podcast"
+  description: |
+    Searches Spotify for the given podcast show, and plays the first result returned in the list.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_search_play_podcast_english
+      command:
+        - "Play Spotify (podcast|pod cast|show) {show_name} [on device {device_name}]"
+  variables:
+    show_name: "{{ trigger.slots.show_name | default(null) }}"
+    show_name_title: "{{ trigger.slots.show_name | default('Not Specified') }}"
+    device_name: "{{ trigger.slots.device_name | default('*') }}"
+    device_name_title: "{{ trigger.slots.device_name | default('default') }}"
+  conditions: []
+  actions:
+    - sequence:
+      - action: spotifyplus.search_shows
+        data:
+          entity_id: media_player.spotifyplus_todd_l
+          criteria: "{{ show_name }}"
+          limit_total: 2
+          include_external: audio
+        response_variable: search_result
+      - if:
+          - condition: template
+            alias: Were any search matches found?
+            value_template: >
+              {{ search_result.result.items_count > 0 }}
+        then:
+          - sequence:
+            - variables:
+                show_name_title: "{{ search_result.result[\"items\"][0].name | default('Not Known') }}"
+            - action: spotifyplus.player_media_play_context
+              data:
+                entity_id: media_player.spotifyplus_todd_l
+                context_uri: "{{ search_result.result[\"items\"][0].uri }}"
+                device_id: "{{ device_name }}"
+            - set_conversation_response: "{{ 'Okay, playing found podcast \"' + show_name_title + '\", on the ' + device_name_title + ' device.' }}"
+        else:
+          - set_conversation_response: "{{ 'A Spotify Podcast Show named \"' + show_name_title + '\" could not be found.' }}"
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Search and Play Artist Radio
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Search and Play Artist Radio"
+  description: |
+    Searches Spotify for the given artist radio station, and plays the first result returned in the list.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_search_play_artist_radio_english
+      command:
+        - "Play Spotify radio [station] [for] [artist {artist_name}] [on device {device_name}]"
+  variables:
+    artist_name: "{{ trigger.slots.artist_name | default(null) }}"
+    artist_name_title: "{{ trigger.slots.artist_name | default('Not Specified') }}"
+    device_name: "{{ trigger.slots.device_name | default('*') }}"
+    device_name_title: "{{ trigger.slots.device_name | default('default') }}"
+  conditions: []
+  actions:
+    - sequence:
+      - action: spotifyplus.search_playlists
+        data:
+          entity_id: media_player.spotifyplus_todd_l
+          criteria: "{{ 'Radio ' + artist_name }}"
+          include_external: audio
+          limit_total: 2
+        response_variable: search_result
+      - if:
+          - condition: template
+            alias: Were any search matches found?
+            value_template: >
+              {{ search_result.result.items_count > 0 }}
+        then:
+          - sequence:
+            - variables:
+                artist_name_title: "{{ search_result.result[\"items\"][0].name | default('Not Known') }}"
+            - action: spotifyplus.player_media_play_context
+              data:
+                entity_id: media_player.spotifyplus_todd_l
+                context_uri: "{{ search_result.result[\"items\"][0].uri }}"
+                shuffle: true
+                device_id: "{{ device_name }}"
+            - set_conversation_response: "{{ 'Okay, playing found Spotify Radio Playlist \"' + artist_name_title + '\" on the ' + device_name_title + ' device.' }}"
+        else:
+          - set_conversation_response: "{{ 'A Spotify Radio Playlist for artist \"' + artist_name_title + '\" could not be found.' }}"
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Search and Play Album
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Search and Play Album"
+  description: |
+    Searches Spotify for the given album, and plays the first result returned in the list.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_search_play_album_english
+      command:
+        - "Play Spotify album {album_name} [by artist {artist_name}] [on device {device_name}]"
+  variables:
+    album_name: "{{ trigger.slots.album_name | default(null) }}"
+    album_name_title: "{{ trigger.slots.album_name | default('Not Specified') }}"
+    artist_name: "{{ trigger.slots.artist_name | default(null) }}"
+    artist_name_title: "{{ trigger.slots.artist_name | default('Not Specified') }}"
+    device_name: "{{ trigger.slots.device_name | default('*') }}"
+    device_name_title: "{{ trigger.slots.device_name | default('default') }}"
+  conditions: []
+  actions:
+    - sequence:
+      - action: spotifyplus.search_albums
+        data:
+          entity_id: media_player.spotifyplus_todd_l
+          criteria: "{{ artist_name + ' ' + album_name }}"
+          limit_total: 2
+        response_variable: search_result
+      - if:
+          - condition: template
+            alias: Were any search matches found?
+            value_template: >
+              {{ search_result.result.items_count > 0 }}
+        then:
+          - sequence:
+            - variables:
+                album_name_title: "{{ search_result.result[\"items\"][0].name | default('Not Known') }}"
+                artist_name_title: "{{ search_result.result[\"items\"][0].artists[0].name | default('Not Known') }}"
+            - action: spotifyplus.player_media_play_context
+              data:
+                entity_id: media_player.spotifyplus_todd_l
+                context_uri: "{{ search_result.result[\"items\"][0].uri }}"
+                shuffle: true
+                device_id: "{{ device_name }}"
+            - set_conversation_response: "{{ 'Okay, playing found album \"' + album_name_title + '\", from artist \"' + artist_name_title + '\",  on the ' + device_name_title + ' device.' }}"
+        else:
+          - set_conversation_response: "{{ 'A Spotify Album named \"' + album_name_title + '\", from artist \"' + artist_name_title + '\", could not be found.' }}"
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Search and Play Track
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Search and Play Track"
+  description: |
+    Searches Spotify for the given track, and plays the first result returned in the list.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_search_play_track_english
+      command:
+        - "Play Spotify (track|song) {track_name} [by artist {artist_name}] [on device {device_name}]"
+  variables:
+    track_name: "{{ trigger.slots.track_name | default(null) }}"
+    track_name_title: "{{ trigger.slots.track_name | default('Not Specified') }}"
+    artist_name: "{{ trigger.slots.artist_name | default(null) }}"
+    artist_name_title: "{{ trigger.slots.artist_name | default('Not Specified') }}"
+    device_name: "{{ trigger.slots.device_name | default('*') }}"
+    device_name_title: "{{ trigger.slots.device_name | default('default') }}"
+  conditions: []
+  actions:
+    - sequence:
+      - action: spotifyplus.search_tracks
+        data:
+          entity_id: media_player.spotifyplus_todd_l
+          criteria: "{{ artist_name + ' ' + track_name }}"
+          limit_total: 5
+        response_variable: search_result
+      - if:
+          - condition: template
+            alias: Were any search matches found?
+            value_template: >
+              {{ search_result.result.items_count > 0 }}
+        then:
+          - sequence:
+            - variables:
+                track_name_title: "{{ search_result.result[\"items\"][0].name | default('Not Known') }}"
+                artist_name_title: "{{ search_result.result[\"items\"][0].artists[0].name | default('Not Known') }}"
+            - action: spotifyplus.player_media_play_tracks
+              data:
+                entity_id: media_player.spotifyplus_todd_l
+                uris: "{{ search_result.result[\"items\"][0].uri }}"
+                device_id: "{{ device_name }}"
+            - set_conversation_response: "{{ 'Okay, playing found Spotify track \"' + track_name_title + '\", from artist \"' + artist_name_title + '\", on the ' + device_name_title + ' device.' }}"
+        else:
+          - set_conversation_response: "{{ 'A Spotify Track named \"' + track_name_title + '\", from artist \"' + artist_name_title + '\", could not be found.' }}"
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Search and Play Playlist
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Search and Play Playlist"
+  description: |
+    Searches Spotify for the given playlist, and plays the first result returned in the list.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_search_play_playlist_english
+      command:
+        - "Play Spotify (playlist|play list) {playlist_name} [on device {device_name}]"
+  variables:
+    playlist_name: "{{ trigger.slots.playlist_name | default(null) }}"
+    playlist_name_title: "{{ trigger.slots.playlist_name | default('Not Specified') }}"
+    device_name: "{{ trigger.slots.device_name | default('*') }}"
+    device_name_title: "{{ trigger.slots.device_name | default('default') }}"
+  conditions: []
+  actions:
+    - sequence:
+      - action: spotifyplus.search_playlists
+        data:
+          entity_id: media_player.spotifyplus_todd_l
+          criteria: "{{ playlist_name }}"
+          limit_total: 5
+        response_variable: search_result
+      - if:
+          - condition: template
+            alias: Were any search matches found?
+            value_template: >
+              {{ search_result.result.items_count > 0 }}
+        then:
+          - sequence:
+            - variables:
+                playlist_name_title: "{{ search_result.result[\"items\"][0].name | default('Not Known') }}"
+            - action: spotifyplus.player_media_play_context
+              data:
+                entity_id: media_player.spotifyplus_todd_l
+                context_uri: "{{ search_result.result[\"items\"][0].uri }}"
+                shuffle: true
+                device_id: "{{ device_name }}"
+            - set_conversation_response: "{{ 'Okay, playing found Spotify playlist \"' + playlist_name_title + '\", on the ' + device_name_title + ' device.' }}"
+        else:
+          - set_conversation_response: "{{ 'A Spotify Playlist named \"' + playlist_name_title + '\", could not be found.' }}"
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Player Volume Mute Off
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Player Volume Mute Off"
+  description: |
+    Set volume to unmuted.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_player_volume_mute_off_english
+      command:
+        - "(UnMute|Restore) Spotify [Player] Volume [level]"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player state currently playing|paused?
+          value_template: >
+            {{ states('media_player.spotifyplus_todd_l') in ['playing', 'paused'] }}
+      then:
+        - sequence:
+          - action: media_player.volume_mute
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+              is_volume_muted: false
+          - set_conversation_response: "{{ 'Okay, Spotify volume was unmuted.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Player Volume Mute On
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Player Volume Mute On"
+  description: |
+    Set volume to mute.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_player_volume_mute_on_english
+      command:
+        - "Mute Spotify [Player] Volume [level]"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player state currently playing|paused?
+          value_template: >
+            {{ states('media_player.spotifyplus_todd_l') in ['playing', 'paused'] }}
+      then:
+        - sequence:
+          - action: media_player.volume_mute
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+              is_volume_muted: true
+          - set_conversation_response: "{{ 'Okay, Spotify volume was muted.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Player Volume Level Set
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Player Volume Level Set"
+  description: |
+    Set player volume level for the specified Spotify Connect device.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_player_volume_level_set_english
+      command:
+        - "Set Spotify [Player] Volume [level] [to] {volume_pct} [percent|%] [on device {device_name}]"
+  variables:
+    volume_pct: "{{ trigger.slots.volume_pct | default(20) }}"
+    device_name: "{{ trigger.slots.device_name | default('*') }}"
+    device_name_title: "{{ trigger.slots.device_name | default('default') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player state currently playing|paused?
+          value_template: >
+            {{ states('media_player.spotifyplus_todd_l') in ['playing', 'paused'] }}
+      then:
+        - sequence:
+          - action: spotifyplus.player_set_volume_level
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+              volume_level: "{{ volume_pct }}"
+              device_id: "{{ device_name }}"
+          - set_conversation_response: "{{ 'Okay, Spotify volume was set to ' + volume_pct|string + '%, on the ' + device_name_title + ' device.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Player Volume Level Decrease
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Player Volume Level Decrease"
+  description: |
+    Decrease player volume level by the preset volume step level amount.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_player_volume_level_decrease_english
+      command:
+        - "Decrease Spotify [Player] Volume [level]"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player state currently playing|paused?
+          value_template: >
+            {{ states('media_player.spotifyplus_todd_l') in ['playing', 'paused'] }}
+      then:
+        - sequence:
+          - action: media_player.volume_down
+            data:
+              entity_id: media_player.spotifyplus_todd_l        
+          - set_conversation_response: "{{ 'Okay, Spotify volume level was decreased.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Player Volume Level Increase
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Player Volume Level Increase"
+  description: |
+    Increase player volume level by the preset volume step level amount.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_player_volume_level_increase_english
+      command:
+        - "Increase Spotify [Player] Volume [level]"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player state currently playing|paused?
+          value_template: >
+            {{ states('media_player.spotifyplus_todd_l') in ['playing', 'paused'] }}
+      then:
+        - sequence:
+          - action: media_player.volume_up
+            data:
+              entity_id: media_player.spotifyplus_todd_l        
+          - set_conversation_response: "{{ 'Okay, Spotify volume level was increased.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Player Volume Set Step Level
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Player Volume Set Step Level"
+  description: |
+    Set player volume step level value for the volume increase and decrease commands.
+    Value should be in the range of 1 - 40.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_player_volume_set_step_level_english
+      command:
+        - "Set Spotify [Player] Volume Step [level] [to] {volume_pct} [percent|%]"
+  variables:
+    volume_pct: "{{ trigger.slots.volume_pct | default(10) }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player state currently playing|paused|idle|unknown|off?
+          value_template: >
+            {{ states('media_player.spotifyplus_todd_l') in ['playing', 'paused', 'idle', 'unknown', 'off'] }}
+      then:
+        - sequence:
+          - action: spotifyplus.volume_set_step
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+              level_percent: "{{ volume_pct | string }}"
+          - set_conversation_response: "{{ 'Okay, media player Volume Step Level was set to ' + volume_pct | string + '%.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Player Repeat Mode All
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Player Repeat Mode All"
+  description: |
+    Sets the Spotify player repeat mode to ALL for the specified Spotify Connect device.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_player_repeat_mode_all_english
+      command:
+        - "[Set|Enable] Spotify Repeat [mode] [all|context] [on device {device_name}]"
+  variables:
+    device_name: "{{ trigger.slots.device_name | default('*') }}"
+    device_name_title: "{{ trigger.slots.device_name | default('default') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player state currently playing|paused?
+          value_template: >
+            {{ states('media_player.spotifyplus_todd_l') in ['playing', 'paused'] }}
+      then:
+        - sequence:
+          - action: spotifyplus.player_set_repeat_mode
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+              state: context
+              device_id: "{{ device_name }}"
+          - set_conversation_response: "{{ 'Okay, Spotify repeat mode is All Tracks.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Player Repeat Mode One
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Player Repeat Mode One"
+  description: |
+    Sets the Spotify player repeat mode to ONE for the specified Spotify Connect device.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_player_repeat_mode_one_english
+      command:
+        - "[Set|Enable] Spotify Repeat [mode] [1|one|track] [on device {device_name}]"
+  variables:
+    device_name: "{{ trigger.slots.device_name | default('*') }}"
+    device_name_title: "{{ trigger.slots.device_name | default('default') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player state currently playing|paused?
+          value_template: >
+            {{ states('media_player.spotifyplus_todd_l') in ['playing', 'paused'] }}
+      then:
+        - sequence:
+          - action: spotifyplus.player_set_repeat_mode
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+              state: track
+              device_id: "{{ device_name }}"
+          - set_conversation_response: "{{ 'Okay, Spotify repeat mode is One Track.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Player Repeat Mode Off
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Player Repeat Mode Off"
+  description: |
+    Sets the Spotify player repeat mode to OFF for the specified Spotify Connect device.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_player_repeat_mode_off_english
+      command:
+        - "[Set|Disable] Spotify Repeat [mode] [off|disabled] [on device {device_name}]"
+  variables:
+    device_name: "{{ trigger.slots.device_name | default('*') }}"
+    device_name_title: "{{ trigger.slots.device_name | default('default') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player state currently playing|paused?
+          value_template: >
+            {{ states('media_player.spotifyplus_todd_l') in ['playing', 'paused'] }}
+      then:
+        - sequence:
+          - action: spotifyplus.player_set_repeat_mode
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+              state: "off"
+              device_id: "{{ device_name }}"
+          - set_conversation_response: "{{ 'Okay, Spotify repeat mode is Off.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Player Shuffle Mode Off
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Player Shuffle Mode Off"
+  description: |
+    Sets the Spotify player shuffle mode to OFF for the specified Spotify Connect device.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_player_shuffle_mode_off_english
+      command:
+        - "[Set|Disable] Spotify Shuffle [mode] [off|disabled] [on device {device_name}]"
+  variables:
+    device_name: "{{ trigger.slots.device_name | default('*') }}"
+    device_name_title: "{{ trigger.slots.device_name | default('default') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player state currently playing|paused?
+          value_template: >
+            {{ states('media_player.spotifyplus_todd_l') in ['playing', 'paused'] }}
+      then:
+        - sequence:
+          - action: spotifyplus.player_set_shuffle_mode
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+              state: false
+              device_id: "{{ device_name }}"
+          - set_conversation_response: "{{ 'Okay, Spotify shuffle mode is Disabled.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Player Shuffle Mode On
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Player Shuffle Mode On"
+  description: |
+    Sets the Spotify player shuffle mode to ON for the specified Spotify Connect device.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_player_shuffle_mode_on_english
+      command:
+        - "[Set|Enable] Spotify Shuffle [mode] [on|enabled] [on device {device_name}]"
+  variables:
+    device_name: "{{ trigger.slots.device_name | default('*') }}"
+    device_name_title: "{{ trigger.slots.device_name | default('default') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player state currently playing|paused?
+          value_template: >
+            {{ states('media_player.spotifyplus_todd_l') in ['playing', 'paused'] }}
+      then:
+        - sequence:
+          - action: spotifyplus.player_set_shuffle_mode
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+              state: true
+              device_id: "{{ device_name }}"
+          - set_conversation_response: "{{ 'Okay, Spotify shuffle mode is Enabled.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Player Media Skip Start
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Player Media Skip Start"
+  description: |
+    Skips to start of the currently playing track for the specified Spotify Connect device.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_player_media_skip_start_english
+      command:
+        - "[Skip] Spotify [Play|Player|Music] [to|2] (Start|Restart) [of] (track|song) [on device {device_name}]"
+  variables:
+    device_name: "{{ trigger.slots.device_name | default('*') }}"
+    device_name_title: "{{ trigger.slots.device_name | default('default') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player state currently playing|paused?
+          value_template: >
+            {{ states('media_player.spotifyplus_todd_l') in ['playing', 'paused'] }}
+      then:
+        - sequence:
+          - action: spotifyplus.player_media_seek
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+              device_id: "{{ device_name }}"
+              position_ms: 0
+          - set_conversation_response: "{{ 'Okay, skipping to start of Spotify track on the ' + device_name_title + ' device.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Player Media Skip Previous
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Player Media Skip Previous"
+  description: |
+    Skips to previous track in the user's queue for the specified Spotify Connect device.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_player_media_skip_previous_english
+      command:
+        - "[Skip] Spotify [Play|Player|Music] Previous [track|song] [on device {device_name}]"
+  variables:
+    device_name: "{{ trigger.slots.device_name | default('*') }}"
+    device_name_title: "{{ trigger.slots.device_name | default('default') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player state currently playing|paused?
+          value_template: >
+            {{ states('media_player.spotifyplus_todd_l') in ['playing', 'paused'] }}
+      then:
+        - sequence:
+          - action: spotifyplus.player_media_skip_previous
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+              device_id: "{{ device_name }}"
+          - set_conversation_response: "{{ 'Okay, skipping to previous Spotify track on the ' + device_name_title + ' device.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Player Media Skip Next
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Player Media Skip Next"
+  description: |
+    Skips to next track in the user's queue for the specified Spotify Connect device.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_player_media_skip_next_english
+      command:
+        - "[Skip] Spotify [Play|Player|Music] Next [track|song] [on device {device_name}]"
+  variables:
+    device_name: "{{ trigger.slots.device_name | default('*') }}"
+    device_name_title: "{{ trigger.slots.device_name | default('default') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player state currently playing|paused?
+          value_template: >
+            {{ states('media_player.spotifyplus_todd_l') in ['playing', 'paused'] }}
+      then:
+        - sequence:
+          - action: spotifyplus.player_media_skip_next
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+              device_id: "{{ device_name }}"
+          - set_conversation_response: "{{ 'Okay, skipping to next Spotify track on the ' + device_name_title + ' device.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Player Media Resume
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Player Media Resume"
+  description: |
+    Resume media play on the specified Spotify Connect device.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_player_media_resume_english
+      command:
+        - "Resume [the] Spotify [Play|Player|Music] [on device {device_name}]"
+  variables:
+    device_name: "{{ trigger.slots.device_name | default('*') }}"
+    device_name_title: "{{ trigger.slots.device_name | default('default') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player state currently paused|idle|unknown|off?
+          value_template: >
+            {{ states('media_player.spotifyplus_todd_l') in ['paused', 'idle', 'unknown', 'off'] }}
+      then:
+        - sequence:
+          - action: spotifyplus.player_media_resume
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+              device_id: "{{ device_name }}"
+          - set_conversation_response: "{{ 'Okay, resuming Spotify play on the ' + device_name_title + ' device.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Player Media Pause
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Player Media Pause"
+  description: |
+    Pause media play for the specified Spotify Connect device.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_player_media_pause_english
+      command:
+        - "(Stop|Pause) [the] Spotify [Play|Player|Music] [on device {device_name}]"
+  variables:
+    device_name: "{{ trigger.slots.device_name | default('*') }}"
+    device_name_title: "{{ trigger.slots.device_name | default('default') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player state currently playing?
+          value_template: >
+            {{ states('media_player.spotifyplus_todd_l') in ['playing'] }}
+      then:
+        - sequence:
+          - action: spotifyplus.player_media_pause
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+              device_id: "{{ device_name }}"
+          - set_conversation_response: "{{ 'Okay, pausing Spotify play on the ' + device_name_title + ' device.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Users Favorite Show Episodes Remove
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Users Favorite Show Episodes Remove"
+  description: |
+    Remove currently playing episode from the current user's favorite show episodes.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_favorite_show_episodes_remove_english
+      command:
+        - "Remove Spotify (podcast|pod cast|show) episode [from] (favorite|favorites)"
+  variables:
+    show_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_album_name') }}"
+    episode_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_title') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player currently playing a podcast?
+          value_template: >
+            {{ state_attr('media_player.spotifyplus_todd_l', 'sp_item_type') == 'podcast' }}
+      then:
+        - sequence:
+          - action: spotifyplus.remove_episode_favorites
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+          - set_conversation_response: "{{ 'Okay, the episode named \"' + episode_name + '\" from pod cast show \"' + show_name + '\"  was removed from your Spotify show episode favorites.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media that contains Podcast information.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Users Favorite Show Episodes Add
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Users Favorite Show Episodes Add"
+  description: |
+    Add currently playing episode to the current user's favorite show episodes.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_favorite_show_episodes_add_english
+      command:
+        - "Add Spotify (podcast|pod cast|show) episode [to|2] (favorite|favorites)"
+  variables:
+    show_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_album_name') }}"
+    episode_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_title') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player currently playing a podcast?
+          value_template: >
+            {{ state_attr('media_player.spotifyplus_todd_l', 'sp_item_type') == 'podcast' }}
+      then:
+        - sequence:
+          - action: spotifyplus.save_episode_favorites
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+          - set_conversation_response: "{{ 'Okay, the episode named \"' + episode_name + '\" from pod cast show \"' + show_name + '\"  was added to your Spotify show episode favorites.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media that contains Podcast information.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Users Favorite Shows Remove
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Users Favorite Shows Remove"
+  description: |
+    Remove currently playing show from the current user's favorite shows.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_favorite_shows_remove_english
+      command:
+        - "Remove Spotify (podcast|pod cast|show) [from] (favorite|favorites)"
+  variables:
+    show_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_album_name') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player currently playing a podcast?
+          value_template: >
+            {{ state_attr('media_player.spotifyplus_todd_l', 'sp_item_type') == 'podcast' }}
+      then:
+        - sequence:
+          - action: spotifyplus.remove_show_favorites
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+          - set_conversation_response: "{{ 'Okay, the podcast show named \"' + show_name + '\" was removed from your Spotify show favorites.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media that contains Podcast information.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Users Favorite Shows Add
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Users Favorite Shows Add"
+  description: |
+    Add currently playing show to the current user's favorite shows.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_favorite_shows_add_english
+      command:
+        - "Add Spotify (podcast|pod cast|show) [to|2] (favorite|favorites)"
+  variables:
+    show_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_album_name') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player currently playing a podcast?
+          value_template: >
+            {{ state_attr('media_player.spotifyplus_todd_l', 'sp_item_type') == 'podcast' }}
+      then:
+        - sequence:
+          - action: spotifyplus.save_show_favorites
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+          - set_conversation_response: "{{ 'Okay, the podcast show named \"' + show_name + '\" was added to your Spotify show favorites.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media that contains Podcast information.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Users Favorite Audiobooks Remove
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Users Favorite Audiobooks Remove"
+  description: |
+    Remove currently playing track audiobook from the current user's favorite audiobooks.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_favorite_audiobooks_remove_english
+      command:
+        - "Remove Spotify (audiobook|audio book|book) [from] (favorite|favorites)"
+  variables:
+    audiobook_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_album_name') }}"
+    author_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_artist') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player currently playing an audiobook?
+          value_template: >
+            {{ state_attr('media_player.spotifyplus_todd_l', 'sp_item_type') == 'audiobook' }}
+      then:
+        - sequence:
+          - action: spotifyplus.remove_audiobook_favorites
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+          - set_conversation_response: "{{ 'Okay, the audiobook named \"' + audiobook_name + '\" by author \"' + author_name + '\" was removed from your Spotify audiobook favorites.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media that contains Audiobook information.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Users Favorite Audiobooks Add
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Users Favorite Audiobooks Add"
+  description: |
+    Add currently playing track audiobook to the current user's favorite audiobooks.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_favorite_audiobooks_add_english
+      command:
+        - "Add Spotify (audiobook|audio book|book) [to|2] (favorite|favorites)"
+  variables:
+    audiobook_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_album_name') }}"
+    author_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_artist') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player currently playing an audiobook?
+          value_template: >
+            {{ state_attr('media_player.spotifyplus_todd_l', 'sp_item_type') == 'audiobook' }}
+      then:
+        - sequence:
+          - action: spotifyplus.save_audiobook_favorites
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+          - set_conversation_response: "{{ 'Okay, the audiobook named \"' + audiobook_name + '\" by author \"' + author_name + '\" was added to your Spotify audiobook favorites.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media that contains Audiobook information.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Users Favorite Artists Remove
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Users Favorite Artists Remove"
+  description: |
+    Remove currently playing track artist from the current user's favorite artists.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_favorite_artists_remove_english
+      command:
+        - "Remove Spotify (artist) [from] (favorite|favorites)"
+  variables:
+    artist_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_artist') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player currently playing a track?
+          value_template: >
+            {{ state_attr('media_player.spotifyplus_todd_l', 'sp_item_type') == 'track' }}
+      then:
+        - sequence:
+          - action: spotifyplus.unfollow_artists
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+          - set_conversation_response: "{{ 'Okay, the artist named \"' + artist_name + '\" was removed from your Spotify artist favorites.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media that contains Track Artist information.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Users Favorite Artists Add
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Users Favorite Artists Add"
+  description: |
+    Add currently playing track artist to the current user's favorite artists.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_favorite_artists_add_english
+      command:
+        - "Add Spotify (artist) [to|2] (favorite|favorites)"
+  variables:
+    artist_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_artist') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player currently playing a track?
+          value_template: >
+            {{ state_attr('media_player.spotifyplus_todd_l', 'sp_item_type') == 'track' }}
+      then:
+        - sequence:
+          - action: spotifyplus.follow_artists
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+          - set_conversation_response: "{{ 'Okay, the artist named \"' + artist_name + '\" was added to your Spotify artist favorites.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media that contains Track Artist information.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Users Favorite Albums Remove
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Users Favorite Albums Remove"
+  description: |
+    Remove currently playing track album from the current user's favorite albums.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_favorite_albums_remove_english
+      command:
+        - "Remove Spotify (album|LP) [from] (favorite|favorites)"
+  variables:
+    album_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_album_name') }}"
+    artist_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_artist') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player currently playing a track?
+          value_template: >
+            {{ state_attr('media_player.spotifyplus_todd_l', 'sp_item_type') == 'track' }}
+      then:
+        - sequence:
+          - action: spotifyplus.remove_album_favorites
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+          - set_conversation_response: "{{ 'Okay, the album named \"' + album_name + '\" by artist \"' + artist_name + '\" was removed from your Spotify album favorites.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media that contains Track Album information.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Users Favorite Albums Add
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Users Favorite Albums Add"
+  description: |
+    Add currently playing track album to the current user's favorite albums.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_favorite_albums_add_english
+      command:
+        - "Add Spotify (album|LP) [to|2] (favorite|favorites)"
+  variables:
+    album_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_album_name') }}"
+    artist_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_artist') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player currently playing a track?
+          value_template: >
+            {{ state_attr('media_player.spotifyplus_todd_l', 'sp_item_type') == 'track' }}
+      then:
+        - sequence:
+          - action: spotifyplus.save_album_favorites
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+          - set_conversation_response: "{{ 'Okay, the album named \"' + album_name + '\" by artist \"' + artist_name + '\" was added to your Spotify album favorites.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media that contains Track Album information.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Users Favorite Playlists Remove
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Users Favorite Playlists Remove"
+  description: |
+    Remove currently playing playlist from the current user's favorite playlists.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_favorite_playlists_remove_english
+      command:
+        - "Remove Spotify (playlist|play list) [from] (favorite|favorites)"
+  variables:
+    playlist_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'sp_playlist_name') | default(None) }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player currently playing a playlist?
+          value_template: >
+            {{ playlist_name is not none }}
+      then:
+        - sequence:
+          - action: spotifyplus.unfollow_playlist
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+          - set_conversation_response: "{{ 'Okay, the playlist named \"' + playlist_name + '\" was removed from your Spotify playlist favorites.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media that contains Playlist information.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Users Favorite Playlists Add
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Users Favorite Playlists Add"
+  description: |
+    Add currently playing playlist to the current user's favorite playlists.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_favorite_playlists_add_english
+      command:
+        - "Add Spotify (playlist|play list) [to|2] (favorite|favorites)"
+  variables:
+    playlist_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'sp_playlist_name') | default(None) }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player currently playing a playlist?
+          value_template: >
+            {{ playlist_name is not none }}
+      then:
+        - sequence:
+          - action: spotifyplus.follow_playlist
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+          - set_conversation_response: "{{ 'Okay, the playlist named \"' + playlist_name + '\" was added to your Spotify playlist favorites.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media that contains Playlist information.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Users Favorite Tracks Remove
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Users Favorite Tracks Remove"
+  description: |
+    Remove currently playing track from the current user's favorite tracks.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_favorite_tracks_remove_english
+      command:
+        - "Remove Spotify (track|song) [from] (favorite|favorites)"
+  variables:
+    track_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_title') }}"
+    artist_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_artist') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player currently playing a track?
+          value_template: >
+            {{ state_attr('media_player.spotifyplus_todd_l', 'sp_item_type') == 'track' }}
+      then:
+        - sequence:
+          - action: spotifyplus.remove_track_favorites
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+          - set_conversation_response: "{{ 'Okay, the track named \"' + track_name + '\", by artist \"' + artist_name + '\", was removed from your Spotify track favorites.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media that contains Track information.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Users Favorite Tracks Add
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Users Favorite Tracks Add"
+  description: |
+    Add currently playing track to the current user's favorite tracks.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_favorite_tracks_add_english
+      command:
+        - "Add Spotify (track|song) [to|2] (favorite|favorites)"
+  variables:
+    track_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_title') }}"
+    artist_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_artist') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player currently playing a track?
+          value_template: >
+            {{ state_attr('media_player.spotifyplus_todd_l', 'sp_item_type') == 'track' }}
+      then:
+        - sequence:
+          - action: spotifyplus.save_track_favorites
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+          - set_conversation_response: "{{ 'Okay, the track named \"' + track_name + '\", by artist \"' + artist_name + '\", was added to your Spotify track favorites.' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media that contains Track information.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Users Favorite Tracks Play All
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Users Favorite Tracks Play All"
+  description: |
+    Play users favorite Spotify tracks using a SpotifyPlus media player.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_favorite_tracks_play_all_english
+      command:
+        - "Play my favorite (tracks|songs) [for artist {filter_artist}] [on device {device_name}]"
+  variables:
+    device_name: "{{ trigger.slots.device_name | default('*') }}"
+    device_name_title: "{{ trigger.slots.device_name | default('default') }}"
+    filter_artist: "{{ trigger.slots.filter_artist | default(null) }}"        
+    filter_album: "{{ trigger.slots.filter_album | default(null) }}"        
+  conditions: []
+  actions:
+    - action: spotifyplus.player_media_play_track_favorites
+      data:
+        entity_id: media_player.spotifyplus_todd_l
+        limit_total: 200
+        shuffle: true
+        device_id: "{{ device_name }}"
+        filter_artist: "{{ filter_artist }}"
+        filter_album: "{{ filter_album }}"
+    - set_conversation_response: "{{ 'Okay, playing Spotify track favorites on the ' + device_name_title + ' device.' }}"
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Now Playing Info Track
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Now Playing Info Track"
+  description: |
+    Queries Spotify player state for currently playing track information.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_now_playing_info_track_english
+      command:
+        - "[get] [Spotify] [now playing] (track|song) [info|details]"
+  variables:
+    album_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_album_name') }}"
+    artist_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_artist') }}"
+    track_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_title') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player currently playing a track?
+          value_template: >
+            {{ state_attr('media_player.spotifyplus_todd_l', 'sp_item_type') == 'track' }}
+      then:
+        - set_conversation_response: "{{ 'Spotify is playing track \"' + track_name + '\", by the artist \"' + artist_name + '\", from the album \"' + album_name + '\".' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media that contains Track information.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Now Playing Info Podcast Episode
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Now Playing Info Podcast Episode"
+  description: |
+    Queries Spotify player state for currently playing podcast episode information.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_now_playing_info_episode_podcast_english
+      command:
+        - "[get] [Spotify] [now playing] (podcast|pod cast|show) [info|details]"
+  variables:
+    show_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_album_name') }}"
+    episode_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_title') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player currently playing a podcast?
+          value_template: >
+            {{ state_attr('media_player.spotifyplus_todd_l', 'sp_item_type') == 'podcast' }}
+      then:
+        - set_conversation_response: "{{ 'Spotify is playing podcast episode \"' + episode_name + '\", from pod cast show \"' + show_name + '\".' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media that contains Podcast information.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Now Playing Info Audiobook Episode
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Now Playing Info Audiobook Episode"
+  description: |
+    Queries Spotify player state for currently playing audiobook episode information.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_now_playing_info_episode_audiobook_english
+      command:
+        - "[get] [Spotify] [now playing] (audiobook|audio book) [info|details]"
+  variables:
+    audiobook_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_album_name') }}"
+    chapter_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_title') }}"
+    author_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_artist') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player currently playing an audiobook?
+          value_template: >
+            {{ state_attr('media_player.spotifyplus_todd_l', 'sp_item_type') == 'audiobook' }}
+      then:
+        - set_conversation_response: "{{ 'Spotify is playing \"' + chapter_name + '\", from audiobook \"' + audiobook_name + '\", by author \"' + author_name + '\".' }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media that contains Audiobook information.
+  mode: single
+
+  #################################################################################
+  # SpotifyPlus Voice - Now Playing Info Track Artist
+  #################################################################################
+- alias: "Voice: SpotifyPlus: Now Playing Info Track Artist"
+  description: |
+    Queries Spotify artist information for the currently playing track.
+  triggers:
+    - trigger: conversation
+      id: voice_spotifyplus_now_playing_info_track_artist_english
+      command:
+        - "[get] [Spotify] [now playing] artist [bio|info|details]"
+  variables:
+    artist_uri: "{{ state_attr('media_player.spotifyplus_todd_l', 'sp_artist_uri') }}"
+    artist_name: "{{ state_attr('media_player.spotifyplus_todd_l', 'media_artist') }}"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          alias: Is media player state currently playing|paused a track?
+          value_template: >
+            {{ states('media_player.spotifyplus_todd_l') in ['playing','paused'] and state_attr('media_player.spotifyplus_todd_l', 'sp_item_type') == 'track' }}
+      then:
+        - sequence:
+          - action: spotifyplus.get_id_from_uri
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+              uri: "{{ artist_uri }}"
+            response_variable: id_result
+          - action: spotifyplus.get_artist_info
+            data:
+              entity_id: media_player.spotifyplus_todd_l
+              artist_id: "{{ id_result.result }}"
+            response_variable: info_result
+          - variables:
+              artist_bio: >-
+                {{ info_result.result.bio | default('Artist information could
+                not be found for "' + artist_name + '".') }}
+          - set_conversation_response: "{{ artist_bio | truncate(400) }}"
+      else:
+        - set_conversation_response: The Spotify media player is currently not playing media that contains Artist information.
+  mode: single

@@ -2156,6 +2156,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogVerbose("Adding items(s) to Spotify Artist Favorites")
             self.data.spotifyClient.FollowArtists(ids)
 
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
+
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
@@ -2201,6 +2204,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # follow playlist.
             _logsi.LogVerbose("Adding items to Spotify Playlist Favorites")
             self.data.spotifyClient.FollowPlaylist(playlistId, public)
+
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
@@ -3687,6 +3693,56 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
                 "result": result.ToDictionary(),
                 "message": message
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_get_id_from_uri(
+            self, 
+            uri:str=None, 
+            ) -> dict:
+        """
+        Gets the Id portion of a Spotify URI value.
+        
+        Args:
+            uri (str):  
+                The Spotify URI value.
+                Example: `spotify:track:6vc9OTcyd3hyzabCmsdnwE`
+                If omitted, the currently playing uri value is used.
+                
+        Returns:
+            A dictionary that contains the following keys:
+            - result: A string object that contains the id value.
+        """
+        apiMethodName:str = 'service_spotify_get_id_from_uri'
+        apiMethodParms:SIMethodParmListContext = None
+        result:Album = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("uri", uri)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Id From Uri Service", apiMethodParms)
+                
+            # request information from Spotify Web API.
+            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
+            result = self.data.spotifyClient.GetIdFromUri(uri)
+
+            # return the result itself.
+            return {
+                "result": result
             }
 
         # the following exceptions have already been logged, so we just need to
@@ -7248,6 +7304,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogVerbose("Removing items(s) from Spotify Album Favorites")
             self.data.spotifyClient.RemoveAlbumFavorites(ids)
 
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
+
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
@@ -7288,6 +7347,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # remove items from Spotify audiobook favorites.
             _logsi.LogVerbose("Removing items(s) from Spotify Audiobook Favorites")
             self.data.spotifyClient.RemoveAudiobookFavorites(ids)
+
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
@@ -7330,6 +7392,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogVerbose("Removing items(s) from Spotify Episode Favorites")
             self.data.spotifyClient.RemoveEpisodeFavorites(ids)
 
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
+
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
@@ -7370,6 +7435,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # remove items from Spotify show favorites.
             _logsi.LogVerbose("Removing items(s) from Spotify Show Favorites")
             self.data.spotifyClient.RemoveShowFavorites(ids)
+
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
@@ -7412,6 +7480,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogVerbose("Removing items(s) from Spotify Track Favorites")
             self.data.spotifyClient.RemoveTrackFavorites(ids)
 
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
+
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
@@ -7452,6 +7523,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # save items to Spotify album favorites.
             _logsi.LogVerbose("Saving items(s) to Spotify Album Favorites")
             self.data.spotifyClient.SaveAlbumFavorites(ids)
+
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
@@ -7494,6 +7568,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogVerbose("Saving items(s) to Spotify Audiobook Favorites")
             self.data.spotifyClient.SaveAudiobookFavorites(ids)
 
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
+
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
@@ -7534,6 +7611,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # save items to Spotify episode favorites.
             _logsi.LogVerbose("Saving items(s) to Spotify Episode Favorites")
             self.data.spotifyClient.SaveEpisodeFavorites(ids)
+
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
@@ -7576,6 +7656,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogVerbose("Saving items(s) to Spotify Show Favorites")
             self.data.spotifyClient.SaveShowFavorites(ids)
 
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
+
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
@@ -7616,6 +7699,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # save items to Spotify track favorites.
             _logsi.LogVerbose("Saving items(s) to Spotify Track Favorites")
             self.data.spotifyClient.SaveTrackFavorites(ids)
+
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
@@ -8465,6 +8551,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LogVerbose("Removing items(s) from Spotify Artist Favorites")
             self.data.spotifyClient.UnfollowArtists(ids)
 
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
+
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
         except SpotifyApiError as ex:
@@ -8504,6 +8593,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # unfollow playlist.
             _logsi.LogVerbose("Removing items from Spotify Playlist Favorites")
             self.data.spotifyClient.UnfollowPlaylist(playlistId)
+
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).
@@ -9027,15 +9119,22 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
     def service_volume_set_step(
             self, 
-            level:float=0.10,
+            level:float=None,
+            level_percent:int=None,
             ) -> None:
         """
         Set level used for volume step services.
 
         Args:
             level (float):
-                Level percentage to adjust the volume by.
-                Range is 0.01 to 1.0; Default is 0.10.
+                Level percentage to adjust the volume by, expressed as a float value.  
+                Range is 0.01 to 1.0; Default is None.  
+            level_percent (int):
+                Level percentage to adjust the volume by, expressed as an integer value.  
+                `level` argument is ignored if this argument is specified.  
+                Range is 1 to 100; Default is None.
+
+        Default is 0.10 if neither argument is specified.
 
         A system log warning is issued if level is less than 0.01 or greater than 1.0, 
         and the level is defaulted to 0.10.
@@ -9048,21 +9147,39 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # trace.
             apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
             apiMethodParms.AppendKeyValue("level", level)
+            apiMethodParms.AppendKeyValue("level_percent", level_percent)
             _logsi.LogMethodParmList(SILevel.Verbose, "Volume Set Step Service", apiMethodParms)
+
+            # default value if no argument was specified.
+            stepValue:float = 0.10
             
             # validations.
-            stepValue:float = 0.10
-            if (isinstance(level, int)):
-                level = float(level)
-            if (not isinstance(level, float)):
-                level = 0.10
-            if (isinstance(level, float)):
-                stepValue = level
+            if (level is not None):
+                if (isinstance(level, int)):
+                    level = float(level)
+                if (not isinstance(level, float)):
+                    level = 0.10
+                if (isinstance(level, float)):
+                    stepValue = level
+
+            # if level_percent specified, then use it instead and convert to float value.
+            if (level_percent is not None):
+                if (not isinstance(level_percent, int)):
+                    level_percent = 10
+                if level_percent < 1:
+                    level_percent = 10
+                if level_percent > 100:
+                    level_percent = 10
+                stepValue = float(level_percent / 100)
+                _logsi.LogVerbose("'%s': level_percent value specified; converted percent value %s to float value %s" % (self.name, level_percent, stepValue))
 
             # ensure range is between 0.01 and 1.0.
             if (stepValue < 0.01) or (stepValue > 1.0):
                 _logsi.LogWarning(f'Volume Step level \"{stepValue:.3f}\" was not in the range of 0.01 to 1.0; defaulting to 0.10')
                 stepValue = 0.10
+
+            # trace.
+            _logsi.LogVerbose("'%s': Volume step level: %s" % (self.name, stepValue))
 
             # update ha state.
             self._attr_volume_step = stepValue

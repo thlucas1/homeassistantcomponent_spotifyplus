@@ -1137,6 +1137,27 @@ get_featured_playlists:
       selector:
         boolean:
 
+get_id_from_uri:
+  name: Get Id From Uri
+  description: Gets the Id portion of a Spotify URI value.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    uri:
+      name: URI Value
+      description: "Spotify URI value to parse. Example: `spotify:track:6vc9OTcyd3hyzabCmsdnwE`."
+      example: "spotify:track:6vc9OTcyd3hyzabCmsdnwE"
+      required: true
+      selector:
+        text:
+
 get_image_palette_colors:
   name: Get Image Palette Colors
   description: Get color palette RGB values from the specified image source.  
@@ -4406,12 +4427,21 @@ volume_set_step:
           domain: media_player
     level:
       name: Level
-      description: Level percentage to adjust the volume by. Default is 0.10 (e.g. 10 percent), range is 0.01 to 1.00 (e.g. 1 to 100 percent).
-      example: 0.05
+      description: Level percentage to adjust the volume by, expressed as a floating point number from 0.01 - 1.0.  Default is 0.10 (e.g. 10 percent), range is 0.01 to 1.00.
       required: false
       selector:
         number:
           min: 0.01
           max: 1.00
+          mode: box
+    level_percent:
+      name: Level Percentage
+      description: Level percentage to adjust the volume by. Default is 10, range is 1 to 100 (e.g. percent). level argument is ignored if this argument is specified.
+      example: 5
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 100
           mode: box
 

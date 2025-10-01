@@ -48,6 +48,8 @@
     <Folder Include="config\" />
     <Folder Include="custom_components\" />
     <Folder Include="custom_components\spotifyplus\" />
+    <Folder Include="custom_components\spotifyplus\samplecode\automations\" />
+    <Folder Include="custom_components\spotifyplus\samplecode\" />
     <Folder Include="custom_components\spotifyplus\translations\" />
     <Folder Include="scripts\" />
   </ItemGroup>
@@ -67,6 +69,7 @@
     <Content Include="CHANGELOG.md" />
     <Content Include="config\configuration.yaml" />
     <Content Include="config\smartinspect.cfg" />
+    <Content Include="custom_components\spotifyplus\samplecode\automations\voice_assist_spotifyplus.yaml" />
     <Content Include="custom_components\spotifyplus\manifest.json" />
     <Content Include="custom_components\spotifyplus\services.yaml" />
     <Content Include="custom_components\spotifyplus\strings.json" />
