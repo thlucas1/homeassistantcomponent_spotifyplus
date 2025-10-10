@@ -3,16 +3,6 @@
 from homeassistant.components.application_credentials import AuthorizationServer
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN
-
-# get smartinspect logger reference; create a new session for this module name.
-from smartinspectpython.siauto import SIAuto, SILevel, SISession
-import logging
-_logsi:SISession = SIAuto.Si.GetSession(__name__)
-if (_logsi == None):
-    _logsi = SIAuto.Si.AddSession(__name__, True)
-_logsi.SystemLogger = logging.getLogger(__name__)
-
 
 async def async_get_authorization_server(hass: HomeAssistant) -> AuthorizationServer:
     """
@@ -24,5 +14,4 @@ async def async_get_authorization_server(hass: HomeAssistant) -> AuthorizationSe
         token_url="https://accounts.spotify.com/api/token",
     )
 
-    _logsi.LogObject(SILevel.Verbose, "Component AuthorizationServer object", auth_server)
     return auth_server

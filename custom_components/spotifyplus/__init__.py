@@ -30,14 +30,118 @@ from homeassistant.helpers.issue_registry import IssueSeverity, async_create_iss
 from homeassistant.helpers.typing import ConfigType
 
 from .appmessages import STAppMessages
+from .instancedata_spotifyplus import InstanceDataSpotifyPlus
 from .const import (
     CONF_OPTION_DEVICE_LOGINID,
     CONF_OPTION_DEVICE_PASSWORD,
     CONF_OPTION_DEVICE_USERNAME,
     DOMAIN, 
-    SPOTIFY_SCOPES
+    SPOTIFY_SCOPES,
+    SERVICE_SPOTIFY_ADD_PLAYER_QUEUE_ITEMS,
+    SERVICE_SPOTIFY_CHECK_ALBUM_FAVORITES,
+    SERVICE_SPOTIFY_CHECK_ARTISTS_FOLLOWING,
+    SERVICE_SPOTIFY_CHECK_AUDIOBOOK_FAVORITES,
+    SERVICE_SPOTIFY_CHECK_EPISODE_FAVORITES,
+    SERVICE_SPOTIFY_CHECK_PLAYLIST_FOLLOWERS,
+    SERVICE_SPOTIFY_CHECK_SHOW_FAVORITES,
+    SERVICE_SPOTIFY_CHECK_TRACK_FAVORITES,
+    SERVICE_SPOTIFY_CHECK_USERS_FOLLOWING,
+    SERVICE_SPOTIFY_FOLLOW_ARTISTS,
+    SERVICE_SPOTIFY_FOLLOW_PLAYLIST,
+    SERVICE_SPOTIFY_FOLLOW_USERS,
+    SERVICE_SPOTIFY_GET_ALBUM,
+    SERVICE_SPOTIFY_GET_ALBUM_FAVORITES,
+    SERVICE_SPOTIFY_GET_ALBUM_NEW_RELEASES,
+    SERVICE_SPOTIFY_GET_ALBUM_TRACKS,
+    SERVICE_SPOTIFY_GET_ARTIST,
+    SERVICE_SPOTIFY_GET_ARTIST_ALBUMS,
+    SERVICE_SPOTIFY_GET_ARTIST_INFO,
+    SERVICE_SPOTIFY_GET_ARTIST_RELATED_ARTISTS,
+    SERVICE_SPOTIFY_GET_ARTIST_TOP_TRACKS,
+    SERVICE_SPOTIFY_GET_ARTISTS_FOLLOWED,
+    SERVICE_SPOTIFY_GET_AUDIOBOOK,
+    SERVICE_SPOTIFY_GET_AUDIOBOOK_CHAPTERS,
+    SERVICE_SPOTIFY_GET_AUDIOBOOK_FAVORITES,
+    SERVICE_SPOTIFY_GET_BROWSE_CATEGORYS_LIST,
+    SERVICE_SPOTIFY_GET_CATEGORY_PLAYLISTS,
+    SERVICE_SPOTIFY_GET_CHAPTER,
+    SERVICE_SPOTIFY_GET_COVER_IMAGE_FILE,
+    SERVICE_SPOTIFY_GET_EPISODE,
+    SERVICE_SPOTIFY_GET_EPISODE_FAVORITES,
+    SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS, 
+    SERVICE_SPOTIFY_GET_ID_FROM_URI,
+    SERVICE_SPOTIFY_GET_IMAGE_PALETTE_COLORS, 
+    SERVICE_SPOTIFY_GET_IMAGE_VIBRANT_COLORS,
+    SERVICE_SPOTIFY_GET_PLAYER_DEVICES,
+    SERVICE_SPOTIFY_GET_PLAYER_LAST_PLAYED_INFO,
+    SERVICE_SPOTIFY_GET_PLAYER_NOW_PLAYING,
+    SERVICE_SPOTIFY_GET_PLAYER_PLAYBACK_STATE,
+    SERVICE_SPOTIFY_GET_PLAYER_QUEUE_INFO,
+    SERVICE_SPOTIFY_GET_PLAYER_RECENT_TRACKS,
+    SERVICE_SPOTIFY_GET_PLAYLIST,
+    SERVICE_SPOTIFY_GET_PLAYLIST_COVER_IMAGE,
+    SERVICE_SPOTIFY_GET_PLAYLIST_FAVORITES,
+    SERVICE_SPOTIFY_GET_PLAYLIST_ITEMS, 
+    SERVICE_SPOTIFY_GET_PLAYLISTS_FOR_USER,
+    SERVICE_SPOTIFY_GET_SHOW,
+    SERVICE_SPOTIFY_GET_SHOW_EPISODES,
+    SERVICE_SPOTIFY_GET_SHOW_FAVORITES, 
+    SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICE,
+    SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES,
+    SERVICE_SPOTIFY_GET_TRACK,
+    SERVICE_SPOTIFY_GET_TRACK_AUDIO_FEATURES,
+    SERVICE_SPOTIFY_GET_TRACK_FAVORITES,
+    SERVICE_SPOTIFY_GET_TRACK_RECOMMENDATIONS,
+    SERVICE_SPOTIFY_GET_TRACKS_AUDIO_FEATURES, 
+    SERVICE_SPOTIFY_GET_USERS_TOP_ARTISTS,
+    SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS,
+    SERVICE_SPOTIFY_PLAYER_MEDIA_PAUSE, 
+    SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT, 
+    SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACK_FAVORITES,
+    SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS,
+    SERVICE_SPOTIFY_PLAYER_MEDIA_RESUME,
+    SERVICE_SPOTIFY_PLAYER_MEDIA_SEEK, 
+    SERVICE_SPOTIFY_PLAYER_MEDIA_SKIP_NEXT, 
+    SERVICE_SPOTIFY_PLAYER_MEDIA_SKIP_PREVIOUS,
+    SERVICE_SPOTIFY_PLAYER_SET_REPEAT_MODE,
+    SERVICE_SPOTIFY_PLAYER_SET_SHUFFLE_MODE,
+    SERVICE_SPOTIFY_PLAYER_SET_VOLUME_LEVEL,
+    SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK,
+    SERVICE_SPOTIFY_PLAYLIST_CHANGE,
+    SERVICE_SPOTIFY_PLAYLIST_COVER_IMAGE_ADD,
+    SERVICE_SPOTIFY_PLAYLIST_CREATE,
+    SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD,
+    SERVICE_SPOTIFY_PLAYLIST_ITEMS_CLEAR,
+    SERVICE_SPOTIFY_PLAYLIST_ITEMS_REMOVE, 
+    SERVICE_SPOTIFY_PLAYLIST_ITEMS_REORDER,
+    SERVICE_SPOTIFY_PLAYLIST_ITEMS_REPLACE,
+    SERVICE_SPOTIFY_REMOVE_ALBUM_FAVORITES,
+    SERVICE_SPOTIFY_REMOVE_AUDIOBOOK_FAVORITES,
+    SERVICE_SPOTIFY_REMOVE_EPISODE_FAVORITES, 
+    SERVICE_SPOTIFY_REMOVE_SHOW_FAVORITES,
+    SERVICE_SPOTIFY_REMOVE_TRACK_FAVORITES,
+    SERVICE_SPOTIFY_SAVE_ALBUM_FAVORITES,
+    SERVICE_SPOTIFY_SAVE_AUDIOBOOK_FAVORITES, 
+    SERVICE_SPOTIFY_SAVE_EPISODE_FAVORITES,
+    SERVICE_SPOTIFY_SAVE_SHOW_FAVORITES,
+    SERVICE_SPOTIFY_SAVE_TRACK_FAVORITES, 
+    SERVICE_SPOTIFY_SEARCH_ALL,
+    SERVICE_SPOTIFY_SEARCH_ALBUMS, 
+    SERVICE_SPOTIFY_SEARCH_ARTISTS, 
+    SERVICE_SPOTIFY_SEARCH_AUDIOBOOKS,
+    SERVICE_SPOTIFY_SEARCH_EPISODES, 
+    SERVICE_SPOTIFY_SEARCH_PLAYLISTS,
+    SERVICE_SPOTIFY_SEARCH_SHOWS,
+    SERVICE_SPOTIFY_SEARCH_TRACKS, 
+    SERVICE_SPOTIFY_TRIGGER_SCAN_INTERVAL,
+    SERVICE_SPOTIFY_UNFOLLOW_ARTISTS,
+    SERVICE_SPOTIFY_UNFOLLOW_PLAYLIST,
+    SERVICE_SPOTIFY_UNFOLLOW_USERS,
+    SERVICE_SPOTIFY_ZEROCONF_DEVICE_CONNECT,
+    SERVICE_SPOTIFY_ZEROCONF_DEVICE_DISCONNECT,
+    SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO,
+    SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES, 
 )
-from .instancedata_spotifyplus import InstanceDataSpotifyPlus
 
 __all__ = [
     "DOMAIN",
@@ -83,114 +187,8 @@ CONFIG_SCHEMA = cv.removed(DOMAIN, raise_if_present=False)
 
 
 # -----------------------------------------------------------------------------------
-# Custom Service Schemas.
+# Custom Service schemas.
 # -----------------------------------------------------------------------------------
-SERVICE_SPOTIFY_ADD_PLAYER_QUEUE_ITEMS:str = 'add_player_queue_items'
-SERVICE_SPOTIFY_CHECK_ALBUM_FAVORITES:str = 'check_album_favorites'
-SERVICE_SPOTIFY_CHECK_ARTISTS_FOLLOWING:str = 'check_artists_following'
-SERVICE_SPOTIFY_CHECK_AUDIOBOOK_FAVORITES:str = 'check_audiobook_favorites'
-SERVICE_SPOTIFY_CHECK_EPISODE_FAVORITES:str = 'check_episode_favorites'
-SERVICE_SPOTIFY_CHECK_PLAYLIST_FOLLOWERS:str = 'check_playlist_followers'
-SERVICE_SPOTIFY_CHECK_SHOW_FAVORITES:str = 'check_show_favorites'
-SERVICE_SPOTIFY_CHECK_TRACK_FAVORITES:str = 'check_track_favorites'
-SERVICE_SPOTIFY_CHECK_USERS_FOLLOWING:str = 'check_users_following'
-SERVICE_SPOTIFY_FOLLOW_ARTISTS:str = 'follow_artists'
-SERVICE_SPOTIFY_FOLLOW_PLAYLIST:str = 'follow_playlist'
-SERVICE_SPOTIFY_FOLLOW_USERS:str = 'follow_users'
-SERVICE_SPOTIFY_GET_ALBUM:str = 'get_album'
-SERVICE_SPOTIFY_GET_ALBUM_FAVORITES:str = 'get_album_favorites'
-SERVICE_SPOTIFY_GET_ALBUM_NEW_RELEASES:str = 'get_album_new_releases'
-SERVICE_SPOTIFY_GET_ALBUM_TRACKS:str = 'get_album_tracks'
-SERVICE_SPOTIFY_GET_ARTIST:str = 'get_artist'
-SERVICE_SPOTIFY_GET_ARTIST_ALBUMS:str = 'get_artist_albums'
-SERVICE_SPOTIFY_GET_ARTIST_INFO:str = 'get_artist_info'
-SERVICE_SPOTIFY_GET_ARTIST_RELATED_ARTISTS:str = 'get_artist_related_artists'
-SERVICE_SPOTIFY_GET_ARTIST_TOP_TRACKS:str = 'get_artist_top_tracks'
-SERVICE_SPOTIFY_GET_ARTISTS_FOLLOWED:str = 'get_artists_followed'
-SERVICE_SPOTIFY_GET_AUDIOBOOK:str = 'get_audiobook'
-SERVICE_SPOTIFY_GET_AUDIOBOOK_CHAPTERS:str = 'get_audiobook_chapters'
-SERVICE_SPOTIFY_GET_AUDIOBOOK_FAVORITES:str = 'get_audiobook_favorites'
-SERVICE_SPOTIFY_GET_BROWSE_CATEGORYS_LIST:str = 'get_browse_categorys_list'
-SERVICE_SPOTIFY_GET_CATEGORY_PLAYLISTS:str = 'get_category_playlists'
-SERVICE_SPOTIFY_GET_CHAPTER:str = 'get_chapter'
-SERVICE_SPOTIFY_GET_COVER_IMAGE_FILE:str = 'get_cover_image_file'
-SERVICE_SPOTIFY_GET_EPISODE:str = 'get_episode'
-SERVICE_SPOTIFY_GET_EPISODE_FAVORITES:str = 'get_episode_favorites'
-SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS:str = 'get_featured_playlists'
-SERVICE_SPOTIFY_GET_ID_FROM_URI:str = 'get_id_from_uri'
-SERVICE_SPOTIFY_GET_IMAGE_PALETTE_COLORS:str = 'get_image_palette_colors'
-SERVICE_SPOTIFY_GET_IMAGE_VIBRANT_COLORS:str = 'get_image_vibrant_colors'
-SERVICE_SPOTIFY_GET_PLAYER_DEVICES:str = 'get_player_devices'
-SERVICE_SPOTIFY_GET_PLAYER_LAST_PLAYED_INFO:str = 'get_player_last_played_info'
-SERVICE_SPOTIFY_GET_PLAYER_NOW_PLAYING:str = 'get_player_now_playing'
-SERVICE_SPOTIFY_GET_PLAYER_PLAYBACK_STATE:str = 'get_player_playback_state'
-SERVICE_SPOTIFY_GET_PLAYER_QUEUE_INFO:str = 'get_player_queue_info'
-SERVICE_SPOTIFY_GET_PLAYER_RECENT_TRACKS:str = 'get_player_recent_tracks'
-SERVICE_SPOTIFY_GET_PLAYLIST:str = 'get_playlist'
-SERVICE_SPOTIFY_GET_PLAYLIST_COVER_IMAGE:str = 'get_playlist_cover_image'
-SERVICE_SPOTIFY_GET_PLAYLIST_FAVORITES:str = 'get_playlist_favorites'
-SERVICE_SPOTIFY_GET_PLAYLIST_ITEMS:str = 'get_playlist_items'
-SERVICE_SPOTIFY_GET_PLAYLISTS_FOR_USER:str = 'get_playlists_for_user'
-SERVICE_SPOTIFY_GET_SHOW:str = 'get_show'
-SERVICE_SPOTIFY_GET_SHOW_EPISODES:str = 'get_show_episodes'
-SERVICE_SPOTIFY_GET_SHOW_FAVORITES:str = 'get_show_favorites'
-SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICE:str = 'get_spotify_connect_device'
-SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES:str = 'get_spotify_connect_devices'
-SERVICE_SPOTIFY_GET_TRACK:str = 'get_track'
-SERVICE_SPOTIFY_GET_TRACK_AUDIO_FEATURES:str = 'get_track_audio_features'
-SERVICE_SPOTIFY_GET_TRACK_FAVORITES:str = 'get_track_favorites'
-SERVICE_SPOTIFY_GET_TRACK_RECOMMENDATIONS:str = 'get_track_recommendations'
-SERVICE_SPOTIFY_GET_TRACKS_AUDIO_FEATURES:str = 'get_tracks_audio_features'
-SERVICE_SPOTIFY_GET_USERS_TOP_ARTISTS:str = 'get_users_top_artists'
-SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS:str = 'get_users_top_tracks'
-SERVICE_SPOTIFY_PLAYER_MEDIA_PAUSE:str = 'player_media_pause'
-SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT:str = 'player_media_play_context'
-SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACK_FAVORITES:str = 'player_media_play_track_favorites'
-SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS:str = 'player_media_play_tracks'
-SERVICE_SPOTIFY_PLAYER_MEDIA_RESUME:str = 'player_media_resume'
-SERVICE_SPOTIFY_PLAYER_MEDIA_SEEK:str = 'player_media_seek'
-SERVICE_SPOTIFY_PLAYER_MEDIA_SKIP_NEXT:str = 'player_media_skip_next'
-SERVICE_SPOTIFY_PLAYER_MEDIA_SKIP_PREVIOUS:str = 'player_media_skip_previous'
-SERVICE_SPOTIFY_PLAYER_SET_REPEAT_MODE:str = 'player_set_repeat_mode'
-SERVICE_SPOTIFY_PLAYER_SET_SHUFFLE_MODE:str = 'player_set_shuffle_mode'
-SERVICE_SPOTIFY_PLAYER_SET_VOLUME_LEVEL:str = 'player_set_volume_level'
-SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK:str = 'player_transfer_playback'
-SERVICE_SPOTIFY_PLAYLIST_CHANGE:str = 'playlist_change'
-SERVICE_SPOTIFY_PLAYLIST_COVER_IMAGE_ADD:str = 'playlist_cover_image_add'
-SERVICE_SPOTIFY_PLAYLIST_CREATE:str = 'playlist_create'
-SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD:str = 'playlist_items_add'
-SERVICE_SPOTIFY_PLAYLIST_ITEMS_CLEAR:str = 'playlist_items_clear'
-SERVICE_SPOTIFY_PLAYLIST_ITEMS_REMOVE:str = 'playlist_items_remove'
-SERVICE_SPOTIFY_PLAYLIST_ITEMS_REORDER:str = 'playlist_items_reorder'
-SERVICE_SPOTIFY_PLAYLIST_ITEMS_REPLACE:str = 'playlist_items_replace'
-SERVICE_SPOTIFY_REMOVE_ALBUM_FAVORITES:str = 'remove_album_favorites'
-SERVICE_SPOTIFY_REMOVE_AUDIOBOOK_FAVORITES:str = 'remove_audiobook_favorites'
-SERVICE_SPOTIFY_REMOVE_EPISODE_FAVORITES:str = 'remove_episode_favorites'
-SERVICE_SPOTIFY_REMOVE_SHOW_FAVORITES:str = 'remove_show_favorites'
-SERVICE_SPOTIFY_REMOVE_TRACK_FAVORITES:str = 'remove_track_favorites'
-SERVICE_SPOTIFY_SAVE_ALBUM_FAVORITES:str = 'save_album_favorites'
-SERVICE_SPOTIFY_SAVE_AUDIOBOOK_FAVORITES:str = 'save_audiobook_favorites'
-SERVICE_SPOTIFY_SAVE_EPISODE_FAVORITES:str = 'save_episode_favorites'
-SERVICE_SPOTIFY_SAVE_SHOW_FAVORITES:str = 'save_show_favorites'
-SERVICE_SPOTIFY_SAVE_TRACK_FAVORITES:str = 'save_track_favorites'
-SERVICE_SPOTIFY_SEARCH_ALL:str = 'search_all'
-SERVICE_SPOTIFY_SEARCH_ALBUMS:str = 'search_albums'
-SERVICE_SPOTIFY_SEARCH_ARTISTS:str = 'search_artists'
-SERVICE_SPOTIFY_SEARCH_AUDIOBOOKS:str = 'search_audiobooks'
-SERVICE_SPOTIFY_SEARCH_EPISODES:str = 'search_episodes'
-SERVICE_SPOTIFY_SEARCH_PLAYLISTS:str = 'search_playlists'
-SERVICE_SPOTIFY_SEARCH_SHOWS:str = 'search_shows'
-SERVICE_SPOTIFY_SEARCH_TRACKS:str = 'search_tracks'
-SERVICE_SPOTIFY_TRIGGER_SCAN_INTERVAL:str = 'trigger_scan_interval'
-SERVICE_SPOTIFY_UNFOLLOW_ARTISTS:str = 'unfollow_artists'
-SERVICE_SPOTIFY_UNFOLLOW_PLAYLIST:str = 'unfollow_playlist'
-SERVICE_SPOTIFY_UNFOLLOW_USERS:str = 'unfollow_users'
-SERVICE_SPOTIFY_ZEROCONF_DEVICE_CONNECT:str = 'zeroconf_device_connect'
-SERVICE_SPOTIFY_ZEROCONF_DEVICE_DISCONNECT:str = 'zeroconf_device_disconnect'
-SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO:str = 'zeroconf_device_getinfo'
-SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES:str = 'zeroconf_discover_devices'
-
-
 SERVICE_SPOTIFY_ADD_PLAYER_QUEUE_ITEMS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
@@ -483,11 +481,16 @@ SERVICE_SPOTIFY_GET_IMAGE_PALETTE_COLORS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("image_source"): cv.string,
-        vol.Optional("color_count", default=10): vol.All(vol.Range(min=1,max=256)),
-        vol.Optional("color_quality", default=None): vol.All(vol.Range(min=1,max=10)),
-        vol.Optional("brightness_filter_low", default=None): vol.All(vol.Range(min=0,max=765)),
-        vol.Optional("brightness_filter_high", default=None): vol.All(vol.Range(min=0,max=765)),
-        vol.Optional("hue_distance_filter", default=None): vol.All(vol.Range(min=0,max=360)),
+        # vol.Optional("color_count", default=10): vol.All(vol.Range(min=1,max=256)),
+        # vol.Optional("color_quality", default=None): vol.All(vol.Range(min=1,max=10)),
+        # vol.Optional("brightness_filter_low", default=None): vol.All(vol.Range(min=0,max=765)),
+        # vol.Optional("brightness_filter_high", default=None): vol.All(vol.Range(min=0,max=765)),
+        # vol.Optional("hue_distance_filter", default=None): vol.All(vol.Range(min=0,max=360)),
+        vol.Optional("color_quality", default=10): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=256))),
+        vol.Optional("color_quality", default=None): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=10))),
+        vol.Optional("brightness_filter_low", default=None): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=765))),
+        vol.Optional("brightness_filter_high", default=None): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=765))),
+        vol.Optional("hue_distance_filter", default=None): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=360))),
     }
 )
 
@@ -3978,12 +3981,12 @@ async def async_unload_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
             # dispose of SpotifyClient resources (stops directory task, unwires events, etc).
             if (data is not None):
                 if (data.spotifyClient is not None):
-                    _logsi.LogObject(SILevel.Verbose, "'%s': Component async_unload_entry is disposing the SpotifyClient object" % entry.title, data.spotifyClient)
+                    _logsi.LogVerbose("'%s': Component async_unload_entry is disposing the SpotifyClient object" % entry.title)
                     data.spotifyClient.Dispose()
 
             # a quick check to make sure all update listeners were removed (see method doc notes above).
             if len(entry.update_listeners) > 0:
-                _logsi.LogArray(SILevel.Warning, "'%s': Component configuration update_listener(s) did not get removed before configuration unload (%d items - should be 0 prioer to HA 2026.0 release, but after that release still contains entries)" % (entry.title, len(entry.update_listeners)), entry.update_listeners)
+                _logsi.LogArray(SILevel.Warning, "'%s': Component configuration update_listener(s) did not get removed before configuration unload (%d items - should be 0 prior to HA 2026.0 release, but after that release still contains entries)" % (entry.title, len(entry.update_listeners)), entry.update_listeners)
                 # 2024/06/08 - I commented out the following line to clear the `update_listeners`, as it was causing `ValueError: list.remove(x): x not in list`
                 # exceptions starting with the HA 2024.6.0 release!
                 #entry.update_listeners.clear()

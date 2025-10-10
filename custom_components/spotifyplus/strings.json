@@ -17,7 +17,7 @@
     },
     "abort": {
       "_comment_01": "***** IMPORTANT ***** some of these resources are not referenced in our config_flow, but are still required by OAuth2 processing!",
-      "already_configured": "Service is already configured for \"SpotifyPlus {userinfo}\".  Please modify the existing service entry.",
+      "already_configured": "An existing service entry has already been configured for Spotify user \"{userinfo_name}\", user-id \"{userinfo_id}\".  Please modify the existing service entry, or select a different Application Credential when adding a service.",
       "authorize_url_timeout": "Timeout generating authorize URL.",
       "connection_error": "Could not retrieve Spotify account information. Is the user registered in the Spotify Developer Dashboard?",
       "invalid_access_token": "OAuth access token is invalid for the SpotifyPlus integration; please check the System Log for further information.",

@@ -1,0 +1,77 @@
+# ============================================================================
+# SpotifyPlus integration intent common responses, lists, expand rules, etc.
+#
+# Location: custom_sentences/en/spotifyplus_common_en.yaml
+# Language: en, English
+# ============================================================================
+language: en
+responses:
+
+  # messages for our integration platform ("spotifyplus").
+  spotifyplus:
+
+    # error messages.
+    error_unhandled: "An unexpected error occurred"
+
+    # player related messages.
+    player_not_playing_media: "Media player \"{{ slots.target_player.text }}\" is currently not playing media."
+    player_not_matched: "SpotifyPlus media player could not be resolved by \"{{ slots.target_player.text }}\"."
+    player_not_matched_area: "SpotifyPlus media player could not be resolved for the \"{{ slots.area.text }}\" area."
+    player_not_spotifyplus: "Resolved media player \"{{ slots.target_player.text }}\" is not a SpotifyPlus media player."
+    player_not_exposed_to_voice: "Media player \"{{ slots.target_player.text }}\" has not been exposed to Voice Assistant."
+    player_features_not_supported: "Media player \"{{ slots.name.text }}\" does not support required features for this request."
+    
+
+# ============================================================================
+# SpotifyPlus common lists
+# ============================================================================
+lists:
+
+  # player_name:
+  #   values:
+  #     - in: xxx_todd
+  #       out: media_player.spotifyplus_todd_l
+  #       synonyms:
+  #         - "xxx_premium"
+  #         - "xxx_spotify premium"
+
+  spotifyplus_device_name:
+    values:
+      - in: "(office|living room)"
+        out: Bose-ST10-1
+      - in: Kitchen
+        out: Bose-ST10-2
+
+
+# ============================================================================
+# SpotifyPlus common expansion rules
+# ============================================================================
+expansion_rules:
+
+  on_spotifyplus_player_name: "(on|for) [<the>] ({name} player|player {name})"      # e.g. "on the Spotify Premium player", "on player Spotify Premium"
+  in_spotifyplus_player_area: "(in|inn) [<the>] ({area}|{area} area|area {area})"   # e.g. "in the Office", "in the Office area", "in area Office"
+
+  #spotifyplus_in_area: "in [<the>] {area}"    # e.g. "in office", "in the office"
+  # the: "(the|my|our)"
+  # area: "[<the>] {area}"
+  # floor: "[<the>] {floor} [floor]"
+  # area_floor: "(<area>|<floor>)"
+  # in_area_floor: "[<in>] <area_floor>"
+  # the: "(the|my|our)"
+  # name: "[<the>] {name}"
+  # area: "[<the>] {area}"
+  # in_area_floor: "[<in>] <area_floor>"
+  # in: "(in|on|at|of|across|around|throughout)"
+
+# ============================================================================
+# SpotifyPlus common skip words
+# ============================================================================
+skip_words:
+  - "please"
+  - "can you"
+  - "could you"
+  - "would you"
+  - "for me"
+  - "i'd like"
+  - "i'd like to"
+  - "i want"

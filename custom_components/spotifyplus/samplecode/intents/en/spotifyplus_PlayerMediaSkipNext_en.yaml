@@ -1,0 +1,113 @@
+# ============================================================================
+# SpotifyPlus integration intent custom sentence and response definitions.
+#
+# Language: en, English
+# Intent:   SpotifyPlusPlayerMediaSkipNext
+# Location: custom_sentences/en/spotifyplus_PlayerMediaSkipNext_en.yaml
+# ============================================================================
+language: en
+intents:
+
+  SpotifyPlusPlayerMediaSkipNext:
+
+    data:
+
+      - sentences:
+
+          - "spotify [play] [<the>] (next|skip|skip (to|2) [<the>] next) (track|song) <on_spotifyplus_player_name>"
+
+            # This sentence is recognized when a player name is provided in the spoken 
+            # command (e.g. "on player Spotify Premium", "on Todds player", etc)
+
+            # __Example Phrases - By Player Name__  
+            # - "spotify next track for player spotify premium"
+            # - "spotify next track on player spotify premium"
+            # - "spotify play next track for player spotify premium"
+            # - "spotify play next track for the player spotify premium"
+            # - "spotify play next track for the spotify premium player"
+            # - "spotify play next track for the spotifyplus todd l player"
+            # - "spotify play next track for the player spotifyplus todd l"
+            # - "spotify play the next track for the player spotifyplus todd l"
+            # - "spotify play the next track on the spotifyplus todd l player"
+            # - "spotify skip track for the spotify premium player"
+            # - "spotify skip track on spotify premium player"
+            # - "spotify skip track on player spotify premium"
+            # - "spotify skip to next track on player spotify premium"
+
+        slots:
+
+          name: ""            # requires a value since no player name was specified.
+          device_name: "*"    # use default device id defined in spotifyplus configuration options.
+          delay: 0.50         # delay after command to give spotify time to process.
+
+        response: default_by_name
+
+      - sentences:
+
+          - "spotify ([play] [<the>] next|skip|skip (to|2) [<the>] next) (track|song)"
+
+            # This sentence is recognized when a player name is NOT provided in the spoken command.  
+            # In this case, the first active SpotifyPlus media player is used.
+
+            # __Example Phrases - No Player Name__  
+            # - "spotify next track"
+            # - "spotify next song"
+            # - "spotify play next track"
+            # - "spotify play next song"
+            # - "spotify play the next track"
+            # - "spotify play the next song"
+            # - "spotify skip to next track"
+            # - "spotify skip to next song"
+            # - "spotify skip to the next song"
+            # - "spotify skip track"
+            # - "spotify skip song"
+
+        slots:
+
+          name: "Spotify Premium"   # requires a value since no player name was specified.
+          device_name: "*"          # use default device id defined in spotifyplus configuration options.
+          delay: 0.50               # delay after command to give spotify time to process.
+
+        response: default_no_player
+
+      - sentences:
+
+          - "spotify [play] [<the>] (next|skip|skip (to|2) [<the>] next) (track|song) <in_spotifyplus_player_area>"
+
+            # This sentence is recognized when an area is provided in the spoken command (e.g. "in the Living Room", 
+            # "in the Living Room area", "in area Living Room", etc).
+
+            # __Example Phrases - By Player Area__  
+            # - "spotify next track in the Office area"
+            # - "spotify next track in the Office"
+            # - "spotify play next track in the Office"
+            # - "spotify play next track in the Living Room"
+            # - "spotify play next track in the Living Room area"
+            # - "spotify skip track in the Living Room"
+            # - "spotify skip track in the Living Room area"
+            # - "spotify skip song in the Living Room"
+            # - "spotify skip to the next track in the Office"
+
+        slots:
+
+          area: ""            # requires a value to be assigned in case it could not be resolved.
+          name: ""            # requires a value since no player name was specified.
+          device_name: "*"    # use default device id defined in spotifyplus configuration options.
+          delay: 0.50         # delay after command to give spotify time to process.
+
+        response: default_by_area
+
+
+# ============================================================================
+# Custom response definitions for THIS intent.
+# Note - Shared responses for all intents are stored in the Common file.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusPlayerMediaSkipNext:
+
+      default: "Okay, Spotify skipped to next track."
+      default_by_name: "Okay, Spotify skipped to next track on named player \"{{ slots.target_player.text }}\"."
+      default_by_area: "Okay, Spotify skipped to next track in the \"{{ slots.target_player.text }}\" area."
+      default_no_player: "Okay, Spotify skipped to next track on default player \"{{ slots.target_player.text }}\"."

@@ -34,7 +34,13 @@
     <Compile Include="custom_components\spotifyplus\config_flow.py" />
     <Compile Include="custom_components\spotifyplus\const.py" />
     <Compile Include="custom_components\spotifyplus\instancedata_spotifyplus.py" />
+    <Compile Include="custom_components\spotifyplus\intent.py" />
+    <Compile Include="custom_components\spotifyplus\intent_handlers\spotifyplusintenthandler.py" />
+    <Compile Include="custom_components\spotifyplus\intent_handlers\spotifyplusplayermediaskipnext_handler.py" />
+    <Compile Include="custom_components\spotifyplus\intent_handlers\spotifyplusplayermediaskipprevious_handler.py" />
+    <Compile Include="custom_components\spotifyplus\intent_handlers\__init__.py" />
     <Compile Include="custom_components\spotifyplus\media_player.py" />
+    <Compile Include="custom_components\spotifyplus\samplecode\intents\en\spotifyplus_PlayerMediaSkipPrevious_en.yaml" />
     <Compile Include="custom_components\spotifyplus\search_media.py" />
     <Compile Include="custom_components\spotifyplus\system_health.py" />
     <Compile Include="custom_components\spotifyplus\utils.py" />
@@ -48,8 +54,11 @@
     <Folder Include="config\" />
     <Folder Include="custom_components\" />
     <Folder Include="custom_components\spotifyplus\" />
+    <Folder Include="custom_components\spotifyplus\intent_handlers\" />
     <Folder Include="custom_components\spotifyplus\samplecode\automations\" />
     <Folder Include="custom_components\spotifyplus\samplecode\" />
+    <Folder Include="custom_components\spotifyplus\samplecode\intents\" />
+    <Folder Include="custom_components\spotifyplus\samplecode\intents\en\" />
     <Folder Include="custom_components\spotifyplus\translations\" />
     <Folder Include="scripts\" />
   </ItemGroup>
@@ -71,6 +80,8 @@
     <Content Include="config\smartinspect.cfg" />
     <Content Include="custom_components\spotifyplus\samplecode\automations\voice_assist_spotifyplus.yaml" />
     <Content Include="custom_components\spotifyplus\manifest.json" />
+    <Content Include="custom_components\spotifyplus\samplecode\intents\en\spotifyplus_PlayerMediaSkipNext_en.yaml" />
+    <Content Include="custom_components\spotifyplus\samplecode\intents\en\spotifyplus_common_en.yaml" />
     <Content Include="custom_components\spotifyplus\services.yaml" />
     <Content Include="custom_components\spotifyplus\strings.json" />
     <Content Include="custom_components\spotifyplus\translations\en.json" />

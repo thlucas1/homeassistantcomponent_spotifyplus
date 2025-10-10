@@ -1,12 +1,3 @@
-from copy import deepcopy
-
-# # get smartinspect logger reference; create a new session for this module name.
-# from smartinspectpython.siauto import SIAuto, SILevel, SISession, SIColors
-# import logging
-# _logsi:SISession = SIAuto.Si.GetSession(__name__)
-# if (_logsi == None):
-#     _logsi = SIAuto.Si.AddSession(__name__, True)
-# _logsi.SystemLogger = logging.getLogger(__name__)
 
 def passwordMaskDictionary(inputObj:dict) -> dict:
     """

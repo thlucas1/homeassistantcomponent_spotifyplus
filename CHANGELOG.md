@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.171 ] - 2025/10/09
+
+  * Added voice assist intents: `SpotifyPlusPlayerMediaSkipNext`, `SpotifyPlusPlayerMediaSkipPrevious`.  Check out the [wiki docs](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Voice-Assist-Support#intent-index) for more information.
+  * Updated `config_flow` logic to prevent the `No application_credentials platform for 'spotifyplus'` error dialog.  This was introduced with release v1.0.164, but only affects a limited number of users.
+
 ###### [ 1.0.170 ] - 2025/10/01
 
   * Updated sample code `voice_assist_spotifyplus.yaml`.
