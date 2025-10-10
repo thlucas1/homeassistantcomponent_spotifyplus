@@ -1568,8 +1568,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.EnterMethod(SILevel.Debug)
             _logsi.LogVerbose("'%s': MediaPlayer is verifying SpotifyPlus '%s' integration script configuration" % (self.name, title))
 
+            # TEST TODO uncomment as needed, as this logs a LOT of information!
             # if SpotifyPlus integration is NOT installed, then log the services that ARE installed in case we need it.
-            # TODO uncomment as needed, as this logs a LOT of information!
             #serviceAll = self.hass.services.async_services()
             #_logsi.LogDictionary(SILevel.Verbose, "'%s': MediaPlayer ALL services list" % self.name, serviceAll, prettyPrint=True)
 

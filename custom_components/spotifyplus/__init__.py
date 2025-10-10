@@ -153,6 +153,8 @@ TOKEN_STATUS:str = 'status'
 TOKEN_STATUS_REFRESH_EVENT:str = 'TokenRefreshEvent'
 TOKENUPDATER_LOCK = threading.Lock()   # syncronous lock to sync access to token updates.
 
+REAUTH_TEST_FIRST_TIME:bool = None    # used when testing app creds reauth processing
+
 try:
 
     from smartinspectpython.siauto import SIAuto, SILevel, SISession, SIConfigurationTimer, SIColors
@@ -3867,6 +3869,19 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
         _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry spotifyClient object (with AuthToken)" % entry.title, spotifyClient)
         _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry Spotify UserProfile object" % entry.title, spotifyClient.UserProfile)
 
+        # ensure authentication token scopes have not changed.
+        if not set(session.token["scope"].split(" ")).issuperset(SPOTIFY_SCOPES):
+            _logsi.LogWarning("'%s': Spotify authentication token scopes have changed; user needs to re-authenticate their application credentials" % (entry.title), colorValue=SIColors.Tan)
+            raise ConfigEntryAuthFailed
+
+        # TEST TODO - force application credentials to re-authenticate for the specified test account.
+        # leave the following comments in here, in case you need to application credential re-authorization logic.
+        # global REAUTH_TEST_FIRST_TIME
+        # if (entry.title.lower().find("free") > -1) and (REAUTH_TEST_FIRST_TIME is None):
+        #     _logsi.LogWarning("'%s': TEST TODO - Testing app creds reauth processing" % (entry.title), colorValue=SIColors.Red)
+        #     REAUTH_TEST_FIRST_TIME = True
+        #     entry.async_start_reauth(hass)  # start reauth flow.
+
         # dump initial Spotify Connect device list (for HA debug log).
         scDevices:SpotifyConnectDevices = spotifyClient.SpotifyConnectDirectory.GetDevices()
         scDevice:SpotifyConnectDevice
@@ -4159,7 +4174,6 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
             # formulate the new unique_id value.
             new_unique_id = entry.unique_id + "_" + DOMAIN
-            #new_unique_id = entry.data.get("id", entry.unique_id) + "_" + DOMAIN   # TEST TODO
             _logsi.LogVerbose("'%s': Migrating config entry unique_id from \"%s\" to \"%s\"" % (entry.title, entry.unique_id, new_unique_id), colorValue=SIColors.DarkBlue)
 
             # if you also need to adjust data.

@@ -246,6 +246,12 @@ class SpotifyPlusConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, 
 
         Returns:
             A `ConfigFlowResult` object that indicates the flow result.
+
+        Refer to the following developer guide on how to handle expired application credentials:
+        - https://developers.home-assistant.io/docs/integration_setup_failures/#handling-expired-credentials
+
+        ReAuth processing can be tested by calling the `entry.async_start_reauth(hass)` method
+        from the __init__.py `async_setup_entry` logic (after session token is established).
         """
         try:
 
@@ -286,17 +292,35 @@ class SpotifyPlusConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, 
             _logsi.EnterMethod(SILevel.Debug, colorValue=SIColors.Tan)
             _logsi.LogDictionary(SILevel.Verbose, "ConfigFlow is confirming the OAuth2 Re-Authentication flow - user input parameters", user_input, prettyPrint=True, colorValue=SIColors.Tan)
 
+            reauth_account_name = "unknown"
+            reauth_account_id = "unknown"
+
             # get reauth config entry linked to the current context.
             reauth_entry = self._get_reauth_entry()
-            if reauth_entry is not None:
-                _logsi.LogDictionary(SILevel.Verbose, "reauth_entry Data", reauth_entry.data, prettyPrint=True, colorValue=SIColors.Tan)
+            if (reauth_entry is not None):
+
+                # trace.
+                if (_logsi.IsOn(SILevel.Verbose)):
+                    _logsi.LogObject(SILevel.Verbose, "ConfigFlow OAuth2 Re-Authentication flow - reauth_entry object", reauth_entry, colorValue=SIColors.Tan)
+                    _logsi.LogDictionary(SILevel.Verbose, "ConfigFlow OAuth2 Re-Authentication flow - reauth_entry data", reauth_entry.data, prettyPrint=True, colorValue=SIColors.Tan)
+
+                # default reauth account information details.
+                # note that there could be instances where the "id" and "name" attributes 
+                # do not exist in the reauth entry data; in this case, we will use the
+                # unique_id and the title instead.
+                reauth_account_id = reauth_entry.data.get(CONF_ID, None) or reauth_entry.unique_id.replace("_" + DOMAIN, "")  # drop the "_spotifyplus" suffix
+                reauth_account_name = reauth_entry.data.get(CONF_NAME, None) or reauth_entry.title
 
             # if user has not authenticated then prompt the user to authenticate.
             if user_input is None:
-                _logsi.LogVerbose("ConfigFlow is prompting user to authenticate for account id ('%s')" % reauth_entry.data[CONF_ID], colorValue=SIColors.Tan)
+
+                _logsi.LogVerbose("ConfigFlow is prompting user to authenticate for account name \"%s\", id \"%s\"" % (reauth_account_name, reauth_account_id), colorValue=SIColors.Tan)
                 return self.async_show_form(
                     step_id="reauth_confirm",
-                    description_placeholders={"account": reauth_entry.data[CONF_ID]},
+                    description_placeholders={
+                        "account_id": reauth_account_id,
+                        "account_name": reauth_account_name
+                        },
                     errors={},
                 )
 
@@ -361,7 +385,7 @@ class SpotifyPlusOptionsFlow(OptionsFlow):
 
             # load config entry options values.
             self._Options = dict(entry.options)
-            
+
         except Exception as ex:
             
             # trace.

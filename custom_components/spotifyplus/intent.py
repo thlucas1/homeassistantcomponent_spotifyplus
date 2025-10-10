@@ -88,7 +88,7 @@ async def async_setup_intents(hass: HomeAssistant) -> None:
 #             # is this a spotifyplus media player?
 #             if (entityObj.domain == DOMAIN_MEDIA_PLAYER) and (entityObj.platform == PLATFORM_SPOTIFYPLUS) and (entityObj.disabled == False):
 
-#                 #_logsi.LogObject(SILevel.Verbose, "TODO REMOVEME Entity object: %s" % entityObj.entity_id, entityObj)
+#                 #_logsi.LogObject(SILevel.Verbose, "Entity object: %s" % entityObj.entity_id, entityObj)
 
 #                 entity_id = entityObj.entity_id
 #                 friendly_name = entityObj.name or entityObj.original_name

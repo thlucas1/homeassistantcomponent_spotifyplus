@@ -12,7 +12,7 @@
       },
       "reauth_confirm": {
         "title": "SpotifyPlus Re-Authentication Required",
-        "description": "The SpotifyPlus integration needs to re-authenticate with Spotify for account: {account}"
+        "description": "The SpotifyPlus integration needs to re-authenticate with Spotify for user name \"{account_name}\", user-id \"{account_id}\"."
       }
     },
     "abort": {

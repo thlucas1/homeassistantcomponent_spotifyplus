@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.172 ] - 2025/10/10
+
+  * Updated `config_flow` method `async_step_reauth_confirm` to load the account information correctly for the `reauth_confirm` dialog.  It seems the "id", "name", and "description" attributes are no longer stored in the core configuration entry `data` area.  For older entries, the attributes are still present; for newer entries they are not!  This was causing application credential reauth processing to fail, as it was using `data["id"]` syntax to get the Spotify account id (to display as part of the reauth dialog) and the attribute was not present.
+
 ###### [ 1.0.171 ] - 2025/10/09
 
   * Added voice assist intents: `SpotifyPlusPlayerMediaSkipNext`, `SpotifyPlusPlayerMediaSkipPrevious`.  Check out the [wiki docs](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Voice-Assist-Support#intent-index) for more information.
