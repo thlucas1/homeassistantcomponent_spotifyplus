@@ -1,4 +1,3 @@
-
 import voluptuous as vol
 
 from homeassistant.components.media_player import MediaPlayerEntityFeature
@@ -21,7 +20,6 @@ from smartinspectpython.siauto import SILevel, SIColors
 from ..appmessages import STAppMessages
 from ..const import (
     CONF_AREA,
-    CONF_DEVICE_NAME,
     CONF_FLOOR,
     CONF_NAME,
     CONF_VALUE,
@@ -68,7 +66,6 @@ class SpotifyPlusPlayerMediaSkipPrevious_Handler(SpotifyPlusIntentHandler):
             vol.Optional("preferred_floor_id"): cv.string,
 
             # slots for other service arguments.
-            vol.Optional(CONF_DEVICE_NAME, description="Spotify Connect device name or id"): vol.Any(None, cv.string),
             vol.Optional("delay", default=0.50): vol.Any(None, vol.All(vol.Coerce(float), vol.Range(min=0, max=10.0)))
         }
 
@@ -79,7 +76,7 @@ class SpotifyPlusPlayerMediaSkipPrevious_Handler(SpotifyPlusIntentHandler):
         Handles the intent.
 
         Args:
-            intentObj (?):
+            intentObj (Intent):
                 Intent object.
         """
         playerEntityState:State = None
@@ -112,7 +109,6 @@ class SpotifyPlusPlayerMediaSkipPrevious_Handler(SpotifyPlusIntentHandler):
                 return intentResponse
             
             # get optional arguments (if provided).
-            device_name = slots.get(CONF_DEVICE_NAME, {}).get(CONF_VALUE, None)
             delay = slots.get("delay", {}).get(CONF_VALUE, None)
 
             # set service name and build parameters.
@@ -120,7 +116,7 @@ class SpotifyPlusPlayerMediaSkipPrevious_Handler(SpotifyPlusIntentHandler):
             svcData:dict = \
             {
                 "entity_id": playerEntityState.entity_id,
-                "device_id": device_name,
+                "device_id": "",  # always use current device for this service call.
                 "delay": delay
             }
 

@@ -6,6 +6,13 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.173 ] - 2025/10/12
+
+  * Added voice assist intents: `SpotifyPlusPlayerMediaPause`, `SpotifyPlusPlayerMediaResume`, `SpotifyPlusPlayerMediaSkipStart`, `SpotifyPlusPlayerSetRepeatMode`, `SpotifyPlusPlayerSetShuffleMode`, `SpotifyPlusVolumeSetStep`.  Check out the [wiki docs](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Voice-Assist-Support#intent-index) for more information.
+  * Updated voice assist intents: `SpotifyPlusPlayerMediaSkipNext`, `SpotifyPlusPlayerMediaSkipPrevious` - removed the `device_name` slot, since it cannot transfer playback to devices that are not in the player device list (e.g. Google Cast, Sonos, etc).
+  * Updated requirement `colorlog==6.7.0` to `colorlog>=6.7.0` to avoid conflicts with other custom integrations.
+  * Updated requirement `ruff==0.1.3` to `ruff>=0.1.3` to avoid conflicts with other custom integrations.
+
 ###### [ 1.0.172 ] - 2025/10/10
 
   * Updated `config_flow` method `async_step_reauth_confirm` to load the account information correctly for the `reauth_confirm` dialog.  It seems the "id", "name", and "description" attributes are no longer stored in the core configuration entry `data` area.  For older entries, the attributes are still present; for newer entries they are not!  This was causing application credential reauth processing to fail, as it was using `data["id"]` syntax to get the Spotify account id (to display as part of the reauth dialog) and the attribute was not present.

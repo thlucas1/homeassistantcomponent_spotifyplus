@@ -25,18 +25,18 @@ from ..const import (
     CONF_VALUE,
     DOMAIN,
     PLATFORM_SPOTIFYPLUS,
-    INTENT_PLAYER_MEDIA_SKIP_NEXT,
+    INTENT_PLAYER_SET_REPEAT_MODE,
     RESPONSE_ERROR_UNHANDLED,
     RESPONSE_PLAYER_NOT_PLAYING_MEDIA,
-    SERVICE_SPOTIFY_PLAYER_MEDIA_SKIP_NEXT,
+    SERVICE_SPOTIFY_PLAYER_SET_REPEAT_MODE,
 )
 
 from .spotifyplusintenthandler import SpotifyPlusIntentHandler
 
 
-class SpotifyPlusPlayerMediaSkipNext_Handler(SpotifyPlusIntentHandler):
+class SpotifyPlusPlayerSetRepeatMode_Handler(SpotifyPlusIntentHandler):
     """
-    Handles intents for SpotifyPlusPlayerMediaSkipNext.
+    Handles intents for SpotifyPlusPlayerSetRepeatMode.
     """
     def __init__(self) -> None:
         """
@@ -46,8 +46,8 @@ class SpotifyPlusPlayerMediaSkipNext_Handler(SpotifyPlusIntentHandler):
         super().__init__()
 
         # set intent handler basics.
-        self.description = "Skips to next track in the user's queue for the specified SpotifyPlus media player."
-        self.intent_type = INTENT_PLAYER_MEDIA_SKIP_NEXT
+        self.description = "Set repeat mode for the specified SpotifyPlus media player."
+        self.intent_type = INTENT_PLAYER_SET_REPEAT_MODE
         self.platforms = {PLATFORM_SPOTIFYPLUS}
 
 
@@ -66,7 +66,8 @@ class SpotifyPlusPlayerMediaSkipNext_Handler(SpotifyPlusIntentHandler):
             vol.Optional("preferred_floor_id"): cv.string,
 
             # slots for other service arguments.
-            vol.Optional("delay", default=0.50): vol.Any(None, vol.All(vol.Coerce(float), vol.Range(min=0, max=10.0)))
+            vol.Optional("delay", default=0.50): vol.Any(None, vol.All(vol.Coerce(float), vol.Range(min=0, max=10.0))),
+            vol.Optional("player_repeat_mode"): cv.string,
         }
 
 
@@ -98,7 +99,7 @@ class SpotifyPlusPlayerMediaSkipNext_Handler(SpotifyPlusIntentHandler):
                 intentObj,
                 intentResponse,
                 slots=intentObj.slots,
-                desiredFeatures=MediaPlayerEntityFeature.NEXT_TRACK | MediaPlayerEntityFeature.PLAY_MEDIA,
+                desiredFeatures=MediaPlayerEntityFeature.SEEK | MediaPlayerEntityFeature.PLAY_MEDIA,
                 desiredStates=[STATE_PLAYING, STATE_PAUSED],
                 desiredStateResponseKey=RESPONSE_PLAYER_NOT_PLAYING_MEDIA,
             )
@@ -110,12 +111,14 @@ class SpotifyPlusPlayerMediaSkipNext_Handler(SpotifyPlusIntentHandler):
             
             # get optional arguments (if provided).
             delay = slots.get("delay", {}).get(CONF_VALUE, None)
+            player_repeat_mode = slots.get("player_repeat_mode", {}).get(CONF_VALUE, "on")
 
             # set service name and build parameters.
-            svcName:str = SERVICE_SPOTIFY_PLAYER_MEDIA_SKIP_NEXT
+            svcName:str = SERVICE_SPOTIFY_PLAYER_SET_REPEAT_MODE
             svcData:dict = \
             {
                 "entity_id": playerEntityState.entity_id,
+                "state": player_repeat_mode,
                 "device_id": "",  # always use current device for this service call.
                 "delay": delay
             }

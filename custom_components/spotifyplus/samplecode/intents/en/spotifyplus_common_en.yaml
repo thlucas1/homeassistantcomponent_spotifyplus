@@ -35,12 +35,47 @@ lists:
   #         - "xxx_premium"
   #         - "xxx_spotify premium"
 
-  spotifyplus_device_name:
+  device_name:
     values:
       - in: "(office|living room)"
         out: Bose-ST10-1
       - in: Kitchen
         out: Bose-ST10-2
+
+  player_repeat_mode:
+    values:
+      - in: "(on|[single|1|one] track|)"
+        out: "track"
+      - in: "(context|all|all tracks|list)"
+        out: "context"
+      - in: "(off|disable[d])"
+        out: "off"
+
+  player_shuffle_mode:
+    values:
+      - in: "(on|true|enable[d])"
+        out: "on"
+      - in: "(off|false|disable[d])"
+        out: "off"
+
+  player_volume_level:
+    values:
+      - in: (max|maximum|highest)
+        out: 100
+      - in: (min|minimum|lowest)
+        out: 1
+
+  player_volume_level_pct:
+    range:
+      type: "percentage"
+      from: 0
+      to: 100
+
+  player_volume_step_pct:
+    range:
+      type: "percentage"
+      from: 1
+      to: 100
 
 
 # ============================================================================
@@ -48,8 +83,9 @@ lists:
 # ============================================================================
 expansion_rules:
 
-  on_spotifyplus_player_name: "(on|for) [<the>] ({name} player|player {name})"      # e.g. "on the Spotify Premium player", "on player Spotify Premium"
-  in_spotifyplus_player_area: "(in|inn) [<the>] ({area}|{area} area|area {area})"   # e.g. "in the Office", "in the Office area", "in area Office"
+  in_spotifyplus_player_area: "(in|inn) [<the>] ({area}|{area} area|area {area})"       # e.g. "in the Office", "in the Office area", "in area Office"
+  on_spotifyplus_player_name: "(on|for) [<the>] ({name} player|player {name})"          # e.g. "on the Spotify Premium player", "on player Spotify Premium"
+  on_spotifyplus_device_name: "(on|for) [<the>] ({device_name} device|device {device_name})"   # e.g. "on the Office device", "on device Home Receive"
 
   #spotifyplus_in_area: "in [<the>] {area}"    # e.g. "in office", "in the office"
   # the: "(the|my|our)"

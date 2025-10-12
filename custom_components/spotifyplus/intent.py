@@ -38,14 +38,15 @@ async def async_setup_intents(hass: HomeAssistant) -> None:
         # get slot list of spotifyplus media player names and any defined aliases.
         #player_name_list = await async_get_slot_list_player_name(hass)
            
-        # register all intents this component provides, and their corresponding schemas.
-        intentObj:IntentHandler = SpotifyPlusPlayerMediaSkipNext_Handler()
-        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_REGISTER % intentObj.intent_type, intentObj, colorValue=SIColors.Khaki)
-        intent.async_register(hass, intentObj)
-
-        intentObj:IntentHandler = SpotifyPlusPlayerMediaSkipPrevious_Handler()
-        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_REGISTER % intentObj.intent_type, intentObj, colorValue=SIColors.Khaki)
-        intent.async_register(hass, intentObj)
+        # register all intents this component provides.
+        register_intent_handler(hass, SpotifyPlusPlayerMediaPause_Handler())
+        register_intent_handler(hass, SpotifyPlusPlayerMediaResume_Handler())
+        register_intent_handler(hass, SpotifyPlusPlayerMediaSkipNext_Handler())
+        register_intent_handler(hass, SpotifyPlusPlayerMediaSkipPrevious_Handler())
+        register_intent_handler(hass, SpotifyPlusPlayerMediaSkipStart_Handler())
+        register_intent_handler(hass, SpotifyPlusPlayerSetRepeatMode_Handler())
+        register_intent_handler(hass, SpotifyPlusPlayerSetShuffleMode_Handler())
+        register_intent_handler(hass, SpotifyPlusVolumeSetStep_Handler())
 
         # indicate success.
         _logsi.LogVerbose("Component async_setup_intents complete", colorValue=SIColors.Khaki)
@@ -61,6 +62,18 @@ async def async_setup_intents(hass: HomeAssistant) -> None:
 
         # trace.
         _logsi.LeaveMethod(SILevel.Debug, colorValue=SIColors.Khaki)
+
+
+def register_intent_handler(
+    hass: HomeAssistant,
+    intentObj:IntentHandler,
+    ) -> None:
+    """
+    Registers a voice assist intent, and trace logs the object.
+    """
+    # register single intent this component provides.
+    _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_REGISTER % intentObj.intent_type, intentObj, colorValue=SIColors.Khaki)
+    intent.async_register(hass, intentObj)
 
 
 # async def async_get_slot_list_player_name(

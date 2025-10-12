@@ -141,6 +141,9 @@ from .const import (
     SERVICE_SPOTIFY_ZEROCONF_DEVICE_DISCONNECT,
     SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO,
     SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES, 
+    SERVICE_VOLUME_SET_STEP,
+    SERVICE_LIST_APPLICATION_CREDENTIAL_MAPPPINGS,
+    SERVICE_TEST_TOKEN_EXPIRE,
 )
 
 __all__ = [
@@ -1199,8 +1202,6 @@ SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES_SCHEMA = vol.Schema(
 # -----------------------------------------------------------------------------------
 # Custom Service Schemas - MediaPlayerEntity enhancements.
 # -----------------------------------------------------------------------------------
-SERVICE_VOLUME_SET_STEP:str = 'volume_set_step'
-
 SERVICE_VOLUME_SET_STEP_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
@@ -1213,9 +1214,6 @@ SERVICE_VOLUME_SET_STEP_SCHEMA = vol.Schema(
 # -----------------------------------------------------------------------------------
 # Custom Service Schemas - non-Spotify Web API related.
 # -----------------------------------------------------------------------------------
-SERVICE_LIST_APPLICATION_CREDENTIAL_MAPPPINGS:str = 'list_application_credential_mappings'
-SERVICE_TEST_TOKEN_EXPIRE:str = 'test_token_expire'
-
 SERVICE_LIST_APPLICATION_CREDENTIAL_MAPPPINGS_SCHEMA = vol.Schema(
     {
         vol.Optional("filter_domain"): cv.string,

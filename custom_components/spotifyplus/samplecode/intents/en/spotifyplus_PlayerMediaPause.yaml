@@ -2,36 +2,35 @@
 # SpotifyPlus integration intent custom sentence and response definitions.
 #
 # Language: en, English
-# Intent:   SpotifyPlusPlayerMediaSkipNext
-# Location: custom_sentences/en/spotifyplus_PlayerMediaSkipNext_en.yaml
+# Intent:   SpotifyPlusPlayerMediaPause
+# Location: custom_sentences/en/spotifyplus_PlayerMediaPause_en.yaml
 # ============================================================================
 language: en
 intents:
 
-  SpotifyPlusPlayerMediaSkipNext:
+  SpotifyPlusPlayerMediaPause:
 
     data:
 
       - sentences:
 
-          - "spotify ([play] [<the>] next|skip|skip (to|2) [<the>] next) (track|song)"
+          - "spotify (pause|stop) [[<the>] (track|song)]"
 
             # Base sentence phrases for this intent.
             # This sentence is recognized when a name / area is NOT provided in the spoken command.  
             # In this case, the first active SpotifyPlus media player is used.
 
-            # __Example Phrases - Default Player__  
-            # - "spotify next track"
-            # - "spotify next song"
-            # - "spotify play next track"
-            # - "spotify play next song"
-            # - "spotify play the next track"
-            # - "spotify play the next song"
-            # - "spotify skip to next track"
-            # - "spotify skip to next song"
-            # - "spotify skip to the next song"
-            # - "spotify skip track"
-            # - "spotify skip song"
+            # __Example Phrases - No Player Name__  
+            # - "spotify pause"
+            # - "spotify pause track"
+            # - "spotify pause the track"
+            # - "spotify pause song"
+            # - "spotify pause the song"
+            # - "spotify stop"
+            # - "spotify stop track"
+            # - "spotify stop the track"
+            # - "spotify stop song"
+            # - "spotify stop the song"
 
         slots:
 
@@ -42,15 +41,15 @@ intents:
 
       - sentences:
 
-          - "spotify [play] [<the>] (next|skip|skip (to|2) [<the>] next) (track|song) <on_spotifyplus_player_name>"
+          - "spotify (pause|stop) [<the>] (track|song) <on_spotifyplus_player_name>"
 
             # This sentence is recognized when a player name is provided in the spoken 
             # command (e.g. "on player Spotify Premium", "on Todds player", etc).  
             # Supports the same base sentence phrases for this intent.
 
             # __Example Phrases - By Player Name__  
-            # - "spotify next track on player spotify premium"
-            # - "spotify next track on spotify premium player"
+            # - "spotify pause track on player spotify premium"
+            # - "spotify pause track on spotify premium player"
 
         slots:
 
@@ -61,15 +60,15 @@ intents:
 
       - sentences:
 
-          - "spotify [play] [<the>] (next|skip|skip (to|2) [<the>] next) (track|song) <in_spotifyplus_player_area>"
+          - "spotify (pause|stop) [<the>] (track|song) <in_spotifyplus_player_area>"
 
             # This sentence is recognized when a player area is provided in the spoken 
             # command (e.g. "in the Living Room area", "in the Living Room", etc).  
             # Supports the same base sentence phrases for this intent.
 
             # __Example Phrases - By Player Area__  
-            # - "spotify next track in the Office area"
-            # - "spotify next track in the Office"
+            # - "spotify pause track in the Office area"
+            # - "spotify pause track in the Office"
 
         slots:
 
@@ -87,9 +86,9 @@ intents:
 responses:
   intents:
 
-    SpotifyPlusPlayerMediaSkipNext:
+    SpotifyPlusPlayerMediaPause:
 
-      default_no_player: "Okay, Spotify skipped to next track on default player \"{{ slots.target_player.text }}\"."
-      default_by_name: "Okay, Spotify skipped to next track on named player \"{{ slots.target_player.text }}\"."
-      default_by_area: "Okay, Spotify skipped to next track in the \"{{ slots.target_player.text }}\" area."
-      default: "Okay, Spotify skipped to next track."
+      default_no_player: "Okay, Spotify paused the track on default player \"{{ slots.target_player.text }}\"."
+      default_by_name: "Okay, Spotify paused the track on named player \"{{ slots.target_player.text }}\"."
+      default_by_area: "Okay, Spotify paused the track in the \"{{ slots.target_player.text }}\" area."
+      default: "Okay, Spotify paused the track."

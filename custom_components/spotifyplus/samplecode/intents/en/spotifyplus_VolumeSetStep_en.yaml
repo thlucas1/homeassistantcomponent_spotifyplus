@@ -1,0 +1,88 @@
+# ============================================================================
+# SpotifyPlus integration intent custom sentence and response definitions.
+#
+# Language: en, English
+# Intent:   SpotifyPlusVolumeSetStep
+# Location: custom_sentences/en/spotifyplus_VolumeSetStep_en.yaml
+# ============================================================================
+language: en
+intents:
+
+  SpotifyPlusVolumeSetStep:
+
+    data:
+
+      - sentences:
+
+          - "spotify volume step [level] [to|2] {player_volume_step_pct} [percent|%]"
+
+            # Base sentence phrases for this intent.
+            # This sentence is recognized when a name / area is NOT provided in the spoken command.  
+            # In this case, the first active SpotifyPlus media player is used.
+
+            # __Example Phrases - Default Player__  
+            # - "spotify volume step level to 10 percent"
+            # - "spotify volume step level to 10 %"
+            # - "spotify volume step level 10 percent"
+            # - "spotify volume step 10 percent"
+
+        slots:
+
+          name: "Spotify Premium"     # requires a value since no player name was specified.
+          player_volume_step_pct: 10  # shuffle mode disabled by default.
+
+        response: default_no_player
+
+      - sentences:
+
+          - "spotify volume step [level] [to|2] {player_volume_step_pct} [percent|%] <on_spotifyplus_player_name>"
+
+            # This sentence is recognized when a player name is provided in the spoken 
+            # command (e.g. "on player Spotify Premium", "on Todds player", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Name__  
+            # - "spotify volume step level to 10 percent for player spotify premium"
+            # - "spotify volume step level to 10 percent for spotify premium player"
+
+        slots:
+
+          name: ""                    # requires a value since no player name was specified.
+          player_volume_step_pct: 10  # shuffle mode disabled by default.
+
+        response: default_by_name
+
+      - sentences:
+
+          - "spotify volume step [level] [to|2] {player_volume_step_pct} [percent|%] <in_spotifyplus_player_area>"
+
+            # This sentence is recognized when a player area is provided in the spoken 
+            # command (e.g. "in the Living Room area", "in the Living Room", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Area__  
+            # - "spotify volume step level to 10 percent in the Office area"
+            # - "spotify volume step level to 10 percent in the Office"
+ 
+        slots:
+
+          area: ""                    # requires a value to be assigned in case it could not be resolved.
+          name: ""                    # requires a value since no player name was specified.
+          player_volume_step_pct: 10  # shuffle mode disabled by default.
+
+        response: default_by_area
+
+
+# ============================================================================
+# Custom response definitions for THIS intent.
+# Note - Shared responses for all intents are stored in the Common file.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusVolumeSetStep:
+
+      default_no_player: "Okay, Spotify volume step level is \"{{ slots.player_volume_step_pct.text }}%\" for default player \"{{ slots.target_player.text }}\"."
+      default_by_name: "Okay, Spotify volume step level is \"{{ slots.player_volume_step_pct.text }}%\" for named player \"{{ slots.target_player.text }}\"."
+      default_by_area: "Okay, Spotify volume step level is \"{{ slots.player_volume_step_pct.text }}%\" in the \"{{ slots.target_player.text }}\" area."
+      default: "Okay, Spotify volume step level is \"{{ slots.player_volume_step_pct.text }}%\"."

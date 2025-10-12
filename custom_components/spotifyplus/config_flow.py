@@ -249,6 +249,7 @@ class SpotifyPlusConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, 
 
         Refer to the following developer guide on how to handle expired application credentials:
         - https://developers.home-assistant.io/docs/integration_setup_failures/#handling-expired-credentials
+        - https://developers.home-assistant.io/docs/config_entries_config_flow_handler/#reauthentication
 
         ReAuth processing can be tested by calling the `entry.async_start_reauth(hass)` method
         from the __init__.py `async_setup_entry` logic (after session token is established).

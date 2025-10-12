@@ -1,0 +1,94 @@
+# ============================================================================
+# SpotifyPlus integration intent custom sentence and response definitions.
+#
+# Language: en, English
+# Intent:   SpotifyPlusPlayerSetShuffleMode
+# Location: custom_sentences/en/spotifyplus_PlayerSetShuffleMode_en.yaml
+# ============================================================================
+language: en
+intents:
+
+  SpotifyPlusPlayerSetShuffleMode:
+
+    data:
+
+      - sentences:
+
+          - "spotify shuffle [mode] {player_shuffle_mode}"
+
+            # Base sentence phrases for this intent.
+            # This sentence is recognized when a name / area is NOT provided in the spoken command.  
+            # In this case, the first active SpotifyPlus media player is used.
+
+            # __Example Phrases - Default Player__  
+            # - "spotify shuffle mode on"
+            # - "spotify shuffle mode off"
+            # - "spotify shuffle on"
+            # - "spotify shuffle off"
+            # - "spotify shuffle enabled"
+            # - "spotify shuffle disabled"
+
+        slots:
+
+          name: "Spotify Premium"     # requires a value since no player name was specified.
+          player_shuffle_mode: "off"  # shuffle mode disabled by default.
+          delay: 0.50                 # delay after command to give spotify time to process.
+
+        response: default_no_player
+
+      - sentences:
+
+          - "spotify shuffle [mode] {player_shuffle_mode} <on_spotifyplus_player_name>"
+
+            # This sentence is recognized when a player name is provided in the spoken 
+            # command (e.g. "on player Spotify Premium", "on Todds player", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Name__  
+            # - "spotify shuffle on for player spotify premium"
+            # - "spotify shuffle on for spotify premium player"
+
+        slots:
+
+          name: ""                    # requires a value since no player name was specified.
+          player_shuffle_mode: "off"  # shuffle mode disabled by default.
+          delay: 0.50                 # delay after command to give spotify time to process.
+
+        response: default_by_name
+
+      - sentences:
+
+          - "spotify shuffle [mode] {player_shuffle_mode} <in_spotifyplus_player_area>"
+
+            # This sentence is recognized when a player area is provided in the spoken 
+            # command (e.g. "in the Living Room area", "in the Living Room", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Area__  
+            # - "spotify shuffle on in the Office area"
+            # - "spotify shuffle on in the Office"
+ 
+        slots:
+
+          area: ""                    # requires a value to be assigned in case it could not be resolved.
+          name: ""                    # requires a value since no player name was specified.
+          player_shuffle_mode: "off"  # shuffle mode disabled by default.
+          delay: 0.50                 # delay after command to give spotify time to process.
+
+        response: default_by_area
+
+
+# ============================================================================
+# Custom response definitions for THIS intent.
+# Note - Shared responses for all intents are stored in the Common file.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusPlayerSetShuffleMode:
+
+      default_no_player: "Okay, Spotify shuffle mode is \"{{ slots.player_shuffle_mode.text }}\" for default player \"{{ slots.target_player.text }}\"."
+      default_by_name: "Okay, Spotify shuffle mode is \"{{ slots.player_shuffle_mode.text }}\" for named player \"{{ slots.target_player.text }}\"."
+      default_by_area: "Okay, Spotify shuffle mode is \"{{ slots.player_shuffle_mode.text }}\" in the \"{{ slots.target_player.text }}\" area."
+      default: "Okay, Spotify shuffle mode is \"{{ slots.player_shuffle_mode.text }}\"."
+

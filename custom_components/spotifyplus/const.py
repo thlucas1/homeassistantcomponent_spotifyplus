@@ -164,6 +164,17 @@ SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO:str = 'zeroconf_device_getinfo'
 SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES:str = 'zeroconf_discover_devices'
 
 # -----------------------------------------------------------------------------------
+# Custom Service Schemas - MediaPlayerEntity enhancements.
+# -----------------------------------------------------------------------------------
+SERVICE_VOLUME_SET_STEP:str = 'volume_set_step'
+
+# -----------------------------------------------------------------------------------
+# Custom Service Schemas - non-Spotify Web API related.
+# -----------------------------------------------------------------------------------
+SERVICE_LIST_APPLICATION_CREDENTIAL_MAPPPINGS:str = 'list_application_credential_mappings'
+SERVICE_TEST_TOKEN_EXPIRE:str = 'test_token_expire'
+
+# -----------------------------------------------------------------------------------
 # Configuration constants.
 # -----------------------------------------------------------------------------------
 CONF_AREA:str = "area"
@@ -177,8 +188,14 @@ CONF_TARGET_PLAYER:str = "target_player"
 # -----------------------------------------------------------------------------------
 # Intent Handler identifiers.
 # -----------------------------------------------------------------------------------
+INTENT_PLAYER_MEDIA_PAUSE = "SpotifyPlusPlayerMediaPause"
+INTENT_PLAYER_MEDIA_RESUME = "SpotifyPlusPlayerMediaResume"
 INTENT_PLAYER_MEDIA_SKIP_NEXT = "SpotifyPlusPlayerMediaSkipNext"
 INTENT_PLAYER_MEDIA_SKIP_PREVIOUS = "SpotifyPlusPlayerMediaSkipPrevious"
+INTENT_PLAYER_MEDIA_SKIP_START = "SpotifyPlusPlayerMediaSkipStart"
+INTENT_PLAYER_SET_REPEAT_MODE = "SpotifyPlusPlayerSetRepeatMode"
+INTENT_PLAYER_SET_SHUFFLE_MODE = "SpotifyPlusPlayerSetShuffleMode"
+INTENT_VOLUME_SET_STEP = "SpotifyPlusVolumeSetStep"
 
 # -----------------------------------------------------------------------------------
 # Intent Handler response codes.

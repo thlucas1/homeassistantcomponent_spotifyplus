@@ -12,6 +12,7 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/thlucas1/homeassistantcomponent_spotifyplus/issues",
   "requirements": [
+    "colorlog>=6.9.0,",
     "oauthlib>=3.2.2",
     "platformdirs>=4.1.0",
     "requests>=2.31.0",
@@ -21,5 +22,5 @@
     "urllib3>=2.0",
     "zeroconf>=0.132.2"
   ],
-  "version": "1.0.172"
+  "version": "1.0.173"
 }

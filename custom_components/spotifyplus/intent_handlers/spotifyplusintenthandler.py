@@ -73,8 +73,8 @@ class SpotifyPlusIntentHandler(IntentHandler):
         intentResponse:IntentResponse,
         slots:_SlotsType,
         desiredFeatures:MediaPlayerEntityFeature,
-        desiredStates:list[MediaPlayerState],
-        desiredStateResponseKey:str,
+        desiredStates:list[MediaPlayerState]=None,
+        desiredStateResponseKey:str=None,
         ) -> Tuple[IntentResponse, _SlotsType, MediaPlayerEntity | None]:
         """
         Resolve matching player entity state.
@@ -171,6 +171,17 @@ class SpotifyPlusIntentHandler(IntentHandler):
                     self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_RESPONSE % (intentObj.intent_type), intentResponse, colorValue=SIColors.Khaki)
                     return (intentResponse, slots, None)
 
+                elif matchResult.no_match_reason == MatchFailedReason.MULTIPLE_TARGETS:
+
+                    # if multiple targets matched, then loop through them to find the
+                    # first SpotifyPlus platform.
+                    for stateEntry in matchResult.states:
+                        playerEntity = get_registry_entry_media_player(intentObj, platform=PLATFORM_SPOTIFYPLUS, entity_id=stateEntry.entity_id)
+                        if (playerEntity):
+                            playerEntityState = stateEntry
+                            resolvedDesc = "MatchTargetsResult (First of Multiple)"
+                            break
+
                 else:
 
                     # no - search for the first active spotifyplus media player entity.
@@ -206,11 +217,12 @@ class SpotifyPlusIntentHandler(IntentHandler):
                 self.logsi.LogDictionary(SILevel.Verbose, "Current slot values for intent: \"%s\"" % intentObj.intent_type, slots, colorValue=SIColors.Khaki)
 
             # is media player state in the desired state (e.g. playing? paused? etc)?
-            if (playerEntityState.state not in desiredStates):
-                responseText = await get_intent_response_resource(desiredStateResponseKey, slots, intentObj, PLATFORM_SPOTIFYPLUS)
-                intentResponse.async_set_speech(responseText)
-                self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_RESPONSE % (intentObj.intent_type), intentResponse, colorValue=SIColors.Khaki)
-                return (intentResponse, slots, None)
+            if (desiredStates is not None):
+                if (playerEntityState.state not in desiredStates):
+                    responseText = await get_intent_response_resource(desiredStateResponseKey, slots, intentObj, PLATFORM_SPOTIFYPLUS)
+                    intentResponse.async_set_speech(responseText)
+                    self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_RESPONSE % (intentObj.intent_type), intentResponse, colorValue=SIColors.Khaki)
+                    return (intentResponse, slots, None)
 
             # return response and the found player entity.
             return (intentResponse, slots, playerEntityState)
@@ -441,7 +453,7 @@ async def get_intent_response_resource(
                 candidates.append(responses_root[response_key])
 
             # trace.
-            _logsi.LogDictionary(SILevel.Verbose,"Responses candidates dictionary", candidates, prettyPrint=True, colorValue=SIColors.Khaki)
+            #_logsi.LogDictionary(SILevel.Verbose,"Responses candidates dictionary", candidates, prettyPrint=True, colorValue=SIColors.Khaki)
 
             # did we find any matching candidates?
             if candidates:

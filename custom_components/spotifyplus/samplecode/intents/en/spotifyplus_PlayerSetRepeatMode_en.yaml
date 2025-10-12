@@ -1,0 +1,97 @@
+# ============================================================================
+# SpotifyPlus integration intent custom sentence and response definitions.
+#
+# Language: en, English
+# Intent:   SpotifyPlusPlayerSetRepeatMode
+# Location: custom_sentences/en/spotifyplus_PlayerSetRepeatMode_en.yaml
+# ============================================================================
+language: en
+intents:
+
+  SpotifyPlusPlayerSetRepeatMode:
+
+    data:
+
+      - sentences:
+
+          - "spotify repeat [mode] {player_repeat_mode}"
+
+            # Base sentence phrases for this intent.
+            # This sentence is recognized when a name / area is NOT provided in the spoken command.  
+            # In this case, the first active SpotifyPlus media player is used.
+
+            # __Example Phrases - Default Player__  
+            # - "spotify repeat on"
+            # - "spotify repeat track"
+            # - "spotify repeat 1 track"
+            # - "spotify repeat single track"
+            # - "spotify repeat context"
+            # - "spotify repeat all"
+            # - "spotify repeat all tracks"
+            # - "spotify repeat list"
+            # - "spotify repeat off"
+            # - "spotify repeat disabled"
+
+        slots:
+
+          name: "Spotify Premium"     # requires a value since no player name was specified.
+          player_repeat_mode: "off"   # repeat mode disabled by default.
+          delay: 0.50                 # delay after command to give spotify time to process.
+
+        response: default_no_player
+
+      - sentences:
+
+          - "spotify repeat [mode] {player_repeat_mode} <on_spotifyplus_player_name>"
+
+            # This sentence is recognized when a player name is provided in the spoken 
+            # command (e.g. "on player Spotify Premium", "on Todds player", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Name__  
+            # - "spotify repeat track for player spotify premium"
+            # - "spotify repeat track for spotify premium player"
+
+        slots:
+
+          name: ""                    # requires a value since no player name was specified.
+          player_repeat_mode: "off"   # repeat mode disabled by default.
+          delay: 0.50                 # delay after command to give spotify time to process.
+
+        response: default_by_name
+
+      - sentences:
+
+          - "spotify repeat [mode] {player_repeat_mode} <in_spotifyplus_player_area>"
+
+            # This sentence is recognized when a player area is provided in the spoken 
+            # command (e.g. "in the Living Room area", "in the Living Room", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Area__  
+            # - "spotify repeat track in the Office area"
+            # - "spotify repeat track in the Office"
+ 
+        slots:
+
+          area: ""                    # requires a value to be assigned in case it could not be resolved.
+          name: ""                    # requires a value since no player name was specified.
+          player_repeat_mode: "off"   # repeat mode disabled by default.
+          delay: 0.50                 # delay after command to give spotify time to process.
+
+        response: default_by_area
+
+
+# ============================================================================
+# Custom response definitions for THIS intent.
+# Note - Shared responses for all intents are stored in the Common file.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusPlayerSetRepeatMode:
+
+      default_by_name: "Okay, Spotify repeat mode is \"{{ slots.player_repeat_mode.text }}\" for named player \"{{ slots.target_player.text }}\"."
+      default_by_area: "Okay, Spotify repeat mode is \"{{ slots.player_repeat_mode.text }}\" in the \"{{ slots.target_player.text }}\" area."
+      default_no_player: "Okay, Spotify repeat mode is \"{{ slots.player_repeat_mode.text }}\" for default player \"{{ slots.target_player.text }}\"."
+      default: "Okay, Spotify repeat mode is \"{{ slots.player_repeat_mode.text }}\"."
