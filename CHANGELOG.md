@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.176 ] - 2025/10/12
+
+  * Fixed service `get_image_palette_colors` argument `color_count` issue; accidentally changed it to `color_quality` in error.
+
 ###### [ 1.0.175 ] - 2025/10/12
 
   * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.250`.

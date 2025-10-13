@@ -486,12 +486,7 @@ SERVICE_SPOTIFY_GET_IMAGE_PALETTE_COLORS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("image_source"): cv.string,
-        # vol.Optional("color_count", default=10): vol.All(vol.Range(min=1,max=256)),
-        # vol.Optional("color_quality", default=None): vol.All(vol.Range(min=1,max=10)),
-        # vol.Optional("brightness_filter_low", default=None): vol.All(vol.Range(min=0,max=765)),
-        # vol.Optional("brightness_filter_high", default=None): vol.All(vol.Range(min=0,max=765)),
-        # vol.Optional("hue_distance_filter", default=None): vol.All(vol.Range(min=0,max=360)),
-        vol.Optional("color_quality", default=10): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=256))),
+        vol.Optional("color_count", default=10): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=256))),
         vol.Optional("color_quality", default=None): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=10))),
         vol.Optional("brightness_filter_low", default=None): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=765))),
         vol.Optional("brightness_filter_high", default=None): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=765))),
