@@ -9,6 +9,8 @@ from .spotifyplusplayermediaskipstart_handler import SpotifyPlusPlayerMediaSkipS
 from .spotifyplusplayersetrepeatmode_handler import SpotifyPlusPlayerSetRepeatMode_Handler
 from .spotifyplusplayersetshufflemode_handler import SpotifyPlusPlayerSetShuffleMode_Handler
 from .spotifyplusvolumedown_handler import SpotifyPlusVolumeDown_Handler
+from .spotifyplusvolumemuteoff_handler import SpotifyPlusVolumeMuteOff_Handler
+from .spotifyplusvolumemuteon_handler import SpotifyPlusVolumeMuteOn_Handler
 from .spotifyplusvolumesetstep_handler import SpotifyPlusVolumeSetStep_Handler
 from .spotifyplusvolumeup_handler import SpotifyPlusVolumeUp_Handler
 
@@ -22,6 +24,8 @@ __all__ = [
     'SpotifyPlusPlayerSetRepeatMode_Handler',
     'SpotifyPlusPlayerSetShuffleMode_Handler',
     'SpotifyPlusVolumeDown_Handler',
+    'SpotifyPlusVolumeMuteOff_Handler',
+    'SpotifyPlusVolumeMuteOn_Handler',
     'SpotifyPlusVolumeSetStep_Handler',
     'SpotifyPlusVolumeUp_Handler',
 ]

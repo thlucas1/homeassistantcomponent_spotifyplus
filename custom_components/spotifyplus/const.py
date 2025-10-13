@@ -196,8 +196,10 @@ INTENT_PLAYER_MEDIA_SKIP_PREVIOUS = "SpotifyPlusPlayerMediaSkipPrevious"
 INTENT_PLAYER_MEDIA_SKIP_START = "SpotifyPlusPlayerMediaSkipStart"
 INTENT_PLAYER_SET_REPEAT_MODE = "SpotifyPlusPlayerSetRepeatMode"
 INTENT_PLAYER_SET_SHUFFLE_MODE = "SpotifyPlusPlayerSetShuffleMode"
-INTENT_VOLUME_SET_STEP = "SpotifyPlusVolumeSetStep"
 INTENT_VOLUME_DOWN = "SpotifyPlusVolumeDown"
+INTENT_VOLUME_MUTE_OFF = "SpotifyPlusVolumeMuteOff"
+INTENT_VOLUME_MUTE_ON = "SpotifyPlusVolumeMuteOn"
+INTENT_VOLUME_SET_STEP = "SpotifyPlusVolumeSetStep"
 INTENT_VOLUME_UP = "SpotifyPlusVolumeUp"
 
 # -----------------------------------------------------------------------------------

@@ -44,6 +44,8 @@
     <Compile Include="custom_components\spotifyplus\intent_handlers\spotifyplusplayersetrepeatmode_handler.py" />
     <Compile Include="custom_components\spotifyplus\intent_handlers\spotifyplusplayersetshufflemode_handler.py" />
     <Compile Include="custom_components\spotifyplus\intent_handlers\spotifyplusvolumedown_handler.py" />
+    <Compile Include="custom_components\spotifyplus\intent_handlers\spotifyplusvolumemuteoff_handler.py" />
+    <Compile Include="custom_components\spotifyplus\intent_handlers\spotifyplusvolumemuteon_handler.py" />
     <Compile Include="custom_components\spotifyplus\intent_handlers\spotifyplusvolumeup_handler.py" />
     <Compile Include="custom_components\spotifyplus\intent_handlers\spotifyplusvolumesetstep_handler.py" />
     <Compile Include="custom_components\spotifyplus\intent_handlers\__init__.py" />
@@ -95,6 +97,8 @@
     <Content Include="custom_components\spotifyplus\samplecode\intents\en\spotifyplus_common_en.yaml" />
     <Content Include="custom_components\spotifyplus\samplecode\intents\en\spotifyplus_PlayerSetRepeatMode_en.yaml" />
     <Content Include="custom_components\spotifyplus\samplecode\intents\en\spotifyplus_VolumeDown_en.yaml" />
+    <Content Include="custom_components\spotifyplus\samplecode\intents\en\spotifyplus_VolumeMuteOff.yaml" />
+    <Content Include="custom_components\spotifyplus\samplecode\intents\en\spotifyplus_VolumeMuteOn_en.yaml" />
     <Content Include="custom_components\spotifyplus\samplecode\intents\en\spotifyplus_VolumeUp_en.yaml" />
     <Content Include="custom_components\spotifyplus\samplecode\intents\en\spotifyplus_PlayerSetShuffleMode_en.yaml" />
     <Content Include="custom_components\spotifyplus\samplecode\intents\en\spotifyplus_VolumeSetStep_en.yaml" />
