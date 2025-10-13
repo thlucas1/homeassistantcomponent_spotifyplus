@@ -178,6 +178,7 @@ SERVICE_TEST_TOKEN_EXPIRE:str = 'test_token_expire'
 # Configuration constants.
 # -----------------------------------------------------------------------------------
 CONF_AREA:str = "area"
+CONF_ENTITY_ID:str = "entity_id"
 CONF_FLOOR:str = "floor"
 CONF_NAME:str = "name"
 CONF_DEVICE_NAME:str = "device_name"
@@ -196,6 +197,8 @@ INTENT_PLAYER_MEDIA_SKIP_START = "SpotifyPlusPlayerMediaSkipStart"
 INTENT_PLAYER_SET_REPEAT_MODE = "SpotifyPlusPlayerSetRepeatMode"
 INTENT_PLAYER_SET_SHUFFLE_MODE = "SpotifyPlusPlayerSetShuffleMode"
 INTENT_VOLUME_SET_STEP = "SpotifyPlusVolumeSetStep"
+INTENT_VOLUME_DOWN = "SpotifyPlusVolumeDown"
+INTENT_VOLUME_UP = "SpotifyPlusVolumeUp"
 
 # -----------------------------------------------------------------------------------
 # Intent Handler response codes.

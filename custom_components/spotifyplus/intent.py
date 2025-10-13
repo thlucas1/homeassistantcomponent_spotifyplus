@@ -46,7 +46,9 @@ async def async_setup_intents(hass: HomeAssistant) -> None:
         register_intent_handler(hass, SpotifyPlusPlayerMediaSkipStart_Handler())
         register_intent_handler(hass, SpotifyPlusPlayerSetRepeatMode_Handler())
         register_intent_handler(hass, SpotifyPlusPlayerSetShuffleMode_Handler())
+        register_intent_handler(hass, SpotifyPlusVolumeDown_Handler())
         register_intent_handler(hass, SpotifyPlusVolumeSetStep_Handler())
+        register_intent_handler(hass, SpotifyPlusVolumeUp_Handler())
 
         # indicate success.
         _logsi.LogVerbose("Component async_setup_intents complete", colorValue=SIColors.Khaki)

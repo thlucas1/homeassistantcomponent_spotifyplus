@@ -1,0 +1,94 @@
+# ============================================================================
+# SpotifyPlus integration intent custom sentence and response definitions.
+#
+# Language: en, English
+# Intent:   SpotifyPlusVolumeUp
+# Location: custom_sentences/en/spotifyplus_VolumeUp_en.yaml
+# ============================================================================
+language: en
+intents:
+
+  SpotifyPlusVolumeUp:
+
+    data:
+
+      - sentences:
+
+          - "spotify [player] volume [level] (increase[d]|up|higher|raise)"
+          - "(increase[d]|raise) spotify [player] volume [level]"
+
+            # Base sentence phrases for this intent.
+            # This sentence is recognized when a name / area is NOT provided in the spoken command.  
+            # In this case, the first active SpotifyPlus media player is used.
+
+            # __Example Phrases - Default Player__  
+            # - "spotify player volume level up"
+            # - "spotify player volume level increase"
+            # - "spotify volume level increase"
+            # - "spotify volume increase"
+            # - "spotify volume up"
+            # - "increase spotify player volume level"
+            # - "increase spotify player volume"
+            # - "increase spotify volume"
+            # - "raise spotify volume"
+
+        slots:
+
+          name: "Spotify Premium"     # requires a value since no player name was specified.
+
+        response: default_no_player
+
+      - sentences:
+
+          - "spotify [player] volume [level] (increase[d]|up|higher|raise) <on_spotifyplus_player_name>"
+          - "(increase[d]|raise) spotify [player] volume [level] <on_spotifyplus_player_name>"
+
+            # This sentence is recognized when a player name is provided in the spoken 
+            # command (e.g. "on player Spotify Premium", "on Todds player", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Name__  
+            # - "spotify volume increase for player spotify premium"
+            # - "spotify volume increase for spotify premium player"
+
+        slots:
+
+          name: ""                    # requires a value since no player name was specified.
+
+        response: default_by_name
+
+      - sentences:
+
+          - "spotify [player] volume [level] (increase[d]|up|higher|raise) <in_spotifyplus_player_area>"
+          - "(increase[d]|raise) spotify [player] volume [level] <in_spotifyplus_player_area>"
+
+            # This sentence is recognized when a player area is provided in the spoken 
+            # command (e.g. "in the Living Room area", "in the Living Room", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Area__  
+            # - "spotify volume increase in the Office area"
+            # - "spotify volume increase in the Office"
+ 
+        slots:
+
+          area: ""                    # requires a value to be assigned in case it could not be resolved.
+          name: ""                    # requires a value since no player name was specified.
+
+        response: default_by_area
+
+
+# ============================================================================
+# Custom response definitions for THIS intent.
+# Note - Shared responses for all intents are stored in the Common file.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusVolumeUp:
+
+      default_no_player: "Okay, Spotify volume level was increased for default player \"{{ slots.target_player.text }}\"."
+      default_by_name: "Okay, Spotify volume level was increased for named player \"{{ slots.target_player.text }}\"."
+      default_by_area: "Okay, Spotify volume level was increased in the \"{{ slots.target_player.text }}\" area."
+      default: "Okay, Spotify volume level was increased."
+

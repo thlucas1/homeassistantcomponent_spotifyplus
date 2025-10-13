@@ -6,11 +6,17 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.174 ] - 2025/10/12
+
+  * Added voice assist intents: `SpotifyPlusVolumeDown`, `SpotifyPlusVolumeUp`.  Check out the [wiki docs](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Voice-Assist-Support#intent-index) for more information.
+  * Removed requirement `colorlog>=6.9.0`; package is not used.
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.250`.
+
 ###### [ 1.0.173 ] - 2025/10/12
 
   * Added voice assist intents: `SpotifyPlusPlayerMediaPause`, `SpotifyPlusPlayerMediaResume`, `SpotifyPlusPlayerMediaSkipStart`, `SpotifyPlusPlayerSetRepeatMode`, `SpotifyPlusPlayerSetShuffleMode`, `SpotifyPlusVolumeSetStep`.  Check out the [wiki docs](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Voice-Assist-Support#intent-index) for more information.
   * Updated voice assist intents: `SpotifyPlusPlayerMediaSkipNext`, `SpotifyPlusPlayerMediaSkipPrevious` - removed the `device_name` slot, since it cannot transfer playback to devices that are not in the player device list (e.g. Google Cast, Sonos, etc).
-  * Updated requirement `colorlog==6.7.0` to `colorlog>=6.7.0` to avoid conflicts with other custom integrations.
+  * Updated requirement `colorlog==6.7.0` to `colorlog>=6.9.0` to avoid conflicts with other custom integrations.
   * Updated requirement `ruff==0.1.3` to `ruff>=0.1.3` to avoid conflicts with other custom integrations.
 
 ###### [ 1.0.172 ] - 2025/10/10

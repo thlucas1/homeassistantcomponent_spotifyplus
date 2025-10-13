@@ -43,6 +43,8 @@
     <Compile Include="custom_components\spotifyplus\intent_handlers\spotifyplusplayermediaskipstart_handler.py" />
     <Compile Include="custom_components\spotifyplus\intent_handlers\spotifyplusplayersetrepeatmode_handler.py" />
     <Compile Include="custom_components\spotifyplus\intent_handlers\spotifyplusplayersetshufflemode_handler.py" />
+    <Compile Include="custom_components\spotifyplus\intent_handlers\spotifyplusvolumedown_handler.py" />
+    <Compile Include="custom_components\spotifyplus\intent_handlers\spotifyplusvolumeup_handler.py" />
     <Compile Include="custom_components\spotifyplus\intent_handlers\spotifyplusvolumesetstep_handler.py" />
     <Compile Include="custom_components\spotifyplus\intent_handlers\__init__.py" />
     <Compile Include="custom_components\spotifyplus\media_player.py" />
@@ -92,6 +94,8 @@
     <Content Include="custom_components\spotifyplus\samplecode\intents\en\spotifyplus_PlayerMediaSkipNext_en.yaml" />
     <Content Include="custom_components\spotifyplus\samplecode\intents\en\spotifyplus_common_en.yaml" />
     <Content Include="custom_components\spotifyplus\samplecode\intents\en\spotifyplus_PlayerSetRepeatMode_en.yaml" />
+    <Content Include="custom_components\spotifyplus\samplecode\intents\en\spotifyplus_VolumeDown_en.yaml" />
+    <Content Include="custom_components\spotifyplus\samplecode\intents\en\spotifyplus_VolumeUp_en.yaml" />
     <Content Include="custom_components\spotifyplus\samplecode\intents\en\spotifyplus_PlayerSetShuffleMode_en.yaml" />
     <Content Include="custom_components\spotifyplus\samplecode\intents\en\spotifyplus_VolumeSetStep_en.yaml" />
     <Content Include="custom_components\spotifyplus\services.yaml" />
