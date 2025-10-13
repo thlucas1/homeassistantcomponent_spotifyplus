@@ -6,11 +6,14 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.175 ] - 2025/10/12
+
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.250`.
+
 ###### [ 1.0.174 ] - 2025/10/12
 
   * Added voice assist intents: `SpotifyPlusVolumeDown`, `SpotifyPlusVolumeUp`.  Check out the [wiki docs](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Voice-Assist-Support#intent-index) for more information.
   * Removed requirement `colorlog>=6.9.0`; package is not used.
-  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.250`.
 
 ###### [ 1.0.173 ] - 2025/10/12
 
