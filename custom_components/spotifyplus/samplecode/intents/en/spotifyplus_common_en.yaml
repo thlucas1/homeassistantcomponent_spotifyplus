@@ -13,27 +13,36 @@ responses:
     # error messages.
     error_unhandled: "An unexpected error occurred"
 
-    # player related messages.
-    player_not_playing_media: "Media player \"{{ slots.target_player.text }}\" is currently not playing media."
+    # get information request related messages.
+    get_info_artist_bio: "Artist bio for \"{{ slots.artist_title.text }}\" ... \n\n{{ slots.artist_bio.text | truncate(400, end=' ...') }}\n\n[more info at {{ slots.artist_url.text }}]({{ slots.artist_url.value }})"
+
+    # now playing information related messages.
+    nowplaying_info_audiobook: "Media player is playing \"{{ slots.chapter_title.text }}\", from audiobook \"{{ slots.audiobook_title.text }}\", by author \"{{ slots.author_title.text }}\".\n\n[more info at {{ slots.audiobook_url.text }}]({{ slots.audiobook_url.value }})"
+    nowplaying_info_podcast: "Media player is playing episode \"{{ slots.episode_title.text }}\", from podcast \"{{ slots.podcast_title.text }}\".\n\n[more info at {{ slots.episode_url.text }}]({{ slots.episode_url.value }})"
+    nowplaying_info_track: "Media player is playing track \"{{ slots.track_title.text }}\", from album \"{{ slots.album_title.text }}\", by artist \"{{ slots.artist_title.text }}\".\n\n[more info at {{ slots.album_url.text }}]({{ slots.album_url.value }})"
+    nowplaying_no_media_album: "SpotifyPlus media player is currently not playing media that contains Track Album information."
+    nowplaying_no_media_artist: "SpotifyPlus media player is currently not playing media that contains Track Artist information."
+    nowplaying_no_media_audiobook: "SpotifyPlus media player is currently not playing media that contains Audiobook information."
+    nowplaying_no_media_episode: "SpotifyPlus media player is currently not playing media that contains Episode information."
+    nowplaying_no_media_playlist: "SpotifyPlus media player is currently not playing media that contains Playlist information."
+    nowplaying_no_media_podcast: "SpotifyPlus media player is currently not playing media that contains Podcast information."
+    nowplaying_no_media_track: "SpotifyPlus media player is currently not playing media that contains Track information."
+
+    # media player related messages.
+    player_features_not_supported: "Media player \"{{ slots.name.text }}\" does not support required features for this request."
+    player_not_exposed_to_voice: "Media player \"{{ slots.target_player.text }}\" has not been exposed to Voice Assistant."
     player_not_matched: "SpotifyPlus media player could not be resolved by \"{{ slots.target_player.text }}\"."
     player_not_matched_area: "SpotifyPlus media player could not be resolved for the \"{{ slots.area.text }}\" area."
+    player_not_playing_media: "Media player \"{{ slots.target_player.text }}\" is currently not playing media."
     player_not_spotifyplus: "Resolved media player \"{{ slots.target_player.text }}\" is not a SpotifyPlus media player."
-    player_not_exposed_to_voice: "Media player \"{{ slots.target_player.text }}\" has not been exposed to Voice Assistant."
-    player_features_not_supported: "Media player \"{{ slots.name.text }}\" does not support required features for this request."
-    
 
+    # general spotify information related messages.
+    spotify_no_artist_info: "Artist information could not be found for \"{{ slots.artist_name.text }}\"."
+    
 # ============================================================================
 # SpotifyPlus common lists
 # ============================================================================
 lists:
-
-  # player_name:
-  #   values:
-  #     - in: xxx_todd
-  #       out: media_player.spotifyplus_todd_l
-  #       synonyms:
-  #         - "xxx_premium"
-  #         - "xxx_spotify premium"
 
   device_name:
     values:
@@ -41,6 +50,9 @@ lists:
         out: Bose-ST10-1
       - in: Kitchen
         out: Bose-ST10-2
+
+  artist_name:
+    wildcard: true  # Wildcard lists can match any text.
 
   player_repeat_mode:
     values:

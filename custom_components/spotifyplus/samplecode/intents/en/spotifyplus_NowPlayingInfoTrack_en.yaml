@@ -2,75 +2,89 @@
 # SpotifyPlus integration intent custom sentence and response definitions.
 #
 # Language: en, English
-# Intent:   SpotifyPlusPlayerMediaSkipStart
-# Location: custom_sentences/en/spotifyplus_PlayerMediaSkipStart_en.yaml
+# Intent:   SpotifyPlusNowPlayingInfoTrack
+# Location: custom_sentences/en/spotifyplus_NowPlayingInfoTrack_en.yaml
 # ============================================================================
 language: en
 intents:
 
-  SpotifyPlusPlayerMediaSkipStart:
+  SpotifyPlusNowPlayingInfoTrack:
 
     data:
 
       - sentences:
 
-          - "spotify (restart|skip (to|2) [<the>] start of [<the>]) (track|song)"
+          - "[get] spotify [nowplaying|now playing] (track|song|music) (info|information|details)"
 
             # Base sentence phrases for this intent.
             # This sentence is recognized when a name / area is NOT provided in the spoken command.  
             # In this case, the first active SpotifyPlus media player is used.
 
             # __Example Phrases - Default Player__  
-            # - "spotify restart track"
-            # - "spotify restart song"
-            # - "spotify skip to start of track"
-            # - "spotify skip to the start of the song"
+            # - "spotify nowplaying track info"
+            # - "spotify track info"
+            # - "get spotify track info"
 
         slots:
 
           name: "Spotify Premium"  # default player to use.
-          delay: 0.50
+          artist_title: ""
+          artist_url: ""
+          album_title: ""
+          album_url: ""
+          track_title: ""
+          track_url: ""
 
-        response: default_no_player
+        response: default
 
       - sentences:
 
-          - "spotify (restart|skip (to|2) [<the>] start of [<the>]) (track|song) <on_spotifyplus_player_name>"
+          - "[get] spotify [nowplaying|now playing] (track|song|music) (info|information|details) <on_spotifyplus_player_name>"
 
             # This sentence is recognized when a player name is provided in the spoken 
             # command (e.g. "on player Spotify Premium", "on Todds player", etc).  
             # Supports the same base sentence phrases for this intent.
 
             # __Example Phrases - By Player Name__  
-            # - "spotify restart track on player spotify premium"
-            # - "spotify restart track on spotify premium player"
+            # - "get spotify track info for player spotify premium"
+            # - "get spotify track info for spotify premium player"
 
         slots:
 
           name: ""
-          delay: 0.50
+          artist_title: ""
+          artist_url: ""
+          album_title: ""
+          album_url: ""
+          track_title: ""
+          track_url: ""
 
-        response: default_by_name
+        response: default
 
       - sentences:
 
-          - "spotify (restart|skip (to|2) [<the>] start of [<the>]) (track|song) <in_spotifyplus_player_area>"
+          - "[get] spotify [nowplaying|now playing] (track|song|music) (info|information|details) <in_spotifyplus_player_area>"
 
             # This sentence is recognized when a player area is provided in the spoken 
             # command (e.g. "in the Living Room area", "in the Living Room", etc).  
             # Supports the same base sentence phrases for this intent.
 
             # __Example Phrases - By Player Area__  
-            # - "spotify restart track in the Office area"
-            # - "spotify restart track in the Office"
-
+            # - "get spotify track info in the Office area"
+            # - "get spotify track info in the Office"
+ 
         slots:
 
           area: ""
           name: ""
-          delay: 0.50
+          artist_title: ""
+          artist_url: ""
+          album_title: ""
+          album_url: ""
+          track_title: ""
+          track_url: ""
 
-        response: default_by_area
+        response: default
 
 
 # ============================================================================
@@ -80,9 +94,6 @@ intents:
 responses:
   intents:
 
-    SpotifyPlusPlayerMediaSkipStart:
+    SpotifyPlusNowPlayingInfoTrack:
 
-      default_no_player: "Okay, Spotify restarted the track on default player \"{{ slots.target_player.text }}\"."
-      default_by_name: "Okay, Spotify restarted the track on named player \"{{ slots.target_player.text }}\"."
-      default_by_area: "Okay, Spotify restarted the track in the \"{{ slots.target_player.text }}\" area."
-      default: "Okay, Spotify restarted the track."
+      default: "" # not used - see common `nowplaying_info_track` message.

@@ -24,10 +24,6 @@ from homeassistant.helpers.intent import (
 
 from ..appmessages import STAppMessages
 from ..const import (
-    CONF_AREA,
-    CONF_FLOOR,
-    CONF_NAME,
-    CONF_TARGET_PLAYER,
     CONF_TEXT,
     CONF_VALUE,
     DOMAIN_MEDIA_PLAYER,
@@ -36,6 +32,12 @@ from ..const import (
     RESPONSE_PLAYER_NOT_EXPOSED_TO_VOICE,
     RESPONSE_PLAYER_NOT_MATCHED,
     RESPONSE_PLAYER_NOT_MATCHED_AREA,
+    SLOT_AREA,
+    SLOT_FLOOR,
+    SLOT_NAME,
+    SLOT_PREFERRED_AREA_ID,
+    SLOT_PREFERRED_FLOOR_ID,
+    SLOT_TARGET_PLAYER,
 )
 
 import logging
@@ -72,12 +74,28 @@ class SpotifyPlusIntentHandler(IntentHandler):
         intentObj:Intent,
         intentResponse:IntentResponse,
         slots:_SlotsType,
-        desiredFeatures:MediaPlayerEntityFeature,
+        desiredFeatures:MediaPlayerEntityFeature=None,
         desiredStates:list[MediaPlayerState]=None,
         desiredStateResponseKey:str=None,
-        ) -> Tuple[IntentResponse, _SlotsType, MediaPlayerEntity | None]:
+        ) -> Tuple[IntentResponse, _SlotsType, State | None]:
         """
         Resolve matching player entity state.
+
+        Args:
+            intentObj (Intent):
+                Intent object.
+            intentResponse (IntentResponse):
+                Intent response object that will be returned if an error occurs.
+            slots (_SlotType):
+                Slot arguments to be validated, and used to format responses.
+            desiredFeatures (MediaPlayerEntityFeature):
+                Media Player Features that are required for the match (e.g. MediaPlayerEntityFeature.PLAY | MediaPlayerEntityFeature.PAUSE).
+            desiredStateResponseKey (str):
+                Response message key that will be loaded and sent if the `desiredFeatures` are not supported.
+
+        Returns:
+            A tuple of 3 parameters that contain the IntentResponse object, modified slots, and the resolved 
+            SpotifyPlus media player entity state (or none if entity was not resolved).
         """
         try:
 
@@ -94,12 +112,12 @@ class SpotifyPlusIntentHandler(IntentHandler):
             # when resolving entity_id's related to the following: "name", "floor", "area".
             # if you customize outside of those values then entity matching will not work; you 
             # have to define custom lists in order for things to match!
-            player_name: str | None = slots.get(CONF_NAME, {}).get(CONF_VALUE, "")
-            area_id = slots.get(CONF_AREA, {}).get(CONF_VALUE, "")
-            floor_id = slots.get(CONF_FLOOR, {}).get(CONF_VALUE, "")
+            player_name: str | None = slots.get(SLOT_NAME, {}).get(CONF_VALUE, "")
+            area_id = slots.get(SLOT_AREA, {}).get(CONF_VALUE, "")
+            floor_id = slots.get(SLOT_FLOOR, {}).get(CONF_VALUE, "")
 
             # update target player slot in case we have any errors.
-            slots[CONF_TARGET_PLAYER] = {
+            slots[SLOT_TARGET_PLAYER] = {
                 CONF_TEXT: player_name + area_id + floor_id,  # only 1 should be populated, others are empty strings.
                 CONF_VALUE: "unknown"
             }
@@ -124,8 +142,8 @@ class SpotifyPlusIntentHandler(IntentHandler):
                 intentObj.hass,
                 matchConstraints,
                 MatchTargetsPreferences(
-                    area_id=slots.get("preferred_area_id", {}).get(CONF_VALUE),
-                    floor_id=slots.get("preferred_floor_id", {}).get(CONF_VALUE),
+                    area_id=slots.get(SLOT_PREFERRED_AREA_ID, {}).get(CONF_VALUE),
+                    floor_id=slots.get(SLOT_PREFERRED_FLOOR_ID, {}).get(CONF_VALUE),
                 ),
             )
             if (self.logsi.IsOn(SILevel.Verbose)):
@@ -204,7 +222,7 @@ class SpotifyPlusIntentHandler(IntentHandler):
             # update target player slot that contains the selected player info.
             # note we will use the friendly name / area / floor value supplied, 
             # and just update the entity_id value.
-            slots[CONF_TARGET_PLAYER] = {
+            slots[SLOT_TARGET_PLAYER] = {
                 CONF_TEXT: player_name + area_id + floor_id,  # only 1 should be populated, others are empty strings.
                 CONF_VALUE: playerEntityState.entity_id
             }
@@ -214,10 +232,12 @@ class SpotifyPlusIntentHandler(IntentHandler):
 
             # trace.
             if (self.logsi.IsOn(SILevel.Verbose)):
-                self.logsi.LogDictionary(SILevel.Verbose, "Current slot values for intent: \"%s\"" % intentObj.intent_type, slots, colorValue=SIColors.Khaki)
+                self.logsi.LogDictionary(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_SLOT_INFO % intentObj.intent_type, slots, colorValue=SIColors.Khaki)
 
-            # is media player state in the desired state (e.g. playing? paused? etc)?
+            # do we need to check player state?
             if (desiredStates is not None):
+
+                # is media player state in the desired state (e.g. playing? paused? etc)?
                 if (playerEntityState.state not in desiredStates):
                     responseText = await get_intent_response_resource(desiredStateResponseKey, slots, intentObj, PLATFORM_SPOTIFYPLUS)
                     intentResponse.async_set_speech(responseText)

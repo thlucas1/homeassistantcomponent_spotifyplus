@@ -57,6 +57,11 @@ class STAppMessages:
     Intent handler response: '%s'
     """
 
+    MSG_INTENT_HANDLER_SLOT_INFO:str = "Current slot values for intent: '%s'"
+    """
+    Current slot values for intent: '%s'
+    """
+
     MSG_INTENT_MATCH_CONSTRAINTS_REQ:str="Intent matching contraints request: '%s'"
     """
     Intent matching contraints request: '%s'

@@ -28,8 +28,8 @@ intents:
 
         slots:
 
-          name: "Spotify Premium"     # requires a value since no player name was specified.
-          player_volume_step_pct: 10  # shuffle mode disabled by default.
+          name: "Spotify Premium" # default media player alias.
+          player_volume_step_pct: 10
 
         response: default_no_player
 
@@ -47,8 +47,8 @@ intents:
 
         slots:
 
-          name: ""                    # requires a value since no player name was specified.
-          player_volume_step_pct: 10  # shuffle mode disabled by default.
+          name: ""
+          player_volume_step_pct: 10
 
         response: default_by_name
 
@@ -66,9 +66,9 @@ intents:
  
         slots:
 
-          area: ""                    # requires a value to be assigned in case it could not be resolved.
-          name: ""                    # requires a value since no player name was specified.
-          player_volume_step_pct: 10  # shuffle mode disabled by default.
+          area: ""
+          name: ""
+          player_volume_step_pct: 10
 
         response: default_by_area
 

@@ -1,7 +1,6 @@
 import voluptuous as vol
 
 from homeassistant.components.media_player import MediaPlayerEntityFeature
-from homeassistant.const import SERVICE_VOLUME_MUTE
 from homeassistant.core import State
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv
@@ -16,13 +15,18 @@ from smartinspectpython.siauto import SILevel, SIColors
 
 from ..appmessages import STAppMessages
 from ..const import (
-    DOMAIN_MEDIA_PLAYER,
-    INTENT_VOLUME_MUTE_ON,
+    CONF_VALUE,
+    DOMAIN,
+    INTENT_PLAYER_SET_VOLUME_LEVEL,
     PLATFORM_SPOTIFYPLUS,
     RESPONSE_ERROR_UNHANDLED,
+    RESPONSE_PLAYER_NOT_PLAYING_MEDIA,
+    SERVICE_SPOTIFY_PLAYER_SET_VOLUME_LEVEL,
     SLOT_AREA,
+    SLOT_DELAY,
     SLOT_FLOOR,
     SLOT_NAME,
+    SLOT_PLAYER_VOLUME_LEVEL_PCT,
     SLOT_PREFERRED_AREA_ID,
     SLOT_PREFERRED_FLOOR_ID,
 )
@@ -30,9 +34,9 @@ from ..const import (
 from .spotifyplusintenthandler import SpotifyPlusIntentHandler
 
 
-class SpotifyPlusVolumeMuteOn_Handler(SpotifyPlusIntentHandler):
+class SpotifyPlusPlayerSetVolumeLevel_Handler(SpotifyPlusIntentHandler):
     """
-    Handles intents for SpotifyPlusVolumeMuteOn.
+    Handles intents for SpotifyPlusPlayerSetVolumeLevel.
     """
     def __init__(self) -> None:
         """
@@ -42,8 +46,8 @@ class SpotifyPlusVolumeMuteOn_Handler(SpotifyPlusIntentHandler):
         super().__init__()
 
         # set intent handler basics.
-        self.description = "Mute volume for the specified SpotifyPlus media player."
-        self.intent_type = INTENT_VOLUME_MUTE_ON
+        self.description = "Set volume level for the specified SpotifyPlus media player."
+        self.intent_type = INTENT_PLAYER_SET_VOLUME_LEVEL
         self.platforms = {PLATFORM_SPOTIFYPLUS}
 
 
@@ -62,7 +66,8 @@ class SpotifyPlusVolumeMuteOn_Handler(SpotifyPlusIntentHandler):
             vol.Optional(SLOT_PREFERRED_FLOOR_ID): cv.string,
 
             # slots for other service arguments.
-            # n/a.
+            vol.Optional(SLOT_DELAY, default=0.50): vol.Any(None, vol.All(vol.Coerce(float), vol.Range(min=0, max=10.0))),
+            vol.Optional(SLOT_PLAYER_VOLUME_LEVEL_PCT, default=10): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=100))),
         }
 
 
@@ -93,7 +98,7 @@ class SpotifyPlusVolumeMuteOn_Handler(SpotifyPlusIntentHandler):
                 intentObj,
                 intentResponse,
                 slots=intentObj.slots,
-                desiredFeatures=MediaPlayerEntityFeature.VOLUME_MUTE | MediaPlayerEntityFeature.PLAY_MEDIA,
+                desiredFeatures=MediaPlayerEntityFeature.VOLUME_SET | MediaPlayerEntityFeature.PLAY_MEDIA,
                 desiredStates=None,
                 desiredStateResponseKey=None,
             )
@@ -104,20 +109,23 @@ class SpotifyPlusVolumeMuteOn_Handler(SpotifyPlusIntentHandler):
                 return intentResponse
             
             # get optional arguments (if provided).
-            # n/a
+            delay = slots.get(SLOT_DELAY, {}).get(CONF_VALUE, None)
+            player_volume_level_pct = slots.get(SLOT_PLAYER_VOLUME_LEVEL_PCT, {}).get(CONF_VALUE, "on")
 
             # set service name and build parameters.
-            svcName:str = SERVICE_VOLUME_MUTE
+            svcName:str = SERVICE_SPOTIFY_PLAYER_SET_VOLUME_LEVEL
             svcData:dict = \
             {
                 "entity_id": playerEntityState.entity_id,
-                "is_volume_muted": True
+                "volume_level": player_volume_level_pct,
+                "device_id": "",  # always use current device for this service call.
+                "delay": delay
             }
 
             # call integration service for this intent.
             self.logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (svcName, playerEntityState.entity_id), colorValue=SIColors.Khaki)
             await intentObj.hass.services.async_call(
-                DOMAIN_MEDIA_PLAYER,
+                DOMAIN,
                 svcName,
                 svcData,
                 blocking=True,

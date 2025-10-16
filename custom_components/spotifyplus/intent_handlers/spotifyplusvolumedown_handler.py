@@ -16,13 +16,15 @@ from smartinspectpython.siauto import SILevel, SIColors
 
 from ..appmessages import STAppMessages
 from ..const import (
-    CONF_AREA,
-    CONF_FLOOR,
-    CONF_NAME,
     DOMAIN_MEDIA_PLAYER,
-    PLATFORM_SPOTIFYPLUS,
     INTENT_VOLUME_DOWN,
+    PLATFORM_SPOTIFYPLUS,
     RESPONSE_ERROR_UNHANDLED,
+    SLOT_AREA,
+    SLOT_FLOOR,
+    SLOT_NAME,
+    SLOT_PREFERRED_AREA_ID,
+    SLOT_PREFERRED_FLOOR_ID,
 )
 
 from .spotifyplusintenthandler import SpotifyPlusIntentHandler
@@ -53,19 +55,18 @@ class SpotifyPlusVolumeDown_Handler(SpotifyPlusIntentHandler):
         return {
 
             # slots that determine which media player entity will be used.
-            vol.Optional(CONF_NAME): cv.string,
-            vol.Optional(CONF_AREA): cv.string,
-            vol.Optional(CONF_FLOOR): cv.string,
-            vol.Optional("preferred_area_id"): cv.string,
-            vol.Optional("preferred_floor_id"): cv.string,
+            vol.Optional(SLOT_NAME): cv.string,
+            vol.Optional(SLOT_AREA): cv.string,
+            vol.Optional(SLOT_FLOOR): cv.string,
+            vol.Optional(SLOT_PREFERRED_AREA_ID): cv.string,
+            vol.Optional(SLOT_PREFERRED_FLOOR_ID): cv.string,
 
             # slots for other service arguments.
             # n/a.
         }
 
 
-    #async def async_handle(self, intentObj) -> IntentResponse:
-    async def async_handle(self, intentObj: intent.Intent) -> IntentResponse:    # <- "intent.Intent" causes circular reference!
+    async def async_handle(self, intentObj: intent.Intent) -> IntentResponse:
         """
         Handles the intent.
 

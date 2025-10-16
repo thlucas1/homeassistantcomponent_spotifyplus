@@ -1,7 +1,11 @@
 import voluptuous as vol
 
 from homeassistant.components.media_player import MediaPlayerEntityFeature
-from homeassistant.const import SERVICE_VOLUME_MUTE
+from homeassistant.components.media_player.const import (
+    ATTR_MEDIA_ALBUM_NAME,
+    ATTR_MEDIA_CONTENT_ID,
+    ATTR_MEDIA_TITLE,
+)
 from homeassistant.core import State
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv
@@ -11,28 +15,44 @@ from homeassistant.helpers.intent import (
     IntentResponse, 
     _SlotsType,
 )
+from homeassistant.const import (
+    STATE_PAUSED,
+    STATE_PLAYING,
+)
 
 from smartinspectpython.siauto import SILevel, SIColors
 
+from spotifywebapipython.spotifymediatypes import SpotifyMediaTypes
+
 from ..appmessages import STAppMessages
+from ..utils import get_id_from_uri
 from ..const import (
-    DOMAIN_MEDIA_PLAYER,
-    INTENT_VOLUME_MUTE_ON,
+    ATTR_SPOTIFYPLUS_ITEM_TYPE,
+    CONF_TEXT,
+    CONF_VALUE,
+    INTENT_NOWPLAYING_INFO_PODCAST,
     PLATFORM_SPOTIFYPLUS,
     RESPONSE_ERROR_UNHANDLED,
+    RESPONSE_NOWPLAYING_INFO_PODCAST,
+    RESPONSE_NOWPLAYING_NO_MEDIA_PODCAST,
+    RESPONSE_PLAYER_NOT_PLAYING_MEDIA,
     SLOT_AREA,
+    SLOT_PODCAST_TITLE,
+    SLOT_EPISODE_TITLE,
+    SLOT_EPISODE_URL,
     SLOT_FLOOR,
     SLOT_NAME,
     SLOT_PREFERRED_AREA_ID,
     SLOT_PREFERRED_FLOOR_ID,
+    SPOTIFY_WEB_URL_PFX,
 )
 
-from .spotifyplusintenthandler import SpotifyPlusIntentHandler
+from .spotifyplusintenthandler import SpotifyPlusIntentHandler, get_intent_response_resource
 
 
-class SpotifyPlusVolumeMuteOn_Handler(SpotifyPlusIntentHandler):
+class SpotifyPlusNowPlayingInfoPodcast_Handler(SpotifyPlusIntentHandler):
     """
-    Handles intents for SpotifyPlusVolumeMuteOn.
+    Handles intents for SpotifyPlusNowPlayingInfoPodcast.
     """
     def __init__(self) -> None:
         """
@@ -42,8 +62,8 @@ class SpotifyPlusVolumeMuteOn_Handler(SpotifyPlusIntentHandler):
         super().__init__()
 
         # set intent handler basics.
-        self.description = "Mute volume for the specified SpotifyPlus media player."
-        self.intent_type = INTENT_VOLUME_MUTE_ON
+        self.description = "Queries media player state for currently playing podcast episode information."
+        self.intent_type = INTENT_NOWPLAYING_INFO_PODCAST
         self.platforms = {PLATFORM_SPOTIFYPLUS}
 
 
@@ -62,7 +82,9 @@ class SpotifyPlusVolumeMuteOn_Handler(SpotifyPlusIntentHandler):
             vol.Optional(SLOT_PREFERRED_FLOOR_ID): cv.string,
 
             # slots for other service arguments.
-            # n/a.
+            vol.Optional(SLOT_PODCAST_TITLE): cv.string,
+            vol.Optional(SLOT_EPISODE_TITLE): cv.string,
+            vol.Optional(SLOT_EPISODE_URL): cv.string,
         }
 
 
@@ -93,9 +115,9 @@ class SpotifyPlusVolumeMuteOn_Handler(SpotifyPlusIntentHandler):
                 intentObj,
                 intentResponse,
                 slots=intentObj.slots,
-                desiredFeatures=MediaPlayerEntityFeature.VOLUME_MUTE | MediaPlayerEntityFeature.PLAY_MEDIA,
-                desiredStates=None,
-                desiredStateResponseKey=None,
+                desiredFeatures=MediaPlayerEntityFeature.PLAY_MEDIA,
+                desiredStates=[STATE_PLAYING, STATE_PAUSED],
+                desiredStateResponseKey=RESPONSE_PLAYER_NOT_PLAYING_MEDIA,
             )
 
             # if media player was not resolved, then we are done;
@@ -106,26 +128,43 @@ class SpotifyPlusVolumeMuteOn_Handler(SpotifyPlusIntentHandler):
             # get optional arguments (if provided).
             # n/a
 
-            # set service name and build parameters.
-            svcName:str = SERVICE_VOLUME_MUTE
-            svcData:dict = \
-            {
-                "entity_id": playerEntityState.entity_id,
-                "is_volume_muted": True
-            }
+            # is now playing item a podcast episode?
+            item_type:str = playerEntityState.attributes.get(ATTR_SPOTIFYPLUS_ITEM_TYPE)
+            if (item_type != SpotifyMediaTypes.PODCAST.value):
 
-            # call integration service for this intent.
-            self.logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (svcName, playerEntityState.entity_id), colorValue=SIColors.Khaki)
-            await intentObj.hass.services.async_call(
-                DOMAIN_MEDIA_PLAYER,
-                svcName,
-                svcData,
-                blocking=True,
-                context=intentObj.context,
-            )
+                # no - requested info is not available.
+                responseText = await get_intent_response_resource(RESPONSE_NOWPLAYING_NO_MEDIA_PODCAST, slots, intentObj, PLATFORM_SPOTIFYPLUS)
+                intentResponse.async_set_speech(responseText)
+                self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_RESPONSE % (intentObj.intent_type), intentResponse, colorValue=SIColors.Khaki)
+                return intentResponse
+
+            # example:
+            # sp_item_type: podcast
+            # media_content_id: spotify:episode:3npL6aA9rshrP85Gl1EK1V
+            # media_title: Maren Morris
+            # media_album_name: Armchair Expert with Dax Shepard
+
+            # get now playing details.
+            podcast_name:str = playerEntityState.attributes.get(ATTR_MEDIA_ALBUM_NAME)
+            episode_name:str = playerEntityState.attributes.get(ATTR_MEDIA_TITLE)
+            episode_uri:str = playerEntityState.attributes.get(ATTR_MEDIA_CONTENT_ID)
+
+            # get id portion of spotify uri value.
+            episode_id:str = get_id_from_uri(episode_uri)
+
+            # update slots with returned info.
+            slots[SLOT_PODCAST_TITLE] = { CONF_TEXT: podcast_name, CONF_VALUE: "" }
+            slots[SLOT_EPISODE_TITLE] = { CONF_TEXT: episode_name, CONF_VALUE: episode_uri }
+            slots[SLOT_EPISODE_URL] = { CONF_TEXT: "Spotify", CONF_VALUE: f"{SPOTIFY_WEB_URL_PFX}/{SpotifyMediaTypes.EPISODE.value}/{episode_id}" }
+
+            # trace.
+            if (self.logsi.IsOn(SILevel.Verbose)):
+                self.logsi.LogDictionary(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_SLOT_INFO % intentObj.intent_type, slots, colorValue=SIColors.Khaki)
 
             # return intent response.
             intentResponse.speech_slots = slots
+            responseText = await get_intent_response_resource(RESPONSE_NOWPLAYING_INFO_PODCAST, slots, intentObj, PLATFORM_SPOTIFYPLUS)
+            intentResponse.async_set_speech(responseText)
             self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_RESPONSE % (intentObj.intent_type), intentResponse, colorValue=SIColors.Khaki)
             return intentResponse
 

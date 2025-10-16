@@ -39,6 +39,15 @@ async def async_setup_intents(hass: HomeAssistant) -> None:
         #player_name_list = await async_get_slot_list_player_name(hass)
            
         # register all intents this component provides.
+        register_intent_handler(hass, SpotifyPlusFavoriteArtistAdd_Handler())
+        register_intent_handler(hass, SpotifyPlusFavoriteArtistRemove_Handler())
+        register_intent_handler(hass, SpotifyPlusFavoriteTrackAdd_Handler())
+        register_intent_handler(hass, SpotifyPlusFavoriteTrackRemove_Handler())
+        register_intent_handler(hass, SpotifyPlusGetInfoArtistBio_Handler())
+        register_intent_handler(hass, SpotifyPlusNowPlayingInfoArtistBio_Handler())
+        register_intent_handler(hass, SpotifyPlusNowPlayingInfoAudiobook_Handler())
+        register_intent_handler(hass, SpotifyPlusNowPlayingInfoPodcast_Handler())
+        register_intent_handler(hass, SpotifyPlusNowPlayingInfoTrack_Handler())
         register_intent_handler(hass, SpotifyPlusPlayerMediaPause_Handler())
         register_intent_handler(hass, SpotifyPlusPlayerMediaResume_Handler())
         register_intent_handler(hass, SpotifyPlusPlayerMediaSkipNext_Handler())
@@ -46,6 +55,7 @@ async def async_setup_intents(hass: HomeAssistant) -> None:
         register_intent_handler(hass, SpotifyPlusPlayerMediaSkipStart_Handler())
         register_intent_handler(hass, SpotifyPlusPlayerSetRepeatMode_Handler())
         register_intent_handler(hass, SpotifyPlusPlayerSetShuffleMode_Handler())
+        register_intent_handler(hass, SpotifyPlusPlayerSetVolumeLevel_Handler())
         register_intent_handler(hass, SpotifyPlusVolumeDown_Handler())
         register_intent_handler(hass, SpotifyPlusVolumeMuteOff_Handler()) 
         register_intent_handler(hass, SpotifyPlusVolumeMuteOn_Handler())

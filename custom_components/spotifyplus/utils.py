@@ -1,4 +1,42 @@
 
+def get_id_from_uri(
+    uri:str, 
+    ) -> str:
+    """
+    Get the id portion from a Spotify uri value.
+        
+    Args:
+        uri (str):  
+            The Spotify URI value.
+            Example: `spotify:track:5v5ETK9WFXAnGQ3MRubKuE`
+                
+    Returns:
+        A string containing the id value.
+            
+    No exceptions are raised with this method.
+    """
+    result:str = None
+        
+    try:
+            
+        # validations.
+        if uri is None or len(uri.strip()) == 0:
+            return result
+
+        # get Id from uri value.
+        colonCnt:int = uri.count(':')
+        if colonCnt == 2:
+            idx:int = uri.rfind(':')
+            if idx > -1:
+                result = uri[idx+1:]
+
+        return result
+
+    except Exception:
+            
+        return None
+
+
 def passwordMaskDictionary(inputObj:dict) -> dict:
     """
     Checks keys in a dictionary any keys that contain `password` and masks the

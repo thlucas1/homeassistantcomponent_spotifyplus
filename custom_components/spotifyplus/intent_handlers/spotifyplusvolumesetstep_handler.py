@@ -10,25 +10,23 @@ from homeassistant.helpers.intent import (
     IntentResponse, 
     _SlotsType,
 )
-from homeassistant.const import (
-    STATE_PAUSED,
-    STATE_PLAYING,
-)
 
 from smartinspectpython.siauto import SILevel, SIColors
 
 from ..appmessages import STAppMessages
 from ..const import (
-    CONF_AREA,
-    CONF_FLOOR,
-    CONF_NAME,
     CONF_VALUE,
     DOMAIN,
-    PLATFORM_SPOTIFYPLUS,
     INTENT_VOLUME_SET_STEP,
+    PLATFORM_SPOTIFYPLUS,
     RESPONSE_ERROR_UNHANDLED,
-    RESPONSE_PLAYER_NOT_PLAYING_MEDIA,
     SERVICE_VOLUME_SET_STEP,
+    SLOT_AREA,
+    SLOT_FLOOR,
+    SLOT_NAME,
+    SLOT_PLAYER_VOLUME_STEP_PCT,
+    SLOT_PREFERRED_AREA_ID,
+    SLOT_PREFERRED_FLOOR_ID,
 )
 
 from .spotifyplusintenthandler import SpotifyPlusIntentHandler
@@ -59,19 +57,18 @@ class SpotifyPlusVolumeSetStep_Handler(SpotifyPlusIntentHandler):
         return {
 
             # slots that determine which media player entity will be used.
-            vol.Optional(CONF_NAME): cv.string,
-            vol.Optional(CONF_AREA): cv.string,
-            vol.Optional(CONF_FLOOR): cv.string,
-            vol.Optional("preferred_area_id"): cv.string,
-            vol.Optional("preferred_floor_id"): cv.string,
+            vol.Optional(SLOT_NAME): cv.string,
+            vol.Optional(SLOT_AREA): cv.string,
+            vol.Optional(SLOT_FLOOR): cv.string,
+            vol.Optional(SLOT_PREFERRED_AREA_ID): cv.string,
+            vol.Optional(SLOT_PREFERRED_FLOOR_ID): cv.string,
 
             # slots for other service arguments.
-            vol.Optional("player_volume_step_pct", default=10): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=100))),
+            vol.Optional(SLOT_PLAYER_VOLUME_STEP_PCT, default=10): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=100))),
         }
 
 
-    #async def async_handle(self, intentObj) -> IntentResponse:
-    async def async_handle(self, intentObj: intent.Intent) -> IntentResponse:    # <- "intent.Intent" causes circular reference!
+    async def async_handle(self, intentObj: intent.Intent) -> IntentResponse:
         """
         Handles the intent.
 
@@ -109,7 +106,7 @@ class SpotifyPlusVolumeSetStep_Handler(SpotifyPlusIntentHandler):
                 return intentResponse
             
             # get optional arguments (if provided).
-            player_volume_step_pct = slots.get("player_volume_step_pct", {}).get(CONF_VALUE, 10)
+            player_volume_step_pct = slots.get(SLOT_PLAYER_VOLUME_STEP_PCT, {}).get(CONF_VALUE, 10)
 
             # set service name and build parameters.
             svcName:str = SERVICE_VOLUME_SET_STEP

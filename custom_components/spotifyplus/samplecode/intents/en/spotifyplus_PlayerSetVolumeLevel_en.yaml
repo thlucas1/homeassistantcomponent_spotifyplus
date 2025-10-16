@@ -2,77 +2,77 @@
 # SpotifyPlus integration intent custom sentence and response definitions.
 #
 # Language: en, English
-# Intent:   SpotifyPlusVolumeMuteOn
-# Location: custom_sentences/en/spotifyplus_VolumeMuteOn_en.yaml
+# Intent:   SpotifyPlusPlayerSetVolumeLevel
+# Location: custom_sentences/en/spotifyplus_PlayerSetVolumeLevel_en.yaml
 # ============================================================================
 language: en
 intents:
 
-  SpotifyPlusVolumeMuteOn:
+  SpotifyPlusPlayerSetVolumeLevel:
 
     data:
 
       - sentences:
 
-          - "mute spotify [player] [volume] [level]"
-          - "spotify mute [player] [volume] [level]"
+          - "[set] spotify volume [level] [to|2] {player_volume_level_pct} [percent|%]"
 
             # Base sentence phrases for this intent.
             # This sentence is recognized when a name / area is NOT provided in the spoken command.  
             # In this case, the first active SpotifyPlus media player is used.
 
             # __Example Phrases - Default Player__  
-            # - "spotify mute player volume level"
-            # - "spotify mute player volume"
-            # - "spotify mute player"
-            # - "spotify mute"
-            # - "mute spotify player volume level"
-            # - "mute spotify player volume"
-            # - "mute spotify player"
-            # - "mute spotify"
+            # - "spotify volume level to 10 percent"
+            # - "spotify volume level to 10 %"
+            # - "spotify volume level 10 percent"
+            # - "spotify volume 10 percent"
+            # - "set spotify volume 10"
 
         slots:
 
           name: "Spotify Premium" # default media player alias.
+          delay: 0.50
+          player_volume_level_pct: 10
 
         response: default_no_player
 
       - sentences:
 
-          - "mute spotify [player] [volume] [level] <on_spotifyplus_player_name>"
-          - "spotify mute [player] [volume] [level] <on_spotifyplus_player_name>"
+          - "[set] spotify volume [level] [to|2] {player_volume_level_pct} [percent|%] <on_spotifyplus_player_name>"
 
             # This sentence is recognized when a player name is provided in the spoken 
             # command (e.g. "on player Spotify Premium", "on Todds player", etc).  
             # Supports the same base sentence phrases for this intent.
 
             # __Example Phrases - By Player Name__  
-            # - "spotify mute volume for player spotify premium"
-            # - "spotify mute volume for spotify premium player"
+            # - "set spotify volume 10 percent for player spotify premium"
+            # - "set spotify volume 10 percent for spotify premium player"
 
         slots:
 
           name: ""
+          delay: 0.50
+          player_volume_level_pct: 10
 
         response: default_by_name
 
       - sentences:
 
-          - "mute spotify [player] [volume] [level] <in_spotifyplus_player_area>"
-          - "spotify mute [player] [volume] [level] <in_spotifyplus_player_area>"
+          - "[set] spotify volume [level] [to|2] {player_volume_level_pct} [percent|%] <in_spotifyplus_player_area>"
 
             # This sentence is recognized when a player area is provided in the spoken 
             # command (e.g. "in the Living Room area", "in the Living Room", etc).  
             # Supports the same base sentence phrases for this intent.
 
             # __Example Phrases - By Player Area__  
-            # - "spotify mute volume in the Office area"
-            # - "spotify mute volume in the Office"
+            # - "set spotify volume 10 percent in the Office area"
+            # - "set spotify volume 10 percent in the Office"
  
         slots:
 
           area: ""
           name: ""
+          delay: 0.50
+          player_volume_level_pct: 10
 
         response: default_by_area
 
@@ -84,10 +84,10 @@ intents:
 responses:
   intents:
 
-    SpotifyPlusVolumeMuteOn:
+    SpotifyPlusPlayerSetVolumeLevel:
 
-      default_no_player: "Okay, Spotify volume was muted for default player \"{{ slots.target_player.text }}\"."
-      default_by_name: "Okay, Spotify volume was muted for named player \"{{ slots.target_player.text }}\"."
-      default_by_area: "Okay, Spotify volume was muted in the \"{{ slots.target_player.text }}\" area."
-      default: "Okay, Spotify volume was muted."
+      default_no_player: "Okay, Spotify volume level set to \"{{ slots.player_volume_level_pct.text }}%\" for default player \"{{ slots.target_player.text }}\"."
+      default_by_name: "Okay, Spotify volume level set to \"{{ slots.player_volume_level_pct.text }}%\" for named player \"{{ slots.target_player.text }}\"."
+      default_by_area: "Okay, Spotify volume level set to \"{{ slots.player_volume_level_pct.text }}%\" in the \"{{ slots.target_player.text }}\" area."
+      default: "Okay, Spotify volume level set to \"{{ slots.player_volume_level_pct.text }}%\"."
 

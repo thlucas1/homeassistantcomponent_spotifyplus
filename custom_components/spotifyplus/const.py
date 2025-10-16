@@ -2,7 +2,6 @@
 Constants for the SpotifyPlus component.
 """
 import logging
-from homeassistant.components.media_player import MediaType
 
 DOMAIN = "spotifyplus"
 """ Domain identifier for this integration (spotifyplus). """
@@ -13,8 +12,10 @@ PLATFORM_SPOTIFYPLUS = DOMAIN
 DOMAIN_SCRIPT = "script"
 """ Domain identifier for script integration (script). """
 
-DOMAIN_MEDIA_PLAYER:str = "media_player"
+DOMAIN_MEDIA_PLAYER = "media_player"
 """ Domain identifier for media players (media_player). """
+
+SPOTIFY_WEB_URL_PFX = "https://open.spotify.com/"
 
 LOGGER = logging.getLogger(__package__)
 
@@ -56,139 +57,213 @@ SPOTIFY_SCOPES:list = \
 ]
 
 # -----------------------------------------------------------------------------------
+# Custom State attribute identifiers.
+# -----------------------------------------------------------------------------------
+ATTR_SPOTIFYPLUS_ARTIST_URI = "sp_artist_uri"
+ATTR_SPOTIFYPLUS_CONTEXT_URI = "sp_context_uri"
+ATTR_SPOTIFYPLUS_DEVICE_ID = "sp_device_id"
+ATTR_SPOTIFYPLUS_DEVICE_NAME = "sp_device_name"
+ATTR_SPOTIFYPLUS_DEVICE_IS_BRAND_SONOS = "sp_device_is_brand_sonos"
+ATTR_SPOTIFYPLUS_DEVICE_IS_CHROMECAST = "sp_device_is_chromecast"
+ATTR_SPOTIFYPLUS_DEVICE_IS_RESTRICTED = "sp_device_is_restricted"
+ATTR_SPOTIFYPLUS_DEVICE_MUSIC_SOURCE = "sp_device_music_source"
+ATTR_SPOTIFYPLUS_ITEM_TYPE = "sp_item_type"
+ATTR_SPOTIFYPLUS_NOWPLAYING_IMAGE_URL = "sp_nowplaying_image_url"
+ATTR_SPOTIFYPLUS_PLAY_TIME_REMAINING_EST = "sp_play_time_remaining_est"
+ATTR_SPOTIFYPLUS_PLAYING_TYPE = "sp_playing_type"
+ATTR_SPOTIFYPLUS_PLAYLIST_NAME = "sp_playlist_name"
+ATTR_SPOTIFYPLUS_PLAYLIST_URI = "sp_playlist_uri"
+ATTR_SPOTIFYPLUS_SOURCE_LIST_HIDE = "sp_source_list_hide"
+ATTR_SPOTIFYPLUS_TRACK_IS_EXPLICIT = "sp_track_is_explicit"
+ATTR_SPOTIFYPLUS_TRACK_URI_ORIGIN = "sp_track_uri_origin"
+ATTR_SPOTIFYPLUS_USER_COUNTRY = "sp_user_country"
+ATTR_SPOTIFYPLUS_USER_DISPLAY_NAME = "sp_user_display_name"
+ATTR_SPOTIFYPLUS_USER_EMAIL = "sp_user_email"
+ATTR_SPOTIFYPLUS_USER_HAS_WEB_PLAYER_CREDENTIALS = "sp_user_has_web_player_credentials"
+ATTR_SPOTIFYPLUS_USER_ID = "sp_user_id"
+ATTR_SPOTIFYPLUS_USER_PRODUCT = "sp_user_product"
+ATTR_SPOTIFYPLUS_USER_URI = "sp_user_uri"
+ATTR_VOLUME_STEP = "volume_step"
+
+# -----------------------------------------------------------------------------------
 # Custom Service identifiers.
 # -----------------------------------------------------------------------------------
-SERVICE_SPOTIFY_ADD_PLAYER_QUEUE_ITEMS:str = 'add_player_queue_items'
-SERVICE_SPOTIFY_CHECK_ALBUM_FAVORITES:str = 'check_album_favorites'
-SERVICE_SPOTIFY_CHECK_ARTISTS_FOLLOWING:str = 'check_artists_following'
-SERVICE_SPOTIFY_CHECK_AUDIOBOOK_FAVORITES:str = 'check_audiobook_favorites'
-SERVICE_SPOTIFY_CHECK_EPISODE_FAVORITES:str = 'check_episode_favorites'
-SERVICE_SPOTIFY_CHECK_PLAYLIST_FOLLOWERS:str = 'check_playlist_followers'
-SERVICE_SPOTIFY_CHECK_SHOW_FAVORITES:str = 'check_show_favorites'
-SERVICE_SPOTIFY_CHECK_TRACK_FAVORITES:str = 'check_track_favorites'
-SERVICE_SPOTIFY_CHECK_USERS_FOLLOWING:str = 'check_users_following'
-SERVICE_SPOTIFY_FOLLOW_ARTISTS:str = 'follow_artists'
-SERVICE_SPOTIFY_FOLLOW_PLAYLIST:str = 'follow_playlist'
-SERVICE_SPOTIFY_FOLLOW_USERS:str = 'follow_users'
-SERVICE_SPOTIFY_GET_ALBUM:str = 'get_album'
-SERVICE_SPOTIFY_GET_ALBUM_FAVORITES:str = 'get_album_favorites'
-SERVICE_SPOTIFY_GET_ALBUM_NEW_RELEASES:str = 'get_album_new_releases'
-SERVICE_SPOTIFY_GET_ALBUM_TRACKS:str = 'get_album_tracks'
-SERVICE_SPOTIFY_GET_ARTIST:str = 'get_artist'
-SERVICE_SPOTIFY_GET_ARTIST_ALBUMS:str = 'get_artist_albums'
-SERVICE_SPOTIFY_GET_ARTIST_INFO:str = 'get_artist_info'
-SERVICE_SPOTIFY_GET_ARTIST_RELATED_ARTISTS:str = 'get_artist_related_artists'
-SERVICE_SPOTIFY_GET_ARTIST_TOP_TRACKS:str = 'get_artist_top_tracks'
-SERVICE_SPOTIFY_GET_ARTISTS_FOLLOWED:str = 'get_artists_followed'
-SERVICE_SPOTIFY_GET_AUDIOBOOK:str = 'get_audiobook'
-SERVICE_SPOTIFY_GET_AUDIOBOOK_CHAPTERS:str = 'get_audiobook_chapters'
-SERVICE_SPOTIFY_GET_AUDIOBOOK_FAVORITES:str = 'get_audiobook_favorites'
-SERVICE_SPOTIFY_GET_BROWSE_CATEGORYS_LIST:str = 'get_browse_categorys_list'
-SERVICE_SPOTIFY_GET_CATEGORY_PLAYLISTS:str = 'get_category_playlists'
-SERVICE_SPOTIFY_GET_CHAPTER:str = 'get_chapter'
-SERVICE_SPOTIFY_GET_COVER_IMAGE_FILE:str = 'get_cover_image_file'
-SERVICE_SPOTIFY_GET_EPISODE:str = 'get_episode'
-SERVICE_SPOTIFY_GET_EPISODE_FAVORITES:str = 'get_episode_favorites'
-SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS:str = 'get_featured_playlists'
-SERVICE_SPOTIFY_GET_ID_FROM_URI:str = 'get_id_from_uri'
-SERVICE_SPOTIFY_GET_IMAGE_PALETTE_COLORS:str = 'get_image_palette_colors'
-SERVICE_SPOTIFY_GET_IMAGE_VIBRANT_COLORS:str = 'get_image_vibrant_colors'
-SERVICE_SPOTIFY_GET_PLAYER_DEVICES:str = 'get_player_devices'
-SERVICE_SPOTIFY_GET_PLAYER_LAST_PLAYED_INFO:str = 'get_player_last_played_info'
-SERVICE_SPOTIFY_GET_PLAYER_NOW_PLAYING:str = 'get_player_now_playing'
-SERVICE_SPOTIFY_GET_PLAYER_PLAYBACK_STATE:str = 'get_player_playback_state'
-SERVICE_SPOTIFY_GET_PLAYER_QUEUE_INFO:str = 'get_player_queue_info'
-SERVICE_SPOTIFY_GET_PLAYER_RECENT_TRACKS:str = 'get_player_recent_tracks'
-SERVICE_SPOTIFY_GET_PLAYLIST:str = 'get_playlist'
-SERVICE_SPOTIFY_GET_PLAYLIST_COVER_IMAGE:str = 'get_playlist_cover_image'
-SERVICE_SPOTIFY_GET_PLAYLIST_FAVORITES:str = 'get_playlist_favorites'
-SERVICE_SPOTIFY_GET_PLAYLIST_ITEMS:str = 'get_playlist_items'
-SERVICE_SPOTIFY_GET_PLAYLISTS_FOR_USER:str = 'get_playlists_for_user'
-SERVICE_SPOTIFY_GET_SHOW:str = 'get_show'
-SERVICE_SPOTIFY_GET_SHOW_EPISODES:str = 'get_show_episodes'
-SERVICE_SPOTIFY_GET_SHOW_FAVORITES:str = 'get_show_favorites'
-SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICE:str = 'get_spotify_connect_device'
-SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES:str = 'get_spotify_connect_devices'
-SERVICE_SPOTIFY_GET_TRACK:str = 'get_track'
-SERVICE_SPOTIFY_GET_TRACK_AUDIO_FEATURES:str = 'get_track_audio_features'
-SERVICE_SPOTIFY_GET_TRACK_FAVORITES:str = 'get_track_favorites'
-SERVICE_SPOTIFY_GET_TRACK_RECOMMENDATIONS:str = 'get_track_recommendations'
-SERVICE_SPOTIFY_GET_TRACKS_AUDIO_FEATURES:str = 'get_tracks_audio_features'
-SERVICE_SPOTIFY_GET_USERS_TOP_ARTISTS:str = 'get_users_top_artists'
-SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS:str = 'get_users_top_tracks'
-SERVICE_SPOTIFY_PLAYER_MEDIA_PAUSE:str = 'player_media_pause'
-SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT:str = 'player_media_play_context'
-SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACK_FAVORITES:str = 'player_media_play_track_favorites'
-SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS:str = 'player_media_play_tracks'
-SERVICE_SPOTIFY_PLAYER_MEDIA_RESUME:str = 'player_media_resume'
-SERVICE_SPOTIFY_PLAYER_MEDIA_SEEK:str = 'player_media_seek'
-SERVICE_SPOTIFY_PLAYER_MEDIA_SKIP_NEXT:str = 'player_media_skip_next'
-SERVICE_SPOTIFY_PLAYER_MEDIA_SKIP_PREVIOUS:str = 'player_media_skip_previous'
-SERVICE_SPOTIFY_PLAYER_SET_REPEAT_MODE:str = 'player_set_repeat_mode'
-SERVICE_SPOTIFY_PLAYER_SET_SHUFFLE_MODE:str = 'player_set_shuffle_mode'
-SERVICE_SPOTIFY_PLAYER_SET_VOLUME_LEVEL:str = 'player_set_volume_level'
-SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK:str = 'player_transfer_playback'
-SERVICE_SPOTIFY_PLAYLIST_CHANGE:str = 'playlist_change'
-SERVICE_SPOTIFY_PLAYLIST_COVER_IMAGE_ADD:str = 'playlist_cover_image_add'
-SERVICE_SPOTIFY_PLAYLIST_CREATE:str = 'playlist_create'
-SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD:str = 'playlist_items_add'
-SERVICE_SPOTIFY_PLAYLIST_ITEMS_CLEAR:str = 'playlist_items_clear'
-SERVICE_SPOTIFY_PLAYLIST_ITEMS_REMOVE:str = 'playlist_items_remove'
-SERVICE_SPOTIFY_PLAYLIST_ITEMS_REORDER:str = 'playlist_items_reorder'
-SERVICE_SPOTIFY_PLAYLIST_ITEMS_REPLACE:str = 'playlist_items_replace'
-SERVICE_SPOTIFY_REMOVE_ALBUM_FAVORITES:str = 'remove_album_favorites'
-SERVICE_SPOTIFY_REMOVE_AUDIOBOOK_FAVORITES:str = 'remove_audiobook_favorites'
-SERVICE_SPOTIFY_REMOVE_EPISODE_FAVORITES:str = 'remove_episode_favorites'
-SERVICE_SPOTIFY_REMOVE_SHOW_FAVORITES:str = 'remove_show_favorites'
-SERVICE_SPOTIFY_REMOVE_TRACK_FAVORITES:str = 'remove_track_favorites'
-SERVICE_SPOTIFY_SAVE_ALBUM_FAVORITES:str = 'save_album_favorites'
-SERVICE_SPOTIFY_SAVE_AUDIOBOOK_FAVORITES:str = 'save_audiobook_favorites'
-SERVICE_SPOTIFY_SAVE_EPISODE_FAVORITES:str = 'save_episode_favorites'
-SERVICE_SPOTIFY_SAVE_SHOW_FAVORITES:str = 'save_show_favorites'
-SERVICE_SPOTIFY_SAVE_TRACK_FAVORITES:str = 'save_track_favorites'
-SERVICE_SPOTIFY_SEARCH_ALL:str = 'search_all'
-SERVICE_SPOTIFY_SEARCH_ALBUMS:str = 'search_albums'
-SERVICE_SPOTIFY_SEARCH_ARTISTS:str = 'search_artists'
-SERVICE_SPOTIFY_SEARCH_AUDIOBOOKS:str = 'search_audiobooks'
-SERVICE_SPOTIFY_SEARCH_EPISODES:str = 'search_episodes'
-SERVICE_SPOTIFY_SEARCH_PLAYLISTS:str = 'search_playlists'
-SERVICE_SPOTIFY_SEARCH_SHOWS:str = 'search_shows'
-SERVICE_SPOTIFY_SEARCH_TRACKS:str = 'search_tracks'
-SERVICE_SPOTIFY_TRIGGER_SCAN_INTERVAL:str = 'trigger_scan_interval'
-SERVICE_SPOTIFY_UNFOLLOW_ARTISTS:str = 'unfollow_artists'
-SERVICE_SPOTIFY_UNFOLLOW_PLAYLIST:str = 'unfollow_playlist'
-SERVICE_SPOTIFY_UNFOLLOW_USERS:str = 'unfollow_users'
-SERVICE_SPOTIFY_ZEROCONF_DEVICE_CONNECT:str = 'zeroconf_device_connect'
-SERVICE_SPOTIFY_ZEROCONF_DEVICE_DISCONNECT:str = 'zeroconf_device_disconnect'
-SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO:str = 'zeroconf_device_getinfo'
-SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES:str = 'zeroconf_discover_devices'
+SERVICE_SPOTIFY_ADD_PLAYER_QUEUE_ITEMS = 'add_player_queue_items'
+SERVICE_SPOTIFY_CHECK_ALBUM_FAVORITES = 'check_album_favorites'
+SERVICE_SPOTIFY_CHECK_ARTISTS_FOLLOWING = 'check_artists_following'
+SERVICE_SPOTIFY_CHECK_AUDIOBOOK_FAVORITES = 'check_audiobook_favorites'
+SERVICE_SPOTIFY_CHECK_EPISODE_FAVORITES = 'check_episode_favorites'
+SERVICE_SPOTIFY_CHECK_PLAYLIST_FOLLOWERS = 'check_playlist_followers'
+SERVICE_SPOTIFY_CHECK_SHOW_FAVORITES = 'check_show_favorites'
+SERVICE_SPOTIFY_CHECK_TRACK_FAVORITES = 'check_track_favorites'
+SERVICE_SPOTIFY_CHECK_USERS_FOLLOWING = 'check_users_following'
+SERVICE_SPOTIFY_FOLLOW_ARTISTS = 'follow_artists'
+SERVICE_SPOTIFY_FOLLOW_PLAYLIST = 'follow_playlist'
+SERVICE_SPOTIFY_FOLLOW_USERS = 'follow_users'
+SERVICE_SPOTIFY_GET_ALBUM = 'get_album'
+SERVICE_SPOTIFY_GET_ALBUM_FAVORITES = 'get_album_favorites'
+SERVICE_SPOTIFY_GET_ALBUM_NEW_RELEASES = 'get_album_new_releases'
+SERVICE_SPOTIFY_GET_ALBUM_TRACKS = 'get_album_tracks'
+SERVICE_SPOTIFY_GET_ARTIST = 'get_artist'
+SERVICE_SPOTIFY_GET_ARTIST_ALBUMS = 'get_artist_albums'
+SERVICE_SPOTIFY_GET_ARTIST_INFO = 'get_artist_info'
+SERVICE_SPOTIFY_GET_ARTIST_RELATED_ARTISTS = 'get_artist_related_artists'
+SERVICE_SPOTIFY_GET_ARTIST_TOP_TRACKS = 'get_artist_top_tracks'
+SERVICE_SPOTIFY_GET_ARTISTS_FOLLOWED = 'get_artists_followed'
+SERVICE_SPOTIFY_GET_AUDIOBOOK = 'get_audiobook'
+SERVICE_SPOTIFY_GET_AUDIOBOOK_CHAPTERS = 'get_audiobook_chapters'
+SERVICE_SPOTIFY_GET_AUDIOBOOK_FAVORITES = 'get_audiobook_favorites'
+SERVICE_SPOTIFY_GET_BROWSE_CATEGORYS_LIST = 'get_browse_categorys_list'
+SERVICE_SPOTIFY_GET_CATEGORY_PLAYLISTS = 'get_category_playlists'
+SERVICE_SPOTIFY_GET_CHAPTER = 'get_chapter'
+SERVICE_SPOTIFY_GET_COVER_IMAGE_FILE = 'get_cover_image_file'
+SERVICE_SPOTIFY_GET_EPISODE = 'get_episode'
+SERVICE_SPOTIFY_GET_EPISODE_FAVORITES = 'get_episode_favorites'
+SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS = 'get_featured_playlists'
+SERVICE_SPOTIFY_GET_ID_FROM_URI = 'get_id_from_uri'
+SERVICE_SPOTIFY_GET_IMAGE_PALETTE_COLORS = 'get_image_palette_colors'
+SERVICE_SPOTIFY_GET_IMAGE_VIBRANT_COLORS = 'get_image_vibrant_colors'
+SERVICE_SPOTIFY_GET_PLAYER_DEVICES = 'get_player_devices'
+SERVICE_SPOTIFY_GET_PLAYER_LAST_PLAYED_INFO = 'get_player_last_played_info'
+SERVICE_SPOTIFY_GET_PLAYER_NOW_PLAYING = 'get_player_now_playing'
+SERVICE_SPOTIFY_GET_PLAYER_PLAYBACK_STATE = 'get_player_playback_state'
+SERVICE_SPOTIFY_GET_PLAYER_QUEUE_INFO = 'get_player_queue_info'
+SERVICE_SPOTIFY_GET_PLAYER_RECENT_TRACKS = 'get_player_recent_tracks'
+SERVICE_SPOTIFY_GET_PLAYLIST = 'get_playlist'
+SERVICE_SPOTIFY_GET_PLAYLIST_COVER_IMAGE = 'get_playlist_cover_image'
+SERVICE_SPOTIFY_GET_PLAYLIST_FAVORITES = 'get_playlist_favorites'
+SERVICE_SPOTIFY_GET_PLAYLIST_ITEMS = 'get_playlist_items'
+SERVICE_SPOTIFY_GET_PLAYLISTS_FOR_USER = 'get_playlists_for_user'
+SERVICE_SPOTIFY_GET_SHOW = 'get_show'
+SERVICE_SPOTIFY_GET_SHOW_EPISODES = 'get_show_episodes'
+SERVICE_SPOTIFY_GET_SHOW_FAVORITES = 'get_show_favorites'
+SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICE = 'get_spotify_connect_device'
+SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICES = 'get_spotify_connect_devices'
+SERVICE_SPOTIFY_GET_TRACK = 'get_track'
+SERVICE_SPOTIFY_GET_TRACK_AUDIO_FEATURES = 'get_track_audio_features'
+SERVICE_SPOTIFY_GET_TRACK_FAVORITES = 'get_track_favorites'
+SERVICE_SPOTIFY_GET_TRACK_RECOMMENDATIONS = 'get_track_recommendations'
+SERVICE_SPOTIFY_GET_TRACKS_AUDIO_FEATURES = 'get_tracks_audio_features'
+SERVICE_SPOTIFY_GET_USERS_TOP_ARTISTS = 'get_users_top_artists'
+SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS = 'get_users_top_tracks'
+SERVICE_SPOTIFY_PLAYER_MEDIA_PAUSE = 'player_media_pause'
+SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT = 'player_media_play_context'
+SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACK_FAVORITES = 'player_media_play_track_favorites'
+SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS = 'player_media_play_tracks'
+SERVICE_SPOTIFY_PLAYER_MEDIA_RESUME = 'player_media_resume'
+SERVICE_SPOTIFY_PLAYER_MEDIA_SEEK = 'player_media_seek'
+SERVICE_SPOTIFY_PLAYER_MEDIA_SKIP_NEXT = 'player_media_skip_next'
+SERVICE_SPOTIFY_PLAYER_MEDIA_SKIP_PREVIOUS = 'player_media_skip_previous'
+SERVICE_SPOTIFY_PLAYER_SET_REPEAT_MODE = 'player_set_repeat_mode'
+SERVICE_SPOTIFY_PLAYER_SET_SHUFFLE_MODE = 'player_set_shuffle_mode'
+SERVICE_SPOTIFY_PLAYER_SET_VOLUME_LEVEL = 'player_set_volume_level'
+SERVICE_SPOTIFY_PLAYER_TRANSFER_PLAYBACK = 'player_transfer_playback'
+SERVICE_SPOTIFY_PLAYLIST_CHANGE = 'playlist_change'
+SERVICE_SPOTIFY_PLAYLIST_COVER_IMAGE_ADD = 'playlist_cover_image_add'
+SERVICE_SPOTIFY_PLAYLIST_CREATE = 'playlist_create'
+SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD = 'playlist_items_add'
+SERVICE_SPOTIFY_PLAYLIST_ITEMS_CLEAR = 'playlist_items_clear'
+SERVICE_SPOTIFY_PLAYLIST_ITEMS_REMOVE = 'playlist_items_remove'
+SERVICE_SPOTIFY_PLAYLIST_ITEMS_REORDER = 'playlist_items_reorder'
+SERVICE_SPOTIFY_PLAYLIST_ITEMS_REPLACE = 'playlist_items_replace'
+SERVICE_SPOTIFY_REMOVE_ALBUM_FAVORITES = 'remove_album_favorites'
+SERVICE_SPOTIFY_REMOVE_AUDIOBOOK_FAVORITES = 'remove_audiobook_favorites'
+SERVICE_SPOTIFY_REMOVE_EPISODE_FAVORITES = 'remove_episode_favorites'
+SERVICE_SPOTIFY_REMOVE_SHOW_FAVORITES = 'remove_show_favorites'
+SERVICE_SPOTIFY_REMOVE_TRACK_FAVORITES = 'remove_track_favorites'
+SERVICE_SPOTIFY_SAVE_ALBUM_FAVORITES = 'save_album_favorites'
+SERVICE_SPOTIFY_SAVE_AUDIOBOOK_FAVORITES = 'save_audiobook_favorites'
+SERVICE_SPOTIFY_SAVE_EPISODE_FAVORITES = 'save_episode_favorites'
+SERVICE_SPOTIFY_SAVE_SHOW_FAVORITES = 'save_show_favorites'
+SERVICE_SPOTIFY_SAVE_TRACK_FAVORITES = 'save_track_favorites'
+SERVICE_SPOTIFY_SEARCH_ALL = 'search_all'
+SERVICE_SPOTIFY_SEARCH_ALBUMS = 'search_albums'
+SERVICE_SPOTIFY_SEARCH_ARTISTS = 'search_artists'
+SERVICE_SPOTIFY_SEARCH_AUDIOBOOKS = 'search_audiobooks'
+SERVICE_SPOTIFY_SEARCH_EPISODES = 'search_episodes'
+SERVICE_SPOTIFY_SEARCH_PLAYLISTS = 'search_playlists'
+SERVICE_SPOTIFY_SEARCH_SHOWS = 'search_shows'
+SERVICE_SPOTIFY_SEARCH_TRACKS = 'search_tracks'
+SERVICE_SPOTIFY_TRIGGER_SCAN_INTERVAL = 'trigger_scan_interval'
+SERVICE_SPOTIFY_UNFOLLOW_ARTISTS = 'unfollow_artists'
+SERVICE_SPOTIFY_UNFOLLOW_PLAYLIST = 'unfollow_playlist'
+SERVICE_SPOTIFY_UNFOLLOW_USERS = 'unfollow_users'
+SERVICE_SPOTIFY_ZEROCONF_DEVICE_CONNECT = 'zeroconf_device_connect'
+SERVICE_SPOTIFY_ZEROCONF_DEVICE_DISCONNECT = 'zeroconf_device_disconnect'
+SERVICE_SPOTIFY_ZEROCONF_DEVICE_GETINFO = 'zeroconf_device_getinfo'
+SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES = 'zeroconf_discover_devices'
 
 # -----------------------------------------------------------------------------------
 # Custom Service Schemas - MediaPlayerEntity enhancements.
 # -----------------------------------------------------------------------------------
-SERVICE_VOLUME_SET_STEP:str = 'volume_set_step'
+SERVICE_VOLUME_SET_STEP = 'volume_set_step'
 
 # -----------------------------------------------------------------------------------
 # Custom Service Schemas - non-Spotify Web API related.
 # -----------------------------------------------------------------------------------
-SERVICE_LIST_APPLICATION_CREDENTIAL_MAPPPINGS:str = 'list_application_credential_mappings'
-SERVICE_TEST_TOKEN_EXPIRE:str = 'test_token_expire'
+SERVICE_LIST_APPLICATION_CREDENTIAL_MAPPPINGS = 'list_application_credential_mappings'
+SERVICE_TEST_TOKEN_EXPIRE = 'test_token_expire'
 
 # -----------------------------------------------------------------------------------
 # Configuration constants.
 # -----------------------------------------------------------------------------------
-CONF_AREA:str = "area"
-CONF_ENTITY_ID:str = "entity_id"
-CONF_FLOOR:str = "floor"
-CONF_NAME:str = "name"
-CONF_DEVICE_NAME:str = "device_name"
-CONF_TEXT:str = "text"
-CONF_VALUE:str = "value"
-CONF_TARGET_PLAYER:str = "target_player"
+CONF_ENTITY_ID = "entity_id"
+CONF_TEXT = "text"
+CONF_VALUE = "value"
+
+# -----------------------------------------------------------------------------------
+# Slot Argument constants.
+# -----------------------------------------------------------------------------------
+SLOT_AREA = "area"
+SLOT_ALBUM_TITLE = "album_title"
+SLOT_ALBUM_URL = "album_url"
+SLOT_ARTIST_BIO = "artist_bio"
+SLOT_ARTIST_NAME = "artist_name"
+SLOT_ARTIST_TITLE = "artist_title"
+SLOT_ARTIST_URL = "artist_url"
+SLOT_AUDIOBOOK_TITLE = "audiobook_title"
+SLOT_AUDIOBOOK_URL = "audiobook_url"
+SLOT_AUTHOR_TITLE = "author_title"
+SLOT_CHAPTER_TITLE = "chapter_title"
+SLOT_DELAY = "delay"
+SLOT_DEVICE_NAME = "device_name"
+SLOT_EPISODE_TITLE = "episode_title"
+SLOT_EPISODE_URL = "episode_url"
+SLOT_FLOOR = "floor"
+SLOT_NAME = "name"
+SLOT_PLAYER_REPEAT_MODE = "player_repeat_mode"
+SLOT_PLAYER_SHUFFLE_MODE = "player_shuffle_mode"
+SLOT_PLAYER_VOLUME_LEVEL_PCT = "player_volume_level_pct"
+SLOT_PLAYER_VOLUME_STEP_PCT = "player_volume_step_pct"
+SLOT_PODCAST_TITLE = "podcast_title"
+SLOT_PREFERRED_AREA_ID = "preferred_area_id"
+SLOT_PREFERRED_FLOOR_ID = "preferred_floor_id"
+SLOT_TARGET_PLAYER = "target_player"
+SLOT_TRACK_TITLE = "track_title"
+SLOT_TRACK_URL = "track_url"
 
 # -----------------------------------------------------------------------------------
 # Intent Handler identifiers.
 # -----------------------------------------------------------------------------------
+INTENT_FAVORITE_ALBUM_ADD = "SpotifyPlusFavoriteAlbumAdd"
+INTENT_FAVORITE_ALBUM_REMOVE = "SpotifyPlusFavoriteAlbumRemove"
+INTENT_FAVORITE_ARTIST_ADD = "SpotifyPlusFavoriteArtistAdd"
+INTENT_FAVORITE_ARTIST_REMOVE = "SpotifyPlusFavoriteArtistRemove"
+INTENT_FAVORITE_AUDIOBOOK_ADD = "SpotifyPlusFavoriteAudiobookAdd"
+INTENT_FAVORITE_AUDIOBOOK_REMOVE = "SpotifyPlusFavoriteAudiobookRemove"
+INTENT_FAVORITE_PLAYLIST_ADD = "SpotifyPlusFavoritePlaylistAdd"
+INTENT_FAVORITE_PLAYLIST_REMOVE = "SpotifyPlusFavoritePlaylistRemove"
+INTENT_FAVORITE_PODCAST_ADD = "SpotifyPlusFavoritePodcastAdd"
+INTENT_FAVORITE_PODCAST_REMOVE = "SpotifyPlusFavoritePodcastRemove"
+INTENT_FAVORITE_PODCAST_EPISODE_ADD = "SpotifyPlusFavoritePodcastEpisodeAdd"
+INTENT_FAVORITE_PODCAST_EPISODE_REMOVE = "SpotifyPlusFavoritePodcastEpisodeRemove"
+INTENT_FAVORITE_TRACK_ADD = "SpotifyPlusFavoriteTrackAdd"
+INTENT_FAVORITE_TRACK_REMOVE = "SpotifyPlusFavoriteTrackRemove"
+INTENT_GET_INFO_ARTIST_BIO = "SpotifyPlusGetInfoArtistBio"
+INTENT_NOWPLAYING_INFO_ARTIST_BIO = "SpotifyPlusNowPlayingInfoArtistBio"
+INTENT_NOWPLAYING_INFO_AUDIOBOOK = "SpotifyPlusNowPlayingInfoAudiobook"
+INTENT_NOWPLAYING_INFO_PODCAST = "SpotifyPlusNowPlayingInfoPodcast"
+INTENT_NOWPLAYING_INFO_TRACK = "SpotifyPlusNowPlayingInfoTrack"
 INTENT_PLAYER_MEDIA_PAUSE = "SpotifyPlusPlayerMediaPause"
 INTENT_PLAYER_MEDIA_RESUME = "SpotifyPlusPlayerMediaResume"
 INTENT_PLAYER_MEDIA_SKIP_NEXT = "SpotifyPlusPlayerMediaSkipNext"
@@ -196,6 +271,7 @@ INTENT_PLAYER_MEDIA_SKIP_PREVIOUS = "SpotifyPlusPlayerMediaSkipPrevious"
 INTENT_PLAYER_MEDIA_SKIP_START = "SpotifyPlusPlayerMediaSkipStart"
 INTENT_PLAYER_SET_REPEAT_MODE = "SpotifyPlusPlayerSetRepeatMode"
 INTENT_PLAYER_SET_SHUFFLE_MODE = "SpotifyPlusPlayerSetShuffleMode"
+INTENT_PLAYER_SET_VOLUME_LEVEL = "SpotifyPlusPlayerSetVolumeLevel"
 INTENT_VOLUME_DOWN = "SpotifyPlusVolumeDown"
 INTENT_VOLUME_MUTE_OFF = "SpotifyPlusVolumeMuteOff"
 INTENT_VOLUME_MUTE_ON = "SpotifyPlusVolumeMuteOn"
@@ -205,11 +281,23 @@ INTENT_VOLUME_UP = "SpotifyPlusVolumeUp"
 # -----------------------------------------------------------------------------------
 # Intent Handler response codes.
 # -----------------------------------------------------------------------------------
-RESPONSE_OK:str = "default"
-RESPONSE_ERROR_UNHANDLED:str = "error_unhandled"
-RESPONSE_PLAYER_FEATURES_NOT_SUPPORTED:str = "player_features_not_supported"
-RESPONSE_PLAYER_NOT_EXPOSED_TO_VOICE:str = "player_not_exposed_to_voice"
-RESPONSE_PLAYER_NOT_MATCHED:str = "player_not_matched"
-RESPONSE_PLAYER_NOT_MATCHED_AREA:str = "player_not_matched_area"
-RESPONSE_PLAYER_NOT_PLAYING_MEDIA:str = "player_not_playing_media"
-RESPONSE_PLAYER_NOT_SPOTIFYPLUS:str = "player_not_spotifyplus"
+RESPONSE_OK = "default"
+RESPONSE_ERROR_UNHANDLED = "error_unhandled"
+RESPONSE_GET_INFO_ARTIST_BIO = "get_info_artist_bio"
+RESPONSE_NOWPLAYING_NO_MEDIA_ALBUM = "nowplaying_no_media_album"
+RESPONSE_NOWPLAYING_NO_MEDIA_ARTIST = "nowplaying_no_media_artist"
+RESPONSE_NOWPLAYING_NO_MEDIA_AUDIOBOOK = "nowplaying_no_media_audiobook"
+RESPONSE_NOWPLAYING_NO_MEDIA_EPISODE = "nowplaying_no_media_episode"
+RESPONSE_NOWPLAYING_NO_MEDIA_PLAYLIST = "nowplaying_no_media_playlist"
+RESPONSE_NOWPLAYING_NO_MEDIA_PODCAST = "nowplaying_no_media_podcast"
+RESPONSE_NOWPLAYING_NO_MEDIA_TRACK = "nowplaying_no_media_track"
+RESPONSE_NOWPLAYING_INFO_AUDIOBOOK = "nowplaying_info_audiobook"
+RESPONSE_NOWPLAYING_INFO_PODCAST = "nowplaying_info_podcast"
+RESPONSE_NOWPLAYING_INFO_TRACK = "nowplaying_info_track"
+RESPONSE_PLAYER_FEATURES_NOT_SUPPORTED = "player_features_not_supported"
+RESPONSE_PLAYER_NOT_EXPOSED_TO_VOICE = "player_not_exposed_to_voice"
+RESPONSE_PLAYER_NOT_MATCHED = "player_not_matched"
+RESPONSE_PLAYER_NOT_MATCHED_AREA = "player_not_matched_area"
+RESPONSE_PLAYER_NOT_PLAYING_MEDIA = "player_not_playing_media"
+RESPONSE_PLAYER_NOT_SPOTIFYPLUS = "player_not_spotifyplus"
+RESPONSE_SPOTIFY_NO_ARTIST_INFO = "spotify_no_artist_info"

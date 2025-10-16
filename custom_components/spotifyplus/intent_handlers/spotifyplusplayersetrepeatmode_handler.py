@@ -19,16 +19,20 @@ from smartinspectpython.siauto import SILevel, SIColors
 
 from ..appmessages import STAppMessages
 from ..const import (
-    CONF_AREA,
-    CONF_FLOOR,
-    CONF_NAME,
     CONF_VALUE,
     DOMAIN,
-    PLATFORM_SPOTIFYPLUS,
     INTENT_PLAYER_SET_REPEAT_MODE,
+    PLATFORM_SPOTIFYPLUS,
     RESPONSE_ERROR_UNHANDLED,
     RESPONSE_PLAYER_NOT_PLAYING_MEDIA,
     SERVICE_SPOTIFY_PLAYER_SET_REPEAT_MODE,
+    SLOT_AREA,
+    SLOT_DELAY,
+    SLOT_FLOOR,
+    SLOT_NAME,
+    SLOT_PLAYER_REPEAT_MODE,
+    SLOT_PREFERRED_AREA_ID,
+    SLOT_PREFERRED_FLOOR_ID,
 )
 
 from .spotifyplusintenthandler import SpotifyPlusIntentHandler
@@ -59,20 +63,19 @@ class SpotifyPlusPlayerSetRepeatMode_Handler(SpotifyPlusIntentHandler):
         return {
 
             # slots that determine which media player entity will be used.
-            vol.Optional(CONF_NAME): cv.string,
-            vol.Optional(CONF_AREA): cv.string,
-            vol.Optional(CONF_FLOOR): cv.string,
-            vol.Optional("preferred_area_id"): cv.string,
-            vol.Optional("preferred_floor_id"): cv.string,
+            vol.Optional(SLOT_NAME): cv.string,
+            vol.Optional(SLOT_AREA): cv.string,
+            vol.Optional(SLOT_FLOOR): cv.string,
+            vol.Optional(SLOT_PREFERRED_AREA_ID): cv.string,
+            vol.Optional(SLOT_PREFERRED_FLOOR_ID): cv.string,
 
             # slots for other service arguments.
-            vol.Optional("delay", default=0.50): vol.Any(None, vol.All(vol.Coerce(float), vol.Range(min=0, max=10.0))),
-            vol.Optional("player_repeat_mode"): cv.string,
+            vol.Optional(SLOT_DELAY, default=0.50): vol.Any(None, vol.All(vol.Coerce(float), vol.Range(min=0, max=10.0))),
+            vol.Optional(SLOT_PLAYER_REPEAT_MODE): cv.string,
         }
 
 
-    #async def async_handle(self, intentObj) -> IntentResponse:
-    async def async_handle(self, intentObj: intent.Intent) -> IntentResponse:    # <- "intent.Intent" causes circular reference!
+    async def async_handle(self, intentObj: intent.Intent) -> IntentResponse:
         """
         Handles the intent.
 
@@ -110,8 +113,8 @@ class SpotifyPlusPlayerSetRepeatMode_Handler(SpotifyPlusIntentHandler):
                 return intentResponse
             
             # get optional arguments (if provided).
-            delay = slots.get("delay", {}).get(CONF_VALUE, None)
-            player_repeat_mode = slots.get("player_repeat_mode", {}).get(CONF_VALUE, "on")
+            delay = slots.get(SLOT_DELAY, {}).get(CONF_VALUE, None)
+            player_repeat_mode = slots.get(SLOT_PLAYER_REPEAT_MODE, {}).get(CONF_VALUE, "on")
 
             # set service name and build parameters.
             svcName:str = SERVICE_SPOTIFY_PLAYER_SET_REPEAT_MODE

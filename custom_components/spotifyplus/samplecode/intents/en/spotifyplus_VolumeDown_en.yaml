@@ -34,7 +34,7 @@ intents:
 
         slots:
 
-          name: "Spotify Premium"     # requires a value since no player name was specified.
+          name: "Spotify Premium" # default media player alias.
 
         response: default_no_player
 
@@ -53,7 +53,7 @@ intents:
 
         slots:
 
-          name: ""                    # requires a value since no player name was specified.
+          name: ""
 
         response: default_by_name
 
@@ -72,8 +72,8 @@ intents:
  
         slots:
 
-          area: ""                    # requires a value to be assigned in case it could not be resolved.
-          name: ""                    # requires a value since no player name was specified.
+          area: ""
+          name: ""
 
         response: default_by_area
 

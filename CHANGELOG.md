@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.178 ] - 2025/10/15
+
+  * Added voice assist intents: `SpotifyPlusFavoriteArtistAdd`, `SpotifyPlusFavoriteArtistRemove`, `SpotifyPlusFavoriteTrackAdd`, `SpotifyPlusFavoriteTrackRemove`, `SpotifyPlusGetInfoArtistBio`, `SpotifyPlusNowPlayingInfoArtistBio`, `SpotifyPlusNowPlayingInfoAudiobook`, `SpotifyPlusNowPlayingInfoPodcast`, `SpotifyPlusNowPlayingInfoTrack`, `SpotifyPlusPlayerSetVolumeLevel`.  Check out the [wiki docs](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Voice-Assist-Support#intent-index) for more information.
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.252`.
+
 ###### [ 1.0.177 ] - 2025/10/13
 
   * Added voice assist intents: `SpotifyPlusVolumeMuteOff`, `SpotifyPlusVolumeMuteOn`.  Check out the [wiki docs](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Voice-Assist-Support#intent-index) for more information.

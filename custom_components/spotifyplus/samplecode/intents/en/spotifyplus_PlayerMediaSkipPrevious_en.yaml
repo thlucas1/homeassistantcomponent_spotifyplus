@@ -33,8 +33,8 @@ intents:
 
         slots:
 
-          name: "Spotify Premium"   # requires a value since no player name was specified.
-          delay: 0.50               # delay after command to give spotify time to process.
+          name: "Spotify Premium"  # default player to use.
+          delay: 0.50
 
         response: default_no_player
 
@@ -52,8 +52,8 @@ intents:
 
         slots:
 
-          name: ""            # requires a value since no player name was specified.
-          delay: 0.50         # delay after command to give spotify time to process.
+          name: ""
+          delay: 0.50
 
         response: default_by_name
 
@@ -71,9 +71,9 @@ intents:
 
         slots:
 
-          area: ""            # requires a value to be assigned in case it could not be resolved.
-          name: ""            # requires a value since no player name was specified.
-          delay: 0.50         # delay after command to give spotify time to process.
+          area: ""
+          name: ""
+          delay: 0.50
 
         response: default_by_area
 
