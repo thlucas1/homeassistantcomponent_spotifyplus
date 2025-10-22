@@ -1,9 +1,6 @@
 import voluptuous as vol
 
 from homeassistant.components.media_player import MediaPlayerEntityFeature
-from homeassistant.components.media_player.const import (
-    ATTR_MEDIA_ARTIST,
-)
 from homeassistant.const import (
     STATE_PAUSED,
     STATE_PLAYING,
@@ -23,32 +20,34 @@ from ..appmessages import STAppMessages
 from ..intent_loader import IntentLoader
 from ..utils import get_id_from_uri
 from ..const import (
-    ATTR_SPOTIFYPLUS_ITEM_TYPE,
-    ATTR_SPOTIFYPLUS_ARTIST_URI,
+    ATTR_SPOTIFYPLUS_CONTEXT_URI,
+    ATTR_SPOTIFYPLUS_PLAYLIST_NAME,
+    ATTR_SPOTIFYPLUS_PLAYLIST_URI,
     CONF_TEXT,
     CONF_VALUE,
     DOMAIN,
-    INTENT_FAVORITE_ARTIST_REMOVE,
+    INTENT_FAVORITE_PLAYLIST_ADD,
     PLATFORM_SPOTIFYPLUS,
-    RESPONSE_NOWPLAYING_NO_MEDIA_ARTIST,
+    RESPONSE_NOWPLAYING_NO_MEDIA_PLAYLIST,
     RESPONSE_PLAYER_NOT_PLAYING_MEDIA,
-    SERVICE_SPOTIFY_UNFOLLOW_ARTISTS,
+    SERVICE_SPOTIFY_FOLLOW_PLAYLIST,
     SLOT_AREA,
-    SLOT_ARTIST_TITLE,
-    SLOT_ARTIST_URL,
     SLOT_FLOOR,
     SLOT_NAME,
+    SLOT_PLAYLIST_TITLE,
+    SLOT_PLAYLIST_URL,
     SLOT_PREFERRED_AREA_ID,
     SLOT_PREFERRED_FLOOR_ID,
+    SLOT_PUBLIC,
     SPOTIFY_WEB_URL_PFX,
 )
 
 from .spotifyplusintenthandler import SpotifyPlusIntentHandler
 
 
-class SpotifyPlusFavoriteArtistRemove_Handler(SpotifyPlusIntentHandler):
+class SpotifyPlusFavoritePlaylistAdd_Handler(SpotifyPlusIntentHandler):
     """
-    Handles intents for SpotifyPlusFavoriteArtistRemove.
+    Handles intents for SpotifyPlusFavoritePlaylistAdd.
     """
     def __init__(self, intentLoader:IntentLoader) -> None:
         """
@@ -58,8 +57,8 @@ class SpotifyPlusFavoriteArtistRemove_Handler(SpotifyPlusIntentHandler):
         super().__init__(intentLoader)
 
         # set intent handler basics.
-        self.description = "Removes the currently playing track artist from Spotify user artist favorites."
-        self.intent_type = INTENT_FAVORITE_ARTIST_REMOVE
+        self.description = "Adds the currently playing playlist to Spotify user playlist favorites."
+        self.intent_type = INTENT_FAVORITE_PLAYLIST_ADD
         self.platforms = {PLATFORM_SPOTIFYPLUS}
 
 
@@ -78,8 +77,9 @@ class SpotifyPlusFavoriteArtistRemove_Handler(SpotifyPlusIntentHandler):
             vol.Optional(SLOT_PREFERRED_FLOOR_ID): cv.string,
 
             # slots for other service arguments.
-            vol.Optional(SLOT_ARTIST_TITLE): cv.string,
-            vol.Optional(SLOT_ARTIST_URL): cv.string,
+            vol.Optional(SLOT_PLAYLIST_TITLE): cv.string,
+            vol.Optional(SLOT_PLAYLIST_URL): cv.string,
+            vol.Optional(SLOT_PUBLIC): cv.boolean,
         }
 
 
@@ -115,33 +115,40 @@ class SpotifyPlusFavoriteArtistRemove_Handler(SpotifyPlusIntentHandler):
             return intentResponse
             
         # get optional arguments (if provided).
-        # n/a
+        is_public = intentObj.slots.get(SLOT_PUBLIC, {}).get(CONF_VALUE, True)
 
-        # is now playing item a track? if not, then we are done.
-        item_type:str = playerEntityState.attributes.get(ATTR_SPOTIFYPLUS_ITEM_TYPE)
-        if (item_type != SpotifyMediaTypes.TRACK.value):
-            return await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_NOWPLAYING_NO_MEDIA_ARTIST)
+        # is now playing item a playlist (e.g. spotify:playlist:x)? if not, then we are done.
+        item_type:str = playerEntityState.attributes.get(ATTR_SPOTIFYPLUS_CONTEXT_URI)
+        if (item_type is None) or (item_type.find(SpotifyMediaTypes.PLAYLIST.value) == -1):
+            return await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_NOWPLAYING_NO_MEDIA_PLAYLIST)
 
         # get now playing details.
-        artist_name:str = playerEntityState.attributes.get(ATTR_MEDIA_ARTIST)
-        artist_uri:str = playerEntityState.attributes.get(ATTR_SPOTIFYPLUS_ARTIST_URI)
+        playlist_name:str = playerEntityState.attributes.get(ATTR_SPOTIFYPLUS_PLAYLIST_NAME)
+        playlist_uri:str = playerEntityState.attributes.get(ATTR_SPOTIFYPLUS_PLAYLIST_URI)
+
+        # if playlist name is "unknown", then it's probably a Spotify generated list; if so
+        # then we will indicate this to the user.  Note that the favorite will be shown in 
+        # the Spotify Favorites with the correct name (e.g. "Daily Mix 01").
+        if ((playlist_name or "").lower() == "unknown"):
+            playlist_name = "Spotify Algorithmic Playlist"
 
         # get id portion of spotify uri value.
-        artist_id:str = get_id_from_uri(artist_uri)
+        playlist_id:str = get_id_from_uri(playlist_uri)
 
         # update slots with returned info.
-        intentObj.slots[SLOT_ARTIST_TITLE] = { CONF_TEXT: artist_name, CONF_VALUE: artist_uri }
-        intentObj.slots[SLOT_ARTIST_URL] = { CONF_TEXT: "Spotify", CONF_VALUE: f"{SPOTIFY_WEB_URL_PFX}/{SpotifyMediaTypes.ARTIST.value}/{artist_id}" }
+        intentObj.slots[SLOT_PLAYLIST_TITLE] = { CONF_TEXT: playlist_name, CONF_VALUE: playlist_uri }
+        intentObj.slots[SLOT_PLAYLIST_URL] = { CONF_TEXT: "Spotify", CONF_VALUE: f"{SPOTIFY_WEB_URL_PFX}/{SpotifyMediaTypes.PLAYLIST.value}/{playlist_id}" }
 
         # trace.
         if (self.logsi.IsOn(SILevel.Verbose)):
             self.logsi.LogDictionary(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_SLOT_INFO % intentObj.intent_type, intentObj.slots, colorValue=SIColors.Khaki)
 
         # set service name and build parameters.
-        svcName:str = SERVICE_SPOTIFY_UNFOLLOW_ARTISTS
+        svcName:str = SERVICE_SPOTIFY_FOLLOW_PLAYLIST
         svcData:dict = \
         {
             "entity_id": playerEntityState.entity_id,
+            "public": is_public
         }
 
         # call integration service for this intent.

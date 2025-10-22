@@ -1,12 +1,23 @@
 """Intents for the spotifyplus integration."""
+from typing import IO
+
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import intent
 from homeassistant.helpers.intent import (
     IntentHandler, 
+    async_register as intent_async_register,
 )
+from homeassistant.util.json import JsonObjectType, json_loads_object
+
+from home_assistant_intents import (
+    _DATA_DIR as HA_BUILT_IN_INTENTS_DATA_DIR, 
+    get_intents,
+)
+
+from custom_components.spotifyplus.const import PLATFORM_SPOTIFYPLUS
 
 from .appmessages import STAppMessages
 from .intent_handlers import *
+from .intent_loader import IntentLoader
 
 import logging
 _LOGGER = logging.getLogger(__name__)
@@ -17,6 +28,11 @@ _logsi:SISession = SIAuto.Si.GetSession(__name__)
 if (_logsi == None):
     _logsi = SIAuto.Si.AddSession(__name__, True)
 _logsi.SystemLogger = _LOGGER
+
+
+def json_load(fp: IO[str]) -> JsonObjectType:
+    """Wrap json_loads for get_intents."""
+    return json_loads_object(fp.read())
 
 
 async def async_setup_intents(hass: HomeAssistant) -> None:
@@ -34,33 +50,65 @@ async def async_setup_intents(hass: HomeAssistant) -> None:
         # trace.
         _logsi.EnterMethod(SILevel.Debug, colorValue=SIColors.Khaki)
         _logsi.LogVerbose("Component async_setup_intents starting", colorValue=SIColors.Khaki)
-
+        
         # get slot list of spotifyplus media player names and any defined aliases.
         #player_name_list = await async_get_slot_list_player_name(hass)
-           
+
+        # create intent loader instance.
+        # in our case, we will only load OUR platform intent data.
+        intentLoader:IntentLoader = IntentLoader(hass, PLATFORM_SPOTIFYPLUS)
+                   
         # register all intents this component provides.
-        register_intent_handler(hass, SpotifyPlusFavoriteArtistAdd_Handler())
-        register_intent_handler(hass, SpotifyPlusFavoriteArtistRemove_Handler())
-        register_intent_handler(hass, SpotifyPlusFavoriteTrackAdd_Handler())
-        register_intent_handler(hass, SpotifyPlusFavoriteTrackRemove_Handler())
-        register_intent_handler(hass, SpotifyPlusGetInfoArtistBio_Handler())
-        register_intent_handler(hass, SpotifyPlusNowPlayingInfoArtistBio_Handler())
-        register_intent_handler(hass, SpotifyPlusNowPlayingInfoAudiobook_Handler())
-        register_intent_handler(hass, SpotifyPlusNowPlayingInfoPodcast_Handler())
-        register_intent_handler(hass, SpotifyPlusNowPlayingInfoTrack_Handler())
-        register_intent_handler(hass, SpotifyPlusPlayerMediaPause_Handler())
-        register_intent_handler(hass, SpotifyPlusPlayerMediaResume_Handler())
-        register_intent_handler(hass, SpotifyPlusPlayerMediaSkipNext_Handler())
-        register_intent_handler(hass, SpotifyPlusPlayerMediaSkipPrevious_Handler())
-        register_intent_handler(hass, SpotifyPlusPlayerMediaSkipStart_Handler())
-        register_intent_handler(hass, SpotifyPlusPlayerSetRepeatMode_Handler())
-        register_intent_handler(hass, SpotifyPlusPlayerSetShuffleMode_Handler())
-        register_intent_handler(hass, SpotifyPlusPlayerSetVolumeLevel_Handler())
-        register_intent_handler(hass, SpotifyPlusVolumeDown_Handler())
-        register_intent_handler(hass, SpotifyPlusVolumeMuteOff_Handler()) 
-        register_intent_handler(hass, SpotifyPlusVolumeMuteOn_Handler())
-        register_intent_handler(hass, SpotifyPlusVolumeSetStep_Handler())
-        register_intent_handler(hass, SpotifyPlusVolumeUp_Handler())
+        register_intent_handler(hass, SpotifyPlusFavoriteAlbumAdd_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusFavoriteAlbumRemove_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusFavoriteArtistAdd_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusFavoriteArtistRemove_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusFavoriteAudiobookAdd_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusFavoriteAudiobookRemove_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusFavoritePlaylistAdd_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusFavoritePlaylistRemove_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusFavoritePodcastAdd_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusFavoritePodcastRemove_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusFavoritePodcastEpisodeAdd_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusFavoritePodcastEpisodeRemove_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusFavoriteTrackAdd_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusFavoriteTrackRemove_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusGetInfoArtistBio_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusNowPlayingInfoArtistBio_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusNowPlayingInfoAudiobook_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusNowPlayingInfoPodcast_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusNowPlayingInfoTrack_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusPlayerMediaPause_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusPlayerMediaResume_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusPlayerMediaSkipNext_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusPlayerMediaSkipPrevious_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusPlayerMediaSkipStart_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusPlayerSetRepeatMode_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusPlayerSetShuffleMode_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusPlayerSetVolumeLevel_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusPlayPlaylist_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusVolumeDown_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusVolumeMuteOff_Handler(intentLoader)) 
+        register_intent_handler(hass, SpotifyPlusVolumeMuteOn_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusVolumeSetStep_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusVolumeUp_Handler(intentLoader))
+
+        # trace.
+        # log information about built-in intents for this language variant.
+        if (_logsi.IsOn(SILevel.Verbose)):
+            try:
+                _logsi.LogVerbose("Component - loading HA built-in intents from data path: \"%s\"" % HA_BUILT_IN_INTENTS_DATA_DIR, colorValue=SIColors.Khaki)
+                language_variant = hass.config.language or "en"
+                lang_variant_intents = await hass.async_add_executor_job(
+                    get_intents, language_variant, json_load
+                )
+                if lang_variant_intents:
+                    _logsi.LogDictionary(SILevel.Verbose, "Component - HA built-in intents (dictionary)", lang_variant_intents, prettyPrint=True, colorValue=SIColors.Khaki)
+                else:
+                    _logsi.LogVerbose("Component - HA built-in intents not found for language variant: \"%s\"" % language_variant, colorValue=SIColors.Khaki)
+            except Exception as ex:
+                # log exception, but not to system logger as HA will take care of it.
+                _logsi.LogException("Could not load HA built-in intents!", ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
 
         # indicate success.
         _logsi.LogVerbose("Component async_setup_intents complete", colorValue=SIColors.Khaki)
@@ -69,7 +117,7 @@ async def async_setup_intents(hass: HomeAssistant) -> None:
     except Exception as ex:
 
         # log exception, but not to system logger as HA will take care of it.
-        _logsi.LogException("Component async_setup_intents exception", ex, logToSystemLogger=False)
+        _logsi.LogException("Component async_setup_intents exception", ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
         raise
 
     finally:
@@ -87,7 +135,7 @@ def register_intent_handler(
     """
     # register single intent this component provides.
     _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_REGISTER % intentObj.intent_type, intentObj, colorValue=SIColors.Khaki)
-    intent.async_register(hass, intentObj)
+    intent_async_register(hass, intentObj)
 
 
 # async def async_get_slot_list_player_name(
@@ -169,3 +217,4 @@ def register_intent_handler(
 
 #         # trace.
 #         _logsi.LeaveMethod(SILevel.Debug, colorValue=SIColors.Khaki)
+

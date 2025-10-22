@@ -11,13 +11,10 @@ from homeassistant.const import (
     STATE_PLAYING,
 )
 from homeassistant.core import State, ServiceResponse
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers import intent
 from homeassistant.helpers.intent import (
-    IntentHandleError,
+    Intent,
     IntentResponse, 
-    _SlotsType,
 )
 
 from smartinspectpython.siauto import SILevel, SIColors
@@ -25,6 +22,7 @@ from smartinspectpython.siauto import SILevel, SIColors
 from spotifywebapipython import SpotifyMediaTypes
 
 from ..appmessages import STAppMessages
+from ..intent_loader import IntentLoader
 from ..utils import get_id_from_uri
 from ..const import (
     ATTR_SPOTIFYPLUS_ITEM_TYPE,
@@ -35,7 +33,6 @@ from ..const import (
     DOMAIN,
     INTENT_NOWPLAYING_INFO_TRACK,
     PLATFORM_SPOTIFYPLUS,
-    RESPONSE_ERROR_UNHANDLED,
     RESPONSE_NOWPLAYING_INFO_TRACK,
     RESPONSE_NOWPLAYING_NO_MEDIA_TRACK,
     RESPONSE_PLAYER_NOT_PLAYING_MEDIA,
@@ -54,19 +51,19 @@ from ..const import (
     SPOTIFY_WEB_URL_PFX,
 )
 
-from .spotifyplusintenthandler import SpotifyPlusIntentHandler, get_intent_response_resource
+from .spotifyplusintenthandler import SpotifyPlusIntentHandler
 
 
 class SpotifyPlusNowPlayingInfoTrack_Handler(SpotifyPlusIntentHandler):
     """
     Handles intents for SpotifyPlusNowPlayingInfoTrack.
     """
-    def __init__(self) -> None:
+    def __init__(self, intentLoader:IntentLoader) -> None:
         """
         Initializes a new instance of the IntentHandler class.
         """
         # invoke base class method.
-        super().__init__()
+        super().__init__(intentLoader)
 
         # set intent handler basics.
         self.description = "Queries media player state for currently playing track information."
@@ -98,138 +95,98 @@ class SpotifyPlusNowPlayingInfoTrack_Handler(SpotifyPlusIntentHandler):
         }
 
 
-    async def async_handle(self, intentObj: intent.Intent) -> IntentResponse:
+    async def async_HandleIntent(
+        self, 
+        intentObj: Intent, 
+        intentResponse: IntentResponse
+        ) -> IntentResponse:
         """
         Handles the intent.
 
         Args:
             intentObj (Intent):
                 Intent object.
+            intentResponse (IntentResponse)
+                Intent response object.
+
+        Returns:
+            An IntentResponse object.
         """
-        playerEntityState:State = None
-        slots:_SlotsType = None
+        # invoke base class method to resolve the player entity and its state.
+        playerEntityState:State = await super().async_GetMatchingPlayerState(
+            intentObj,
+            intentResponse,
+            desiredFeatures=None,
+            desiredStates=[STATE_PLAYING, STATE_PAUSED],
+            desiredStateResponseKey=RESPONSE_PLAYER_NOT_PLAYING_MEDIA,
+        )
 
-        try:
-
-            # trace.
-            self.logsi.EnterMethod(SILevel.Debug, intentObj.intent_type, colorValue=SIColors.Khaki)
-            self.logsi.LogVerbose(STAppMessages.MSG_INTENT_HANDLE_REQUEST % intentObj.intent_type, colorValue=SIColors.Khaki)
-            self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLE_REQUEST_PARMS % intentObj.intent_type, intentObj, colorValue=SIColors.Khaki)
-            self.logsi.LogDictionary(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLE_REQUEST_SLOTS % intentObj.intent_type, intentObj.slots, colorValue=SIColors.Khaki)
-
-            # create intent response object.
-            intentResponse:IntentResponse = intentObj.create_response()
-
-            # invoke base class method to resolve the player entity.
-            intentResponse, slots, playerEntityState = await super().async_get_matching_player_state(
-                intentObj,
-                intentResponse,
-                slots=intentObj.slots,
-                desiredFeatures=MediaPlayerEntityFeature.PLAY_MEDIA,
-                desiredStates=[STATE_PLAYING, STATE_PAUSED],
-                desiredStateResponseKey=RESPONSE_PLAYER_NOT_PLAYING_MEDIA,
-            )
-
-            # if media player was not resolved, then we are done;
-            # note that the base class method above already called `async_set_speech` with a response.
-            if playerEntityState is None:
-                return intentResponse
-            
-            # get optional arguments (if provided).
-            # n/a
-
-            # is now playing item a track?
-            item_type:str = playerEntityState.attributes.get(ATTR_SPOTIFYPLUS_ITEM_TYPE)
-            if (item_type != SpotifyMediaTypes.TRACK.value):
-
-                # no - requested info is not available.
-                responseText = await get_intent_response_resource(RESPONSE_NOWPLAYING_NO_MEDIA_TRACK, slots, intentObj, PLATFORM_SPOTIFYPLUS)
-                intentResponse.async_set_speech(responseText)
-                self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_RESPONSE % (intentObj.intent_type), intentResponse, colorValue=SIColors.Khaki)
-                return intentResponse
-
-            # get now playing details.
-            album_name:str = playerEntityState.attributes.get(ATTR_MEDIA_ALBUM_NAME)
-            artist_name:str = playerEntityState.attributes.get(ATTR_MEDIA_ARTIST)
-            artist_uri:str = playerEntityState.attributes.get(ATTR_SPOTIFYPLUS_ARTIST_URI)
-            track_name:str = playerEntityState.attributes.get(ATTR_MEDIA_TITLE)
-            track_uri:str = playerEntityState.attributes.get(ATTR_SPOTIFYPLUS_TRACK_URI_ORIGIN)
-
-            # media_content_id: spotify:track:1G5S1rEr4L57ftizRHcYDP
-            # media_title: I Can Only Imagine
-            # media_artist: MercyMe
-            # media_album_name: Almost There
-            # sp_item_type: track
-            # sp_nowplaying_image_url: https://i.scdn.co/image/ab67616d0000b2733deaee5f76ab2da15dd8db86
-            # sp_track_uri_origin: spotify:track:1G5S1rEr4L57ftizRHcYDP
-            # sp_artist_uri: spotify:artist:6APm8EjxOHSYM5B4i3vT3q
-
-            # get id portion of spotify uri value.
-            artist_id:str = get_id_from_uri(artist_uri)
-            track_id:str = get_id_from_uri(track_uri)
-
-            # update slots with returned info.
-            slots[SLOT_ARTIST_TITLE] = { CONF_TEXT: artist_name, CONF_VALUE: artist_uri }
-            slots[SLOT_ARTIST_URL] = { CONF_TEXT: "Spotify", CONF_VALUE: f"{SPOTIFY_WEB_URL_PFX}/{SpotifyMediaTypes.ARTIST.value}/{artist_id}" }
-            slots[SLOT_TRACK_TITLE] = { CONF_TEXT: track_name, CONF_VALUE: track_uri }
-            slots[SLOT_TRACK_URL] = { CONF_TEXT: "Spotify", CONF_VALUE: f"{SPOTIFY_WEB_URL_PFX}/{SpotifyMediaTypes.TRACK.value}/{track_id}" }
-
-            # trace.
-            if (self.logsi.IsOn(SILevel.Verbose)):
-                self.logsi.LogDictionary(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_SLOT_INFO % intentObj.intent_type, slots, colorValue=SIColors.Khaki)
-
-            # set service name and build parameters.
-            svcName:str = SERVICE_SPOTIFY_GET_TRACK
-            svcData:dict = \
-            {
-                "entity_id": playerEntityState.entity_id,
-                "track_id": track_id,
-            }
-
-            # call integration service for this intent.
-            self.logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (svcName, playerEntityState.entity_id), colorValue=SIColors.Khaki)
-            info_result:ServiceResponse = await intentObj.hass.services.async_call(
-                DOMAIN,
-                svcName,
-                svcData,
-                blocking=True,
-                context=intentObj.context,
-                return_response=True,
-            )
-
-            self.logsi.LogDictionary(SILevel.Verbose, "SERVICE_SPOTIFY_GET_TRACK result", info_result, prettyPrint=True, colorValue=SIColors.Khaki)
-
-            # get related details and update slot info.
-            album_uri:str = info_result.get("result",{}).get("album",{}).get("uri",None)
-            album_url:str = info_result.get("result",{}).get("album",{}).get("external_urls", {}).get("spotify", SPOTIFY_WEB_URL_PFX)
-            artist_url:str = info_result.get("result",{}).get("artists",[])[0].get("external_urls", {}).get("spotify", SPOTIFY_WEB_URL_PFX)
-            track_url:str = info_result.get("result",{}).get("external_urls", {}).get("spotify", SPOTIFY_WEB_URL_PFX)
-
-            # update slots with returned info.
-            slots[SLOT_ALBUM_TITLE] = { CONF_TEXT: album_name, CONF_VALUE: album_uri }
-            slots[SLOT_ALBUM_URL] = { CONF_TEXT: "Spotify", CONF_VALUE: album_url }
-            slots[SLOT_ARTIST_URL] = { CONF_TEXT: "Spotify", CONF_VALUE: artist_url }
-            slots[SLOT_TRACK_URL] = { CONF_TEXT: "Spotify", CONF_VALUE: track_url }
-            
-            # trace.
-            if (self.logsi.IsOn(SILevel.Verbose)):
-                self.logsi.LogDictionary(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_SLOT_INFO % intentObj.intent_type, slots, colorValue=SIColors.Khaki)
-
-            # return intent response.
-            intentResponse.speech_slots = slots
-            responseText = await get_intent_response_resource(RESPONSE_NOWPLAYING_INFO_TRACK, slots, intentObj, PLATFORM_SPOTIFYPLUS)
-            intentResponse.async_set_speech(responseText)
-            self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_RESPONSE % (intentObj.intent_type), intentResponse, colorValue=SIColors.Khaki)
+        # if media player was not resolved, then we are done;
+        # note that the base class method above already called `async_set_speech` with a response.
+        if playerEntityState is None:
             return intentResponse
+            
+        # get optional arguments (if provided).
+        # n/a
 
-        except HomeAssistantError: raise  # pass handled exceptions on thru
-        except Exception as ex:
+        # is now playing item a track? if not, then don't bother.
+        item_type:str = playerEntityState.attributes.get(ATTR_SPOTIFYPLUS_ITEM_TYPE)
+        if (item_type != SpotifyMediaTypes.TRACK.value):
+            return await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_NOWPLAYING_NO_MEDIA_TRACK)
 
-            # log exception, but not to system logger as HA will take care of it.
-            self.logsi.LogException(STAppMessages.MSG_INTENT_HANDLER_EXCEPTION % (intentObj.intent_type, str(ex)), ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
-            raise IntentHandleError("Intent handler error for \"%s\"" % (intentObj.intent_type), RESPONSE_ERROR_UNHANDLED)
+        # get now playing details.
+        album_name:str = playerEntityState.attributes.get(ATTR_MEDIA_ALBUM_NAME)
+        artist_name:str = playerEntityState.attributes.get(ATTR_MEDIA_ARTIST)
+        artist_uri:str = playerEntityState.attributes.get(ATTR_SPOTIFYPLUS_ARTIST_URI)
+        track_name:str = playerEntityState.attributes.get(ATTR_MEDIA_TITLE)
+        track_uri:str = playerEntityState.attributes.get(ATTR_SPOTIFYPLUS_TRACK_URI_ORIGIN)
 
-        finally:
+        # get id portion of spotify uri value.
+        artist_id:str = get_id_from_uri(artist_uri)
+        track_id:str = get_id_from_uri(track_uri)
 
-            # trace.
-            self.logsi.LeaveMethod(SILevel.Debug, intentObj.intent_type, colorValue=SIColors.Khaki)
+        # update slots with returned info.
+        intentObj.slots[SLOT_ARTIST_TITLE] = { CONF_TEXT: artist_name, CONF_VALUE: artist_uri }
+        intentObj.slots[SLOT_ARTIST_URL] = { CONF_TEXT: "Spotify", CONF_VALUE: f"{SPOTIFY_WEB_URL_PFX}/{SpotifyMediaTypes.ARTIST.value}/{artist_id}" }
+        intentObj.slots[SLOT_TRACK_TITLE] = { CONF_TEXT: track_name, CONF_VALUE: track_uri }
+        intentObj.slots[SLOT_TRACK_URL] = { CONF_TEXT: "Spotify", CONF_VALUE: f"{SPOTIFY_WEB_URL_PFX}/{SpotifyMediaTypes.TRACK.value}/{track_id}" }
+
+        # trace.
+        if (self.logsi.IsOn(SILevel.Verbose)):
+            self.logsi.LogDictionary(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_SLOT_INFO % intentObj.intent_type, intentObj.slots, colorValue=SIColors.Khaki)
+
+        # set service name and build parameters.
+        svcName:str = SERVICE_SPOTIFY_GET_TRACK
+        svcData:dict = \
+        {
+            "entity_id": playerEntityState.entity_id,
+            "track_id": track_id,
+        }
+
+        # call integration service for this intent.
+        self.logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (svcName, playerEntityState.entity_id), colorValue=SIColors.Khaki)
+        info_result:ServiceResponse = await intentObj.hass.services.async_call(
+            DOMAIN,
+            svcName,
+            svcData,
+            blocking=True,
+            context=intentObj.context,
+            return_response=True,
+        )
+
+        self.logsi.LogDictionary(SILevel.Verbose, "SERVICE_SPOTIFY_GET_TRACK result", info_result, prettyPrint=True, colorValue=SIColors.Khaki)
+
+        # get related details and update slot info.
+        album_uri:str = info_result.get("result",{}).get("album",{}).get("uri",None)
+        album_url:str = info_result.get("result",{}).get("album",{}).get("external_urls", {}).get("spotify", SPOTIFY_WEB_URL_PFX)
+        artist_url:str = info_result.get("result",{}).get("artists",[])[0].get("external_urls", {}).get("spotify", SPOTIFY_WEB_URL_PFX)
+        track_url:str = info_result.get("result",{}).get("external_urls", {}).get("spotify", SPOTIFY_WEB_URL_PFX)
+
+        # update slots with returned info.
+        intentObj.slots[SLOT_ALBUM_TITLE] = { CONF_TEXT: album_name, CONF_VALUE: album_uri }
+        intentObj.slots[SLOT_ALBUM_URL] = { CONF_TEXT: "Spotify", CONF_VALUE: album_url }
+        intentObj.slots[SLOT_ARTIST_URL] = { CONF_TEXT: "Spotify", CONF_VALUE: artist_url }
+        intentObj.slots[SLOT_TRACK_URL] = { CONF_TEXT: "Spotify", CONF_VALUE: track_url }
+            
+        # return intent response.
+        return await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_NOWPLAYING_INFO_TRACK)

@@ -37,9 +37,9 @@ class STAppMessages:
     Intent Handler Parameters: `%s` (slots)
     """
 
-    MSG_INTENT_HANDLER_EXCEPTION:str = "An unhandled exception occurred in Intent handler method '%s'; exception: %s"
+    MSG_INTENT_HANDLER_EXCEPTION:str = "Intent handler exception detected for \"%s\": %s"
     """
-    An unhandled exception occurred in Intent handler method '%s'; exception: %s
+    Intent handler exception detected for \"%s\": %s
     """
 
     MSG_INTENT_VALIDATE_SLOTS_EXCEPTION:str = "Slot validation failed for Intent handler method '%s': %s"

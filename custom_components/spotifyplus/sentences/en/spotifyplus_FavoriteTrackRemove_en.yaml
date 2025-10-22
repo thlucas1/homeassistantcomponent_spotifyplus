@@ -1,0 +1,92 @@
+# ============================================================================
+# SpotifyPlus integration intent custom sentence and response definitions.
+#
+# Language: en, English
+# Intent:   SpotifyPlusFavoriteTrackRemove
+# Location: custom_sentences/en/spotifyplus_FavoriteTrackRemove_en.yaml
+# ============================================================================
+language: en
+intents:
+
+  SpotifyPlusFavoriteTrackRemove:
+
+    data:
+
+      - sentences:
+
+          - "remove spotify (track|song) [from] (favorite|favorites)"
+
+            # Base sentence phrases for this intent.
+            # This sentence is recognized when a name / area is NOT provided in the spoken command.  
+            # In this case, the first active SpotifyPlus media player is used.
+
+            # __Example Phrases - Default Player__  
+            # - "remove spotify track from favorites"
+            # - "remove spotify track favorite"
+
+        slots:
+
+          name: "Spotify Premium"  # default player to use.
+          artist_title: ""
+          artist_url: ""
+          track_title: ""
+          track_url: ""
+
+        response: default
+
+      - sentences:
+
+          - "remove spotify (track|song) [from] (favorite|favorites) <on_spotifyplus_player_name>"
+
+            # This sentence is recognized when a player name is provided in the spoken 
+            # command (e.g. "on player Spotify Premium", "on Todds player", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Name__  
+            # - "remove spotify track favorite for player spotify premium"
+            # - "remove spotify track favorite for spotify premium player"
+
+        slots:
+
+          name: ""
+          artist_title: ""
+          artist_url: ""
+          track_title: ""
+          track_url: ""
+
+        response: default
+
+      - sentences:
+
+          - "remove spotify (track|song) [from] (favorite|favorites) <in_spotifyplus_player_area>"
+
+            # This sentence is recognized when a player area is provided in the spoken 
+            # command (e.g. "in the Living Room area", "in the Living Room", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Area__  
+            # - "remove spotify track favorite in the Office area"
+            # - "remove spotify track favorite in the Office"
+ 
+        slots:
+
+          area: ""
+          name: ""
+          artist_title: ""
+          artist_url: ""
+          track_title: ""
+          track_url: ""
+
+        response: default
+
+
+# ============================================================================
+# Custom response definitions for THIS intent.
+# Note - Shared responses for all intents are stored in the Common file.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusFavoriteTrackRemove:
+
+      default: "Okay, track \"{{ slots.track_title.text }}\", by artist \"{{ slots.artist_title.text }}\" was removed from your Spotify track favorites."

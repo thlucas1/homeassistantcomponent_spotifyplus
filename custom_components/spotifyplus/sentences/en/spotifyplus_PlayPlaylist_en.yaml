@@ -1,0 +1,112 @@
+# ============================================================================
+# SpotifyPlus integration intent custom sentence and response definitions.
+#
+# Language: en, English
+# Intent:   SpotifyPlusPlayPlaylist
+# Location: custom_sentences/en/spotifyplus_PlayPlaylist_en.yaml
+# ============================================================================
+language: en
+intents:
+
+  SpotifyPlusPlayPlaylist:
+
+    data:
+
+      - sentences:
+
+          # the order of the following sentences is important!
+
+          - "play spotify (playlist|play list) {spotify_playlist_names:playlist_name}"                                # known playlist slot list, located in "spotifyplus_common_en.yaml".
+          - "play spotify (playlist|play list) {freeform:playlist_name}"                                              # freeform playlist text.
+          - "play spotify (playlist|play list) {spotify_playlist_names:playlist_name} <on_spotifyplus_device_name>"   # known playlist slot list.
+          - "play spotify (playlist|play list) {freeform:playlist_name} <on_spotifyplus_device_name>"                 # freeform playlist text.
+
+            # Base sentence phrases for this intent.
+            # This sentence is recognized when a name / area is NOT provided in the spoken command.  
+            # In this case, the first active SpotifyPlus media player is used.
+
+            # __Example Phrases - Default Player__  
+            # - "play spotify playlist Daily Mix 1 on device Nest Audio 01"
+            # - "play spotify playlist Daily Mix 1 on device Bose-ST10-1"
+            # - "play spotify playlist Seventh Day Slumber"
+
+        slots:
+
+          name: "Spotify Premium" # default media player alias.
+          target_player: ""
+          delay: 0.50
+          device_name: ""
+          playlist_name: ""
+          playlist_title: ""
+          playlist_url: ""
+          player_shuffle_mode: "off"
+
+        response: default
+
+      - sentences:
+
+          - "play spotify (playlist|play list) {spotify_playlist_names:playlist_name} <on_spotifyplus_player_name>" 
+          - "play spotify (playlist|play list) {freeform:playlist_name} <on_spotifyplus_player_name>"
+          - "play spotify (playlist|play list) {spotify_playlist_names:playlist_name} <on_spotifyplus_device_name> <on_spotifyplus_player_name>"
+          - "play spotify (playlist|play list) {freeform:playlist_name} <on_spotifyplus_device_name> <on_spotifyplus_player_name>"
+
+            # This sentence is recognized when a player name is provided in the spoken 
+            # command (e.g. "on player Spotify Premium", "on Todds player", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Name__  
+            # - "play spotify playlist Daily Mix 1 on device Nest Audio 01 for player spotify premium"
+
+        slots:
+
+          name: ""
+          target_player: ""
+          delay: 0.50
+          device_name: ""
+          playlist_name: ""
+          playlist_title: ""
+          playlist_url: ""
+          player_shuffle_mode: "off"
+
+        response: default
+
+      - sentences:
+
+          - "play spotify (playlist|play list) {spotify_playlist_names:playlist_name} <in_spotifyplus_player_area>"
+          - "play spotify (playlist|play list) {freeform:playlist_name} <in_spotifyplus_player_area>"
+          - "play spotify (playlist|play list) {spotify_playlist_names:playlist_name} <on_spotifyplus_device_name> <in_spotifyplus_player_area>"
+          - "play spotify (playlist|play list) {freeform:playlist_name} <on_spotifyplus_device_name> <in_spotifyplus_player_area>"
+
+            # This sentence is recognized when a player area is provided in the spoken 
+            # command (e.g. "in the Living Room area", "in the Living Room", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Area__  
+            # - "play spotify playlist Daily Mix 1 on device Nest Audio 01 in the Office area"
+            # - "play spotify playlist Daily Mix 1 on device Nest Audio 01 in the Office"
+ 
+        slots:
+
+          area: ""
+          name: ""
+          target_player: ""
+          delay: 0.50
+          device_name: ""
+          playlist_name: ""
+          playlist_title: ""
+          playlist_url: ""
+          player_shuffle_mode: "off"
+
+        response: default
+
+
+# ============================================================================
+# Custom response definitions for THIS intent.
+# Note - Shared responses for all intents are stored in the Common file.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusPlayPlaylist:
+
+      default: "" # not used - see common `get_info_artist_bio` message.

@@ -521,6 +521,9 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                         attributes[ATTR_SPOTIFYPLUS_NOWPLAYING_IMAGE_URL] = episode.ImageUrl
                     if episode.Show.ImageUrl is not None:
                         attributes[ATTR_SPOTIFYPLUS_NOWPLAYING_IMAGE_URL] = episode.Show.ImageUrl
+                    if self._playerState.Context is None:
+                        attributes[ATTR_SPOTIFYPLUS_CONTEXT_URI] = episode.Show.Uri
+                        attributes['media_context_content_id'] = episode.Show.Uri
             if (self._playerState.CurrentlyPlayingType is not None):
                 attributes[ATTR_SPOTIFYPLUS_PLAYING_TYPE] = self._playerState.CurrentlyPlayingType
 

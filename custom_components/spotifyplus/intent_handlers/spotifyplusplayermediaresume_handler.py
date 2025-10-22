@@ -2,13 +2,10 @@ import voluptuous as vol
 
 from homeassistant.components.media_player import MediaPlayerEntityFeature
 from homeassistant.core import State
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers import intent
 from homeassistant.helpers.intent import (
-    IntentHandleError,
+    Intent,
     IntentResponse, 
-    _SlotsType,
 )
 from homeassistant.const import (
     STATE_ON,
@@ -21,12 +18,12 @@ from homeassistant.const import (
 from smartinspectpython.siauto import SILevel, SIColors
 
 from ..appmessages import STAppMessages
+from ..intent_loader import IntentLoader
 from ..const import (
     CONF_VALUE,
     DOMAIN,
     INTENT_PLAYER_MEDIA_RESUME,
     PLATFORM_SPOTIFYPLUS,
-    RESPONSE_ERROR_UNHANDLED,
     RESPONSE_PLAYER_NOT_PLAYING_MEDIA,
     SERVICE_SPOTIFY_PLAYER_MEDIA_RESUME,
     SLOT_AREA,
@@ -44,12 +41,12 @@ class SpotifyPlusPlayerMediaResume_Handler(SpotifyPlusIntentHandler):
     """
     Handles intents for SpotifyPlusPlayerMediaResume.
     """
-    def __init__(self) -> None:
+    def __init__(self, intentLoader:IntentLoader) -> None:
         """
         Initializes a new instance of the IntentHandler class.
         """
         # invoke base class method.
-        super().__init__()
+        super().__init__(intentLoader)
 
         # set intent handler basics.
         self.description = "Resume media play for the specified SpotifyPlus media player."
@@ -76,78 +73,61 @@ class SpotifyPlusPlayerMediaResume_Handler(SpotifyPlusIntentHandler):
         }
 
 
-    async def async_handle(self, intentObj: intent.Intent) -> IntentResponse:
+    async def async_HandleIntent(
+        self, 
+        intentObj: Intent, 
+        intentResponse: IntentResponse
+        ) -> IntentResponse:
         """
         Handles the intent.
 
         Args:
             intentObj (Intent):
                 Intent object.
+            intentResponse (IntentResponse)
+                Intent response object.
+
+        Returns:
+            An IntentResponse object.
         """
-        playerEntityState:State = None
-        slots:_SlotsType = None
+        # invoke base class method to resolve the player entity and its state.
+        playerEntityState:State = await super().async_GetMatchingPlayerState(
+            intentObj,
+            intentResponse,
+            desiredFeatures=MediaPlayerEntityFeature.PAUSE | MediaPlayerEntityFeature.PLAY_MEDIA,
+            desiredStates=[STATE_PAUSED, STATE_OFF, STATE_ON, STATE_IDLE, STATE_UNKNOWN],
+            desiredStateResponseKey=RESPONSE_PLAYER_NOT_PLAYING_MEDIA,
+            requiresSpotifyPremium=True,
+        )
 
-        try:
-
-            # trace.
-            self.logsi.EnterMethod(SILevel.Debug, intentObj.intent_type, colorValue=SIColors.Khaki)
-            self.logsi.LogVerbose(STAppMessages.MSG_INTENT_HANDLE_REQUEST % intentObj.intent_type, colorValue=SIColors.Khaki)
-            self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLE_REQUEST_PARMS % intentObj.intent_type, intentObj, colorValue=SIColors.Khaki)
-            self.logsi.LogDictionary(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLE_REQUEST_SLOTS % intentObj.intent_type, intentObj.slots, colorValue=SIColors.Khaki)
-
-            # create intent response object.
-            intentResponse:IntentResponse = intentObj.create_response()
-
-            # invoke base class method to resolve the player entity.
-            intentResponse, slots, playerEntityState = await super().async_get_matching_player_state(
-                intentObj,
-                intentResponse,
-                slots=intentObj.slots,
-                desiredFeatures=MediaPlayerEntityFeature.PAUSE | MediaPlayerEntityFeature.PLAY_MEDIA,
-                desiredStates=[STATE_PAUSED, STATE_OFF, STATE_ON, STATE_IDLE, STATE_UNKNOWN],
-                desiredStateResponseKey=RESPONSE_PLAYER_NOT_PLAYING_MEDIA,
-            )
-
-            # if media player was not resolved, then we are done;
-            # note that the base class method above already called `async_set_speech` with a response.
-            if playerEntityState is None:
-                return intentResponse
-            
-            # get optional arguments (if provided).
-            delay = slots.get(SLOT_DELAY, {}).get(CONF_VALUE, None)
-
-            # set service name and build parameters.
-            svcName:str = SERVICE_SPOTIFY_PLAYER_MEDIA_RESUME
-            svcData:dict = \
-            {
-                "entity_id": playerEntityState.entity_id,
-                "device_id": "",  # always use current device for this service call.
-                "delay": delay
-            }
-
-            # call integration service for this intent.
-            self.logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (svcName, playerEntityState.entity_id), colorValue=SIColors.Khaki)
-            await intentObj.hass.services.async_call(
-                DOMAIN,
-                svcName,
-                svcData,
-                blocking=True,
-                context=intentObj.context,
-            )
-
-            # return intent response.
-            intentResponse.speech_slots = slots
-            self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_RESPONSE % (intentObj.intent_type), intentResponse, colorValue=SIColors.Khaki)
+        # if media player was not resolved, then we are done;
+        # note that the base class method above already called `async_set_speech` with a response.
+        if playerEntityState is None:
             return intentResponse
+            
+        # get optional arguments (if provided).
+        delay = intentObj.slots.get(SLOT_DELAY, {}).get(CONF_VALUE, None)
 
-        except HomeAssistantError: raise  # pass handled exceptions on thru
-        except Exception as ex:
+        # set service name and build parameters.
+        svcName:str = SERVICE_SPOTIFY_PLAYER_MEDIA_RESUME
+        svcData:dict = \
+        {
+            "entity_id": playerEntityState.entity_id,
+            "device_id": "",  # always use current device for this service call.
+            "delay": delay
+        }
 
-            # log exception, but not to system logger as HA will take care of it.
-            self.logsi.LogException(STAppMessages.MSG_INTENT_HANDLER_EXCEPTION % (intentObj.intent_type, str(ex)), ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
-            raise IntentHandleError("Intent handler error for \"%s\"" % (intentObj.intent_type), RESPONSE_ERROR_UNHANDLED)
+        # call integration service for this intent.
+        self.logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (svcName, playerEntityState.entity_id), colorValue=SIColors.Khaki)
+        await intentObj.hass.services.async_call(
+            DOMAIN,
+            svcName,
+            svcData,
+            blocking=True,
+            context=intentObj.context,
+        )
 
-        finally:
-
-            # trace.
-            self.logsi.LeaveMethod(SILevel.Debug, intentObj.intent_type, colorValue=SIColors.Khaki)
+        # return intent response.
+        intentResponse.speech_slots = intentObj.slots
+        self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_RESPONSE % (intentObj.intent_type), intentResponse, colorValue=SIColors.Khaki)
+        return intentResponse

@@ -1,43 +1,54 @@
-from typing import Tuple
-import os
-import yaml
+from abc import abstractmethod
 
 from homeassistant.components.media_player.const import MediaPlayerState
-from homeassistant.components.media_player import MediaPlayerEntity, MediaPlayerEntityFeature
-from homeassistant.core import HomeAssistant, State
+from homeassistant.components.media_player import MediaPlayerEntityFeature
+from homeassistant.core import State
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_registry import RegistryEntry
 from homeassistant.helpers.template import Template
 from homeassistant.helpers.intent import (
     Intent, 
+    IntentError,
     IntentHandler, 
     IntentResponse, 
     IntentResponseErrorCode,
+    IntentResponseType,
     MatchFailedReason,
     MatchTargetsConstraints, 
     MatchTargetsPreferences, 
     MatchTargetsResult,
-    _SlotsType,
+    MatchFailedError,
     MatchTargetsResult,
     async_match_targets,
 )
 
 from ..appmessages import STAppMessages
 from ..const import (
+    ATTR_SPOTIFYPLUS_USER_PRODUCT,
     CONF_TEXT,
     CONF_VALUE,
     DOMAIN_MEDIA_PLAYER,
     PLATFORM_SPOTIFYPLUS,
+    RESPONSE_ERROR_FAILED_TO_HANDLE,
     RESPONSE_PLAYER_FEATURES_NOT_SUPPORTED,
-    RESPONSE_PLAYER_NOT_EXPOSED_TO_VOICE,
+    #RESPONSE_PLAYER_NOT_EXPOSED_TO_VOICE,
     RESPONSE_PLAYER_NOT_MATCHED,
-    RESPONSE_PLAYER_NOT_MATCHED_AREA,
+    #RESPONSE_PLAYER_NOT_MATCHED_AREA,
+    RESPONSE_SPOTIFY_PREMIUM_REQUIRED,
     SLOT_AREA,
+    SLOT_ERROR_FEATURES,
+    SLOT_ERROR_INFO,
+    SLOT_ERROR_STATES,
     SLOT_FLOOR,
     SLOT_NAME,
     SLOT_PREFERRED_AREA_ID,
     SLOT_PREFERRED_FLOOR_ID,
     SLOT_TARGET_PLAYER,
+)
+from ..intent_loader import (
+    LanguageIntents,
+    IntentLoader,
 )
 
 import logging
@@ -55,12 +66,22 @@ class SpotifyPlusIntentHandler(IntentHandler):
     """
     Base class that handles intents for the SpotifyPlus integration.
     """
-    def __init__(self) -> None:
+    def __init__(
+        self, 
+        intentLoader:IntentLoader,
+        ) -> None:
         """
         Initializes a new instance of the class.
+
+        Args:
+            intentLoader (IntentLoader):
+                A IntentLoader instance that loads our platform intents from custom_sentences.
         """
         # set trace reference.
         self.logsi = _logsi
+
+        # store intent loader reference.
+        self._IntentLoader = intentLoader
 
         # set intent handler basics.
         # these should be overridden in the inheriting class, but are here for validation.
@@ -69,42 +90,145 @@ class SpotifyPlusIntentHandler(IntentHandler):
         self.description = "This description should be overridden in the inheriting class!"
 
 
-    async def async_get_matching_player_state(
+    @abstractmethod
+    async def async_HandleIntent(
+        self, 
+        intentObj: Intent, 
+        intentResponse: IntentResponse
+        ) -> IntentResponse:
+        """
+        Subclasses must implement this method to handle the intent.
+
+        This method is called from the `async_handle` method, and is wrapped in a `try...except`
+        block to automatically capture exceptions and return an error response.
+
+        Args:
+            intentObj (Intent):
+                Intent object.
+            intentResponse (IntentResponse):
+                Intent response object.
+
+        Returns:
+            An IntentResponse object.
+        """
+        raise NotImplementedError()
+
+
+    async def async_handle(
+        self, 
+        intentObj:Intent
+        ) -> IntentResponse:
+        """
+        Handles the intent.
+
+        Args:
+            intentObj (Intent):
+                Intent object.
+
+        Returns:
+            An IntentResponse object.
+        """
+        # create intent response object.
+        intentResponse = intentObj.create_response()
+
+        try:
+
+            # trace.
+            self.logsi.EnterMethod(SILevel.Debug, intentObj.intent_type, colorValue=SIColors.Khaki)
+            self.logsi.LogVerbose(STAppMessages.MSG_INTENT_HANDLE_REQUEST % intentObj.intent_type, colorValue=SIColors.Khaki)
+            self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLE_REQUEST_PARMS % intentObj.intent_type, intentObj, colorValue=SIColors.Khaki)
+            self.logsi.LogDictionary(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLE_REQUEST_SLOTS % intentObj.intent_type, intentObj.slots, colorValue=SIColors.Khaki)
+
+            # call internal method to handle the intent, and return the response.
+            return await self.async_HandleIntent(intentObj, intentResponse)
+
+        except IntentError as ex:
+
+            # anything that inherits from IntentError: MatchFailedError, NoStatesMatchedError, etc.
+
+            # trace.
+            self.logsi.LogException(STAppMessages.MSG_INTENT_HANDLER_EXCEPTION % (intentObj.intent_type, str(ex)), ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
+            raise
+
+        except Exception as ex:
+
+            # determine type of exception.
+            # if HA exception, then do not log to the system logger since HA has already done that.
+            logToSystemLogger = True
+            if (isinstance(ex, HomeAssistantError)):
+                logToSystemLogger = False
+
+            # trace.
+            self.logsi.LogException(STAppMessages.MSG_INTENT_HANDLER_EXCEPTION % (intentObj.intent_type, str(ex)), ex, logToSystemLogger=logToSystemLogger, colorValue=SIColors.Khaki)
+
+            # update slot error details.
+            intentObj.slots[SLOT_ERROR_INFO] = { CONF_VALUE: RESPONSE_ERROR_FAILED_TO_HANDLE, CONF_TEXT: str(ex) }
+            intentResponse.speech_slots = intentObj.slots
+
+            # get unhandled error response.
+            responseText = await self.GetIntentResponseByKey(intentObj, RESPONSE_ERROR_FAILED_TO_HANDLE, intentObj.slots)
+
+            # set intent response type and error code.
+            intentResponse.response_type = IntentResponseType.ERROR
+            intentResponse.error_code = IntentResponseErrorCode.FAILED_TO_HANDLE
+
+            # return intent response.
+            intentResponse.async_set_speech(responseText)
+            self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_RESPONSE % (intentObj.intent_type), intentResponse, colorValue=SIColors.Khaki)
+            return intentResponse
+
+        finally:
+
+            # trace.
+            self.logsi.LeaveMethod(SILevel.Debug, intentObj.intent_type, colorValue=SIColors.Khaki)
+
+
+    async def async_GetMatchingPlayerState(
         self, 
         intentObj:Intent,
         intentResponse:IntentResponse,
-        slots:_SlotsType,
         desiredFeatures:MediaPlayerEntityFeature=None,
         desiredStates:list[MediaPlayerState]=None,
         desiredStateResponseKey:str=None,
-        ) -> Tuple[IntentResponse, _SlotsType, State | None]:
+        requiresSpotifyPremium:bool=False,
+        ) -> State | None:
         """
-        Resolve matching player entity state.
+        Get matching player entity state, if one exists.
 
         Args:
             intentObj (Intent):
                 Intent object.
             intentResponse (IntentResponse):
                 Intent response object that will be returned if an error occurs.
-            slots (_SlotType):
-                Slot arguments to be validated, and used to format responses.
             desiredFeatures (MediaPlayerEntityFeature):
-                Media Player Features that are required for the match (e.g. MediaPlayerEntityFeature.PLAY | MediaPlayerEntityFeature.PAUSE).
+                Media player Features that are required for the match (e.g. MediaPlayerEntityFeature.PLAY | MediaPlayerEntityFeature.PAUSE).
+            desiredStates (list[MediaPlayerState]):
+                A list of media player states that are required for the match (e.g. [STATE_PLAYING, STATE_PAUSED]).
             desiredStateResponseKey (str):
                 Response message key that will be loaded and sent if the `desiredFeatures` are not supported.
+            requiresSpotifyPremium (bool):
+                If true, a check will be made to ensure the user is a Spotify premium member and raise an exception if not.
 
         Returns:
-            A tuple of 3 parameters that contain the IntentResponse object, modified slots, and the resolved 
-            SpotifyPlus media player entity state (or none if entity was not resolved).
+            The resolved SpotifyPlus media player entity state if one exists; otherwise, None.
         """
+        methodParms:SIMethodParmListContext = None
+        
         try:
 
             # trace.
-            self.logsi.EnterMethod(SILevel.Debug, colorValue=SIColors.Khaki)
+            methodParms = _logsi.EnterMethodParmList(SILevel.Debug, colorValue=SIColors.Khaki)
+            methodParms.AppendKeyValue("intent_type", intentObj.intent_type)
+            methodParms.AppendKeyValue("language", intentObj.language)
+            methodParms.AppendKeyValue("desiredFeatures", desiredFeatures)
+            methodParms.AppendKeyValue("desiredStates", desiredStates)
+            methodParms.AppendKeyValue("desiredStateResponseKey", desiredStateResponseKey)
+            methodParms.AppendKeyValue("requiresSpotifyPremium", requiresSpotifyPremium)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Resolving matching player state for intent: \"%s\"" % (intentObj.intent_type), methodParms, colorValue=SIColors.Khaki)
 
             # validate slot arguments.
             if (self.logsi.IsOn(SILevel.Verbose)):
-                self.logsi.LogDictionary(SILevel.Verbose, "Validating slot arguments for intent: \"%s\"" % intentObj.intent_type, slots, colorValue=SIColors.Khaki)
+                self.logsi.LogDictionary(SILevel.Verbose, "Validating slot arguments for intent: \"%s\"" % intentObj.intent_type, intentObj.slots, colorValue=SIColors.Khaki)
             slots = self.async_validate_slots(intentObj.slots)
 
             # get player name / area / floor slot arguments.
@@ -129,7 +253,7 @@ class SpotifyPlusIntentHandler(IntentHandler):
                 floor_name=floor_id,
                 domains={DOMAIN_MEDIA_PLAYER},
                 assistant=intentObj.assistant,
-                features=desiredFeatures,
+                #features=desiredFeatures,
                 single_target=True,
             )
             if (self.logsi.IsOn(SILevel.Verbose)):
@@ -165,29 +289,23 @@ class SpotifyPlusIntentHandler(IntentHandler):
             else:
 
                 # determine why contraints were not matched.
-                if matchResult.no_match_reason == MatchFailedReason.FEATURE:
+                if matchResult.no_match_reason == MatchFailedReason.AREA:
 
-                    # no - media player does not support requested features.
-                    responseText = await get_intent_response_resource(RESPONSE_PLAYER_FEATURES_NOT_SUPPORTED, slots, intentObj, PLATFORM_SPOTIFYPLUS)
-                    intentResponse.async_set_error(IntentResponseErrorCode.NO_VALID_TARGETS, responseText)
-                    self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_RESPONSE % (intentObj.intent_type), intentResponse, colorValue=SIColors.Khaki)
-                    return (intentResponse, slots, None)
-
-                elif matchResult.no_match_reason == MatchFailedReason.AREA:
-
-                    # no - media player entity not found for specified area.
-                    responseText = await get_intent_response_resource(RESPONSE_PLAYER_NOT_MATCHED_AREA, slots, intentObj, PLATFORM_SPOTIFYPLUS)
-                    intentResponse.async_set_error(IntentResponseErrorCode.NO_VALID_TARGETS, responseText)
-                    self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_RESPONSE % (intentObj.intent_type), intentResponse, colorValue=SIColors.Khaki)
-                    return (intentResponse, slots, None)
+                    # media player entity not found for specified area.
+                    raise MatchFailedError(result=matchResult, constraints=matchConstraints)
+                    # intentResponse = await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_PLAYER_NOT_MATCHED_AREA, IntentResponseErrorCode.NO_VALID_TARGETS)
+                    # return None
 
                 elif matchResult.no_match_reason == MatchFailedReason.ASSISTANT:
 
-                    # no - media player entity has not been exposed to HA Voice Assist.
-                    responseText = await get_intent_response_resource(RESPONSE_PLAYER_NOT_EXPOSED_TO_VOICE, slots, intentObj, PLATFORM_SPOTIFYPLUS)
-                    intentResponse.async_set_error(IntentResponseErrorCode.NO_VALID_TARGETS, responseText)
-                    self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_RESPONSE % (intentObj.intent_type), intentResponse, colorValue=SIColors.Khaki)
-                    return (intentResponse, slots, None)
+                    # media player entity has not been exposed to HA Voice Assist.
+                    # raise HA MatchFailedError, which will cause the `conversation.default_agent` logic
+                    # to read `response: -> errors: -> no_x_exposed:` key message.
+                    raise MatchFailedError(result=matchResult, constraints=matchConstraints)
+
+                    # media player entity has not been exposed to HA Voice Assist.
+                    # intentResponse = await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_PLAYER_NOT_EXPOSED_TO_VOICE, IntentResponseErrorCode.NO_VALID_TARGETS)
+                    # return None
 
                 elif matchResult.no_match_reason == MatchFailedReason.MULTIPLE_TARGETS:
 
@@ -210,10 +328,8 @@ class SpotifyPlusIntentHandler(IntentHandler):
 
             # if player not found, then give up and inform the user.
             if (playerEntity is None):
-                responseText = await get_intent_response_resource(RESPONSE_PLAYER_NOT_MATCHED, slots, intentObj, PLATFORM_SPOTIFYPLUS)
-                intentResponse.async_set_error(IntentResponseErrorCode.NO_VALID_TARGETS, responseText)
-                self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_RESPONSE % (intentObj.intent_type), intentResponse, colorValue=SIColors.Khaki)
-                return (intentResponse, slots, None)
+                intentResponse = await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_PLAYER_NOT_MATCHED, IntentResponseErrorCode.NO_VALID_TARGETS)
+                return None
 
             # trace.
             if (self.logsi.IsOn(SILevel.Verbose)):
@@ -227,30 +343,242 @@ class SpotifyPlusIntentHandler(IntentHandler):
                 CONF_VALUE: playerEntityState.entity_id
             }
 
-            # update speech slots with target media player info.
+            # update slots with target media player info.
+            intentObj.slots.update(slots)
             intentResponse.speech_slots = slots
 
-            # trace.
-            if (self.logsi.IsOn(SILevel.Verbose)):
-                self.logsi.LogDictionary(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_SLOT_INFO % intentObj.intent_type, slots, colorValue=SIColors.Khaki)
+            # is spotify premium account required for this function?
+            # we check this BEFORE the features supported check, otherwise it would
+            # always hit the features not supported since free accounts don't support 
+            # player features.  it's a more meaningful message to say that the "spotify
+            # premium is required for this" versus "feature x not supported".
+            if (requiresSpotifyPremium):
+                account_type:str = playerEntityState.attributes.get(ATTR_SPOTIFYPLUS_USER_PRODUCT)
+                if ((account_type or "").lower().find("premium") == -1):
+                    intentResponse = await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_SPOTIFY_PREMIUM_REQUIRED, IntentResponseErrorCode.NO_VALID_TARGETS)
+                    return None
+
+            # do we need to check for desired features?
+            if (desiredFeatures is not None):
+                
+                # are all desired features supported for this player? if not, then we are done.
+                if (playerEntity.supported_features & desiredFeatures) != desiredFeatures:
+
+                    # extract and format the names of desired features.
+                    featureNames = ", ".join(
+                        feature.name.replace("_", " ").lower()
+                        for feature in MediaPlayerEntityFeature
+                        if feature & desiredFeatures
+                    )
+
+                    # media player does not support requested features.
+                    intentObj.slots[SLOT_ERROR_FEATURES] = { CONF_VALUE: RESPONSE_PLAYER_FEATURES_NOT_SUPPORTED, CONF_TEXT: featureNames }
+                    intentResponse = await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_PLAYER_FEATURES_NOT_SUPPORTED, IntentResponseErrorCode.NO_VALID_TARGETS)
+                    return None
 
             # do we need to check player state?
             if (desiredStates is not None):
 
                 # is media player state in the desired state (e.g. playing? paused? etc)?
                 if (playerEntityState.state not in desiredStates):
-                    responseText = await get_intent_response_resource(desiredStateResponseKey, slots, intentObj, PLATFORM_SPOTIFYPLUS)
-                    intentResponse.async_set_speech(responseText)
-                    self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_RESPONSE % (intentObj.intent_type), intentResponse, colorValue=SIColors.Khaki)
-                    return (intentResponse, slots, None)
+                    intentObj.slots[SLOT_ERROR_STATES] = { CONF_VALUE: desiredStateResponseKey, CONF_TEXT: ", ".join(lbl for lbl in desiredStates).lower() }
+                    intentResponse = await self.ReturnResponseByKey(intentObj, intentResponse, desiredStateResponseKey, IntentResponseErrorCode.FAILED_TO_HANDLE)
+                    return None
+
+            # trace.
+            if (self.logsi.IsOn(SILevel.Verbose)):
+                self.logsi.LogDictionary(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_SLOT_INFO % intentObj.intent_type, intentObj.slots, colorValue=SIColors.Khaki)
 
             # return response and the found player entity.
-            return (intentResponse, slots, playerEntityState)
+            return playerEntityState
 
         finally:
 
             # trace.
             self.logsi.LeaveMethod(SILevel.Debug, colorValue=SIColors.Khaki)
+
+
+    async def ReturnResponseByKey(
+        self,
+        intentObj:Intent,
+        intentResponse:IntentResponse,
+        responseKey:str,
+        responseErrorCode:IntentResponseErrorCode=None,
+    ) -> IntentResponse | None:
+        """
+        Look up a response template in `custom_sentences/<language>/*.yaml` files by a key value,
+        render it (with template support), and sets the intent response to return the message.
+
+        If the `responseErrorCode` argument is specified, the intent response is updated to return
+        a response type of error, and the error code set with the `responseErrorCode` value.  
+        
+        In the HA Companion App Assist, the message background is red if a `responseErrorCode`
+        argument value is passed; otherwise, the background is black.
+
+        Args:
+            intentObj (Intent|None):
+                Intent object that is handling the request.
+            intentResponse (IntentResponse):
+                Intent response object.
+            responseKey (str):
+                Intent Response key to find; this value is case-sensitive.
+            responseErrorCode (IntentResponseErrorCode)
+                The IntentResponseErrorCode value to use for the response error code;
+                defaults to `FAILED_TO_HANDLE` if not set.
+
+        Returns:
+            An IntentResponse object with the response.
+        """
+        # trace.
+        if (self.logsi.IsOn(SILevel.Verbose)):
+            self.logsi.LogDictionary(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_SLOT_INFO % intentObj.intent_type, intentObj.slots, colorValue=SIColors.Khaki)
+
+        # if response error code set, then treat it as an error.
+        if (responseErrorCode is not None):
+            intentResponse.response_type = IntentResponseType.ERROR
+            intentResponse.error_code = responseErrorCode
+
+        # get the response code message text, and update the intent response.
+        responseText = await self.GetIntentResponseByKey(intentObj, responseKey)
+        intentResponse.async_set_speech(responseText)
+        if (self.logsi.IsOn(SILevel.Verbose)):
+            self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_RESPONSE % (intentObj.intent_type), intentResponse, colorValue=SIColors.Khaki)
+
+        # return response.
+        return intentResponse
+
+
+    async def GetIntentResponseByKey(
+        self,
+        intentObj:Intent,
+        responseKey:str,
+    ) -> str | None:
+        """
+        Look up a response template in `custom_sentences/<language>/*.yaml` files by a key value
+        and render it (with template support).
+
+        Args:
+            intentObj (Intent|None):
+                Intent object that is handling the request.
+            responseKey (str):
+                Intent Response key to find; this value is case-sensitive.
+
+        Returns:
+            A rendered template string for the response key if found; otherwise, a default English 
+            message stating that the response key could not be found.
+
+        Response key templates may be nested using the following schemas.
+        This is also the search prevalence heirarchy, in that the first layout that contains
+        the response key will be the value that is used.
+        - intent-specific: `responses -> intents -> MyIntentName -> my_message_key: "My message text"`
+        - platform-specific: `responses -> MyPlatform -> my_message_key: "My message text"`
+        - generic-response: `responses -> my_message_key: "My message text"`
+        """
+        methodParms:SIMethodParmListContext = None
+
+        # default result if response key could not be resolved.
+        result:str = "Resource message for response key \"%s\" could not be found." % responseKey
+        
+        try:
+
+            # trace.
+            methodParms = _logsi.EnterMethodParmList(SILevel.Debug, colorValue=SIColors.Khaki)
+            methodParms.AppendKeyValue("responseKey", responseKey)
+            methodParms.AppendKeyValue("intent_type", intentObj.intent_type)
+            methodParms.AppendKeyValue("language", intentObj.language)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Loading response text for response key: \"%s\" (language=%s)" % (responseKey, intentObj.language), methodParms, colorValue=SIColors.Khaki)
+
+            # validations.
+            language = intentObj.language
+            intent_type = intentObj.intent_type
+
+            # get intent data; if none found, then return default message.
+            langIntents:LanguageIntents = await self._IntentLoader.async_get_or_load_intents(language)
+            if (langIntents is None):
+                return result
+
+            # search for intent response key using the following search heirarchy:
+            # - intent-response:   `responses -> intents -> MyIntentName -> my_message_key: "My message text"`
+            # - platform-response: `responses -> MyPlatform -> my_message_key: "My message text"`
+            # - error-response:    `responses -> errors -> my_message_key: "My message text"`
+            # - generic-response:  `responses -> my_message_key: "My message text"`
+
+            # create searchable dictionarys of response data.
+            intents_block = langIntents.intent_responses or {}
+            platform_block = langIntents.platform_responses or {}
+            error_block = langIntents.error_responses or {}
+            generic_block = langIntents.generic_responses or {}
+
+            # check for response key in each response data dictionary.
+            candidates = []
+
+            # check for response key message at the intent level (intent-response).
+            if intent_type in intents_block:
+                intent_dict = intents_block[intent_type] or {}
+                if responseKey in intent_dict:
+                    _logsi.LogDebug("Found candidate for response key (intent-response) \"%s\": \"%s\"" % (responseKey, intent_dict[responseKey]), colorValue=SIColors.Khaki)
+                    candidates.append(intent_dict[responseKey])
+
+            # check for response key message by platform (platform-response).
+            if responseKey in platform_block:
+                _logsi.LogDebug("Found candidate for response key (platform-response) \"%s\": \"%s\"" % (responseKey, platform_block[responseKey]), colorValue=SIColors.Khaki)
+                candidates.append(platform_block[responseKey])
+
+            # check for response key message in response errors (error-response):
+            if responseKey in error_block:
+                _logsi.LogDebug("Found candidate for response key (error-response) \"%s\": \"%s\"" % (responseKey, error_block[responseKey]), colorValue=SIColors.Khaki)
+                candidates.append(error_block[responseKey])
+
+            # check for response key message by simple lookup under responses (generic-response):
+            if responseKey in generic_block and isinstance(generic_block[responseKey], str):
+                _logsi.LogDebug("Found candidate for response key (generic-response) \"%s\": \"%s\"" % (responseKey, generic_block[responseKey]), colorValue=SIColors.Khaki)
+                candidates.append(generic_block[responseKey])
+
+            # trace.
+            _logsi.LogDictionary(SILevel.Verbose,"Responses candidates dictionary", candidates, prettyPrint=True, colorValue=SIColors.Khaki)
+
+            # did we find any matching candidates?
+            if candidates:
+
+                # render the first candidate entry found.
+                template_text = candidates[0]
+
+                # just in case there are exceptions processing the template.
+                # e.g. "dict object' has no attribute 'name'" <- slot reference error.
+                try:
+
+                    # use Home Assistant Template helper to render, with access to hass template functions.
+                    # provide `slots` to the template context as well (like intent scripts do).
+                    tpl = Template(template_text, intentObj.hass)
+                    rendered = tpl.async_render({"slots": intentObj.slots}, parse_result=False)
+                    result = rendered
+
+                except Exception as ex:
+
+                    # trace.
+                    _logsi.LogException("Intent handler GetIntentResponseByKey template render exception: %s" % (str(ex)), ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
+
+                    # ignore template render exceptions.
+                    # we will use the resource message as-is, and let the user figure it out.
+                    # HA will take care of logging the exception to the system log.
+                    result = template_text
+
+            # return result text.
+            _logsi.LogText(SILevel.Verbose,"Response text for response key \"%s\": \"%s\"" % (responseKey, result), result, colorValue=SIColors.Khaki)
+            return result
+
+        except Exception as ex:
+            
+            # trace.
+            _logsi.LogException("Intent handler GetIntentResponseByKey exception: %s" % (str(ex)), ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
+
+            # ignore exceptions
+            return "Could not find intent resource message for response key \"%s\" (language=\"%s\", platform=\"%s\")." % (responseKey, intentObj.language, self._IntentLoader._Platform)
+        
+        finally:
+
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, colorValue=SIColors.Khaki)
 
 
 def get_registry_entry_media_player(
@@ -313,210 +641,3 @@ def get_registry_entry_media_player(
 
     # return to caller.
     return result
-
-
-async def get_intent_response_resource(
-    response_key:str,
-    slots:dict=None,
-    intentObj:Intent=None,
-    platform:str=None,
-    platform_files_only:bool=True,
-    hass:HomeAssistant=None,
-    intent_name:str=None,
-    lang:str=None,
-) -> str | None:
-    """
-    Look up a response template in `custom_sentences/<lang>/*.yaml` files by a key value
-    and render it (with slot support).
-
-    Args:
-        response_key (str):
-            Response key to find.
-            This value is case-sensitive.
-        slots (dict):
-            Slots data to provide to the template engine for overriding resource message key values.
-        intentObj (Intent|None):
-            Intent object; if None, then the remaining arguments must be supplied.
-        platform (str):
-            Platform name.
-        platform_files_only (bool):
-            If true, limits file processing to file names that start with the `platform` argument value;
-            otherwise, false to process all found files.
-        hass (HomeAssistant):
-            Hass instance used to retrieve the language indicator and process template functions.
-            Defaults to intentObj.hass if not supplied.
-        intent_name (str):
-            Parent intent name, if response key is for a specific intent.
-            This value is case-sensitive.
-            Defaults to intentObj.intent_type if not supplied.
-        lang (str):
-            Language indicator, used to find the language-specific folder under the 
-            custom_sentences base folder.
-
-    Returns the rendered string, or a default English message if not found.
-
-    Response key templates may be nested using the following schemas.
-    This is also the search prevalence heirarchy, in that the first layout that contains
-    the response key will be the value that is used.
-    - standard layout: `responses -> intents -> MyIntentName -> my_message_key: "My message text"`
-    - platform layout: `responses -> MyPlatform -> my_message_key: "My message text"`
-    - flatfile layout: `responses -> my_message_key: "My message text"`
-    """
-    methodParms:SIMethodParmListContext = None
-
-    # default result if response key could not be resolved.
-    result:str = "Resource message for response key \"%s\" could not be found." % response_key
-        
-    try:
-
-        # if intent object supplied, then default other input parameters from it's settings.
-        if intentObj:
-            if hass is None:
-                hass = intentObj.hass
-            if intent_name is None:
-                intent_name = intentObj.intent_type
-            if lang is None:
-                lang = intentObj.language
-            if platform is None:
-                if isinstance(intentObj.platform, list):
-                    platform = intentObj.platform[0]
-                else:
-                    platform = intentObj.platform
-
-        # trace.
-        methodParms = _logsi.EnterMethodParmList(SILevel.Debug, colorValue=SIColors.Khaki)
-        methodParms.AppendKeyValue("response_key", response_key)
-        methodParms.AppendKeyValue("intent_name", intent_name)
-        methodParms.AppendKeyValue("platform", platform)
-        methodParms.AppendKeyValue("lang", lang)
-        methodParms.AppendKeyValue("slots", str(slots))
-        methodParms.AppendKeyValue("platform_files_only", platform_files_only)
-        _logsi.LogMethodParmList(SILevel.Verbose, "Loading response text for response key: \"%s\" (lang=%s)" % (response_key, lang), methodParms, colorValue=SIColors.Khaki)
-        
-        # validations.
-        if (not isinstance(platform_files_only, bool)):
-            platform_files_only = False
-
-        # formulate custom sentences folder location.
-        lang = lang or hass.config.language or "en"
-        base_dir = hass.config.path(f"custom_sentences/{lang}")
-
-        # is folder path really a folder? if not, then we are done.
-        # note - use `async_add_executor_job` so we don't block the HA event loop.
-        if not await hass.async_add_executor_job(os.path.isdir, base_dir):
-            return "Resource message folder \"%s\" could not be read." % base_dir
-
-        def _load_yaml_files():
-            responses = []
-            for fname in sorted(os.listdir(base_dir)):
-                fnameCompare = fname.lower()
-                if (not fnameCompare.endswith((".yaml", ".yml"))):
-                    continue
-                if (platform_files_only) and (not fnameCompare.startswith(platform)):
-                    continue
-                path = os.path.join(base_dir, fname)
-                try:
-                    with open(path, "r", encoding="utf-8") as f:
-                        data = yaml.safe_load(f) or {}
-                        responses.append({ 
-                            "path": path,
-                            "data": data
-                        })
-                except Exception:
-                    continue
-            return responses
-
-        # load all yaml files from the language-specific custom_sentences folder.
-        # note - use `async_add_executor_job` so we don't block the HA event loop.
-        all_data = await hass.async_add_executor_job(_load_yaml_files)
-
-        # process all files in the custom_sentences folder.
-        for file_entry in all_data:
-
-            # responses may be nested using the following schemas:
-            # - standard layout: `responses -> intents -> MyIntentName -> my_message_key: "My message text"`
-            # - platform layout: `responses -> MyPlatform -> my_message_key: "My message text"`
-            # - flatfile layout: `responses -> my_message_key: "My message text"`
-            # this is also the search prevalence heirarchy, in that the first layout that contains
-            # the response key will be the value that is used.
-
-            # create searchable dictionarys of response data.
-            file_path = file_entry.get("path")
-            responses_root = file_entry.get("data",{}).get("responses") or {}
-            intents_block = responses_root.get("intents") or {}
-            platform_block = responses_root.get(platform or "") or {}
-
-            # trace.
-            _logsi.LogVerbose("Processing custom_sentences file: \"%s\"" % file_path, colorValue=SIColors.Khaki)
-            #_logsi.LogDictionary(SILevel.Debug,"Responses root dictionary", responses_root, prettyPrint=True, colorValue=SIColors.Khaki)
-            #_logsi.LogDictionary(SILevel.Debug,"Intents block dictionary", intents_block, prettyPrint=True, colorValue=SIColors.Khaki)
-            #_logsi.LogDictionary(SILevel.Debug,"Platform block dictionary", platform_block, prettyPrint=True, colorValue=SIColors.Khaki)
-
-            # check for response key in each layout type.
-            candidates = []
-
-            # check for standard layout:
-            if intent_name in intents_block:
-                intent_dict = intents_block[intent_name] or {}
-                if response_key in intent_dict:
-                    _logsi.LogDebug("Found candidate for response key (intent-specific) \"%s\": \"%s\"" % (response_key, intent_dict[response_key]), colorValue=SIColors.Khaki)
-                    candidates.append(intent_dict[response_key])
-
-            # check for platform layout:
-            if response_key in platform_block:
-                _logsi.LogDebug("Found candidate for response key (platform-specific) \"%s\": \"%s\"" % (response_key, platform_block[response_key]), colorValue=SIColors.Khaki)
-                candidates.append(platform_block[response_key])
-
-            # check for flatfile layout:
-            if response_key in responses_root and isinstance(responses_root[response_key], str):
-                _logsi.LogDebug("Found candidate for response key (intent-agnostic) \"%s\": \"%s\"" % (response_key, responses_root[response_key]), colorValue=SIColors.Khaki)
-                candidates.append(responses_root[response_key])
-
-            # trace.
-            #_logsi.LogDictionary(SILevel.Verbose,"Responses candidates dictionary", candidates, prettyPrint=True, colorValue=SIColors.Khaki)
-
-            # did we find any matching candidates?
-            if candidates:
-
-                # render the first candidate entry found.
-                template_text = candidates[0]
-
-                # just in case there are exceptions processing the template.
-                # e.g. "dict object' has no attribute 'name'" <- slot reference error.
-                try:
-
-                    # use Home Assistant Template helper to render, with access to hass template functions.
-                    # provide `slots` to the template context as well (like intent scripts do).
-                    tpl = Template(template_text, hass)
-                    rendered = tpl.async_render({"slots": slots}, parse_result=False)
-                    result = rendered
-
-                except Exception as ex:
-
-                    # trace.
-                    _logsi.LogException("Intent get_intent_response_resource template render exception: %s" % (str(ex)), ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
-
-                    # ignore template render exceptions.
-                    # we will use the resource message as-is, and let the user figure it out.
-                    # HA will take care of logging the exception to the system log.
-                    result = template_text
-
-                # found result; stop processing response files.
-                break
-
-        # return result text.
-        _logsi.LogText(SILevel.Verbose,"Response text for response key \"%s\": \"%s\"" % (response_key, result), result, colorValue=SIColors.Khaki)
-        return result
-
-    except Exception as ex:
-            
-        # trace.
-        _logsi.LogException("Intent get_intent_response_resource exception: %s" % (str(ex)), ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
-
-        # ignore exceptions
-        return "Resource message resolution error for response key \"%s\"." % response_key
-        
-    finally:
-
-        # trace.
-        _logsi.LeaveMethod(SILevel.Debug, colorValue=SIColors.Khaki)

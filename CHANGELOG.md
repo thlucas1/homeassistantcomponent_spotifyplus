@@ -6,6 +6,14 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.179 ] - 2025/10/16
+
+  * Added voice assist intents: `SpotifyPlusFavoriteAlbumAdd`, `SpotifyPlusFavoriteAlbumRemove`, `SpotifyPlusFavoriteAudiobookAdd`, `SpotifyPlusFavoriteAudiobookRemove`, `SpotifyPlusFavoritePlaylistAdd`, `SpotifyPlusFavoritePlaylistRemove`, `SpotifyPlusFavoritePodcastAdd`, `SpotifyPlusFavoritePodcastRemove`, `SpotifyPlusFavoritePodcastEpisodeAdd`, `SpotifyPlusFavoritePodcastEpisodeRemove`, `SpotifyPlusPlayPlaylist`.  Check out the [wiki docs](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Voice-Assist-Support#intent-index) for more information.
+  * Moved all custom sentence definitions from the `custom_components/spotifyplus/samplecode/intents` to the `custom_components/spotifyplus/sentences` location, to keep it more aligned with HA built-in intents.
+  * Moved all custom automation definitions from the `custom_components/spotifyplus/samplecode/automations` to the `custom_components/spotifyplus/automations` location.
+  * Added `intent_loader` module to mimic loading custom_sentence data like the HA `conversation` module.  This allows access to intent response message templates from the IntentHandler class.  It also adds a "messages by platform" type, so that shared messages across the platform can be added to `responses -> MyPlatform -> my_message_key: "My message text"`.  Note that HA does not recognize this template data structure, so it can only be used by the `SpotifyplusIntentHandler` class.  See the `custom_components/spotifyplus/sentences/en/spotifyplus_common_en.yaml` file for examples.
+  * Updated `media_player` extra state attribute `sp_context_uri` to include the parent show uri value for audiobook / podcast episodes.
+
 ###### [ 1.0.178 ] - 2025/10/15
 
   * Added voice assist intents: `SpotifyPlusFavoriteArtistAdd`, `SpotifyPlusFavoriteArtistRemove`, `SpotifyPlusFavoriteTrackAdd`, `SpotifyPlusFavoriteTrackRemove`, `SpotifyPlusGetInfoArtistBio`, `SpotifyPlusNowPlayingInfoArtistBio`, `SpotifyPlusNowPlayingInfoAudiobook`, `SpotifyPlusNowPlayingInfoPodcast`, `SpotifyPlusNowPlayingInfoTrack`, `SpotifyPlusPlayerSetVolumeLevel`.  Check out the [wiki docs](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Voice-Assist-Support#intent-index) for more information.

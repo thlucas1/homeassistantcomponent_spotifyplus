@@ -1,0 +1,206 @@
+# ============================================================================
+# SpotifyPlus integration intent common responses, lists, expand rules, etc.
+#
+# Location: custom_sentences/en/spotifyplus_common_en.yaml
+# Language: en, English
+# ============================================================================
+language: en
+responses:
+
+  # Generic responses.
+  generic-response-1: "This is generic response message 1"
+  generic-response-2: "This is generic response message 2"
+  generic-response-3: "This is generic response message 3"
+
+
+  errors:
+
+    # the values here will override HA built-in error responses.
+    # they are purposefully designed to be as generic as possible, as they cover multiple
+    # domain / platform types.
+
+    # general errors.
+    no_intent: "Sorry, I couldn't understand that"
+    handle_error: "An unexpected error occurred"
+
+    # intent matching contraint errors used when target(s) cannot be resolved.
+    no_area: "Sorry, I am not aware of any area called \"{{ area }}\"."
+    no_floor: "Sorry, I am not aware of any floor called \"{{ floor }}\"."
+    no_domain: "Sorry, I am not aware of any \"{{ domain.replace('_', ' ') }}\"."
+    no_domain_in_area: "Sorry, I am not aware of any \"{{ domain.replace('_', ' ') }}\" in the \"{{ area }}\" area."
+    no_domain_in_floor: "Sorry, I am not aware of any \"{{ domain.replace('_', ' ') }}\" on the \"{{ floor }}\" floor."
+    no_device_class: "Sorry, I am not aware of any \"{{ device_class }}\"."
+    no_device_class_in_area: "Sorry, I am not aware of any \"{{ device_class }}\" in the \"{{ area }}\" area."
+    no_device_class_in_floor: "Sorry, I am not aware of any \"{{ device_class }}\" in the \"{{ floor }}\" floor."
+    no_entity: "Sorry, I am not aware of any device called \"{{ entity }}\"."
+    no_entity_in_area: "Sorry, I am not aware of any device called \"{{ entity }}\" in the \"{{ area }}\" area."
+    no_entity_in_floor: "Sorry, I am not aware of any device called \"{{ entity }}\" in the \"{{ floor }}\" floor."
+    entity_wrong_state: "Sorry, no device is {{ state | lower }}."
+    feature_not_supported: "Sorry, no device supports the required features."
+
+    # intent matching contraint errors used when target(s) can be resolved, but are not exposed to voice assistant.
+    no_entity_exposed: "Sorry, \"{{ entity }}\" is not exposed to Voice Assistant."
+    no_entity_in_area_exposed: "Sorry, \"{{ entity }}\" in the \"{{ area }}\" area is not exposed to Voice Assistant."
+    no_entity_in_floor_exposed: "Sorry, \"{{ entity }}\" in the \"{{ floor }}\" floor is not exposed to Voice Assistant."
+    no_domain_exposed: "Sorry, no \"{{ domain.replace('_', ' ') }}\" is exposed to Voice Assistant."
+    no_domain_in_area_exposed: "Sorry, no \"{{ domain.replace('_', ' ') }}\" in the \"{{ area }}\" area is exposed to Voice Assistant."
+    no_domain_in_floor_exposed: "Sorry, no \"{{ domain.replace('_', ' ') }}\" in the \"{{ floor }}\" floor is exposed to Voice Assistant."
+    no_device_class_exposed: "Sorry, no \"{{ device_class }}\" is exposed to Voice Assistant."
+    no_device_class_in_area_exposed: "Sorry, no \"{{ device_class }}\" in the \"{{ area }}\" area is exposed to Voice Assistant."
+    no_device_class_in_floor_exposed: "Sorry, no \"{{ device_class }}\" in the \"{{ floor }}\" floor is exposed to Voice Assistant."
+
+    # intent matching contraint errors used when multiple (exposed) devices have the same name.
+    duplicate_entities: "Sorry, there are multiple devices called \"{{ entity }}\"."
+    duplicate_entities_in_area: "Sorry, there are multiple devices called \"{{ entity }}\" in the \"{{ area }}\" area."
+    duplicate_entities_in_floor: "Sorry, there are multiple devices called \"{{ entity }}\" in the \"{{ floor }}\" floor."
+
+
+  # ============================================================================
+  # SpotifyPlus platform responses.
+  # Note that the HA conversation integration does not understand this concept, 
+  # as this functionality is unique to OUR integration.  With that said, you 
+  # must reload the integration (or restart HA) in order for changes to take 
+  # effect for these messages.
+  # ============================================================================
+  spotifyplus:
+
+    # general error messages.
+    error_failed_to_handle: "Failed to handle intent:\n\n{{ slots.error_info.text }}"
+    error_unhandled: "An unexpected error occurred:\n\n{{ slots.error_info.text }}"
+
+    # get information request related messages.
+    get_info_artist_bio: "Artist bio for \"{{ slots.artist_title.text }}\" ... \n\n{{ slots.artist_bio.text | truncate(400, end=' ...') }}\n\n[more info at {{ slots.artist_url.text }}]({{ slots.artist_url.value }})"
+
+    # now playing information related messages.
+    nowplaying_info_audiobook: "Media player is playing \"{{ slots.chapter_title.text }}\", from audiobook \"{{ slots.audiobook_title.text }}\", by author \"{{ slots.author_title.text }}\".\n\n[more info at {{ slots.audiobook_url.text }}]({{ slots.audiobook_url.value }})"
+    nowplaying_info_podcast: "Media player is playing episode \"{{ slots.episode_title.text }}\", from podcast \"{{ slots.podcast_title.text }}\".\n\n[more info at {{ slots.episode_url.text }}]({{ slots.episode_url.value }})"
+    nowplaying_info_track: "Media player is playing track \"{{ slots.track_title.text }}\", from album \"{{ slots.album_title.text }}\", by artist \"{{ slots.artist_title.text }}\".\n\n[more info at {{ slots.album_url.text }}]({{ slots.album_url.value }})"
+    nowplaying_no_media_album: "SpotifyPlus media player is currently not playing media that contains Track Album information."
+    nowplaying_no_media_artist: "SpotifyPlus media player is currently not playing media that contains Track Artist information."
+    nowplaying_no_media_audiobook: "SpotifyPlus media player is currently not playing media that contains Audiobook information."
+    nowplaying_no_media_episode: "SpotifyPlus media player is currently not playing media that contains Episode information."
+    nowplaying_no_media_playlist: "SpotifyPlus media player is currently not playing media that contains Playlist information."
+    nowplaying_no_media_podcast: "SpotifyPlus media player is currently not playing media that contains Podcast information."
+    nowplaying_no_media_track: "SpotifyPlus media player is currently not playing media that contains Track information."
+
+    # media player related messages.
+    play_playlist: "Playing found Spotify playlist \"{{ slots.playlist_title.text }}\", on the \"{{ slots.device_name.text }}\" device."
+    player_features_not_supported: "Media player \"{{ slots.name.text }}\" does not support required features for this request: \"{{ slots.error_features.text }}\"."
+    player_not_exposed_to_voice: "Media player \"{{ slots.target_player.text }}\" has not been exposed to Voice Assistant."
+    player_not_matched: "SpotifyPlus media player could not be resolved by \"{{ slots.target_player.text }}\"."
+    player_not_matched_area: "SpotifyPlus media player could not be resolved for the \"{{ slots.area.text }}\" area."
+    player_not_playing_media: "Media player \"{{ slots.target_player.text }}\" is currently not playing media."
+    player_not_spotifyplus: "Resolved media player \"{{ slots.target_player.text }}\" is not a SpotifyPlus media player."
+
+    # general spotify information related messages.
+    spotify_no_artist_info: "Artist information could not be found for \"{{ slots.artist_name.text }}\"."
+    spotify_search_no_items_playlist: "Playlist information could not be found for \"{{ slots.playlist_name.text }}\"."
+    spotify_premium_required: "Sorry, a Spotify premium account is required for the requested function using media player \"{{ slots.target_player.text }}\"."
+    
+# ============================================================================
+# SpotifyPlus common lists
+# ============================================================================
+lists:
+
+  freeform:
+    wildcard: true  # accept freeform text.
+
+  artist_name:
+    wildcard: true  # Wildcard lists can match any text.
+
+  device_name:
+    wildcard: true  # Wildcard lists can match any text.
+
+  # device_name:
+  #   values:
+  #     - in: "(office|living room)"
+  #       out: Bose-ST10-1
+  #     - in: Kitchen
+  #       out: Bose-ST10-2
+
+  player_repeat_mode:
+    values:
+      - in: "(on|[single|1|one] track|)"
+        out: "track"
+      - in: "(context|all|all tracks|list)"
+        out: "context"
+      - in: "(off|disable[d])"
+        out: "off"
+
+  player_shuffle_mode:
+    values:
+      - in: "(on|true|enable[d])"
+        out: "on"
+      - in: "(off|false|disable[d])"
+        out: "off"
+
+  player_volume_level:
+    values:
+      - in: (max|maximum|highest)
+        out: 100
+      - in: (min|minimum|lowest)
+        out: 1
+
+  player_volume_level_pct:
+    range:
+      type: "percentage"
+      from: 0
+      to: 100
+
+  player_volume_step_pct:
+    range:
+      type: "percentage"
+      from: 1
+      to: 100
+
+  playlist_name:
+    wildcard: true    # accept freeform text.
+
+  # pre-defined Spotify playlist identifiers.
+  spotify_playlist_names:
+    values:           # accept pre-defined values.
+      - in: "Daily Mix (1|One)"
+        out: "spotify:playlist:37i9dQZF1E39vTG3GurFPW"
+      - in: "Daily Mix (2|Two)"
+        out: "spotify:playlist:37i9dQZF1E39DIjrju3A9t"
+      - in: "Daily Mix (3|Three)"
+        out: "spotify:playlist:37i9dQZF1E36yv9pXdC1Mb"
+      - in: "Discover Weekly"
+        out: "spotify:playlist:37i9dQZEVXcTh0pBxo9pZe"
+      - in: "(DJ|deejay|dee jay)"
+        out: "spotify:playlist:37i9dQZF1EYkqdzj48dyYq"
+
+# ============================================================================
+# SpotifyPlus common expansion rules
+# ============================================================================
+expansion_rules:
+
+  in_spotifyplus_player_area: "(in|inn) [<the>] ({area}|{area} area|area {area})"               # e.g. "in the Office", "in the Office area", "in area Office"
+  on_spotifyplus_player_name: "(on|for) [<the>] ({name} player|player {name})"                  # e.g. "on the Spotify Premium player", "on player Spotify Premium"
+  on_spotifyplus_device_name: "(on|for) [<the>] ({device_name} device|device {device_name})"    # e.g. "on the Office device", "on device Home Receiver"
+
+  #spotifyplus_in_area: "in [<the>] {area}"    # e.g. "in office", "in the office"
+  # the: "(the|my|our)"
+  # area: "[<the>] {area}"
+  # floor: "[<the>] {floor} [floor]"
+  # area_floor: "(<area>|<floor>)"
+  # in_area_floor: "[<in>] <area_floor>"
+  # the: "(the|my|our)"
+  # name: "[<the>] {name}"
+  # area: "[<the>] {area}"
+  # in_area_floor: "[<in>] <area_floor>"
+  # in: "(in|on|at|of|across|around|throughout)"
+
+# ============================================================================
+# SpotifyPlus common skip words
+# ============================================================================
+skip_words:
+  - "please"
+  - "can you"
+  - "could you"
+  - "would you"
+  - "for me"
+  - "i'd like"
+  - "i'd like to"
+  - "i want"  
+  - "i want to"
