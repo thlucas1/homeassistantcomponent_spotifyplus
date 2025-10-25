@@ -31,3 +31,4 @@ config/*
 /New_Release_Instructions.txt
 /test/testdata/
 /test/*
+/custom_components/spotifyplus/sentences/en/spotifyplus_common_user_en.yaml
