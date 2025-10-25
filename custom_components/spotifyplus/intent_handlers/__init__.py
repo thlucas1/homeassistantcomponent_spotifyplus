@@ -28,7 +28,16 @@ from .spotifyplusplayermediaskipstart_handler import SpotifyPlusPlayerMediaSkipS
 from .spotifyplusplayersetrepeatmode_handler import SpotifyPlusPlayerSetRepeatMode_Handler
 from .spotifyplusplayersetshufflemode_handler import SpotifyPlusPlayerSetShuffleMode_Handler
 from .spotifyplusplayersetvolumelevel_handler import SpotifyPlusPlayerSetVolumeLevel_Handler
-from .spotifyplusplayplaylist_handler import SpotifyPlusPlayPlaylist_Handler
+from .spotifyplusplayertransferplayback_handler import SpotifyPlusPlayerTransferPlayback_Handler
+from .spotifyplusplayfavoritetracks_handler import SpotifyPlusPlayFavoriteTracks_Handler
+from .spotifyplusplaylistcreate_handler import SpotifyPlusPlaylistCreate_Handler
+from .spotifyplussearchplayartistalbum_handler import SpotifyPlusSearchPlayArtistAlbum_Handler
+from .spotifyplussearchplayartisttrack_handler import SpotifyPlusSearchPlayArtistTrack_Handler
+from .spotifyplussearchplayaudiobook_handler import SpotifyPlusSearchPlayAudiobook_Handler
+from .spotifyplussearchplayplaylist_handler import SpotifyPlusSearchPlayPlaylist_Handler
+from .spotifyplussearchplaypodcast_handler import SpotifyPlusSearchPlayPodcast_Handler
+from .spotifyplussearchplaypodcastepisode_handler import SpotifyPlusSearchPlayPodcastEpisode_Handler
+from .spotifyplussearchplaytrack_handler import SpotifyPlusSearchPlayTrack_Handler
 from .spotifyplusvolumedown_handler import SpotifyPlusVolumeDown_Handler
 from .spotifyplusvolumemuteoff_handler import SpotifyPlusVolumeMuteOff_Handler
 from .spotifyplusvolumemuteon_handler import SpotifyPlusVolumeMuteOn_Handler
@@ -64,7 +73,16 @@ __all__ = [
     'SpotifyPlusPlayerSetRepeatMode_Handler',
     'SpotifyPlusPlayerSetShuffleMode_Handler',
     'SpotifyPlusPlayerSetVolumeLevel_Handler',
-    'SpotifyPlusPlayPlaylist_Handler',
+    'SpotifyPlusPlayerTransferPlayback_Handler',
+    'SpotifyPlusPlayFavoriteTracks_Handler',
+    'SpotifyPlusPlaylistCreate_Handler',
+    'SpotifyPlusSearchPlayArtistAlbum_Handler',
+    'SpotifyPlusSearchPlayArtistTrack_Handler',
+    'SpotifyPlusSearchPlayAudiobook_Handler',
+    'SpotifyPlusSearchPlayPlaylist_Handler',
+    'SpotifyPlusSearchPlayPodcast_Handler',
+    'SpotifyPlusSearchPlayPodcastEpisode_Handler',
+    'SpotifyPlusSearchPlayTrack_Handler',
     'SpotifyPlusVolumeDown_Handler',
     'SpotifyPlusVolumeMuteOff_Handler',
     'SpotifyPlusVolumeMuteOn_Handler',

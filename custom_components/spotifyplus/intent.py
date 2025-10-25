@@ -86,29 +86,41 @@ async def async_setup_intents(hass: HomeAssistant) -> None:
         register_intent_handler(hass, SpotifyPlusPlayerSetRepeatMode_Handler(intentLoader))
         register_intent_handler(hass, SpotifyPlusPlayerSetShuffleMode_Handler(intentLoader))
         register_intent_handler(hass, SpotifyPlusPlayerSetVolumeLevel_Handler(intentLoader))
-        register_intent_handler(hass, SpotifyPlusPlayPlaylist_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusPlayerTransferPlayback_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusPlayFavoriteTracks_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusPlaylistCreate_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusSearchPlayArtistAlbum_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusSearchPlayArtistTrack_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusSearchPlayAudiobook_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusSearchPlayPlaylist_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusSearchPlayPodcast_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusSearchPlayPodcastEpisode_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusSearchPlayTrack_Handler(intentLoader))
         register_intent_handler(hass, SpotifyPlusVolumeDown_Handler(intentLoader))
         register_intent_handler(hass, SpotifyPlusVolumeMuteOff_Handler(intentLoader)) 
         register_intent_handler(hass, SpotifyPlusVolumeMuteOn_Handler(intentLoader))
         register_intent_handler(hass, SpotifyPlusVolumeSetStep_Handler(intentLoader))
         register_intent_handler(hass, SpotifyPlusVolumeUp_Handler(intentLoader))
 
-        # trace.
-        # log information about built-in intents for this language variant.
-        if (_logsi.IsOn(SILevel.Verbose)):
-            try:
-                _logsi.LogVerbose("Component - loading HA built-in intents from data path: \"%s\"" % HA_BUILT_IN_INTENTS_DATA_DIR, colorValue=SIColors.Khaki)
-                language_variant = hass.config.language or "en"
-                lang_variant_intents = await hass.async_add_executor_job(
-                    get_intents, language_variant, json_load
-                )
-                if lang_variant_intents:
-                    _logsi.LogDictionary(SILevel.Verbose, "Component - HA built-in intents (dictionary)", lang_variant_intents, prettyPrint=True, colorValue=SIColors.Khaki)
-                else:
-                    _logsi.LogVerbose("Component - HA built-in intents not found for language variant: \"%s\"" % language_variant, colorValue=SIColors.Khaki)
-            except Exception as ex:
-                # log exception, but not to system logger as HA will take care of it.
-                _logsi.LogException("Could not load HA built-in intents!", ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
+        # start listening for conversation.reload service call events.
+        await intentLoader.async_register_cache_reload_listener()
+
+        # # trace.
+        # # log information about built-in intents for this language variant.
+        # if (_logsi.IsOn(SILevel.Verbose)):
+        #     try:
+        #         _logsi.LogVerbose("Component - loading HA built-in intents from data path: \"%s\"" % HA_BUILT_IN_INTENTS_DATA_DIR, colorValue=SIColors.Khaki)
+        #         language_variant = hass.config.language or "en"
+        #         lang_variant_intents = await hass.async_add_executor_job(
+        #             get_intents, language_variant, json_load
+        #         )
+        #         if lang_variant_intents:
+        #             _logsi.LogDictionary(SILevel.Verbose, "Component - HA built-in intents (dictionary)", lang_variant_intents, prettyPrint=True, colorValue=SIColors.Khaki)
+        #         else:
+        #             _logsi.LogVerbose("Component - HA built-in intents not found for language variant: \"%s\"" % language_variant, colorValue=SIColors.Khaki)
+        #     except Exception as ex:
+        #         # log exception, but not to system logger as HA will take care of it.
+        #         _logsi.LogException("Could not load HA built-in intents!", ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
 
         # indicate success.
         _logsi.LogVerbose("Component async_setup_intents complete", colorValue=SIColors.Khaki)

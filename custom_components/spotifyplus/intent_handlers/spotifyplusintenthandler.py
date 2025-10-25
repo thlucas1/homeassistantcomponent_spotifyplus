@@ -32,9 +32,7 @@ from ..const import (
     PLATFORM_SPOTIFYPLUS,
     RESPONSE_ERROR_FAILED_TO_HANDLE,
     RESPONSE_PLAYER_FEATURES_NOT_SUPPORTED,
-    #RESPONSE_PLAYER_NOT_EXPOSED_TO_VOICE,
     RESPONSE_PLAYER_NOT_MATCHED,
-    #RESPONSE_PLAYER_NOT_MATCHED_AREA,
     RESPONSE_SPOTIFY_PREMIUM_REQUIRED,
     SLOT_AREA,
     SLOT_ERROR_FEATURES,
@@ -163,19 +161,9 @@ class SpotifyPlusIntentHandler(IntentHandler):
 
             # update slot error details.
             intentObj.slots[SLOT_ERROR_INFO] = { CONF_VALUE: RESPONSE_ERROR_FAILED_TO_HANDLE, CONF_TEXT: str(ex) }
-            intentResponse.speech_slots = intentObj.slots
-
-            # get unhandled error response.
-            responseText = await self.GetIntentResponseByKey(intentObj, RESPONSE_ERROR_FAILED_TO_HANDLE, intentObj.slots)
-
-            # set intent response type and error code.
-            intentResponse.response_type = IntentResponseType.ERROR
-            intentResponse.error_code = IntentResponseErrorCode.FAILED_TO_HANDLE
 
             # return intent response.
-            intentResponse.async_set_speech(responseText)
-            self.logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_INTENT_HANDLER_RESPONSE % (intentObj.intent_type), intentResponse, colorValue=SIColors.Khaki)
-            return intentResponse
+            return await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_ERROR_FAILED_TO_HANDLE, IntentResponseErrorCode.FAILED_TO_HANDLE)
 
         finally:
 
@@ -242,8 +230,8 @@ class SpotifyPlusIntentHandler(IntentHandler):
 
             # update target player slot in case we have any errors.
             slots[SLOT_TARGET_PLAYER] = {
+                CONF_VALUE: "unknown",
                 CONF_TEXT: player_name + area_id + floor_id,  # only 1 should be populated, others are empty strings.
-                CONF_VALUE: "unknown"
             }
 
             # build matching entities criteria.
@@ -339,8 +327,8 @@ class SpotifyPlusIntentHandler(IntentHandler):
             # note we will use the friendly name / area / floor value supplied, 
             # and just update the entity_id value.
             slots[SLOT_TARGET_PLAYER] = {
+                CONF_VALUE: playerEntityState.entity_id,
                 CONF_TEXT: player_name + area_id + floor_id,  # only 1 should be populated, others are empty strings.
-                CONF_VALUE: playerEntityState.entity_id
             }
 
             # update slots with target media player info.

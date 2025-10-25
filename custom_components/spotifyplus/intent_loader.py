@@ -16,9 +16,15 @@ from hassil.intents import (
     Intents,
 )
 from hassil.util import merge_dict
-from homeassistant.core import HomeAssistant
+
+from homeassistant.const import EVENT_CALL_SERVICE
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.util import language as language_util
 from homeassistant.util.json import JsonObjectType, json_loads_object
+from homeassistant.components.conversation.const import (
+    SERVICE_RELOAD as CONVERSATION_SERVICE_RELOAD, 
+    DOMAIN as DOMAIN_CONVERSATION,
+)
 
 import logging
 _LOGGER = logging.getLogger(__name__)
@@ -76,12 +82,44 @@ class IntentLoader():
         self._LangIntents:dict[str, LanguageIntents | object] = {}
         self._LoadIntentsLock = asyncio.Lock()
         self._Platform:str = platform
+        self.unsubscribe_event = None
 
 
     @property
     def supported_languages(self) -> list[str]:
         """Return a list of supported languages."""
         return get_languages()
+
+
+    async def async_clear_cache(
+        self, 
+        ) -> None:
+        """
+        Clears the cache of any loaded intents.
+        """
+        try:
+
+            # anything in the cache? if not, then there's nothing to do.
+            if (self._LangIntents == {}):
+                _logsi.LogVerbose("Intent cache is already empty; nothing to do", colorValue=SIColors.Khaki)
+                return
+
+            # let's prepare to load the intent data;
+            # set a lock in case we get multiple requests at the same time.
+            _logsi.LogVerbose("Acquiring lock prior to clearing cache", colorValue=SIColors.Khaki)
+            async with self._LoadIntentsLock:
+
+                # clear the cache.
+                self._LangIntents.clear()
+
+                # trace.
+                _logsi.LogVerbose("Intent cache has been cleared", colorValue=SIColors.Khaki)
+
+        except Exception as ex:
+
+            # log exception, but not to system logger as HA will take care of it.
+            _logsi.LogException("Component async_clear_cache exception", ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
+            raise
 
 
     async def async_get_or_load_intents(
@@ -106,7 +144,6 @@ class IntentLoader():
                 language = self.hass.config.language or "en"
 
             # if we already loaded intents, then return the cached data.
-            #_logsi.LogVerbose("Checking if we already loaded intents for platform \"%s\" (language=%s)" % (platform, language), colorValue=SIColors.Khaki)
             if lang_intents := self._LangIntents.get(language):
                 if lang_intents is ERROR_SENTINEL:
                     return None
@@ -122,7 +159,6 @@ class IntentLoader():
 
                 # was another request waiting while we were loading?
                 # if so, then there is no need to load it again.
-                #_logsi.LogVerbose("Checking if intents were loaded (wait check after lock) for platform \"%s\" (language=%s)" % (self._Platform, language), colorValue=SIColors.Khaki)
                 if lang_intents := self._LangIntents.get(language):
                     if lang_intents is ERROR_SENTINEL:
                         return None
@@ -331,3 +367,50 @@ class IntentLoader():
 
             # trace.
             _logsi.LeaveMethod(SILevel.Debug, colorValue=SIColors.Khaki)
+
+
+    async def async_register_cache_reload_listener(
+        self, 
+        ) -> None:
+        """
+        Registers an event listener that listens for `conversation.reload` service calls,
+        so that our cache will also be reloaded on the next access call.
+        """
+
+        @callback
+        async def _handle_call_service_event(event):
+            """ Called when a "call_service" event is detected. """
+
+            # get event data.
+            data = event.data
+            domain = data.get("domain")
+            service = data.get("service")
+
+            # trace.
+            #_logsi.LogDictionary(SILevel.Verbose, "Call Service detected: domain=\"%s\", service=\"%s\"" % (domain, service), event, prettyPrint=True, colorValue=SIColors.Red)
+
+            # was the "conversation.reload" service called?
+            if domain == DOMAIN_CONVERSATION and service == CONVERSATION_SERVICE_RELOAD:
+
+                _logsi.LogDictionary(SILevel.Verbose, "Intent Loader detected a Conversation integration Reload event", event, prettyPrint=True, colorValue=SIColors.Khaki)
+
+                # clear our intent cache, so it will be reloaded next time.
+                await self.async_clear_cache()
+
+        # listen for all call service events, and store unsubscribe function.
+        self.unsubscribe_event = self.hass.bus.async_listen(EVENT_CALL_SERVICE, _handle_call_service_event)
+
+        # trace.
+        _logsi.LogVerbose("Intent Loader registered the conversation reload event listener", colorValue=SIColors.Khaki)
+
+
+    async def async_unregister_cache_reload_listener(
+        self, 
+        ) -> None:
+        """
+        Unregisters an event listener that listens for `conversation.reload` service calls.
+        """
+        # did we register an event listener? if so, then call it's unregister function.
+        if self.unsubscribe_event:
+            self.unsubscribe_event()  # <-- stop listening
+            _logsi.LogVerbose("Unregistered the conversation reload event listener", colorValue=SIColors.Khaki)

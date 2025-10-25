@@ -6,6 +6,12 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.180 ] - 2025/10/25
+
+  * Added voice assist intents: `SpotifyPlusPlayerTransferPlayback`, `SpotifyPlusPlayFavoriteTracks`, `SpotifyPlusPlaylistCreate`, `SpotifyPlusSearchPlayArtistAlbum`, `SpotifyPlusSearchPlayArtistTrack`, `SpotifyPlusSearchPlayAudiobook`, `SpotifyPlusSearchPlayPodcast`, `SpotifyPlusSearchPlayPodcastEpisode`, `SpotifyPlusSearchPlayTrack`.  Check out the [wiki docs](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Voice-Assist-Support#intent-index) for more information.
+  * Renamed voice assist intent `SpotifyPlusPlayPlaylist` to `SpotifyPlusSearchPlayPlaylist` to align with other "search and play" intents.
+  * Added event listener to detect calls to the `conversation.reload` service, so that OUR intent cache is also cleared.
+
 ###### [ 1.0.179 ] - 2025/10/16
 
   * Added voice assist intents: `SpotifyPlusFavoriteAlbumAdd`, `SpotifyPlusFavoriteAlbumRemove`, `SpotifyPlusFavoriteAudiobookAdd`, `SpotifyPlusFavoriteAudiobookRemove`, `SpotifyPlusFavoritePlaylistAdd`, `SpotifyPlusFavoritePlaylistRemove`, `SpotifyPlusFavoritePodcastAdd`, `SpotifyPlusFavoritePodcastRemove`, `SpotifyPlusFavoritePodcastEpisodeAdd`, `SpotifyPlusFavoritePodcastEpisodeRemove`, `SpotifyPlusPlayPlaylist`.  Check out the [wiki docs](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Voice-Assist-Support#intent-index) for more information.

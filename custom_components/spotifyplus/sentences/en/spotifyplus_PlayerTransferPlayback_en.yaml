@@ -1,0 +1,94 @@
+# ============================================================================
+# SpotifyPlus integration intent custom sentence and response definitions.
+#
+# Language: en, English
+# Intent:   SpotifyPlusPlayerTransferPlayback
+# Location: custom_sentences/en/spotifyplus_PlayerTransferPlayback_en.yaml
+# ============================================================================
+language: en
+intents:
+
+  SpotifyPlusPlayerTransferPlayback:
+
+    data:
+
+      - sentences:
+
+          - "spotify transfer playback [to] [device] {spotifyplus_device_names:device_name}"
+          - "spotify transfer playback [to] [device] {device_name}"
+
+            # Base sentence phrases for this intent.
+            # This sentence is recognized when a name / area is NOT provided in the spoken command.  
+            # In this case, the first active SpotifyPlus media player is used.
+
+            # __Example Phrases - Default Player__  
+            # - "spotify transfer playback to device Bose-ST10-1"
+            # - "spotify transfer playback to Bose-ST10-1"
+            # - "spotify transfer playback Bose-ST10-1"
+
+        slots:
+
+          name: "Spotify Premium" # default media player alias.
+          target_player: ""
+          delay: 0.50
+          device_name: "*"
+
+        response: default_no_player
+
+      - sentences:
+
+          - "spotify transfer playback [to] [device] {spotifyplus_device_names:device_name} <on_spotifyplus_player_name>"
+          - "spotify transfer playback [to] [device] {device_name} <on_spotifyplus_player_name>"
+
+            # This sentence is recognized when a player name is provided in the spoken 
+            # command (e.g. "on player Spotify Premium", "on Todds player", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Name__  
+            # - "spotify transfer playback to Bose-ST10-1 for player spotify premium"
+            # - "spotify transfer playback to Bose-ST10-1 for spotify premium player"
+
+        slots:
+
+          name: ""
+          delay: 0.50
+          device_name: "*"
+
+        response: default_by_name
+
+      - sentences:
+
+          - "spotify transfer playback [to] [device] {spotifyplus_device_names:device_name} <in_spotifyplus_player_area>"
+          - "spotify transfer playback [to] [device] {device_name} <in_spotifyplus_player_area>"
+
+            # This sentence is recognized when a player area is provided in the spoken 
+            # command (e.g. "in the Living Room area", "in the Living Room", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Area__  
+            # - "spotify transfer playback to Bose-ST10-1 in the Office area"
+            # - "spotify transfer playback to Bose-ST10-1 in the Office"
+ 
+        slots:
+
+          area: ""
+          name: ""
+          delay: 0.50
+          device_name: "*"
+
+        response: default_by_area
+
+
+# ============================================================================
+# Custom response definitions for THIS intent.
+# Note - Shared responses for all intents are stored in the Common file.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusPlayerTransferPlayback:
+
+      default_no_player: "Okay, playback transferred to device \"{{ slots.device_name.text }}\", for default player \"{{ slots.target_player.text }}\"."
+      default_by_name: "Okay, playback transferred to device \"{{ slots.device_name.text }}\", for named player \"{{ slots.target_player.text }}\"."
+      default_by_area: "Okay, playback transferred to device \"{{ slots.device_name.text }}\", in the \"{{ slots.target_player.text }}\" area."
+      default: "Okay, playback transferred to device \"{{ slots.device_name.text }}\"."

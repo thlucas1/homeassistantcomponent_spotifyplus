@@ -29,7 +29,7 @@ intents:
           name: "Spotify Premium"  # default player to use.
           playlist_title: ""
           playlist_url: ""
-          public: true
+          is_public: true
 
         response: default
 
@@ -50,7 +50,7 @@ intents:
           name: ""
           playlist_title: ""
           playlist_url: ""
-          public: true
+          is_public: true
 
         response: default
 
@@ -72,7 +72,7 @@ intents:
           name: ""
           playlist_title: ""
           playlist_url: ""
-          public: true
+          is_public: true
 
         response: default
 

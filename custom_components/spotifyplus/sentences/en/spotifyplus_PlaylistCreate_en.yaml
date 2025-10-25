@@ -1,0 +1,101 @@
+# ============================================================================
+# SpotifyPlus integration intent custom sentence and response definitions.
+#
+# Language: en, English
+# Intent:   SpotifyPlusPlaylistCreate
+# Location: custom_sentences/en/spotifyplus_PlaylistCreate_en.yaml
+# ============================================================================
+language: en
+intents:
+
+  SpotifyPlusPlaylistCreate:
+
+    data:
+
+      - sentences:
+
+          - "spotify create (playlist|play list) {playlist_name}"                     # freeform playlist text.
+          - "create spotify (playlist|play list) {playlist_name}"                     # freeform playlist text.
+
+            # Base sentence phrases for this intent.
+            # This sentence is recognized when a name / area is NOT provided in the spoken command.  
+            # In this case, the first active SpotifyPlus media player is used.
+
+            # __Example Phrases - Default Player__  
+            # - "spotify create playlist My New Playlist"
+            # - "create spotify playlist My New Playlist"
+
+        slots:
+
+          name: "Spotify Premium" # default media player alias.
+          target_player: ""
+          playlist_name: ""
+          description: "Created by Home Assistant Voice Assist intent."
+          is_collaborative: False
+          is_public: False
+          image_path: ""  # example: "www/spotifyplus/spotify_playlist_default_image.png"
+
+        response: default
+
+      - sentences:
+
+          - "spotify create (playlist|play list) {playlist_name} <on_spotifyplus_player_name>"
+          - "create spotify (playlist|play list) {playlist_name} <on_spotifyplus_player_name>"
+
+            # This sentence is recognized when a player name is provided in the spoken 
+            # command (e.g. "on player Spotify Premium", "on Todds player", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Name__  
+            # - "spotify create playlist My New Playlist on player spotify premium"
+            # - "create spotify playlist My New Playlist on player spotify premium"
+
+        slots:
+
+          name: ""
+          target_player: ""
+          playlist_name: ""
+          description: "Created by Home Assistant Voice Assist intent."
+          is_collaborative: False
+          is_public: False
+          image_path: ""  # example: "www/spotifyplus/spotify_playlist_default_image.png"
+
+        response: default
+
+      - sentences:
+
+          - "spotify create (playlist|play list) {playlist_name} <in_spotifyplus_player_area>"
+          - "create spotify (playlist|play list) {playlist_name} <in_spotifyplus_player_area>"
+
+            # This sentence is recognized when a player area is provided in the spoken 
+            # command (e.g. "in the Living Room area", "in the Living Room", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Area__  
+            # - "spotify create playlist My New Playlist in the Office area"
+            # - "create spotify playlist My New Playlist in the Office"
+ 
+        slots:
+
+          area: ""
+          name: ""
+          target_player: ""
+          playlist_name: ""
+          description: "Created by Home Assistant Voice Assist intent."
+          is_collaborative: False
+          is_public: False
+          image_path: ""  # example: "www/spotifyplus/spotify_playlist_default_image.png"
+
+        response: default
+
+
+# ============================================================================
+# Custom response definitions for THIS intent.
+# Note - Shared responses for all intents are stored in the Common file.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusPlaylistCreate:
+
+      default: "Okay, created Spotify playlist named \"{{ slots.playlist_title.text }}\"."

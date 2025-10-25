@@ -1,0 +1,112 @@
+# ============================================================================
+# SpotifyPlus integration intent custom sentence and response definitions.
+#
+# Language: en, English
+# Intent:   SpotifyPlusPlayFavoriteTracks
+# Location: custom_sentences/en/spotifyplus_PlayFavoriteTracks_en.yaml
+# ============================================================================
+language: en
+intents:
+
+  SpotifyPlusPlayFavoriteTracks:
+
+    data:
+
+      - sentences:
+
+          - "spotify play favorite tracks [(by|for) artist {spotifyplus_artist_names:artist_name}]" # known artist slot list.
+          - "spotify play favorite tracks [(by|for) artist {freeform:artist_name}]"                 # freeform artist text.
+          - "play spotify favorite tracks [(by|for) artist {spotifyplus_artist_names:artist_name}]" # known artist slot list.
+          - "play spotify favorite tracks [(by|for) artist {freeform:artist_name}]"                 # freeform artist text.
+
+            # Base sentence phrases for this intent.
+            # This sentence is recognized when a name / area is NOT provided in the spoken command.  
+            # In this case, the first active SpotifyPlus media player is used.
+
+            # __Example Phrases - Default Player__  
+            # - "spotify play favorite tracks"
+            # - "play spotify favorite tracks"
+            # - "spotify play favorite tracks by artist Seventh Day Slumber"
+            # - "play spotify favorite tracks by artist Seventh Day Slumber"
+            # - "spotify play favorite tracks by artist Test Artist Slot Entry"
+            # - "play spotify favorite tracks by artist Test Artist Slot Entry"
+
+        slots:
+
+          name: "Spotify Premium" # default media player alias.
+          target_player: ""
+          artist_name: ""
+          delay: 0.50
+          device_name: "*"
+          limit_total: 200
+          player_shuffle_mode: "on"
+
+        response: play_favorite_tracks
+
+      - sentences:
+
+          - "spotify play favorite tracks [(by|for) artist {spotifyplus_artist_names:artist_name}] <on_spotifyplus_player_name>"
+          - "spotify play favorite tracks [(by|for) artist {freeform:artist_name}] <on_spotifyplus_player_name>"
+          - "play spotify favorite tracks [(by|for) artist {spotifyplus_artist_names:artist_name}] <on_spotifyplus_player_name>"
+          - "play spotify favorite tracks [(by|for) artist {freeform:artist_name}] <on_spotifyplus_player_name>"
+
+            # This sentence is recognized when a player name is provided in the spoken 
+            # command (e.g. "on player Spotify Premium", "on Todds player", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Name__  
+            # - "spotify play favorite tracks on player spotify premium"
+            # - "play spotify favorite tracks on player spotify premium"
+
+        slots:
+
+          name: ""
+          target_player: ""
+          artist_name: ""
+          delay: 0.50
+          device_name: "*"
+          limit_total: 200
+          player_shuffle_mode: "on"
+
+        response: play_favorite_tracks
+
+      - sentences:
+
+          - "spotify play favorite tracks [(by|for) artist {spotifyplus_artist_names:artist_name}] <in_spotifyplus_player_area>"
+          - "spotify play favorite tracks [(by|for) artist {freeform:artist_name}] <in_spotifyplus_player_area>"
+          - "play spotify favorite tracks [(by|for) artist {spotifyplus_artist_names:artist_name}] <in_spotifyplus_player_area>"
+          - "play spotify favorite tracks [(by|for) artist {freeform:artist_name}] <in_spotifyplus_player_area>"
+
+            # This sentence is recognized when a player area is provided in the spoken 
+            # command (e.g. "in the Living Room area", "in the Living Room", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Area__  
+            # - "spotify play favorite tracks in the Office"
+            # - "play spotify favorite tracks in the Office"
+ 
+        slots:
+
+          area: ""
+          name: ""
+          target_player: ""
+          artist_name: ""
+          delay: 0.50
+          device_name: "*"
+          limit_total: 200
+          player_shuffle_mode: "on"
+
+        response: play_favorite_tracks
+
+
+# ============================================================================
+# Custom response definitions for THIS intent.
+# Note - Shared responses for all intents are stored in the Common file.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusPlayFavoriteTracks:
+
+      play_favorite_tracks: "Okay, playing Spotify track favorites."
+

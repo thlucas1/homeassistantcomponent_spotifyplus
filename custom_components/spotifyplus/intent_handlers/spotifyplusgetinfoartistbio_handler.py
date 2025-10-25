@@ -31,6 +31,7 @@ from ..const import (
     SLOT_FLOOR,
     SLOT_PREFERRED_AREA_ID,
     SLOT_PREFERRED_FLOOR_ID,
+    SLOT_SEARCH_CRITERIA,
     SPOTIFY_WEB_URL_PFX,
 )
 
@@ -122,6 +123,9 @@ class SpotifyPlusGetInfoArtistBio_Handler(SpotifyPlusIntentHandler):
             "limit_total": 1,
             "include_external": "audio"
         }
+
+        # update slots with search criteria.
+        intentObj.slots[SLOT_SEARCH_CRITERIA] = { CONF_VALUE: "", CONF_TEXT: svcData["criteria"] }
 
         # search spotify catalog for matching artist name.
         self.logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (svcName, playerEntityState.entity_id), colorValue=SIColors.Khaki)

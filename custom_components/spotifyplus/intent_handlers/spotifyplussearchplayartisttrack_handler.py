@@ -9,7 +9,7 @@ from homeassistant.helpers.intent import (
 
 from smartinspectpython.siauto import SILevel, SIColors
 
-from spotifywebapipython import SpotifyApiError, SpotifyMediaTypes
+from spotifywebapipython import SpotifyMediaTypes
 
 from ..appmessages import STAppMessages
 from ..intent_loader import IntentLoader
@@ -19,20 +19,25 @@ from ..const import (
     CONF_VALUE,
     DOMAIN,
     PLATFORM_SPOTIFYPLUS,
-    INTENT_PLAY_PLAYLIST,
-    RESPONSE_PLAY_PLAYLIST,
-    RESPONSE_SPOTIFY_SEARCH_NO_ITEMS_PLAYLIST,
-    SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT,
-    SERVICE_SPOTIFY_SEARCH_PLAYLISTS,
+    INTENT_SEARCH_PLAY_ARTIST_TRACK,
+    RESPONSE_PLAY_TRACK,
+    RESPONSE_PLAY_TRACK_WITH_ARTIST,
+    RESPONSE_SPOTIFY_SEARCH_NO_ITEMS_TRACK,
+    SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS,
+    SERVICE_SPOTIFY_SEARCH_TRACKS,
     SLOT_AREA,
+    SLOT_ARTIST_NAME,
+    SLOT_ARTIST_TITLE,
+    SLOT_ARTIST_URL,
     SLOT_DELAY,
     SLOT_DEVICE_NAME,
     SLOT_FLOOR,
     SLOT_NAME,
     SLOT_PLAYER_SHUFFLE_MODE,
-    SLOT_PLAYLIST_NAME,
-    SLOT_PLAYLIST_TITLE,
-    SLOT_PLAYLIST_URL,
+    SLOT_SEARCH_CRITERIA,
+    SLOT_TRACK_NAME,
+    SLOT_TRACK_TITLE,
+    SLOT_TRACK_URL,
     SLOT_PREFERRED_AREA_ID,
     SLOT_PREFERRED_FLOOR_ID,
     SPOTIFY_WEB_URL_PFX,
@@ -41,9 +46,9 @@ from ..const import (
 from .spotifyplusintenthandler import SpotifyPlusIntentHandler
 
 
-class SpotifyPlusPlayPlaylist_Handler(SpotifyPlusIntentHandler):
+class SpotifyPlusSearchPlayArtistTrack_Handler(SpotifyPlusIntentHandler):
     """
-    Handles intents for SpotifyPlusPlayPlaylist.
+    Handles intents for SpotifyPlusSearchPlayArtistTrack.
     """
     def __init__(self, intentLoader:IntentLoader) -> None:
         """
@@ -53,8 +58,8 @@ class SpotifyPlusPlayPlaylist_Handler(SpotifyPlusIntentHandler):
         super().__init__(intentLoader)
 
         # set intent handler basics.
-        self.description = "Searches the Spotify catalog for a playlist name, and starts playing it if found."
-        self.intent_type = INTENT_PLAY_PLAYLIST
+        self.description = "Searches the Spotify catalog for a track name by a specific artist, and starts playing it if found."
+        self.intent_type = INTENT_SEARCH_PLAY_ARTIST_TRACK
         self.platforms = {PLATFORM_SPOTIFYPLUS}
 
 
@@ -75,9 +80,12 @@ class SpotifyPlusPlayPlaylist_Handler(SpotifyPlusIntentHandler):
             # slots for other service arguments.
             vol.Optional(SLOT_DELAY, default=0.50): vol.Any(None, vol.All(vol.Coerce(float), vol.Range(min=0, max=10.0))),
             vol.Optional(SLOT_DEVICE_NAME): cv.string,
-            vol.Optional(SLOT_PLAYLIST_NAME): cv.string,
-            vol.Optional(SLOT_PLAYLIST_TITLE): cv.string,
-            vol.Optional(SLOT_PLAYLIST_URL): cv.string,
+            vol.Optional(SLOT_ARTIST_NAME): cv.string,
+            vol.Optional(SLOT_ARTIST_TITLE): cv.string,
+            vol.Optional(SLOT_ARTIST_URL): cv.string,
+            vol.Optional(SLOT_TRACK_NAME): cv.string,
+            vol.Optional(SLOT_TRACK_TITLE): cv.string,
+            vol.Optional(SLOT_TRACK_URL): cv.string,
             vol.Optional(SLOT_PLAYER_SHUFFLE_MODE): cv.string,
         }
 
@@ -116,40 +124,55 @@ class SpotifyPlusPlayPlaylist_Handler(SpotifyPlusIntentHandler):
             
         # get optional arguments (if provided).
         delay = intentObj.slots.get(SLOT_DELAY, {}).get(CONF_VALUE, None)
-        device_name = intentObj.slots.get(SLOT_DEVICE_NAME, {}).get(CONF_TEXT, None)
-        playlist_name = intentObj.slots.get(SLOT_PLAYLIST_NAME, {}).get(CONF_TEXT, None)
-        playlist_uri = intentObj.slots.get(SLOT_PLAYLIST_NAME, {}).get(CONF_VALUE, None)
+        device_name = intentObj.slots.get(SLOT_DEVICE_NAME, {}).get(CONF_VALUE, None)
+        artist_name = intentObj.slots.get(SLOT_ARTIST_NAME, {}).get(CONF_TEXT, None)
+        artist_uri = intentObj.slots.get(SLOT_ARTIST_NAME, {}).get(CONF_VALUE, None)
+        track_name = intentObj.slots.get(SLOT_TRACK_NAME, {}).get(CONF_TEXT, None)
+        track_uri = intentObj.slots.get(SLOT_TRACK_NAME, {}).get(CONF_VALUE, None)
         player_shuffle_mode = intentObj.slots.get(SLOT_PLAYER_SHUFFLE_MODE, {}).get(CONF_VALUE, "on")
 
         # update slots with returned info.
-        intentObj.slots[SLOT_PLAYLIST_TITLE] = { CONF_VALUE: playlist_uri, CONF_TEXT: playlist_name }
+        intentObj.slots[SLOT_ARTIST_TITLE] = { CONF_VALUE: artist_uri, CONF_TEXT: artist_name }
+        intentObj.slots[SLOT_TRACK_TITLE] = { CONF_VALUE: track_uri, CONF_TEXT: track_name }
 
         # was a uri supplied?
-        if (playlist_uri.startswith(f"spotify:{SpotifyMediaTypes.PLAYLIST.value}")):
+        if (track_uri.startswith(f"spotify:{SpotifyMediaTypes.TRACK.value}")):
 
             # if a uri was supplied, then it's from a pre-configured list of values; in this case,
             # we will bypass the search since it's (assumed to be) a valid uri value.
 
             # get id portion of spotify uri value.
-            playlist_id:str = get_id_from_uri(playlist_uri)
+            track_id:str = get_id_from_uri(track_uri)
 
             # load returned info that we care about.
-            playlist_title = playlist_name
-            playlist_url = f"{SPOTIFY_WEB_URL_PFX}/{SpotifyMediaTypes.PLAYLIST.value}/{playlist_id}"
+            track_title = track_name
+            track_url = f"{SPOTIFY_WEB_URL_PFX}/{SpotifyMediaTypes.TRACK.value}/{track_id}"
+
+            # artist variables are unknwon, since only the track name / uri were supplied.
+            artist_title = artist_name
+            artist_url = SPOTIFY_WEB_URL_PFX
 
         else:
 
+            # format criteria if searching by artist.
+            artist_criteria = ""
+            if artist_name is not None:
+                artist_criteria = f" artist:{artist_name}" 
+
             # set service name and build parameters.
-            svcName:str = SERVICE_SPOTIFY_SEARCH_PLAYLISTS
+            svcName:str = SERVICE_SPOTIFY_SEARCH_TRACKS
             svcData:dict = \
             {
                 "entity_id": playerEntityState.entity_id,
-                "criteria": playlist_name,
+                "criteria": track_name + artist_criteria,
                 "limit_total": 1,
                 "include_external": "audio"
             }
 
-            # search spotify catalog for matching playlist name.
+            # update slots with search criteria.
+            intentObj.slots[SLOT_SEARCH_CRITERIA] = { CONF_VALUE: "", CONF_TEXT: svcData["criteria"] }
+
+            # search spotify catalog for matching track name.
             self.logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (svcName, playerEntityState.entity_id), colorValue=SIColors.Khaki)
             search_result:ServiceResponse = await intentObj.hass.services.async_call(
                 DOMAIN,
@@ -159,34 +182,40 @@ class SpotifyPlusPlayPlaylist_Handler(SpotifyPlusIntentHandler):
                 context=intentObj.context,
                 return_response=True,
             )
-            self.logsi.LogDictionary(SILevel.Verbose, "SERVICE_SPOTIFY_SEARCH_PLAYLISTS result", search_result, prettyPrint=True, colorValue=SIColors.Khaki)
+            self.logsi.LogDictionary(SILevel.Verbose, "SERVICE_SPOTIFY_SEARCH_TRACKS result", search_result, prettyPrint=True, colorValue=SIColors.Khaki)
 
             # if no matching items, then return appropriate response.
             items_count:int = search_result.get("result",{}).get("items_count", 0)
             if (items_count == 0):
-                return await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_SPOTIFY_SEARCH_NO_ITEMS_PLAYLIST)
+                return await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_SPOTIFY_SEARCH_NO_ITEMS_TRACK)
 
             # load returned info that we care about.
-            playlist_title:str = search_result.get("result",{}).get("items")[0].get("name", "unknown")
-            playlist_uri:str = search_result.get("result",{}).get("items")[0].get("uri", "unknown")
-            playlist_url:str = search_result.get("result",{}).get("items")[0].get("external_urls", {}).get("spotify", SPOTIFY_WEB_URL_PFX)
+            track_title:str = search_result.get("result",{}).get("items")[0].get("name", "unknown")
+            track_uri:str = search_result.get("result",{}).get("items")[0].get("uri", "unknown")
+            track_url:str = search_result.get("result",{}).get("items")[0].get("external_urls", {}).get("spotify", SPOTIFY_WEB_URL_PFX)
+
+            artist_title:str = search_result.get("result",{}).get("items")[0].get("artists")[0].get("name", "unknown")
+            artist_uri:str = search_result.get("result",{}).get("items")[0].get("artists")[0].get("uri", "unknown")
+            artist_url:str = search_result.get("result",{}).get("items")[0].get("artists")[0].get("external_urls", {}).get("spotify", SPOTIFY_WEB_URL_PFX)
 
         # update slots with returned info.
-        intentObj.slots[SLOT_PLAYLIST_TITLE] = { CONF_VALUE: playlist_uri, CONF_TEXT: playlist_title }
-        intentObj.slots[SLOT_PLAYLIST_URL] = { CONF_VALUE: playlist_url, CONF_TEXT: "Spotify" }
+        intentObj.slots[SLOT_ARTIST_TITLE] = { CONF_VALUE: artist_uri, CONF_TEXT: artist_title }
+        intentObj.slots[SLOT_ARTIST_URL] = { CONF_VALUE: artist_url, CONF_TEXT: "Spotify" }
+        intentObj.slots[SLOT_TRACK_TITLE] = { CONF_VALUE: track_uri, CONF_TEXT: track_title }
+        intentObj.slots[SLOT_TRACK_URL] = { CONF_VALUE: track_url, CONF_TEXT: "Spotify" }
 
         # set service name and build parameters.
-        svcName:str = SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT
+        svcName:str = SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS
         svcData:dict = \
         {
             "entity_id": playerEntityState.entity_id,
-            "context_uri": playlist_uri,
+            "uris": track_uri,
             "shuffle": True if player_shuffle_mode == "on" else False,
             "device_id": device_name,
             "delay": delay,
         }
 
-        # get artist information.
+        # play the media.
         self.logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (svcName, playerEntityState.entity_id), colorValue=SIColors.Khaki)
         await intentObj.hass.services.async_call(
             DOMAIN,
@@ -196,6 +225,11 @@ class SpotifyPlusPlayPlaylist_Handler(SpotifyPlusIntentHandler):
             context=intentObj.context,
             return_response=False,
         )
+
+        # set appropriate response.
+        responseKey = RESPONSE_PLAY_TRACK_WITH_ARTIST
+        if (artist_name is None):
+            responseKey = RESPONSE_PLAY_TRACK
            
         # return intent response.
-        return await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_PLAY_PLAYLIST)
+        return await self.ReturnResponseByKey(intentObj, intentResponse, responseKey)

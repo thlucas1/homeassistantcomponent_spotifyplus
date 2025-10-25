@@ -33,12 +33,12 @@ from ..const import (
     SERVICE_SPOTIFY_FOLLOW_PLAYLIST,
     SLOT_AREA,
     SLOT_FLOOR,
+    SLOT_IS_PUBLIC,
     SLOT_NAME,
     SLOT_PLAYLIST_TITLE,
     SLOT_PLAYLIST_URL,
     SLOT_PREFERRED_AREA_ID,
     SLOT_PREFERRED_FLOOR_ID,
-    SLOT_PUBLIC,
     SPOTIFY_WEB_URL_PFX,
 )
 
@@ -79,7 +79,7 @@ class SpotifyPlusFavoritePlaylistAdd_Handler(SpotifyPlusIntentHandler):
             # slots for other service arguments.
             vol.Optional(SLOT_PLAYLIST_TITLE): cv.string,
             vol.Optional(SLOT_PLAYLIST_URL): cv.string,
-            vol.Optional(SLOT_PUBLIC): cv.boolean,
+            vol.Optional(SLOT_IS_PUBLIC): cv.boolean,
         }
 
 
@@ -115,7 +115,7 @@ class SpotifyPlusFavoritePlaylistAdd_Handler(SpotifyPlusIntentHandler):
             return intentResponse
             
         # get optional arguments (if provided).
-        is_public = intentObj.slots.get(SLOT_PUBLIC, {}).get(CONF_VALUE, True)
+        is_public = intentObj.slots.get(SLOT_IS_PUBLIC, {}).get(CONF_VALUE, True)
 
         # is now playing item a playlist (e.g. spotify:playlist:x)? if not, then we are done.
         item_type:str = playerEntityState.attributes.get(ATTR_SPOTIFYPLUS_CONTEXT_URI)
