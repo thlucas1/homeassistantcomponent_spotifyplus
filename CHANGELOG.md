@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.181 ] - 2025/10/27
+
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.254`.
+
 ###### [ 1.0.180 ] - 2025/10/25
 
   * Added voice assist intents: `SpotifyPlusPlayerTransferPlayback`, `SpotifyPlusPlayFavoriteTracks`, `SpotifyPlusPlaylistCreate`, `SpotifyPlusSearchPlayArtistAlbum`, `SpotifyPlusSearchPlayArtistTrack`, `SpotifyPlusSearchPlayAudiobook`, `SpotifyPlusSearchPlayPodcast`, `SpotifyPlusSearchPlayPodcastEpisode`, `SpotifyPlusSearchPlayTrack`.  Check out the [wiki docs](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Voice-Assist-Support#intent-index) for more information.
