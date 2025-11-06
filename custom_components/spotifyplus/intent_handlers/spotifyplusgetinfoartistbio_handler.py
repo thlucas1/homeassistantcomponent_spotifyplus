@@ -112,7 +112,7 @@ class SpotifyPlusGetInfoArtistBio_Handler(SpotifyPlusIntentHandler):
         artist_name = intentObj.slots.get(SLOT_ARTIST_NAME, {}).get(CONF_VALUE, None)
 
         # update slots with returned info.
-        intentObj.slots[SLOT_ARTIST_TITLE] = { CONF_TEXT: artist_name, CONF_VALUE: "" }
+        intentObj.slots[SLOT_ARTIST_TITLE] = { CONF_VALUE: "", CONF_TEXT: artist_name }
 
         # set service name and build parameters.
         svcName:str = SERVICE_SPOTIFY_SEARCH_ARTISTS
@@ -153,8 +153,8 @@ class SpotifyPlusGetInfoArtistBio_Handler(SpotifyPlusIntentHandler):
         artist_id:str = get_id_from_uri(artist_uri)
 
         # update slots with returned info.
-        intentObj.slots[SLOT_ARTIST_TITLE] = { CONF_TEXT: artist_title, CONF_VALUE: artist_uri }
-        intentObj.slots[SLOT_ARTIST_URL] = { CONF_TEXT: "Spotify", CONF_VALUE: artist_url }
+        intentObj.slots[SLOT_ARTIST_TITLE] = { CONF_VALUE: artist_uri, CONF_TEXT: artist_title }
+        intentObj.slots[SLOT_ARTIST_URL] = { CONF_VALUE: artist_url, CONF_TEXT: "Spotify" }
 
         # set service name and build parameters.
         svcName:str = SERVICE_SPOTIFY_GET_ARTIST_INFO
@@ -182,7 +182,7 @@ class SpotifyPlusGetInfoArtistBio_Handler(SpotifyPlusIntentHandler):
             return await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_SPOTIFY_NO_ARTIST_INFO)
 
         # update slots with returned info.
-        intentObj.slots[SLOT_ARTIST_BIO] = { CONF_TEXT: artist_bio, CONF_VALUE: "" }
+        intentObj.slots[SLOT_ARTIST_BIO] = { CONF_VALUE: "", CONF_TEXT: artist_bio }
 
         # return intent response.
         return await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_GET_INFO_ARTIST_BIO)

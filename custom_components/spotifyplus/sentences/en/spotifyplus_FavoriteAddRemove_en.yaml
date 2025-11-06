@@ -2,81 +2,70 @@
 # SpotifyPlus integration intent custom sentence and response definitions.
 #
 # Language: en, English
-# Intent:   SpotifyPlusNowPlayingInfoAudiobook
-# Location: custom_sentences/en/spotifyplus_NowPlayingInfoAudiobook_en.yaml
+# Intent:   SpotifyPlusFavoriteAddRemove
+# Location: custom_sentences/en/spotifyplus_FavoriteAddRemove_en.yaml
 # ============================================================================
 language: en
 intents:
 
-  SpotifyPlusNowPlayingInfoAudiobook:
+  SpotifyPlusFavoriteAddRemove:
 
     data:
 
       - sentences:
 
-          - "[get] spotify [nowplaying|now playing] (audiobook|audio book|book) (info|information|details)"
+          - "{favorite_operator} spotify {spotifyplus_media_type} [to|2|from] (favorite|favorites)"
 
             # Base sentence phrases for this intent.
             # This sentence is recognized when a name / area is NOT provided in the spoken command.  
             # In this case, the first active SpotifyPlus media player is used.
 
             # __Example Phrases - Default Player__  
-            # - "spotify nowplaying audiobook info"
-            # - "spotify audiobook info"
-            # - "get spotify audiobook info"
+            # - "add spotify track to favorites"
+            # - "add spotify track favorite"
+            # - "remove spotify track from favorites"
+            # - "remove spotify track favorite"
 
         slots:
 
           name: "Spotify Premium"  # default player to use.
-          audiobook_title: ""
-          audiobook_url: ""
-          author_title: ""
-          chapter_title: ""
 
         response: default
 
       - sentences:
 
-          - "[get] spotify [nowplaying|now playing] (audiobook|audio book|book) (info|information|details) <on_spotifyplus_player_name>"
+          - "{favorite_operator} spotify {spotifyplus_media_type} [to|2|from] (favorite|favorites) <on_spotifyplus_player_name>"
 
             # This sentence is recognized when a player name is provided in the spoken 
             # command (e.g. "on player Spotify Premium", "on Todds player", etc).  
             # Supports the same base sentence phrases for this intent.
 
             # __Example Phrases - By Player Name__  
-            # - "get spotify audiobook info for player spotify premium"
-            # - "get spotify audiobook info for spotify premium player"
+            # - "add spotify track favorite for player spotify premium"
+            # - "add spotify track favorite for spotify premium player"
 
         slots:
 
           name: ""
-          audiobook_title: ""
-          audiobook_url: ""
-          author_title: ""
-          chapter_title: ""
 
         response: default
 
       - sentences:
 
-          - "[get] spotify [nowplaying|now playing] (audiobook|audio book|book) (info|information|details) <in_spotifyplus_player_area>"
+          - "{favorite_operator} spotify {spotifyplus_media_type} [to|2|from] (favorite|favorites) <in_spotifyplus_player_area>"
 
             # This sentence is recognized when a player area is provided in the spoken 
             # command (e.g. "in the Living Room area", "in the Living Room", etc).  
             # Supports the same base sentence phrases for this intent.
 
             # __Example Phrases - By Player Area__  
-            # - "get spotify audiobook info in the Office area"
-            # - "get spotify audiobook info in the Office"
+            # - "add spotify track favorite in the Office area"
+            # - "add spotify track favorite in the Office"
  
         slots:
 
           area: ""
           name: ""
-          audiobook_title: ""
-          audiobook_url: ""
-          author_title: ""
-          chapter_title: ""
 
         response: default
 
@@ -88,6 +77,6 @@ intents:
 responses:
   intents:
 
-    SpotifyPlusNowPlayingInfoAudiobook:
+    SpotifyPlusFavoriteAddRemove:
 
-      default: "" # not used - see common `nowplaying_info_audiobook` message.
+      default: "" # not used - see common `favorite_add_remove_xxxxxxx_ok` messages.

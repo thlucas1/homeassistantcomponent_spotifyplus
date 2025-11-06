@@ -5,7 +5,7 @@ import copy
 from dataclasses import dataclass
 from pathlib import Path
 import time
-from typing import IO, Any, cast
+from typing import IO, Any, cast, Dict
 import yaml
 
 from home_assistant_intents import (
@@ -14,6 +14,7 @@ from home_assistant_intents import (
 
 from hassil.intents import (
     Intents,
+    TextSlotList,
 )
 from hassil.util import merge_dict
 
@@ -127,7 +128,7 @@ class IntentLoader():
         language:str=None,
         ) -> LanguageIntents | None:
         """
-        Load all intents of a language with lock.
+        Gets the cached intent data for the specified language.
 
         Args:
             language (str):
@@ -136,6 +137,14 @@ class IntentLoader():
 
         Returns:
             A LanguageIntents instance if intent data was found; otherwise, None.
+
+        For the first call of this method, the intents are loaded from disk for the
+        specified language (in a thread-safe manner). 
+
+        For subsequent calls, the cached intent list is returned.
+
+        The intent cache is cleared and reloaded if the conversation "reload" service 
+        is called.
         """
         try:
 
@@ -191,6 +200,44 @@ class IntentLoader():
 
             # log exception, but not to system logger as HA will take care of it.
             _logsi.LogException("Component async_get_or_load_intents exception", ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
+            raise
+
+
+    async def async_get_intent_list_byname(
+        self, 
+        language:str=None,
+        listName:str=None,
+        ) -> Dict[str, TextSlotList] | None:
+        """
+        Gets the specified intent list name definition.
+
+        Args:
+            language (str):
+                Language indicator, used to find the language-specific folder under the 
+                custom_sentences base folder.
+            listName (str):
+                Name of the specific list to retrieve; if null, ALL lists are returned.
+
+        Returns:
+            A dictionary of intent list data if found; otherwise, None.
+        """
+        try:
+
+            # get intent cache; return null if intents could not be loaded.
+            langIntents:LanguageIntents = await self.async_get_or_load_intents(language)
+            if langIntents is None:
+                return None
+
+            # if list name not supplied, then return ALL lists.
+            if (listName is None):
+                return langIntents.intents.slot_lists
+            else:
+                return langIntents.intents.slot_lists.get(listName, None)
+
+        except Exception as ex:
+
+            # log exception, but not to system logger as HA will take care of it.
+            _logsi.LogException("Component async_get_intent_list exception", ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
             raise
 
 

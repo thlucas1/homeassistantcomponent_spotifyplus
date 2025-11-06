@@ -20,20 +20,34 @@ responses:
     # general error messages.
     error_failed_to_handle: "Failed to handle intent:\n\n{{ slots.error_info.text }}"
     error_unhandled: "An unexpected error occurred:\n\n{{ slots.error_info.text }}"
+    error_media_type_invalid: "Media type value \"{{ slots.spotifyplus_media_type.text }}\" was not recognized."
 
     # get information request related messages.
     get_info_artist_bio: "Artist bio for \"{{ slots.artist_title.text }}\" ... \n\n{{ slots.artist_bio.text | truncate(400, end=' ...') }}\n\n[more info at {{ slots.artist_url.text }}]({{ slots.artist_url.value }})"
 
+    # favorites management related messages.
+    favorite_operation_invalid: "Favorite operation type was invalid: \"{{ slots.favorite_operator.text }}\"."
+    favorite_add_remove_album_ok: "Okay, {{ slots.favorite_operator.text }} of Spotify album favorite \"{{ slots.album_title.text }}\", by artist \"{{ slots.artist_title.text }}\", was successful."
+    favorite_add_remove_artist_ok: "Okay, {{ slots.favorite_operator.text }} of Spotify artist favorite \"{{ slots.artist_title.text }}\", was successful."
+    favorite_add_remove_audiobook_ok: "Okay, {{ slots.favorite_operator.text }} of Spotify audiobook favorite \"{{ slots.audiobook_title.text }}\", by author \"{{ slots.author_title.text }}\", was successful."
+    favorite_add_remove_playlist_ok: "Okay, {{ slots.favorite_operator.text }} of Spotify playlist favorite \"{{ slots.playlist_title.text }}\", was successful."
+    favorite_add_remove_podcast_ok: "Okay, {{ slots.favorite_operator.text }} of Spotify podcast favorite \"{{ slots.podcast_title.text }}\", was successful."
+    favorite_add_remove_podcast_episode_ok: "Okay, {{ slots.favorite_operator.text }} of Spotify episode favorite \"{{ slots.episode_title.text }}\", from podcast \"{{ slots.podcast_title.text }}\", was successful."
+    favorite_add_remove_track_ok: "Okay, {{ slots.favorite_operator.text }} of Spotify track favorite \"{{ slots.track_title.text }}\", by artist \"{{ slots.artist_title.text }}\", was successful."
+
     # now playing information related messages.
+    nowplaying_info_album: "Media player is playing a track from album \"{{ slots.album_title.text }}\", by artist \"{{ slots.artist_title.text }}\".\n\n[more info at {{ slots.album_url.text }}]({{ slots.album_url.value }})"
     nowplaying_info_audiobook: "Media player is playing \"{{ slots.chapter_title.text }}\", from audiobook \"{{ slots.audiobook_title.text }}\", by author \"{{ slots.author_title.text }}\".\n\n[more info at {{ slots.audiobook_url.text }}]({{ slots.audiobook_url.value }})"
-    nowplaying_info_podcast: "Media player is playing episode \"{{ slots.episode_title.text }}\", from podcast \"{{ slots.podcast_title.text }}\".\n\n[more info at {{ slots.episode_url.text }}]({{ slots.episode_url.value }})"
+    nowplaying_info_playlist: "Media player is playing a track from playlist \"{{ slots.playlist_title.text }}\".\n\n[more info at {{ slots.playlist_url.text }}]({{ slots.playlist_url.value }})"
+    nowplaying_info_podcast: "Media player is playing episode \"{{ slots.episode_title.text }}\", from podcast \"{{ slots.podcast_title.text }}\".\n\n[more info at {{ slots.podcast_url.text }}]({{ slots.podcast_url.value }})"
+    nowplaying_info_podcast_episode: "Media player is playing episode \"{{ slots.episode_title.text }}\", from podcast \"{{ slots.podcast_title.text }}\".\n\n[more info at {{ slots.episode_url.text }}]({{ slots.episode_url.value }})"
     nowplaying_info_track: "Media player is playing track \"{{ slots.track_title.text }}\", from album \"{{ slots.album_title.text }}\", by artist \"{{ slots.artist_title.text }}\".\n\n[more info at {{ slots.album_url.text }}]({{ slots.album_url.value }})"
     nowplaying_no_media_album: "SpotifyPlus media player is currently not playing media that contains Track Album information."
     nowplaying_no_media_artist: "SpotifyPlus media player is currently not playing media that contains Track Artist information."
     nowplaying_no_media_audiobook: "SpotifyPlus media player is currently not playing media that contains Audiobook information."
-    nowplaying_no_media_episode: "SpotifyPlus media player is currently not playing media that contains Episode information."
     nowplaying_no_media_playlist: "SpotifyPlus media player is currently not playing media that contains Playlist information."
     nowplaying_no_media_podcast: "SpotifyPlus media player is currently not playing media that contains Podcast information."
+    nowplaying_no_media_podcast_episode: "SpotifyPlus media player is currently not playing media that contains Podcast Episode information."
     nowplaying_no_media_track: "SpotifyPlus media player is currently not playing media that contains Track information."
 
     # media player related messages.
@@ -155,7 +169,16 @@ lists:
   track_name:
     wildcard: true  # accept freeform text.
 
+  favorite_operator:
+    # out values must be English value.
+    values:
+      - in: "add"
+        out: "add"
+      - in: "remove"
+        out: "remove"
+
   player_repeat_mode:
+    # out values must be English value.
     values:
       - in: "(on|[single|1|one] track|)"
         out: "track"
@@ -165,6 +188,7 @@ lists:
         out: "off"
 
   player_shuffle_mode:
+    # out values must be English value.
     values:
       - in: "(on|true|enable[d])"
         out: "on"
@@ -189,6 +213,24 @@ lists:
       type: "percentage"
       from: 1
       to: 100
+
+  spotifyplus_media_type:
+    # out values must be English value.
+    values:
+      - in: "(album|lp)"
+        out: "album"
+      - in: "artist"
+        out: "artist"
+      - in: "(audiobook|audio book|book)"
+        out: "audiobook"
+      - in: "(playlist|play list)"
+        out: "playlist"
+      - in: "(podcast|pod cast|show) episode"
+        out: "episode"
+      - in: "(podcast|pod cast|show)"
+        out: "podcast"
+      - in: "(track|song)"
+        out: "track"
 
   # --------------------------------------------------------------------------------------
   # SpotifyPlus voice-friendly album identifiers.
