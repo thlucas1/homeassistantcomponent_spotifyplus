@@ -1,0 +1,123 @@
+# ============================================================================
+# SpotifyPlus integration intent custom sentence and response definitions.
+#
+# Language: en, English
+# Intent:   SpotifyPlusPlayerVolumeControl
+# Location: custom_sentences/en/spotifyplus_PlayerVolumeControl_en.yaml
+# ============================================================================
+language: en
+intents:
+
+  SpotifyPlusPlayerVolumeControl:
+
+    data:
+
+      - sentences:
+
+          - "[set] spotify {spotifyplus_player_volume_control}"
+
+            # Base sentence phrases for this intent.
+            # This sentence is recognized when a name / area is NOT provided in the spoken command.  
+            # In this case, the first active SpotifyPlus media player is used.
+
+            # __Example Phrases - No Player Name__  
+            # - "spotify player volume level down"
+            # - "spotify player volume level decrease"
+            # - "spotify volume level decrease"
+            # - "spotify volume decrease"
+            # - "spotify volume down"
+
+            # - "spotify player volume level up"
+            # - "spotify player volume level increase"
+            # - "spotify volume level increase"
+            # - "spotify volume increase"
+            # - "spotify volume up"
+
+            # - "spotify player volume mute"
+            # - "spotify player volume off"
+            # - "spotify volume mute"
+            # - "spotify volume off"
+
+            # - "spotify player volume unmute"
+            # - "spotify player volume on"
+            # - "spotify player volume restore"
+            # - "spotify volume unmute"
+            # - "spotify volume on"
+            # - "spotify volume restore"
+ 
+            # - "spotify volume step level to 5 percent"
+            # - "spotify volume step 5 percent"
+            # - "spotify volume step 5"
+            # - "set spotify volume step level to 5 percent"
+
+            # - "spotify volume level 5 percent"
+            # - "spotify volume level 5"
+            # - "spotify volume 5"
+            # - "set spotify volume level to 5 percent"
+            # - "set spotify volume level 5"
+            # - "set spotify volume 5"
+            # - "set spotify player volume level to 5 percent"
+
+        slots:
+
+          name: "Spotify Premium"  # default player to use.
+          delay: 0.50
+          player_volume_level_pct: 10
+          player_volume_step_pct: 10
+
+        response: default
+
+      - sentences:
+
+          - "[set] spotify {spotifyplus_player_volume_control} <on_spotifyplus_player_name>"
+
+            # This sentence is recognized when a player name is provided in the spoken 
+            # command (e.g. "on player Spotify Premium", "on Todds player", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Name__  
+            # - "spotify volume decrease for player spotify premium"
+            # - "spotify volume decrease for spotify premium player"
+
+        slots:
+
+          name: ""
+          delay: 0.50
+          player_volume_level_pct: 10
+          player_volume_step_pct: 10
+
+        response: default
+
+      - sentences:
+
+          - "[set] spotify {spotifyplus_player_volume_control} <in_spotifyplus_player_area>"
+
+            # This sentence is recognized when a player area is provided in the spoken 
+            # command (e.g. "in the Living Room area", "in the Living Room", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Area__  
+            # - "spotify volume decrease in the Office area"
+            # - "spotify volume decrease in the Office"
+
+        slots:
+
+          area: ""
+          name: ""
+          delay: 0.50
+          player_volume_level_pct: 10
+          player_volume_step_pct: 10
+
+        response: default
+
+
+# ============================================================================
+# Custom response definitions for THIS intent.
+# Note - Shared responses for all intents are stored in the Common file.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusPlayerVolumeControl:
+
+      default: "" # not used - see common `player_volume_control_xxxxxxx` messages.

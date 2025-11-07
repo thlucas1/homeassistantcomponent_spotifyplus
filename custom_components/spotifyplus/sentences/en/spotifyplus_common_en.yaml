@@ -18,9 +18,11 @@ responses:
   spotifyplus:
 
     # general error messages.
-    error_failed_to_handle: "Failed to handle intent:\n\n{{ slots.error_info.text }}"
     error_unhandled: "An unexpected error occurred:\n\n{{ slots.error_info.text }}"
-    error_media_type_invalid: "Media type value \"{{ slots.spotifyplus_media_type.text }}\" was not recognized."
+    error_failed_to_handle: "Failed to handle intent:\n\n{{ slots.error_info.text }}"
+    error_media_type_invalid: "Media type value \"{{ slots.spotifyplus_media_type.text }}\" ({{ slots.spotifyplus_media_type.value }}) was not recognized."
+    error_player_deck_control_invalid: "Player deck control value \"{{ slots.spotifyplus_player_deck_control.text }}\" ({{ slots.spotifyplus_player_deck_control.value }}) was not recognized."
+    error_player_volume_control_invalid: "Player volume control value \"{{ slots.spotifyplus_player_volume_control.text }}\" ({{ slots.spotifyplus_player_volume_control.value }}) was not recognized."
 
     # get information request related messages.
     get_info_artist_bio: "Artist bio for \"{{ slots.artist_title.text }}\" ... \n\n{{ slots.artist_bio.text | truncate(400, end=' ...') }}\n\n[more info at {{ slots.artist_url.text }}]({{ slots.artist_url.value }})"
@@ -61,12 +63,24 @@ responses:
     play_podcast_episode: "Playing Spotify episode \"{{ slots.episode_title.text }}\", from podcast \"{{ slots.podcast_title.text }}\"."
     play_track_with_artist: "Playing Spotify track \"{{ slots.track_title.text }}\", by artist \"{{ slots.artist_title.text }}\"."
     play_track: "Playing Spotify track \"{{ slots.track_title.text }}\"."
+    player_already_playing_media: "Media player \"{{ slots.target_player.text }}\" is already playing media."
+    player_deck_control_pause: "Okay, Spotify paused the track."
+    player_deck_control_resume: "Okay, Spotify resumed play."
+    player_deck_control_seek_start: "Okay, Spotify restarted the track."
+    player_deck_control_skip_next: "Okay, Spotify skipped to next track."
+    player_deck_control_skip_previous: "Okay, Spotify skipped to previous track."
     player_features_not_supported: "Media player \"{{ slots.name.text }}\" does not support required features for this request: \"{{ slots.error_features.text }}\"."
     player_not_exposed_to_voice: "Media player \"{{ slots.target_player.text }}\" has not been exposed to Voice Assistant."
     player_not_matched: "SpotifyPlus media player could not be resolved by \"{{ slots.target_player.text }}\"."
     player_not_matched_area: "SpotifyPlus media player could not be resolved for the \"{{ slots.area.text }}\" area."
     player_not_playing_media: "Media player \"{{ slots.target_player.text }}\" is currently not playing media."
     player_not_spotifyplus: "Resolved media player \"{{ slots.target_player.text }}\" is not a SpotifyPlus media player."
+    player_volume_control_down: "Okay, Spotify volume level was decreased by {{ slots.player_volume_step_pct.text }} percent."
+    player_volume_control_mute: "Okay, Spotify volume level was muted."
+    player_volume_control_set_step_level: "Okay, Spotify volume step level is {{ slots.player_volume_step_pct.text }} percent."
+    player_volume_control_set_level: "Okay, Spotify volume level set to {{ slots.player_volume_level_pct.text }} percent."
+    player_volume_control_unmute: "Okay, Spotify volume level was restored."
+    player_volume_control_up: "Okay, Spotify volume level was increased by {{ slots.player_volume_step_pct.text }} percent."
     playlist_created: "Okay, created Spotify playlist named \"{{ slots.playlist_title.text }}\".\n\n[more info at {{ slots.playlist_url.text }}]({{ slots.playlist_url.value }})"
 
     # general spotify information related messages.
@@ -232,6 +246,36 @@ lists:
       - in: "(track|song)"
         out: "track"
 
+  spotifyplus_player_deck_control:
+    # out values must be English value.
+    values:
+      - in: "(pause|stop) [[<the>] (play[er]|track|song)]"
+        out: "pause"
+      - in: "(resume|start) [[<the>] (play[er]|track|song)]"
+        out: "resume"
+      - in: "(restart [[<the>] (track|song)]|skip (to|2) [<the>] start of [<the>] (track|song))"
+        out: "seek_start"
+      - in: "([play] [<the>] next|skip|skip (to|2) [<the>] next) (track|song)"
+        out: "skip_next"
+      - in: "([play] [<the>] previous|skip|skip (to|2) [<the>] previous) (track|song)"
+        out: "skip_previous"
+
+  spotifyplus_player_volume_control:
+    # out values must be English value.
+    values:
+      - in: "(mute|[player] volume [level] (mute|off))"
+        out: "mute"
+      - in: "(unmute|[player] volume [level] (unmute|un mute|restore|on))"
+        out: "unmute"
+      - in: "[player] volume [level] (decrease[d]|down|lower)"
+        out: "step_down"
+      - in: "[player] volume [level] (increase[d]|up|higher|raise)"
+        out: "step_up"
+      - in: "[player] volume step [level] [to|2] {player_volume_step_pct} [percent|%]"
+        out: "set_step_level"
+      - in: "[player] volume [level] [to|2] {player_volume_level_pct} [percent|%]"
+        out: "set_level"
+
   # --------------------------------------------------------------------------------------
   # SpotifyPlus voice-friendly album identifiers.
   #
@@ -336,10 +380,6 @@ lists:
   # --------------------------------------------------------------------------------------
   spotifyplus_podcast_names:
     values:
-      - in: "Armchair Expert"
-        out: "spotify:show:6kAsbP8pxwaU2kPibKTuHE"
-      - in: "Joe Rogan"
-        out: "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
       - in: "Test Podcast List Entry"
         out: "spotify:show:6kAsbP8pxwaU2kPibKTuHE"  # Armchair Expert with Dax Sheppard
 

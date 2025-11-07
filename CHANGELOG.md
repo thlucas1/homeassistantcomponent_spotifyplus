@@ -6,6 +6,13 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.183 ] - 2025/11/06
+
+  * Added voice assist intent: `SpotifyPlusPlayerDeckControl`.  This replaces 5 other intents (see below).
+  * Removed 5 voice assist intents related to player deck control: `SpotifyPlusPlayerMediaPause`, `SpotifyPlusPlayerMediaResume`, `SpotifyPlusPlayerMediaSkipNext`, `SpotifyPlusPlayerMediaSkipPrevious`, `SpotifyPlusPlayerMediaSkipStart`; manual removal from `config/custom_sentences` folder is required.
+  * Added voice assist intent: `SpotifyPlusPlayerVolumeControl`.  This replaces 6 other intents (see below).
+  * Removed 6 voice assist intents related to player volume control: `SpotifyPlusPlayerSetVolumeLevel`, `SpotifyPlusVolumeDown`, `SpotifyPlusVolumeMuteOff`, `SpotifyPlusVolumeMuteOn`, `SpotifyPlusVolumeUp`, `SpotifyPlusVolumeSetStep`; manual removal from `config/custom_sentences` folder is required.
+
 ###### [ 1.0.182 ] - 2025/11/05
 
   * Added voice assist intent: `SpotifyPlusFavoriteAddRemove`.  This replaces 14 other intents (see below).

@@ -2,67 +2,86 @@
 # SpotifyPlus integration intent custom sentence and response definitions.
 #
 # Language: en, English
-# Intent:   SpotifyPlusPlayerMediaSkipStart
-# Location: custom_sentences/en/spotifyplus_PlayerMediaSkipStart_en.yaml
+# Intent:   SpotifyPlusPlayerDeckControl
+# Location: custom_sentences/en/spotifyplus_PlayerDeckControl_en.yaml
 # ============================================================================
 language: en
 intents:
 
-  SpotifyPlusPlayerMediaSkipStart:
+  SpotifyPlusPlayerDeckControl:
 
     data:
 
       - sentences:
 
-          - "spotify (restart|skip (to|2) [<the>] start of [<the>]) (track|song)"
+          - "spotify {spotifyplus_player_deck_control}"
 
             # Base sentence phrases for this intent.
             # This sentence is recognized when a name / area is NOT provided in the spoken command.  
             # In this case, the first active SpotifyPlus media player is used.
 
-            # __Example Phrases - Default Player__  
+            # __Example Phrases - No Player Name__  
+            # - "spotify pause"
+            # - "spotify pause track"
+            # - "spotify stop"
+            # - "spotify stop track"
+            # - "spotify resume"
+            # - "spotify resume play"
+            # - "spotify resume player"
+            # - "spotify resume track"
+            # - "spotify start"
+            # - "spotify start track"
+            # - "spotify start player"
+            # - "spotify start play"
+            # - "spotify next track"
+            # - "spotify play next track"
+            # - "spotify play the next track"
+            # - "spotify skip to next track"
+            # - "spotify skip track"
+            # - "spotify previous track"
+            # - "spotify play previous track"
+            # - "spotify play the previous track"
+            # - "spotify skip to previous track"
             # - "spotify restart track"
-            # - "spotify restart song"
             # - "spotify skip to start of track"
-            # - "spotify skip to the start of the song"
 
         slots:
 
           name: "Spotify Premium"  # default player to use.
           delay: 0.50
 
-        response: default_no_player
+        response: default
 
       - sentences:
 
-          - "spotify (restart|skip (to|2) [<the>] start of [<the>]) (track|song) <on_spotifyplus_player_name>"
+          - "spotify {spotifyplus_player_deck_control} <on_spotifyplus_player_name>"
 
             # This sentence is recognized when a player name is provided in the spoken 
             # command (e.g. "on player Spotify Premium", "on Todds player", etc).  
             # Supports the same base sentence phrases for this intent.
 
             # __Example Phrases - By Player Name__  
-            # - "spotify restart track on player spotify premium"
-            # - "spotify restart track on spotify premium player"
+            # - "spotify pause track on player spotify premium"
+            # - "spotify pause track on spotify premium player"
 
         slots:
 
           name: ""
           delay: 0.50
 
-        response: default_by_name
+        response: default
 
       - sentences:
 
-          - "spotify (restart|skip (to|2) [<the>] start of [<the>]) (track|song) <in_spotifyplus_player_area>"
+          - "spotify {spotifyplus_player_deck_control} <in_spotifyplus_player_area>"
 
             # This sentence is recognized when a player area is provided in the spoken 
             # command (e.g. "in the Living Room area", "in the Living Room", etc).  
             # Supports the same base sentence phrases for this intent.
 
             # __Example Phrases - By Player Area__  
-            # - "spotify restart track in the Office area"
-            # - "spotify restart track in the Office"
+            # - "spotify pause track in the Office area"
+            # - "spotify pause track in the Office"
 
         slots:
 
@@ -70,7 +89,7 @@ intents:
           name: ""
           delay: 0.50
 
-        response: default_by_area
+        response: default
 
 
 # ============================================================================
@@ -80,9 +99,6 @@ intents:
 responses:
   intents:
 
-    SpotifyPlusPlayerMediaSkipStart:
+    SpotifyPlusPlayerDeckControl:
 
-      default_no_player: "Okay, Spotify restarted the track on default player \"{{ slots.target_player.text }}\"."
-      default_by_name: "Okay, Spotify restarted the track on named player \"{{ slots.target_player.text }}\"."
-      default_by_area: "Okay, Spotify restarted the track in the \"{{ slots.target_player.text }}\" area."
-      default: "Okay, Spotify restarted the track."
+      default: "" # not used - see common `player_deck_control_xxxxxxx` messages.
