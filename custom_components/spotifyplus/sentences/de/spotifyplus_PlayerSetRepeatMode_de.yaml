@@ -1,0 +1,98 @@
+# ============================================================================
+# SpotifyPlus Integration benutzerdefinierte Satz- und Antwortdefinitionen.
+#
+# Sprache: de, Deutsch
+# Absicht:   SpotifyPlusPlayerSetRepeatMode
+# Ort: custom_sentences/de/spotifyplus_PlayerSetRepeatMode_de.yaml
+# ============================================================================
+language: de
+intents:
+
+  SpotifyPlusPlayerSetRepeatMode:
+
+    data:
+
+      - sentences:
+
+          - "spotify wiederholungsmodus {player_repeat_mode}"
+          - "spotify wiederholung {player_repeat_mode}"
+
+            # Basissätze für diese Absicht.
+            # Dieser Satz wird erkannt, wenn kein Name / Bereich im Sprachbefehl angegeben wird.
+            # In diesem Fall wird der erste aktive SpotifyPlus Media Player verwendet.
+
+            # __Example Phrases - Default Player__
+            # - "spotify repeat on"
+            # - "spotify repeat track"
+            # - "spotify repeat 1 track"
+            # - "spotify repeat single track"
+            # - "spotify repeat context"
+            # - "spotify repeat all"
+            # - "spotify repeat all tracks"
+            # - "spotify repeat list"
+            # - "spotify repeat off"
+            # - "spotify repeat disabled"
+
+        slots:
+
+          name: "Spotify Premium" # Standard-Alias für den Media Player.
+          delay: 0.50
+          player_repeat_mode: "off"
+
+        response: default_no_player
+
+      - sentences:
+
+          - "spotify wiederholungsmodus {player_repeat_mode} <on_spotifyplus_player_name>"
+          - "spotify wiederholung {player_repeat_mode} <on_spotifyplus_player_name>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Name im Sprachbefehl angegeben wird
+            # (z.B. "auf Player Spotify Premium", "auf Todds Player", etc.).
+
+            # __Beispielsätze - Nach Player-Name__
+            # - "spotify wiederholungsmodus titel für player spotify premium"
+            # - "spotify wiederholung titel für spotify premium player"
+
+        slots:
+
+          name: ""
+          delay: 0.50
+          player_repeat_mode: "off"
+
+        response: default_by_name
+
+      - sentences:
+
+          - "spotify wiederholungsmodus {player_repeat_mode} <in_spotifyplus_player_area>"
+          - "spotify wiederholung {player_repeat_mode} <in_spotifyplus_player_area>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Bereich im Sprachbefehl angegeben wird
+            # (z.B. "im Wohnzimmer", "in der Küche", etc.).
+
+            # __Beispielsätze - Nach Player-Bereich__
+            # - "spotify wiederholungsmodus titel im Büro"
+            # - "spotify wiederholung titel im Büro"
+
+        slots:
+
+          area: ""
+          name: ""
+          delay: 0.50
+          player_repeat_mode: "off"
+
+        response: default_by_area
+
+
+# ============================================================================
+# Benutzerdefinierte Antwortdefinitionen für DIESE Absicht.
+# Hinweis - Geteilte Antworten für alle Absichten sind in der Common-Datei gespeichert.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusPlayerSetRepeatMode:
+
+      default_by_name: "Okay, der Spotify-Wiederholungsmodus ist \"{{ slots.player_repeat_mode.text }}\" für den Player \"{{ slots.target_player.text }}\"."
+      default_by_area: "Okay, der Spotify-Wiederholungsmodus ist \"{{ slots.player_repeat_mode.text }}\" im Bereich \"{{ slots.target_player.text }}\"."
+      default_no_player: "Okay, der Spotify-Wiederholungsmodus ist \"{{ slots.player_repeat_mode.text }}\" für den Standard-Player \"{{ slots.target_player.text }}\"."
+      default: "Okay, der Spotify-Wiederholungsmodus ist \"{{ slots.player_repeat_mode.text }}\"."

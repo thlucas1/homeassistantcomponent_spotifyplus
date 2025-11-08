@@ -1,0 +1,94 @@
+# ============================================================================
+# SpotifyPlus Integration benutzerdefinierte Satz- und Antwortdefinitionen.
+#
+# Sprache: de, Deutsch
+# Absicht:   SpotifyPlusPlayerSetShuffleMode
+# Ort: custom_sentences/de/spotifyplus_PlayerSetShuffleMode_de.yaml
+# ============================================================================
+language: de
+intents:
+
+  SpotifyPlusPlayerSetShuffleMode:
+
+    data:
+
+      - sentences:
+
+          - "spotify zufallswiedergabe [modus] {player_shuffle_mode}"
+          - "spotify shuffle [modus] {player_shuffle_mode}"
+
+            # Basissätze für diese Absicht.
+            # Dieser Satz wird erkannt, wenn kein Name / Bereich im Sprachbefehl angegeben wird.
+            # In diesem Fall wird der erste aktive SpotifyPlus Media Player verwendet.
+
+            # __Example Phrases - Default Player__
+            # - "spotify shuffle mode on"
+            # - "spotify shuffle mode off"
+            # - "spotify shuffle on"
+            # - "spotify shuffle off"
+            # - "spotify shuffle enabled"
+            # - "spotify shuffle disabled"
+
+        slots:
+
+          name: "Spotify Premium" # Standard-Alias für den Media Player.
+          delay: 0.50
+          player_shuffle_mode: "off"
+
+        response: default_no_player
+
+      - sentences:
+
+          - "spotify zufallswiedergabe [modus] {player_shuffle_mode} <on_spotifyplus_player_name>"
+          - "spotify shuffle [modus] {player_shuffle_mode} <on_spotifyplus_player_name>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Name im Sprachbefehl angegeben wird
+            # (z.B. "auf Player Spotify Premium", "auf Todds Player", etc.).
+
+            # __Beispielsätze - Nach Player-Name__
+            # - "spotify shuffle an für player spotify premium"
+            # - "spotify zufallswiedergabe an für spotify premium player"
+
+        slots:
+
+          name: ""
+          delay: 0.50
+          player_shuffle_mode: "off"
+
+        response: default_by_name
+
+      - sentences:
+
+          - "spotify zufallswiedergabe [modus] {player_shuffle_mode} <in_spotifyplus_player_area>"
+          - "spotify shuffle [modus] {player_shuffle_mode} <in_spotifyplus_player_area>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Bereich im Sprachbefehl angegeben wird
+            # (z.B. "im Wohnzimmer", "in der Küche", etc.).
+
+            # __Beispielsätze - Nach Player-Bereich__
+            # - "spotify shuffle an im Büro"
+            # - "spotify zufallswiedergabe an im Büro"
+
+        slots:
+
+          area: ""
+          name: ""
+          delay: 0.50
+          player_shuffle_mode: "off"
+
+        response: default_by_area
+
+
+# ============================================================================
+# Benutzerdefinierte Antwortdefinitionen für DIESE Absicht.
+# Hinweis - Geteilte Antworten für alle Absichten sind in der Common-Datei gespeichert.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusPlayerSetShuffleMode:
+
+      default_no_player: "Okay, der Spotify-Zufallswiedergabemodus ist \"{{ slots.player_shuffle_mode.text }}\" für den Standard-Player \"{{ slots.target_player.text }}\"."
+      default_by_name: "Okay, der Spotify-Zufallswiedergabemodus ist \"{{ slots.player_shuffle_mode.text }}\" für den Player \"{{ slots.target_player.text }}\"."
+      default_by_area: "Okay, der Spotify-Zufallswiedergabemodus ist \"{{ slots.player_shuffle_mode.text }}\" im Bereich \"{{ slots.target_player.text }}\"."
+      default: "Okay, der Spotify-Zufallswiedergabemodus ist \"{{ slots.player_shuffle_mode.text }}\"."

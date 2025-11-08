@@ -1,0 +1,99 @@
+# ============================================================================
+# SpotifyPlus Integration benutzerdefinierte Satz- und Antwortdefinitionen.
+#
+# Sprache: de, Deutsch
+# Intent:   SpotifyPlusPlaylistCreate
+# Ort: custom_sentences/de/spotifyplus_PlaylistCreate_de.yaml
+# ============================================================================
+language: de
+intents:
+
+  SpotifyPlusPlaylistCreate:
+
+    data:
+
+      - sentences:
+
+          - "spotify erstelle (playlist|wiedergabeliste) {playlist_name}"
+          - "erstelle spotify (playlist|wiedergabeliste) {playlist_name}"
+
+            # Basissätze für diese Intent.
+            # Dieser Satz wird erkannt, wenn kein Name / Bereich im Sprachbefehl angegeben wird.
+            # In diesem Fall wird der erste aktive SpotifyPlus Media Player verwendet.
+
+            # __Beispielsätze - Standard-Player__
+            # - "spotify erstelle playlist Meine neue Playlist"
+            # - "erstelle spotify wiedergabeliste Meine neue Playlist"
+
+        slots:
+
+          name: "Spotify Premium" # Standard-Alias für den Media Player.
+          target_player: ""
+          playlist_name: ""
+          description: "Erstellt durch Home Assistant Voice Assist Intent."
+          is_collaborative: False
+          is_public: False
+          image_path: ""  # Beispiel: "www/spotifyplus/spotify_playlist_default_image.png"
+
+        response: default
+
+      - sentences:
+
+          - "spotify erstelle (playlist|wiedergabeliste) {playlist_name} <on_spotifyplus_player_name>"
+          - "erstelle spotify (playlist|wiedergabeliste) {playlist_name} <on_spotifyplus_player_name>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Name im Sprachbefehl angegeben wird
+            # (z.B. "auf Player Spotify Premium", "auf Todds Player", etc.).
+
+            # __Beispielsätze - Nach Player-Name__
+            # - "spotify erstelle playlist Meine neue Playlist auf player spotify premium"
+            # - "erstelle spotify wiedergabeliste Meine neue Playlist auf player spotify premium"
+
+        slots:
+
+          name: ""
+          target_player: ""
+          playlist_name: ""
+          description: "Erstellt durch Home Assistant Voice Assist Intent."
+          is_collaborative: False
+          is_public: False
+          image_path: ""  # Beispiel: "www/spotifyplus/spotify_playlist_default_image.png"
+
+        response: default
+
+      - sentences:
+
+          - "spotify erstelle (playlist|wiedergabeliste) {playlist_name} <in_spotifyplus_player_area>"
+          - "erstelle spotify (playlist|wiedergabeliste) {playlist_name} <in_spotifyplus_player_area>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Bereich im Sprachbefehl angegeben wird
+            # (z.B. "im Wohnzimmer", "in der Küche", etc.).
+
+            # __Beispielsätze - Nach Player-Bereich__
+            # - "spotify erstelle playlist Meine neue Playlist im Büro"
+            # - "erstelle spotify wiedergabeliste Meine neue Playlist im Büro"
+
+        slots:
+
+          area: ""
+          name: ""
+          target_player: ""
+          playlist_name: ""
+          description: "Erstellt durch Home Assistant Voice Assist Intent."
+          is_collaborative: False
+          is_public: False
+          image_path: ""  # Beispiel: "www/spotifyplus/spotify_playlist_default_image.png"
+
+        response: default
+
+
+# ============================================================================
+# Benutzerdefinierte Antwortdefinitionen für DIESE Intents.
+# Hinweis - Geteilte Antworten für alle Intenten sind in der Common-Datei gespeichert.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusPlaylistCreate:
+
+      default: "Okay, habe die Spotify-Playlist mit dem Namen \"{{ slots.playlist_title.text }}\" erstellt."

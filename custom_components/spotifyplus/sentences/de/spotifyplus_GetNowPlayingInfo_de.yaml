@@ -1,0 +1,97 @@
+# ============================================================================
+# SpotifyPlus Integration benutzerdefinierte Satz- und Antwortdefinitionen.
+#
+# Sprache: de, Deutsch
+# Absicht:   SpotifyPlusGetNowPlayingInfo
+# Ort: custom_sentences/de/spotifyplus_GetNowPlayingInfo_de.yaml
+# ============================================================================
+language: de
+intents:
+
+  SpotifyPlusGetNowPlayingInfo:
+
+    data:
+
+      - sentences:
+
+          - "[hole|gib mir] spotify [was läuft|aktuelle wiedergabe] {spotifyplus_media_type} (info|informationen|details)"
+
+            # Basissätze für diese Absicht.
+            # Dieser Satz wird erkannt, wenn kein Name / Bereich im Sprachbefehl angegeben wird.
+            # In diesem Fall wird der erste aktive SpotifyPlus Media Player verwendet.
+
+            # __Beispielsätze - Standard-Player__
+            # - "spotify was läuft album info"
+            # - "spotify album info"
+            # - "get spotify album info"
+            # - "spotify nowplaying artist info"
+            # - "spotify artist info"
+            # - "get spotify artist info"
+            # - "spotify nowplaying audiobook info"
+            # - "spotify audiobook info"
+            # - "get spotify audiobook info"
+            # - "spotify nowplaying playlist info"
+            # - "spotify playlist info"
+            # - "get spotify playlist info"
+            # - "spotify nowplaying podcast episode info"
+            # - "spotify podcast episode info"
+            # - "get spotify podcast episode info"
+            # - "spotify nowplaying podcast info"
+            # - "spotify podcast info"
+            # - "get spotify podcast info"
+            # - "spotify nowplaying track info"
+            # - "spotify track info"
+            # - "get spotify track info"
+
+        slots:
+
+          name: "Spotify Premium"  # Standard-Player.
+
+        response: default
+
+      - sentences:
+
+          - "[hole|gib mir] spotify [was läuft|aktuelle wiedergabe] {spotifyplus_media_type} (info|informationen|details) <on_spotifyplus_player_name>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Name im Sprachbefehl angegeben wird
+            # (z.B. "auf Player Spotify Premium", "auf Todds Player", etc.).
+
+            # __Beispielsätze - Nach Player-Name__
+            # - "gib mir spotify künstler info für player spotify premium"
+            # - "hole spotify künstler informationen für spotify premium player"
+
+        slots:
+
+          name: ""
+
+        response: default
+
+      - sentences:
+
+          - "[hole|gib mir] spotify [was läuft|aktuelle wiedergabe] {spotifyplus_media_type} (info|informationen|details) <in_spotifyplus_player_area>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Bereich im Sprachbefehl angegeben wird
+            # (z.B. "im Wohnzimmer", "in der Küche", etc.).
+
+            # __Beispielsätze - Nach Player-Bereich__
+            # - "hole spotify künstler info im Büro"
+            # - "gib mir spotify künstler informationen im Büro"
+
+        slots:
+
+          area: ""
+          name: ""
+
+        response: default
+
+
+# ============================================================================
+# Benutzerdefinierte Antwortdefinitionen für DIESE Absicht.
+# Hinweis - Geteilte Antworten für alle Absichten sind in der Common-Datei gespeichert.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusGetNowPlayingInfo:
+
+      default: "" # nicht verwendet - siehe allgemeine `nowplaying_info_xxxxxxx`-Nachrichten in der common-Datei.

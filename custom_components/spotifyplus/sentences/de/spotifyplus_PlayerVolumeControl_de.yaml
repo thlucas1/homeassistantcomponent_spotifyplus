@@ -1,0 +1,89 @@
+# ============================================================================
+# SpotifyPlus Integration benutzerdefinierte Satz- und Antwortdefinitionen.
+#
+# Sprache: de, Deutsch
+# Intent:   SpotifyPlusPlayerVolumeControl
+# Ort: custom_sentences/de/spotifyplus_PlayerVolumeControl_de.yaml
+# ============================================================================
+language: de
+intents:
+
+  SpotifyPlusPlayerVolumeControl:
+
+    data:
+
+      - sentences:
+
+          - "[setze] spotify {spotifyplus_player_volume_control}"
+
+            # Basissätze für diese Intent.
+            # Dieser Satz wird erkannt, wenn kein Name / Bereich im Sprachbefehl angegeben wird.
+            # In diesem Fall wird der erste aktive SpotifyPlus Media Player verwendet.
+
+            # __Beispielsätze - Kein Player-Name__
+            # - "spotify lauter"
+            # - "spotify leiser"
+            # - "spotify stumm"
+            # - "spotify lautstärke auf 50 prozent"
+
+        slots:
+
+          name: "Spotify Premium"  # Standard-Player.
+          delay: 0.50
+          player_volume_level_pct: 10
+          player_volume_step_pct: 10
+
+        response: default
+
+      - sentences:
+
+          - "[setze] spotify {spotifyplus_player_volume_control} <on_spotifyplus_player_name>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Name im Sprachbefehl angegeben wird
+            # (z.B. "auf Player Spotify Premium", "auf Todds Player", etc.).
+
+            # __Beispielsätze - Nach Player-Name__
+            # - "spotify lauter auf player spotify premium"
+            # - "setze spotify lautstärke auf 50 prozent auf player spotify premium"
+
+        slots:
+
+          name: ""
+          delay: 0.50
+          player_volume_level_pct: 10
+          player_volume_step_pct: 10
+
+        response: default
+
+      - sentences:
+
+          - "[setze] spotify {spotifyplus_player_volume_control} <in_spotifyplus_player_area>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Bereich im Sprachbefehl angegeben wird
+            # (z.B. "im Wohnzimmer", "in der Küche", etc.).
+
+            # __Beispielsätze - Nach Player-Bereich__
+            # - "spotify lauter im Büro"
+            # - "setze spotify lautstärke auf 50 prozent im Büro"
+
+        slots:
+
+          area: ""
+          name: ""
+          delay: 0.50
+          player_volume_level_pct: 10
+          player_volume_step_pct: 10
+
+        response: default
+
+
+# ============================================================================
+# Benutzerdefinierte Antwortdefinitionen für DIESE Intent.
+# Hinweis - Geteilte Antworten für alle Intenten sind in der Common-Datei gespeichert.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusPlayerVolumeControl:
+
+      default: "" # nicht verwendet - siehe allgemeine `player_volume_control_xxxxxxx`-Nachrichten in der common-Datei.

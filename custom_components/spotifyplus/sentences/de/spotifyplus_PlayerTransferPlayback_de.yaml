@@ -1,0 +1,92 @@
+# ============================================================================
+# SpotifyPlus Integration benutzerdefinierte Satz- und Antwortdefinitionen.
+#
+# Sprache: de, Deutsch
+# Absicht:   SpotifyPlusPlayerTransferPlayback
+# Ort: custom_sentences/de/spotifyplus_PlayerTransferPlayback_de.yaml
+# ============================================================================
+language: de
+intents:
+
+  SpotifyPlusPlayerTransferPlayback:
+
+    data:
+
+      - sentences:
+
+          - "spotify (wiedergabe übertragen auf|übertrage auf|wiedergabe auf) [gerät] {spotifyplus_device_names:device_name}"
+          - "spotify (wiedergabe übertragen auf|übertrage auf|wiedergabe auf) [gerät] {device_name}"
+
+            # Basissätze für diese Absicht.
+            # Dieser Satz wird erkannt, wenn kein Name / Bereich im Sprachbefehl angegeben wird.
+            # In diesem Fall wird der erste aktive SpotifyPlus Media Player verwendet.
+
+            # __Beispielsätze - Standard-Player__
+            # - "spotify wiedergabe übertragen auf gerät Bose-ST10-1"
+            # - "spotify übertrage auf Bose-ST10-1"
+            # - "spotify wiedergabe auf Bose-ST10-1"
+
+        slots:
+
+          name: "Spotify Premium" # Standard-Alias für den Media Player.
+          target_player: ""
+          delay: 0.50
+          device_name: "*"
+
+        response: default_no_player
+
+      - sentences:
+
+          - "spotify (wiedergabe übertragen|übertrage|wiedergabe) [auf] [gerät] {spotifyplus_device_names:device_name} <on_spotifyplus_player_name>"
+          - "spotify (wiedergabe übertragen|übertrage|wiedergabe) [auf] [gerät] {device_name} <on_spotifyplus_player_name>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Name im Sprachbefehl angegeben wird
+            # (z.B. "auf Player Spotify Premium", "auf Todds Player", etc.).
+
+            # __Beispielsätze - Nach Player-Name__
+            # - "spotify wiedergabe übertragen auf Bose-ST10-1 für player spotify premium"
+            # - "spotify übertrage auf Bose-ST10-1 für spotify premium player"
+
+        slots:
+
+          name: ""
+          delay: 0.50
+          device_name: "*"
+
+        response: default_by_name
+
+      - sentences:
+
+          - "spotify (wiedergabe übertragen|übertrage|wiedergabe) [auf] [gerät] {spotifyplus_device_names:device_name} <in_spotifyplus_player_area>"
+          - "spotify (wiedergabe übertragen|übertrage|wiedergabe) [auf] [gerät] {device_name} <in_spotifyplus_player_area>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Bereich im Sprachbefehl angegeben wird
+            # (z.B. "im Wohnzimmer", "in der Küche", etc.).
+
+            # __Beispielsätze - Nach Player-Bereich__
+            # - "spotify wiedergabe übertragen auf Bose-ST10-1 im Büro"
+            # - "spotify übertrage auf Bose-ST10-1 im Büro"
+
+        slots:
+
+          area: ""
+          name: ""
+          delay: 0.50
+          device_name: "*"
+
+        response: default_by_area
+
+
+# ============================================================================
+# Benutzerdefinierte Antwortdefinitionen für DIESE Absicht.
+# Hinweis - Geteilte Antworten für alle Absichten sind in der Common-Datei gespeichert.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusPlayerTransferPlayback:
+
+      default_no_player: "Okay, Wiedergabe auf Gerät \"{{ slots.device_name.text }}\" übertragen, für Standard-Player \"{{ slots.target_player.text }}\"."
+      default_by_name: "Okay, Wiedergabe auf Gerät \"{{ slots.device_name.text }}\" übertragen, für Player \"{{ slots.target_player.text }}\"."
+      default_by_area: "Okay, Wiedergabe auf Gerät \"{{ slots.device_name.text }}\" übertragen, im Bereich \"{{ slots.target_player.text }}\"."
+      default: "Okay, Wiedergabe auf Gerät \"{{ slots.device_name.text }}\" übertragen."

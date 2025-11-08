@@ -1,0 +1,107 @@
+# ============================================================================
+# SpotifyPlus Integration benutzerdefinierte Satz- und Antwortdefinitionen.
+#
+# Sprache: de, Deutsch
+# Absicht:   SpotifyPlusPlayFavoriteTracks
+# Ort: custom_sentences/de/spotifyplus_PlayFavoriteTracks_de.yaml
+# ============================================================================
+language: de
+intents:
+
+  SpotifyPlusPlayFavoriteTracks:
+
+    data:
+
+      - sentences:
+
+          - "spotify spiele (lieblingstitel|lieblingssongs|lieblingstracks|lieblingslieder) [von künstler {spotifyplus_artist_names:artist_name}]"
+          - "spotify spiele (lieblingstitel|lieblingssongs|lieblingstracks|lieblingslieder) [von künstler {freeform:artist_name}]"
+          - "spiele spotify (lieblingstitel|lieblingssongs|lieblingstracks|lieblingslieder) [von künstler {spotifyplus_artist_names:artist_name}]"
+          - "spiele spotify (lieblingstitel|lieblingssongs|lieblingstracks|lieblingslieder) [von künstler {freeform:artist_name}]"
+
+            # Basissätze für diese Absicht.
+            # Dieser Satz wird erkannt, wenn kein Name / Bereich im Sprachbefehl angegeben wird.
+            # In diesem Fall wird der erste aktive SpotifyPlus Media Player verwendet.
+
+            # __Beispielsätze - Standard-Player__
+            # - "spotify spiele lieblingstitel"
+            # - "spiele spotify lieblingssongs"
+            # - "spotify spiele lieblingstracks von künstler Seventh Day Slumber"
+            # - "spiele spotify lieblingslieder von künstler Seventh Day Slumber"
+
+        slots:
+
+          name: "Spotify Premium" # Standard-Alias für den Media Player.
+          target_player: ""
+          artist_name: ""
+          delay: 0.50
+          device_name: "*"
+          limit_total: 200
+          player_shuffle_mode: "on"
+
+        response: play_favorite_tracks
+
+      - sentences:
+
+          - "spotify spiele (lieblingstitel|lieblingssongs|lieblingstracks|lieblingslieder) [von künstler {spotifyplus_artist_names:artist_name}] <on_spotifyplus_player_name>"
+          - "spotify spiele (lieblingstitel|lieblingssongs|lieblingstracks|lieblingslieder) [von künstler {freeform:artist_name}] <on_spotifyplus_player_name>"
+          - "spiele spotify (lieblingstitel|lieblingssongs|lieblingstracks|lieblingslieder) [von künstler {spotifyplus_artist_names:artist_name}] <on_spotifyplus_player_name>"
+          - "spiele spotify (lieblingstitel|lieblingssongs|lieblingstracks|lieblingslieder) [von künstler {freeform:artist_name}] <on_spotifyplus_player_name>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Name im Sprachbefehl angegeben wird
+            # (z.B. "auf Player Spotify Premium", "auf Todds Player", etc.).
+
+            # __Beispielsätze - Nach Player-Name__
+            # - "spotify spiele lieblingstitel auf player spotify premium"
+            # - "spiele spotify lieblingssongs auf player spotify premium"
+
+        slots:
+
+          name: ""
+          target_player: ""
+          artist_name: ""
+          delay: 0.50
+          device_name: "*"
+          limit_total: 200
+          player_shuffle_mode: "on"
+
+        response: play_favorite_tracks
+
+      - sentences:
+
+          - "spotify spiele (lieblingstitel|lieblingssongs|lieblingstracks|lieblingslieder) [von künstler {spotifyplus_artist_names:artist_name}] <in_spotifyplus_player_area>"
+          - "spotify spiele (lieblingstitel|lieblingssongs|lieblingstracks|lieblingslieder) [von künstler {freeform:artist_name}] <in_spotifyplus_player_area>"
+          - "spiele spotify (lieblingstitel|lieblingssongs|lieblingstracks|lieblingslieder) [von künstler {spotifyplus_artist_names:artist_name}] <in_spotifyplus_player_area>"
+          - "spiele spotify (lieblingstitel|lieblingssongs|lieblingstracks|lieblingslieder) [von künstler {freeform:artist_name}] <in_spotifyplus_player_area>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Bereich im Sprachbefehl angegeben wird
+            # (z.B. "im Wohnzimmer", "in der Küche", etc.).
+
+            # __Beispielsätze - Nach Player-Bereich__
+            # - "spotify spiele lieblingstitel im Büro"
+            # - "spiele spotify lieblingssongs im Büro"
+
+        slots:
+
+          area: ""
+          name: ""
+          target_player: ""
+          artist_name: ""
+          delay: 0.50
+          device_name: "*"
+          limit_total: 200
+          player_shuffle_mode: "on"
+
+        response: play_favorite_tracks
+
+
+# ============================================================================
+# Benutzerdefinierte Antwortdefinitionen für DIESE Absicht.
+# Hinweis - Geteilte Antworten für alle Absichten sind in der Common-Datei gespeichert.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusPlayFavoriteTracks:
+
+      play_favorite_tracks: "Okay, spiele Spotify-Lieblingstitel."
