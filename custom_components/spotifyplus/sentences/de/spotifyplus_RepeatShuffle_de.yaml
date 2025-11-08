@@ -1,0 +1,68 @@
+# ============================================================================  
+# SpotifyPlus Sätze – Wiederholung & Zufallswiedergabe (formell + umgangssprachlich kombiniert)  
+# Sprache: de, Deutsch  
+# ============================================================================  
+language: de  
+responses:
+
+  repeat_shuffle_control:
+
+    ask_for_repeat_action:
+      - "Möchtest du die Wiederholung einschalten, ausschalten oder nur den aktuellen Song wiederholen?"
+      - "Wie soll ich den Repeat-Modus einstellen – aus, Titel oder alles?"
+      - "Willst du Wiederholen anmachen oder ausschalten?"
+      - "Soll ich den Song oder die Playlist wiederholen?"
+
+    ask_for_shuffle_action:
+      - "Möchtest du die Zufallswiedergabe aktivieren oder deaktivieren?"
+      - "Shuffle an oder aus?"
+      - "Willst du zufällige Wiedergabe?"
+      - "Soll ich die Songs mischen?"
+
+    ask_for_device_name:
+      - "Auf welchem Gerät möchtest du das ändern?"
+      - "Welcher Player soll den Modus wechseln?"
+      - "Auf welchem Lautsprecher soll ich Repeat oder Shuffle ändern?"
+      - "Wo soll ich das einstellen – Wohnzimmer, Büro oder was anderes?"
+
+    ok_repeat_off:
+      - "Okay, Wiederholung ausgeschaltet."
+      - "Repeat ist jetzt aus."
+      - "Wiederholen deaktiviert."
+      - "Ich hab das Wiederholen ausgemacht."
+
+    ok_repeat_context:
+      - "Okay, Wiederholung für die gesamte Playlist aktiviert."
+      - "Repeat ist jetzt für alle Songs an."
+      - "Ich wiederhole die ganze Liste."
+      - "Playlist-Wiederholung eingeschaltet."
+
+    ok_repeat_track:
+      - "Okay, Wiederholung für den aktuellen Song aktiviert."
+      - "Repeat ist jetzt nur für diesen Song an."
+      - "Ich wiederhole den aktuellen Titel."
+      - "Song-Wiederholung eingeschaltet."
+
+    ok_shuffle_on:
+      - "Okay, Zufallswiedergabe aktiviert."
+      - "Shuffle ist jetzt an."
+      - "Ich misch die Songs jetzt."
+      - "Alles klar, Zufallsmodus aktiviert."
+
+    ok_shuffle_off:
+      - "Okay, Zufallswiedergabe ausgeschaltet."
+      - "Shuffle ist jetzt aus."
+      - "Ich spiel die Songs jetzt der Reihe nach."
+      - "Alles klar, Zufallsmodus deaktiviert."
+
+    device_not_found:
+      - "Ich konnte keinen Player namens „{{ slots.device_name.text }}“ finden."
+      - "Das Gerät „{{ slots.device_name.text }}“ wurde nicht gefunden."
+      - "Kein Gerät mit dem Namen „{{ slots.device_name.text }}“ verfügbar."
+      - "„{{ slots.device_name.text }}“ scheint grad nicht verbunden zu sein."
+
+    action_failed:
+      - "Beim Ändern des Wiedergabemodus ist ein Fehler aufgetreten."
+      - "Konnte Repeat/Shuffle nicht umstellen."
+      - "Da ging was schief beim Einstellen des Modus."
+      - "Fehler beim Ändern von Repeat oder Shuffle."

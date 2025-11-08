@@ -1,0 +1,70 @@
+# ============================================================================  
+# SpotifyPlus Sätze – Playlist abspielen (formell + umgangssprachlich kombiniert)  
+# Sprache: de, Deutsch  
+# ============================================================================  
+language: de  
+responses:
+
+  play_playlist:
+
+    ask_for_playlist_name:
+      # formell
+      - "Welche Playlist möchtest du abspielen?"
+      - "Sag mir bitte den Namen der Playlist."
+      # umgangssprachlich
+      - "Welche Playlist soll's sein?"
+      - "Na, was darf’s heute sein – welche Playlist?"
+
+    ask_for_device_name:
+      # formell
+      - "Auf welchem Gerät soll ich die Playlist starten?"
+      - "Möchtest du die Wiedergabe auf einem bestimmten Gerät?"
+      # umgangssprachlich
+      - "Auf welchem Speaker soll’s laufen?"
+      - "Wo soll ich die Playlist spielen – Wohnzimmer, Küche oder was anderes?"
+
+    info_playlist_playing:
+      # formell
+      - "Spiele gerade die Spotify-Playlist „{{ slots.playlist_title.text }}“."
+      - "Jetzt läuft die Playlist „{{ slots.playlist_title.text }}“."
+      # umgangssprachlich
+      - "Läuft: „{{ slots.playlist_title.text }}“."
+      - "Okay, ich hau dir jetzt „{{ slots.playlist_title.text }}“ rein."
+
+    not_found_playlist:
+      # formell
+      - "Die Playlist „{{ slots.playlist_title.text }}“ wurde nicht gefunden."
+      - "Ich konnte keine Playlist namens „{{ slots.playlist_title.text }}“ finden."
+      # umgangssprachlich
+      - "Hm, die Playlist „{{ slots.playlist_title.text }}“ gibt’s wohl nicht."
+      - "Ich find nix mit dem Namen „{{ slots.playlist_title.text }}“."
+
+    ambiguous_playlist:
+      # formell
+      - "Mehrere Playlists mit dem Namen „{{ slots.playlist_title.text }}“ gefunden. Möchtest du die genaue Angabe machen?"
+      # umgangssprachlich
+      - "Gibt mehrere Playlists mit dem Namen „{{ slots.playlist_title.text }}“. Welche meinst du genau?"
+
+    device_not_found:
+      # formell
+      - "Das Gerät „{{ slots.device_name.text }}“ konnte nicht gefunden werden."
+      - "Kein Gerät mit dem Namen „{{ slots.device_name.text }}“ verfügbar."
+      # umgangssprachlich
+      - "Ich find keinen Speaker, der „{{ slots.device_name.text }}“ heißt."
+      - "„{{ slots.device_name.text }}“ scheint grad nicht verbunden zu sein."
+
+    playback_failed:
+      # formell
+      - "Fehler beim Abspielen der Playlist „{{ slots.playlist_title.text }}“."
+      - "Die Playlist „{{ slots.playlist_title.text }}“ konnte nicht abgespielt werden."
+      # umgangssprachlich
+      - "Ups, „{{ slots.playlist_title.text }}“ konnte ich nicht starten."
+      - "Hat nicht geklappt mit „{{ slots.playlist_title.text }}“."
+
+    ok_play_playlist:
+      # formell
+      - "Okay, spiele die Playlist „{{ slots.playlist_title.text }}“."
+      - "Alles klar – starte „{{ slots.playlist_title.text }}“ auf Spotify."
+      # umgangssprachlich
+      - "Alles klar, ich spiel dir „{{ slots.playlist_title.text }}“ ab."
+      - "Los geht’s mit „{{ slots.playlist_title.text }}“!"

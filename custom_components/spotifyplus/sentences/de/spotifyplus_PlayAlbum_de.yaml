@@ -1,0 +1,66 @@
+# ============================================================================  
+# SpotifyPlus Sätze – Album abspielen (formell + umgangssprachlich kombiniert)  
+# Sprache: de, Deutsch  
+# ============================================================================  
+language: de  
+responses:
+
+  play_album:
+
+    ask_for_album_name:
+      - "Welches Album möchtest du hören?"
+      - "Wie heißt das Album, das ich abspielen soll?"
+      - "Welches Album darf’s sein?"
+      - "Na, welches Album willst du hören?"
+
+    ask_for_artist_name:
+      - "Von welchem Künstler ist das Album?"
+      - "Von wem soll ich das Album spielen?"
+      - "Wer ist der Künstler des Albums?"
+      - "Von wem ist das Album?"
+
+    ask_for_device_name:
+      - "Auf welchem Gerät möchtest du abspielen?"
+      - "Soll ich das Album auf einem bestimmten Gerät spielen?"
+      - "Auf welchem Lautsprecher soll’s laufen?"
+      - "Wo soll ich abspielen – Wohnzimmer, Büro oder was anderes?"
+
+    info_album_playing:
+      - "Spiele gerade das Album „{{ slots.album_title.text }}“ von „{{ slots.artist_title.text }}“."
+      - "Jetzt läuft das Album „{{ slots.album_title.text }}“ (Künstler: „{{ slots.artist_title.text }}“)."
+      - "Spiele jetzt „{{ slots.album_title.text }}“ von „{{ slots.artist_title.text }}“."
+      - "Läuft: „{{ slots.album_title.text }}“ von „{{ slots.artist_title.text }}“."
+
+    not_found_album:
+      - "Das Album „{{ slots.album_title.text }}“ wurde nicht gefunden."
+      - "Ich konnte das Album „{{ slots.album_title.text }}“ nicht finden."
+      - "Das Album „{{ slots.album_title.text }}“ hab ich nicht gefunden."
+      - "Hm, „{{ slots.album_title.text }}“ gibt’s wohl nicht."
+
+    ambiguous_album:
+      - "Es gibt mehrere Treffer für „{{ slots.album_title.text }}“. Meinst du einen bestimmten Künstler?"
+      - "Mehrere Alben heißen „{{ slots.album_title.text }}“. Welches davon soll ich spielen?"
+
+    not_found_artist:
+      - "Den Künstler „{{ slots.artist_title.text }}“ habe ich nicht gefunden."
+      - "Ich konnte keinen Künstler namens „{{ slots.artist_title.text }}“ finden."
+      - "Von „{{ slots.artist_title.text }}“ hab ich nix gefunden."
+      - "Scheint keinen Künstler namens „{{ slots.artist_title.text }}“ zu geben."
+
+    device_not_found:
+      - "Das Gerät „{{ slots.device_name.text }}“ konnte nicht gefunden werden."
+      - "Kein Gerät mit dem Namen „{{ slots.device_name.text }}“ verfügbar."
+      - "Ich find keinen Speaker, der „{{ slots.device_name.text }}“ heißt."
+      - "„{{ slots.device_name.text }}“ scheint grad nicht verbunden zu sein."
+
+    playback_failed:
+      - "Fehler beim Abspielen des Albums „{{ slots.album_title.text }}“."
+      - "Das Album „{{ slots.album_title.text }}“ konnte nicht abgespielt werden."
+      - "Ups, „{{ slots.album_title.text }}“ konnte ich nicht starten."
+      - "Hat nicht geklappt mit „{{ slots.album_title.text }}“."
+
+    ok_play_album:
+      - "Okay, spiele das Album „{{ slots.album_title.text }}“ von „{{ slots.artist_title.text }}“."
+      - "Alles klar – starte „{{ slots.album_title.text }}“ von „{{ slots.artist_title.text }}“."
+      - "Alles klar, ich spiel dir „{{ slots.album_title.text }}“ ab."
+      - "Los geht’s mit „{{ slots.album_title.text }}“ von „{{ slots.artist_title.text }}“."

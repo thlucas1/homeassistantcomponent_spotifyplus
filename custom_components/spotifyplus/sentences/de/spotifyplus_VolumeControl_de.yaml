@@ -1,0 +1,68 @@
+# ============================================================================  
+# SpotifyPlus Sätze – Lautstärkesteuerung (formell + umgangssprachlich kombiniert)  
+# Sprache: de, Deutsch  
+# ============================================================================  
+language: de  
+responses:
+
+  volume_control:
+
+    ask_for_volume_action:
+      - "Wie soll ich die Lautstärke ändern – lauter, leiser oder stumm?"
+      - "Was möchtest du – Lautstärke erhöhen, senken oder stummschalten?"
+      - "Soll ich den Ton lauter oder leiser machen?"
+      - "Wie hättest du’s gern – lauter, leiser oder aus?"
+
+    ask_for_device_name:
+      - "Auf welchem Gerät möchtest du das machen?"
+      - "Welcher Lautsprecher soll angepasst werden?"
+      - "Auf welchem Player soll ich die Lautstärke ändern?"
+      - "Wo soll ich lauter oder leiser machen?"
+
+    ok_volume_up:
+      - "Okay, ich mach’s lauter."
+      - "Lautstärke erhöht."
+      - "Alles klar, ich dreh ein bisschen auf."
+      - "Musik läuft jetzt etwas lauter."
+
+    ok_volume_down:
+      - "Okay, ich mach’s leiser."
+      - "Lautstärke verringert."
+      - "Alles klar, ich dreh etwas runter."
+      - "Musik läuft jetzt etwas leiser."
+
+    ok_volume_mute:
+      - "Okay, Ton aus."
+      - "Musik stummgeschaltet."
+      - "Ich hab den Ton ausgeschaltet."
+      - "Alles klar, jetzt ist Ruhe."
+
+    ok_volume_unmute:
+      - "Okay, Ton wieder an."
+      - "Musik wieder aktiviert."
+      - "Ich hab den Ton wieder eingeschaltet."
+      - "Alles klar, Sound ist wieder da."
+
+    ok_volume_set:
+      - "Lautstärke auf {{ slots.player_volume_level_pct.text }} Prozent gesetzt."
+      - "Alles klar, Lautstärke ist jetzt bei {{ slots.player_volume_level_pct.text }} %. "
+      - "Ton auf {{ slots.player_volume_level_pct.text }} Prozent eingestellt."
+      - "Ich hab die Lautstärke auf {{ slots.player_volume_level_pct.text }} % gesetzt."
+
+    ok_volume_step:
+      - "Lautstärke um {{ slots.player_volume_step_pct.text }} Prozent geändert."
+      - "Ich hab die Lautstärke um {{ slots.player_volume_step_pct.text }} % angepasst."
+      - "Tonstärke um {{ slots.player_volume_step_pct.text }} % geändert."
+      - "Alles klar, Lautstärke um {{ slots.player_volume_step_pct.text }} % angepasst."
+
+    device_not_found:
+      - "Ich konnte keinen Player namens „{{ slots.device_name.text }}“ finden."
+      - "Das Gerät „{{ slots.device_name.text }}“ wurde nicht gefunden."
+      - "Kein Gerät mit dem Namen „{{ slots.device_name.text }}“ verfügbar."
+      - "„{{ slots.device_name.text }}“ scheint grad nicht verbunden zu sein."
+
+    volume_failed:
+      - "Beim Ändern der Lautstärke ist ein Fehler aufgetreten."
+      - "Konnte die Lautstärke nicht ändern."
+      - "Da ging was schief beim Einstellen der Lautstärke."
+      - "Fehler beim Lautstärkebefehl."

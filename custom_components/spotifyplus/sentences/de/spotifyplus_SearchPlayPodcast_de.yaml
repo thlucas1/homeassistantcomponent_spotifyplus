@@ -1,0 +1,79 @@
+# ============================================================================  
+# SpotifyPlus Sätze – Podcast suchen & abspielen (formell + umgangssprachlich kombiniert)  
+# Sprache: de, Deutsch  
+# ============================================================================  
+language: de  
+responses:
+
+  search_play_podcast:
+
+    ask_for_podcast_name:
+      - "Welchen Podcast möchtest du hören?"
+      - "Wie heißt der Podcast, den ich abspielen soll?"
+      - "Welchen Podcast darf’s sein?"
+      - "Na, was willst du hören – welcher Podcast?"
+
+    ask_for_episode_name:
+      - "Welche Episode möchtest du hören?"
+      - "Wie heißt die Folge, die ich abspielen soll?"
+      - "Welche Folge darf’s sein?"
+      - "Magst du mir sagen, welche Episode du meinst?"
+
+    ask_for_device_name:
+      - "Auf welchem Gerät möchtest du abspielen?"
+      - "Soll ich den Podcast auf einem bestimmten Gerät spielen?"
+      - "Auf welchem Lautsprecher soll’s laufen?"
+      - "Wo soll ich abspielen – Wohnzimmer, Büro oder was anderes?"
+
+    info_podcast_playing:
+      - "Spiele den Podcast „{{ slots.podcast_title.text }}“."
+      - "Jetzt läuft der Podcast „{{ slots.podcast_title.text }}“."
+      - "Ich spiele jetzt „{{ slots.podcast_title.text }}“."
+      - "Läuft: „{{ slots.podcast_title.text }}“."
+
+    info_podcast_episode_playing:
+      - "Spiele die Episode „{{ slots.episode_title.text }}“ aus dem Podcast „{{ slots.podcast_title.text }}“."
+      - "Jetzt läuft „{{ slots.episode_title.text }}“ (Podcast: „{{ slots.podcast_title.text }}“)."
+      - "Ich spiele jetzt die Folge „{{ slots.episode_title.text }}“ aus „{{ slots.podcast_title.text }}“."
+      - "Läuft: „{{ slots.episode_title.text }}“ aus „{{ slots.podcast_title.text }}“."
+
+    not_found_podcast:
+      - "Der Podcast „{{ slots.podcast_title.text }}“ wurde nicht gefunden."
+      - "Ich konnte den Podcast „{{ slots.podcast_title.text }}“ nicht finden."
+      - "Den Podcast „{{ slots.podcast_title.text }}“ hab ich nicht gefunden."
+      - "Hm, „{{ slots.podcast_title.text }}“ gibt’s wohl nicht."
+
+    not_found_episode:
+      - "Die Episode „{{ slots.episode_title.text }}“ wurde nicht gefunden."
+      - "Ich konnte die Folge „{{ slots.episode_title.text }}“ nicht finden."
+      - "Die Folge „{{ slots.episode_title.text }}“ hab ich nicht gefunden."
+      - "Hm, „{{ slots.episode_title.text }}“ gibt’s wohl nicht."
+
+    ambiguous_podcast:
+      - "Es gibt mehrere Podcasts mit dem Namen „{{ slots.podcast_title.text }}“. Meinst du einen bestimmten?"
+      - "Mehrere Treffer für „{{ slots.podcast_title.text }}“. Welchen davon soll ich spielen?"
+      - "„{{ slots.podcast_title.text }}“ ist nicht eindeutig – kannst du das genauer sagen?"
+
+    device_not_found:
+      - "Das Gerät „{{ slots.device_name.text }}“ konnte nicht gefunden werden."
+      - "Kein Gerät mit dem Namen „{{ slots.device_name.text }}“ verfügbar."
+      - "Ich find keinen Speaker, der „{{ slots.device_name.text }}“ heißt."
+      - "„{{ slots.device_name.text }}“ scheint grad nicht verbunden zu sein."
+
+    playback_failed:
+      - "Fehler beim Abspielen des Podcasts „{{ slots.podcast_title.text }}“."
+      - "Der Podcast „{{ slots.podcast_title.text }}“ konnte nicht abgespielt werden."
+      - "Ups, „{{ slots.podcast_title.text }}“ konnte ich nicht starten."
+      - "Hat nicht geklappt mit „{{ slots.podcast_title.text }}“."
+
+    ok_play_podcast:
+      - "Okay, spiele den Podcast „{{ slots.podcast_title.text }}“."
+      - "Alles klar – starte „{{ slots.podcast_title.text }}“."
+      - "Alles klar, ich spiel dir „{{ slots.podcast_title.text }}“ ab."
+      - "Los geht’s mit „{{ slots.podcast_title.text }}“."
+
+    ok_play_podcast_episode:
+      - "Okay, spiele die Episode „{{ slots.episode_title.text }}“ aus dem Podcast „{{ slots.podcast_title.text }}“."
+      - "Alles klar – starte „{{ slots.episode_title.text }}“ (Podcast: „{{ slots.podcast_title.text }}“)."
+      - "Alles klar, ich spiel dir die Folge „{{ slots.episode_title.text }}“ aus „{{ slots.podcast_title.text }}“ ab."
+      - "Los geht’s mit „{{ slots.episode_title.text }}“ aus „{{ slots.podcast_title.text }}“."

@@ -1,0 +1,62 @@
+# ============================================================================  
+# SpotifyPlus Sätze – Player-Steuerung (formell + umgangssprachlich kombiniert)  
+# Sprache: de, Deutsch  
+# ============================================================================  
+language: de  
+responses:
+
+  player_control:
+
+    ask_for_action:
+      - "Was möchtest du tun – abspielen, pausieren oder zum nächsten Titel springen?"
+      - "Wie soll ich den Player steuern – starten, stoppen oder weiterschalten?"
+      - "Was soll ich machen – Song pausieren oder weitermachen?"
+      - "Na, was darf’s sein – weiter, zurück oder Stopp?"
+
+    ask_for_device_name:
+      - "Auf welchem Gerät möchtest du das machen?"
+      - "Welcher Player soll gesteuert werden?"
+      - "Auf welchem Lautsprecher soll ich das machen?"
+      - "Wo soll ich den Befehl ausführen – Wohnzimmer, Büro oder was anderes?"
+
+    ok_pause:
+      - "Okay, Wiedergabe pausiert."
+      - "Alles klar, ich hab gestoppt."
+      - "Der Song ist jetzt pausiert."
+      - "Musik angehalten."
+
+    ok_resume:
+      - "Okay, Wiedergabe fortgesetzt."
+      - "Weiter geht’s mit der Musik."
+      - "Alles klar, ich spiel wieder ab."
+      - "Musik läuft weiter."
+
+    ok_skip_next:
+      - "Okay, nächster Titel."
+      - "Weiter zum nächsten Song."
+      - "Ich spring einen weiter."
+      - "Nächster bitte!"
+
+    ok_skip_previous:
+      - "Okay, vorheriger Titel."
+      - "Zurück zum letzten Song."
+      - "Ich geh einen zurück."
+      - "Zurück bitte!"
+
+    ok_restart:
+      - "Okay, starte den Song neu."
+      - "Der Titel läuft nochmal von vorn."
+      - "Ich starte den Track neu."
+      - "Los geht’s von Anfang an."
+
+    playback_failed:
+      - "Beim Steuern des Players ist ein Fehler aufgetreten."
+      - "Konnte den Befehl nicht ausführen."
+      - "Da ging was schief beim Steuern."
+      - "Aktion konnte nicht ausgeführt werden."
+
+    player_not_found:
+      - "Ich konnte keinen Player namens „{{ slots.device_name.text }}“ finden."
+      - "Das Gerät „{{ slots.device_name.text }}“ wurde nicht gefunden."
+      - "Kein Gerät mit dem Namen „{{ slots.device_name.text }}“ verfügbar."
+      - "„{{ slots.device_name.text }}“ scheint grad nicht verbunden zu sein."

@@ -1,0 +1,111 @@
+# ============================================================================
+# SpotifyPlus Integrationsantworten, Listen, Erweiterungsregeln usw.
+#
+# Speicherort: custom_sentences/de/spotifyplus_common_de.yaml
+# Sprache: de, Deutsch
+# ============================================================================
+language: de
+responses:
+
+  # ============================================================================
+  # SpotifyPlus Plattform-Antworten
+  # ============================================================================
+  spotifyplus:
+
+    # allgemeine Fehlermeldungen
+    error_unhandled: "Ein unerwarteter Fehler ist aufgetreten:\n\n{{ slots.error_info.text }}"
+    error_failed_to_handle: "Fehler beim Verarbeiten der Anfrage:\n\n{{ slots.error_info.text }}"
+    error_media_type_invalid: "Medientyp \"{{ slots.spotifyplus_media_type.text }}\" ({{ slots.spotifyplus_media_type.value }}) wurde nicht erkannt."
+    error_player_deck_control_invalid: "Steuerungsbefehl \"{{ slots.spotifyplus_player_deck_control.text }}\" ({{ slots.spotifyplus_player_deck_control.value }}) wurde nicht erkannt."
+    error_player_volume_control_invalid: "Lautstärkebefehl \"{{ slots.spotifyplus_player_volume_control.text }}\" ({{ slots.spotifyplus_player_volume_control.value }}) wurde nicht erkannt."
+
+    # Abfrageinformationen
+    get_info_artist_bio: "Künstlerbiografie für \"{{ slots.artist_title.text }}\" ...\n\n{{ slots.artist_bio.text | truncate(400, end=' ...') }}\n\n[mehr Infos unter {{ slots.artist_url.text }}]({{ slots.artist_url.value }})"
+
+    # Favoritenverwaltung
+    favorite_operation_invalid: "Ungültiger Favoriten-Operationstyp: \"{{ slots.favorite_operator.text }}\"."
+    favorite_add_remove_album_ok: "Okay, {{ slots.favorite_operator.text }} des Spotify-Album-Favoriten \"{{ slots.album_title.text }}\" von \"{{ slots.artist_title.text }}\" war erfolgreich."
+    favorite_add_remove_artist_ok: "Okay, {{ slots.favorite_operator.text }} des Spotify-Künstler-Favoriten \"{{ slots.artist_title.text }}\" war erfolgreich."
+    favorite_add_remove_playlist_ok: "Okay, {{ slots.favorite_operator.text }} der Spotify-Playlist \"{{ slots.playlist_title.text }}\" war erfolgreich."
+    favorite_add_remove_podcast_ok: "Okay, {{ slots.favorite_operator.text }} des Spotify-Podcasts \"{{ slots.podcast_title.text }}\" war erfolgreich."
+    favorite_add_remove_track_ok: "Okay, {{ slots.favorite_operator.text }} des Spotify-Titels \"{{ slots.track_title.text }}\" von \"{{ slots.artist_title.text }}\" war erfolgreich."
+
+    # Wiedergabeinformationen
+    nowplaying_info_track: "Der Mediaplayer spielt den Titel \"{{ slots.track_title.text }}\" aus dem Album \"{{ slots.album_title.text }}\" von \"{{ slots.artist_title.text }}\".\n\n[mehr Infos unter {{ slots.album_url.text }}]({{ slots.album_url.value }})"
+    nowplaying_no_media_track: "SpotifyPlus spielt derzeit keine Titelinformationen ab."
+
+    # Playersteuerung
+    play_album: "Spiele das Spotify-Album \"{{ slots.album_title.text }}\"."
+    play_track: "Spiele den Spotify-Titel \"{{ slots.track_title.text }}\"."
+    play_playlist: "Spiele die Spotify-Playlist \"{{ slots.playlist_title.text }}\"."
+    play_podcast: "Spiele den Spotify-Podcast \"{{ slots.podcast_title.text }}\"."
+    player_deck_control_pause: "Okay, Wiedergabe pausiert."
+    player_deck_control_resume: "Okay, Wiedergabe fortgesetzt."
+    player_deck_control_skip_next: "Okay, nächster Titel."
+    player_deck_control_skip_previous: "Okay, vorheriger Titel."
+    player_volume_control_up: "Lautstärke um {{ slots.player_volume_step_pct.text }} Prozent erhöht."
+    player_volume_control_down: "Lautstärke um {{ slots.player_volume_step_pct.text }} Prozent verringert."
+    player_volume_control_mute: "Lautstärke stummgeschaltet."
+    player_volume_control_unmute: "Lautstärke wieder aktiviert."
+    player_volume_control_set_level: "Lautstärke auf {{ slots.player_volume_level_pct.text }} Prozent gesetzt."
+
+    spotify_premium_required: "Ein Spotify-Premiumkonto ist erforderlich, um diese Funktion mit dem Mediaplayer \"{{ slots.target_player.text }}\" zu nutzen."
+
+  # ============================================================================
+  # Allgemeine Fehler in Home Assistant
+  # ============================================================================
+  errors:
+    no_intent: "Entschuldigung, das habe ich nicht verstanden."
+    handle_error: "Ein unerwarteter Fehler ist aufgetreten."
+
+# ============================================================================
+# SpotifyPlus gemeinsame Listen
+# ============================================================================
+lists:
+  favorite_operator:
+    values:
+      - in: "hinzufügen"
+        out: "add"
+      - in: "entfernen"
+        out: "remove"
+
+  spotifyplus_player_deck_control:
+    values:
+      - in: "pause"
+        out: "pause"
+      - in: "fortsetzen"
+        out: "resume"
+      - in: "nächster titel"
+        out: "skip_next"
+      - in: "vorheriger titel"
+        out: "skip_previous"
+
+  spotifyplus_player_volume_control:
+    values:
+      - in: "lauter"
+        out: "step_up"
+      - in: "leiser"
+        out: "step_down"
+      - in: "stumm"
+        out: "mute"
+      - in: "laut"
+        out: "unmute"
+
+# ============================================================================
+# Erweiterungsregeln
+# ============================================================================
+expansion_rules:
+  in_spotifyplus_player_area: "(im|in der) ({area}|{area} bereich)"
+  on_spotifyplus_player_name: "(auf|für) ({name} player|player {name})"
+
+# ============================================================================
+# Überflüssige Wörter
+# ============================================================================
+skip_words:
+  - "bitte"
+  - "kannst du"
+  - "würdest du"
+  - "für mich"
+  - "ich möchte"
+  - "spiel mal"
+  - "mach mal"
