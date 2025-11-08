@@ -101,11 +101,13 @@ expansion_rules:
 # ============================================================================
 # Überflüssige Wörter
 # ============================================================================
-skip_words:
   - "bitte"
   - "kannst du"
   - "würdest du"
-  - "für mich"
-  - "ich möchte"
   - "spiel mal"
   - "mach mal"
+  - "einmal"
+  - "doch mal"
+  - "mal bitte"
+  - "geh mal auf"
+  - "starte mal"
