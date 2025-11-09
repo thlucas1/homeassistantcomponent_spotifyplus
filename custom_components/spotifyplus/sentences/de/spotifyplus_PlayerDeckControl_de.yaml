@@ -1,0 +1,86 @@
+# ============================================================================
+# SpotifyPlus Integration benutzerdefinierte Satz- und Antwortdefinitionen.
+#
+# Sprache: de, Deutsch
+# Intent:   SpotifyPlusPlayerDeckControl
+# Ort: custom_sentences/de/spotifyplus_PlayerDeckControl_de.yaml
+# ============================================================================
+language: de
+intents:
+
+  SpotifyPlusPlayerDeckControl:
+
+    data:
+
+      - sentences:
+
+          - "spotify {spotifyplus_player_deck_control}"
+
+            # Basissätze für diese Intent.
+            # Dieser Satz wird erkannt, wenn kein Name / Bereich im Sprachbefehl angegeben wird.
+            # In diesem Fall wird der erste aktive SpotifyPlus Media Player verwendet.
+
+            # __Beispielsätze - Kein Player-Name__
+            # - "spotify pause"
+            # - "spotify stopp"
+            # - "spotify weiter"
+            # - "spotify fortsetzen"
+            # - "spotify nächster titel"
+            # - "spotify vorheriger titel"
+            # - "spotify neustart"
+
+        slots:
+
+          name: "Spotify Premium"  # Standard-Player.
+          delay: 0.50
+
+        response: default
+
+      - sentences:
+
+          - "spotify {spotifyplus_player_deck_control} <on_spotifyplus_player_name>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Name im Sprachbefehl angegeben wird
+            # (z.B. "auf Player Spotify Premium", "auf Todds Player", etc.).
+
+            # __Beispielsätze - Nach Player-Name__
+            # - "spotify pause auf player spotify premium"
+            # - "spotify stopp auf spotify premium player"
+
+        slots:
+
+          name: ""
+          delay: 0.50
+
+        response: default
+
+      - sentences:
+
+          - "spotify {spotifyplus_player_deck_control} <in_spotifyplus_player_area>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Bereich im Sprachbefehl angegeben wird
+            # (z.B. "im Wohnzimmer", "in der Küche", etc.).
+
+            # __Beispielsätze - Nach Player-Bereich__
+            # - "spotify pause im Büro"
+            # - "spotify stopp im Büro"
+
+        slots:
+
+          area: ""
+          name: ""
+          delay: 0.50
+
+        response: default
+
+
+# ============================================================================
+# Benutzerdefinierte Antwortdefinitionen für DIESE Intent.
+# Hinweis - Geteilte Antworten für alle Intenten sind in der Common-Datei gespeichert.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusPlayerDeckControl:
+
+      default: "" # nicht verwendet - siehe allgemeine `player_deck_control_xxxxxxx`-Nachrichten in der common-Datei.

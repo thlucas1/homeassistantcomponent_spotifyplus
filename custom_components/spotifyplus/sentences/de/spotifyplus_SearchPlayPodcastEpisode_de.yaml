@@ -1,0 +1,99 @@
+# ============================================================================
+# SpotifyPlus Integration benutzerdefinierte Satz- und Antwortdefinitionen.
+#
+# Sprache: de, Deutsch
+# Intent:   SpotifyPlusSearchPlayPodcastEpisode
+# Ort: custom_sentences/de/spotifyplus_SearchPlayPodcastEpisode_de.yaml
+# ============================================================================
+language: de
+intents:
+
+  SpotifyPlusSearchPlayPodcastEpisode:
+
+    data:
+
+      - sentences:
+
+          - "spotify spiele episode {freeform:episode_name} von (podcast|show) {freeform:podcast_name}"
+          - "spiele spotify episode {freeform:episode_name} von (podcast|show) {freeform:podcast_name}"
+
+            # Basissätze für diese Intent.
+            # Dieser Satz wird erkannt, wenn kein Name / Bereich im Sprachbefehl angegeben wird.
+            # In diesem Fall wird der erste aktive SpotifyPlus Media Player verwendet.
+
+            # __Beispielsätze - Standard-Player__
+            # - "spotify spiele episode Kurt Russell von podcast Armchair Expert"
+            # - "spiele spotify episode Kurt Russell von show Armchair Expert"
+
+        slots:
+
+          name: "Spotify Premium" # Standard-Alias für den Media Player.
+          target_player: ""
+          podcast_name: ""
+          episode_name: ""
+          delay: 0.50
+          device_name: "*"
+          player_shuffle_mode: "off"
+
+        response: default
+
+      - sentences:
+
+          - "spotify spiele episode {freeform:episode_name} von (podcast|show) {freeform:podcast_name} <on_spotifyplus_player_name>"
+          - "spiele spotify episode {freeform:episode_name} von (podcast|show) {freeform:podcast_name} <on_spotifyplus_player_name>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Name im Sprachbefehl angegeben wird
+            # (z.B. "auf Player Spotify Premium", "auf Todds Player", etc.).
+
+            # __Beispielsätze - Nach Player-Name__
+            # - "spotify spiele episode Kurt Russell von podcast Armchair Expert auf player spotify premium"
+            # - "spiele spotify episode Kurt Russell von show Armchair Expert auf player spotify premium"
+
+        slots:
+
+          name: ""
+          target_player: ""
+          podcast_name: ""
+          episode_name: ""
+          delay: 0.50
+          device_name: "*"
+          player_shuffle_mode: "off"
+
+        response: default
+
+      - sentences:
+
+          - "spotify spiele episode {freeform:episode_name} von (podcast|show) {freeform:podcast_name} <in_spotifyplus_player_area>"
+          - "spiele spotify episode {freeform:episode_name} von (podcast|show) {freeform:podcast_name} <in_spotifyplus_player_area>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Bereich im Sprachbefehl angegeben wird
+            # (z.B. "im Wohnzimmer", "in der Küche", etc.).
+
+            # __Beispielsätze - Nach Player-Bereich__
+            # - "spotify spiele episode Kurt Russell von podcast Armchair Expert im Büro"
+            # - "spiele spotify episode Kurt Russell von show Armchair Expert im Büro"
+
+        slots:
+
+          area: ""
+          name: ""
+          target_player: ""
+          podcast_name: ""
+          episode_name: ""
+          delay: 0.50
+          device_name: "*"
+          player_shuffle_mode: "off"
+
+        response: default
+
+
+# ============================================================================
+# Benutzerdefinierte Antwortdefinitionen für DIESE Intent.
+# Hinweis - Geteilte Antworten für alle Intenten sind in der Common-Datei gespeichert.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusSearchPlayPodcastEpisode:
+
+      default: "" # nicht verwendet - siehe allgemeine `play_podcast_episode`-Nachricht in der common-Datei.

@@ -1,0 +1,85 @@
+# ============================================================================
+# SpotifyPlus integration intent custom sentence and response definitions.
+#
+# Language: en, English
+# Intent:   SpotifyPlusFavoriteAddRemove
+# Location: custom_sentences/en/spotifyplus_FavoriteAddRemove_en.yaml
+# ============================================================================
+language: en
+intents:
+
+  SpotifyPlusFavoriteAddRemove:
+
+    data:
+
+      - sentences:
+
+          - "{favorite_operator} spotify {spotifyplus_media_type} [to|2|from] (favorite|favorites)"
+
+            # Base sentence phrases for this intent.
+            # This sentence is recognized when a name / area is NOT provided in the spoken command.  
+            # In this case, the first active SpotifyPlus media player is used.
+
+            # __Example Phrases - Default Player__  
+            # - "add spotify track to favorites"
+            # - "add spotify track favorite"
+            # - "remove spotify track from favorites"
+            # - "remove spotify track favorite"
+
+        slots:
+
+          name: "Spotify Premium"  # default player to use.
+          is_public: False
+
+        response: default
+
+      - sentences:
+
+          - "{favorite_operator} spotify {spotifyplus_media_type} [to|2|from] (favorite|favorites) <on_spotifyplus_player_name>"
+
+            # This sentence is recognized when a player name is provided in the spoken 
+            # command (e.g. "on player Spotify Premium", "on Todds player", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Name__  
+            # - "add spotify track favorite for player spotify premium"
+            # - "add spotify track favorite for spotify premium player"
+
+        slots:
+
+          name: ""
+          is_public: False
+
+        response: default
+
+      - sentences:
+
+          - "{favorite_operator} spotify {spotifyplus_media_type} [to|2|from] (favorite|favorites) <in_spotifyplus_player_area>"
+
+            # This sentence is recognized when a player area is provided in the spoken 
+            # command (e.g. "in the Living Room area", "in the Living Room", etc).  
+            # Supports the same base sentence phrases for this intent.
+
+            # __Example Phrases - By Player Area__  
+            # - "add spotify track favorite in the Office area"
+            # - "add spotify track favorite in the Office"
+ 
+        slots:
+
+          area: ""
+          name: ""
+          is_public: False
+
+        response: default
+
+
+# ============================================================================
+# Custom response definitions for THIS intent.
+# Note - Shared responses for all intents are stored in the Common file.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusFavoriteAddRemove:
+
+      default: "" # not used - see common `favorite_add_remove_xxxxxxx_ok` messages.

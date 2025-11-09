@@ -1,0 +1,93 @@
+# ============================================================================
+# SpotifyPlus Integration benutzerdefinierte Satz- und Antwortdefinitionen.
+#
+# Sprache: de, Deutsch
+# Absicht:   SpotifyPlusGetInfoArtistBio
+# Ort: custom_sentences/de/spotifyplus_GetInfoArtistBio_de.yaml
+# ============================================================================
+language: de
+intents:
+
+  SpotifyPlusGetInfoArtistBio:
+
+    data:
+
+      - sentences:
+
+          - "[hole|gib mir] spotify künstler (info|informationen|details|bio) [für|von] {artist_name}"
+
+            # Basissätze für diese Absicht.
+            # Dieser Satz wird erkannt, wenn kein Name / Bereich im Sprachbefehl angegeben wird.
+            # In diesem Fall wird der erste aktive SpotifyPlus Media Player verwendet.
+
+            # __Beispielsätze - Standard-Player__
+            # - "spotify künstler info für Phil Wickham"
+            # - "gib mir spotify künstler info von Phil Wickham"
+
+        slots:
+
+          name: "Spotify Premium" # Standard-Alias für den Media Player.
+          target_player: ""
+          artist_bio: ""
+          artist_name: ""
+          artist_title: ""
+          artist_url: ""
+
+        response: default
+
+      - sentences:
+
+          - "[hole|gib mir] spotify künstler (info|informationen|details|bio) [für|von] {artist_name} <on_spotifyplus_player_name>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Name im Sprachbefehl angegeben wird
+            # (z.B. "auf Player Spotify Premium", "auf Todds Player", etc.).
+
+            # __Beispielsätze - Nach Player-Name__
+            # - "gib mir spotify künstler info für Phil Wickham auf player spotify premium"
+            # - "hole spotify künstler info von Phil Wickham auf spotify premium player"
+
+        slots:
+
+          name: ""
+          target_player: ""
+          artist_bio: ""
+          artist_name: ""
+          artist_title: ""
+          artist_url: ""
+
+        response: default
+
+      - sentences:
+
+          - "[hole|gib mir] spotify künstler (info|informationen|details|bio) [für|von] {artist_name} <in_spotifyplus_player_area>"
+
+            # Dieser Satz wird erkannt, wenn ein Player-Bereich im Sprachbefehl angegeben wird
+            # (z.B. "im Wohnzimmer", "in der Küche", etc.).
+
+            # __Beispielsätze - Nach Player-Bereich__
+            # - "hole spotify künstler info für Phil Wickham im Büro"
+            # - "gib mir spotify künstler info von Phil Wickham im Büro"
+
+        slots:
+
+          area: ""
+          name: ""
+          target_player: ""
+          artist_bio: ""
+          artist_name: ""
+          artist_title: ""
+          artist_url: ""
+
+        response: default
+
+
+# ============================================================================
+# Benutzerdefinierte Antwortdefinitionen für DIESE Absicht.
+# Hinweis - Geteilte Antworten für alle Absichten sind in der Common-Datei gespeichert.
+# ============================================================================
+responses:
+  intents:
+
+    SpotifyPlusGetInfoArtistBio:
+
+      default: "" # nicht verwendet - siehe allgemeine `get_info_artist_bio`-Nachricht in der common-Datei.
