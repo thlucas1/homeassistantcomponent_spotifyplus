@@ -6,6 +6,15 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.184 ] - 2025/11/11
+
+  * Added voice assist intent: `SpotifyPlusSearchPlayContent`.  This replaces 8 other intents (see below).
+  * Removed 8 voice assist intents related to searching for and playing content: `SpotifyPlusPlayFavoriteTracks`, `SpotifyPlusSearchPlayArtistAlbum`, `SpotifyPlusSearchPlayArtistTrack`, `SpotifyPlusSearchPlayAudiobook`, `SpotifyPlusSearchPlayPlaylist`, `SpotifyPlusSearchPlayPodcast`, `SpotifyPlusSearchPlayPodcastEpisode`, `SpotifyPlusSearchPlayTrack`; manual removal from `config/custom_sentences` folder is required.
+  * Added German translation for voice assist intents (thank you [brix29](https://github.com/brix29) for translating).
+  * Added new message keys to the common template: `error_search_play_control_invalid`, `error_search_no_criteria`, `play_favorite_tracks`, `spotify_search_no_items_audiobook`.
+  * Updated existing message keys in the common template: `spotify_search_no_items_album`, `spotify_search_no_items_playlist`, `spotify_search_no_items_podcast`, `spotify_search_no_items_podcast_episode`, `spotify_search_no_items_track`.
+  * Added new lists to the common template: `spotifyplus_search_play_control_multi`, `spotifyplus_search_play_control_single`.
+
 ###### [ 1.0.183 ] - 2025/11/06
 
   * Added voice assist intent: `SpotifyPlusPlayerDeckControl`.  This replaces 5 other intents (see below).

@@ -23,6 +23,8 @@ responses:
     error_media_type_invalid: "Medientyp-Wert \"{{ slots.spotifyplus_media_type.text }}\" ({{ slots.spotifyplus_media_type.value }}) wurde nicht erkannt."
     error_player_deck_control_invalid: "Player-Steuerungswert \"{{ slots.spotifyplus_player_deck_control.text }}\" ({{ slots.spotifyplus_player_deck_control.value }}) wurde nicht erkannt."
     error_player_volume_control_invalid: "Player-Lautstärkereglerwert \"{{ slots.spotifyplus_player_volume_control.text }}\" ({{ slots.spotifyplus_player_volume_control.value }}) wurde nicht erkannt."
+    error_search_play_control_invalid: "Search play control value \"{{ slots.spotifyplus_search_play_control.text }}\" ({{ slots.spotifyplus_search_play_control.value }}) was not recognized."
+    error_search_no_criteria: "Search criteria not specified for search play control type \"{{ slots.spotifyplus_search_play_control.text }}\" ({{ slots.spotifyplus_search_play_control.value }})."
 
     # Nachrichten zu Informationsanfragen.
     get_info_artist_bio: "Künstlerbiografie für \"{{ slots.artist_title.text }}\" ... \n\n{{ slots.artist_bio.text | truncate(400, end=' ...') }}\n\n[mehr Infos unter {{ slots.artist_url.text }}]({{ slots.artist_url.value }})"
@@ -57,6 +59,7 @@ responses:
     play_album: "Spiele Spotify-Album \"{{ slots.album_title.text }}\"."
     play_audiobook: "Spiele Spotify-Hörbuch \"{{ slots.audiobook_title.text }}\"."
     play_audiobook_with_author: "Spiele Spotify-Hörbuch \"{{ slots.audiobook_title.text }}\" von Autor \"{{ slots.author_title.text }}\"."
+    play_favorite_tracks: "Spotify-Lieblingstitel werden abgespielt."
     play_favorite_tracks_for_artist: "Spiele Spotify-Titelfavoriten für Künstler \"{{ slots.artist_title.text }}\"."
     play_playlist: "Spiele Spotify-Playlist \"{{ slots.playlist_title.text }}\"."
     play_podcast: "Spiele Spotify-Podcast \"{{ slots.podcast_title.text }}\"."
@@ -85,11 +88,12 @@ responses:
 
     # Allgemeine Spotify-Informationsnachrichten.
     spotify_no_artist_info: "Künstlerinformationen für \"{{ slots.artist_name.text }}\" konnten nicht gefunden werden."
-    spotify_search_no_items_album: "Albuminformationen für \"{{ slots.album_name.text }}\" konnten nicht gefunden werden. Suchkriterien: \"{{ slots.search_criteria.text }}\"."
-    spotify_search_no_items_playlist: "Playlist-Informationen für \"{{ slots.playlist_name.text }}\" konnten nicht gefunden werden. Suchkriterien: \"{{ slots.search_criteria.text }}\"."
-    spotify_search_no_items_podcast: "Podcast-Informationen für \"{{ slots.podcast_name.text }}\" konnten nicht gefunden werden. Suchkriterien: \"{{ slots.search_criteria.text }}\"."
-    spotify_search_no_items_podcast_episode: "Episodeninformationen für \"{{ slots.episode_name.text }}\" konnten nicht gefunden werden. Suchkriterien: \"{{ slots.search_criteria.text }}\"."
-    spotify_search_no_items_track: "Titelinformationen für \"{{ slots.track_name.text }}\" konnten nicht gefunden werden. Suchkriterien: \"{{ slots.search_criteria.text }}\"."
+    spotify_search_no_items_album: "Albuminformationen für \"{{ slots.criteria_arg_1.text }}\" konnten nicht gefunden werden. Suchkriterien: \"{{ slots.search_criteria.text }}\"."
+    spotify_search_no_items_audiobook: "Hörbuch-Informationen für \"{{ slots.criteria_arg_1.text }}\" konnten nicht gefunden werden. Suchkriterien: \"{{ slots.search_criteria.text }}\"."
+    spotify_search_no_items_playlist: "Playlist-Informationen für \"{{ slots.criteria_arg_1.text }}\" konnten nicht gefunden werden. Suchkriterien: \"{{ slots.search_criteria.text }}\"."
+    spotify_search_no_items_podcast: "Podcast-Informationen für \"{{ slots.criteria_arg_1.text }}\" konnten nicht gefunden werden. Suchkriterien: \"{{ slots.search_criteria.text }}\"."
+    spotify_search_no_items_podcast_episode: "Episodeninformationen für \"{{ slots.criteria_arg_1.text }}\" konnten nicht gefunden werden. Suchkriterien: \"{{ slots.search_criteria.text }}\"."
+    spotify_search_no_items_track: "Titelinformationen für \"{{ slots.criteria_arg_1.text }}\" konnten nicht gefunden werden. Suchkriterien: \"{{ slots.search_criteria.text }}\"."
     spotify_premium_required: "Entschuldigung, für die angeforderte Funktion mit dem Media Player \"{{ slots.target_player.text }}\" ist ein Spotify-Premium-Konto erforderlich."
 
   # ============================================================================
@@ -161,15 +165,9 @@ lists:
     wildcard: true
   artist_name:
     wildcard: true
-  audiobook_name:
-    wildcard: true
   device_name:
     wildcard: true
-  episode_name:
-    wildcard: true
   playlist_name:
-    wildcard: true
-  podcast_name:
     wildcard: true
   track_name:
     wildcard: true
@@ -267,6 +265,34 @@ lists:
       - in: "[player] volume [level] [to|2] {player_volume_level_pct} [percent|%]"
         out: "set_level"
 
+  spotifyplus_search_play_control_multi:
+    # out values must be English value.
+    values:
+      - in: "episode"
+        out: "podcast_episode"
+      - in: "artist (album|LP)"
+        out: "artist_album"
+      - in: "artist (track|song)"
+        out: "artist_track"
+
+  spotifyplus_search_play_control_single:
+    # out values must be English value.
+    values:
+      - in: "(album|LP) [{spotifyplus_album_names:criteria_arg_1}]"
+        out: "album"
+      - in: "(audiobook|audio book|book) [{spotifyplus_audiobook_names:criteria_arg_1}]"
+        out: "audiobook"
+      - in: "(playlist|play list) [{spotifyplus_playlist_names:criteria_arg_1}]"
+        out: "playlist"
+      - in: "(podcast|pod cast|show) [{spotifyplus_podcast_names:criteria_arg_1}]"
+        out: "podcast"
+      - in: "(track favorites|favorite tracks)"
+        out: "favorite_tracks"
+      - in: "(track favorites|favorite tracks) (by|for) artist {spotifyplus_artist_names:criteria_arg_1}"
+        out: "favorite_tracks_artist"
+      - in: "(track|song) [{spotifyplus_track_names:criteria_arg_1}]"
+        out: "track"
+
   # --------------------------------------------------------------------------------------
   # SpotifyPlus voice-friendly album identifiers.
   #
@@ -280,6 +306,8 @@ lists:
   # --------------------------------------------------------------------------------------
   spotifyplus_album_names:
     values:
+      - in: "Test List Entry"
+        out: "spotify:album:4guAwaniEAEQSW0NCpo4gm" # Journey, 2022 Remaster
       - in: "Escape"
         out: "spotify:album:4guAwaniEAEQSW0NCpo4gm" # Journey, 2022 Remaster
       - in: "Escape 1981"
@@ -297,7 +325,7 @@ lists:
   # --------------------------------------------------------------------------------------
   spotifyplus_artist_names:
     values:
-      - in: "Test Artist List Entry"
+      - in: "Test List Entry"
         out: "spotify:artist:6kFLnclYFc3gzpNt13wim5" # Seventh Day Slumber
 
   # --------------------------------------------------------------------------------------
@@ -312,7 +340,7 @@ lists:
   # --------------------------------------------------------------------------------------
   spotifyplus_audiobook_names:
     values:
-      - in: "Test Book List Entry"
+      - in: "Test List Entry"
         out: "spotify:show:74aydHJKgYz3AIq3jjBSv1" # The Elfstones of Shannara
 
   # --------------------------------------------------------------------------------------
@@ -341,6 +369,8 @@ lists:
   # --------------------------------------------------------------------------------------
   spotifyplus_playlist_names:
     values:
+      - in: "Test List Entry"
+        out: "spotify:playlist:37i9dQZEVXcTh0pBxo9pZe"  # Discover Weekly
       - in: "Daily Mix (1|One)"
         out: "spotify:playlist:37i9dQZF1E39vTG3GurFPW"
       - in: "Daily Mix (2|Two)"
@@ -355,8 +385,6 @@ lists:
         out: "spotify:playlist:37i9dQZEVXcTh0pBxo9pZe"
       - in: "(DJ|deejay|dee jay)"
         out: "spotify:playlist:37i9dQZF1EYkqdzj48dyYq"
-      - in: "Test Playlist List Entry"
-        out: "spotify:playlist:5v5ETK9WFXAnGQ3MRubKuE"
 
   # --------------------------------------------------------------------------------------
   # SpotifyPlus voice-friendly podcast identifiers.
@@ -371,8 +399,8 @@ lists:
   # --------------------------------------------------------------------------------------
   spotifyplus_podcast_names:
     values:
-      - in: "Test Podcast List Entry"
-        out: "spotify:show:6kAsbP8pxwaU2kPibKTuHE"  # Armchair Expert with Dax Sheppard
+      - in: "Test List Entry"
+        out: "spotify:show:6kAsbP8pxwaU2kPibKTuHE"  # Armchair Expert with Dax Shepard
 
   # --------------------------------------------------------------------------------------
   # SpotifyPlus voice-friendly track identifiers.
@@ -387,12 +415,12 @@ lists:
   # --------------------------------------------------------------------------------------
   spotifyplus_track_names:
     values:
+      - in: "Test List Entry"
+        out: "spotify:track:5ehcf6UL1TkwozB386cRAp" # Journey, 2024 Remaster, Don't Stop believin'
       - in: "Don't Stop Believing"
         out: "spotify:track:5ehcf6UL1TkwozB386cRAp" # Journey, 2024 Remaster
       - in: "Don't Stop Believing 1981"
         out: "spotify:track:3Ab9C0oz70wDyigunvnG5N" # Journey, 1981 Live, Escape Tour
-      - in: "Test Track List Entry"
-        out: "spotify:track:5ehcf6UL1TkwozB386cRAp" # Journey, 2024 Remaster, Don't Stop believin'
 
 
 # ============================================================================
@@ -401,6 +429,7 @@ lists:
 expansion_rules:
   in_spotifyplus_player_area: "in [dem|der|im] ({area}|bereich {area})"
   on_spotifyplus_player_name: "auf [dem] ({name} player|player {name})"
+
 
 # ============================================================================
 # SpotifyPlus gemeinsame zu ignorierende Wörter

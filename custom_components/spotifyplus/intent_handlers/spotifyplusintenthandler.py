@@ -33,6 +33,7 @@ from ..const import (
     RESPONSE_ERROR_FAILED_TO_HANDLE,
     RESPONSE_PLAYER_FEATURES_NOT_SUPPORTED,
     RESPONSE_PLAYER_NOT_MATCHED,
+    RESPONSE_PLAYER_NOT_MATCHED_AREA,
     RESPONSE_SPOTIFY_PREMIUM_REQUIRED,
     SLOT_AREA,
     SLOT_ERROR_FEATURES,
@@ -280,9 +281,9 @@ class SpotifyPlusIntentHandler(IntentHandler):
                 if matchResult.no_match_reason == MatchFailedReason.AREA:
 
                     # media player entity not found for specified area.
-                    raise MatchFailedError(result=matchResult, constraints=matchConstraints)
-                    # intentResponse = await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_PLAYER_NOT_MATCHED_AREA, IntentResponseErrorCode.NO_VALID_TARGETS)
-                    # return None
+                    #raise MatchFailedError(result=matchResult, constraints=matchConstraints)
+                    intentResponse = await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_PLAYER_NOT_MATCHED_AREA, IntentResponseErrorCode.NO_VALID_TARGETS)
+                    return None
 
                 elif matchResult.no_match_reason == MatchFailedReason.ASSISTANT:
 

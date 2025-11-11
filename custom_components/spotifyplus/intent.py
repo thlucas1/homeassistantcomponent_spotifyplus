@@ -67,15 +67,8 @@ async def async_setup_intents(hass: HomeAssistant) -> None:
         register_intent_handler(hass, SpotifyPlusPlayerSetShuffleMode_Handler(intentLoader))
         register_intent_handler(hass, SpotifyPlusPlayerTransferPlayback_Handler(intentLoader))
         register_intent_handler(hass, SpotifyPlusPlayerVolumeControl_Handler(intentLoader))
-        register_intent_handler(hass, SpotifyPlusPlayFavoriteTracks_Handler(intentLoader))
         register_intent_handler(hass, SpotifyPlusPlaylistCreate_Handler(intentLoader))
-        register_intent_handler(hass, SpotifyPlusSearchPlayArtistAlbum_Handler(intentLoader))
-        register_intent_handler(hass, SpotifyPlusSearchPlayArtistTrack_Handler(intentLoader))
-        register_intent_handler(hass, SpotifyPlusSearchPlayAudiobook_Handler(intentLoader))
-        register_intent_handler(hass, SpotifyPlusSearchPlayPlaylist_Handler(intentLoader))
-        register_intent_handler(hass, SpotifyPlusSearchPlayPodcast_Handler(intentLoader))
-        register_intent_handler(hass, SpotifyPlusSearchPlayPodcastEpisode_Handler(intentLoader))
-        register_intent_handler(hass, SpotifyPlusSearchPlayTrack_Handler(intentLoader))
+        register_intent_handler(hass, SpotifyPlusSearchPlayControl_Handler(intentLoader))
 
         # start listening for conversation.reload service call events.
         await intentLoader.async_register_cache_reload_listener()

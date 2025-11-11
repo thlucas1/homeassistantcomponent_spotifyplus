@@ -9,15 +9,8 @@ from .spotifyplusplayersetrepeatmode_handler import SpotifyPlusPlayerSetRepeatMo
 from .spotifyplusplayersetshufflemode_handler import SpotifyPlusPlayerSetShuffleMode_Handler
 from .spotifyplusplayertransferplayback_handler import SpotifyPlusPlayerTransferPlayback_Handler
 from .spotifyplusplayervolumecontrol_handler import SpotifyPlusPlayerVolumeControl_Handler
-from .spotifyplusplayfavoritetracks_handler import SpotifyPlusPlayFavoriteTracks_Handler
 from .spotifyplusplaylistcreate_handler import SpotifyPlusPlaylistCreate_Handler
-from .spotifyplussearchplayartistalbum_handler import SpotifyPlusSearchPlayArtistAlbum_Handler
-from .spotifyplussearchplayartisttrack_handler import SpotifyPlusSearchPlayArtistTrack_Handler
-from .spotifyplussearchplayaudiobook_handler import SpotifyPlusSearchPlayAudiobook_Handler
-from .spotifyplussearchplayplaylist_handler import SpotifyPlusSearchPlayPlaylist_Handler
-from .spotifyplussearchplaypodcast_handler import SpotifyPlusSearchPlayPodcast_Handler
-from .spotifyplussearchplaypodcastepisode_handler import SpotifyPlusSearchPlayPodcastEpisode_Handler
-from .spotifyplussearchplaytrack_handler import SpotifyPlusSearchPlayTrack_Handler
+from .spotifyplussearchplaycontrol_handler import SpotifyPlusSearchPlayControl_Handler
 
 # all classes to import when "import *" is specified.
 __all__ = [
@@ -29,13 +22,6 @@ __all__ = [
     'SpotifyPlusPlayerSetShuffleMode_Handler',
     'SpotifyPlusPlayerTransferPlayback_Handler',
     'SpotifyPlusPlayerVolumeControl_Handler',
-    'SpotifyPlusPlayFavoriteTracks_Handler',
     'SpotifyPlusPlaylistCreate_Handler',
-    'SpotifyPlusSearchPlayArtistAlbum_Handler',
-    'SpotifyPlusSearchPlayArtistTrack_Handler',
-    'SpotifyPlusSearchPlayAudiobook_Handler',
-    'SpotifyPlusSearchPlayPlaylist_Handler',
-    'SpotifyPlusSearchPlayPodcast_Handler',
-    'SpotifyPlusSearchPlayPodcastEpisode_Handler',
-    'SpotifyPlusSearchPlayTrack_Handler',
+    'SpotifyPlusSearchPlayControl_Handler',
 ]
