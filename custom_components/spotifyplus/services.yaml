@@ -2624,6 +2624,13 @@ player_media_play_context:
       required: false
       selector:
         boolean:
+    play_show_latest_episode:
+      name: Play Show Latest Episode?
+      description: True to play the most current episode of a podcast show, starting at the beginning; otherwise, False to resume playing of the podcast episode that was previously played. Default is False. This argument is only considered for 'show' contexts.
+      example: "False"
+      required: false
+      selector:
+        boolean:
 
 player_media_play_track_favorites:
   name: Player Media Play Track Favorites

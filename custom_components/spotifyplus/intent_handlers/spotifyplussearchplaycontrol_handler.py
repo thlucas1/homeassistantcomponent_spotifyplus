@@ -25,6 +25,7 @@ from ..appmessages import STAppMessages
 from ..intent_loader import IntentLoader
 from ..utils import get_id_from_uri
 from ..const import (
+    CONF_LIMIT_TOTAL_MINIMUM,  
     CONF_TEXT,
     CONF_VALUE,
     DOMAIN,
@@ -276,7 +277,7 @@ class SpotifyPlusSearchPlayControl_Handler(SpotifyPlusIntentHandler):
                 {
                     "entity_id": playerEntityState.entity_id,
                     "criteria": album_name,
-                    "limit_total": 1,
+                    "limit_total": CONF_LIMIT_TOTAL_MINIMUM,
                     "include_external": "audio"
                 }
 
@@ -433,7 +434,7 @@ class SpotifyPlusSearchPlayControl_Handler(SpotifyPlusIntentHandler):
                 {
                     "entity_id": playerEntityState.entity_id,
                     "criteria": album_name + artist_criteria,
-                    "limit_total": 1,
+                    "limit_total": CONF_LIMIT_TOTAL_MINIMUM,
                     "include_external": "audio"
                 }
 
@@ -592,7 +593,7 @@ class SpotifyPlusSearchPlayControl_Handler(SpotifyPlusIntentHandler):
                 {
                     "entity_id": playerEntityState.entity_id,
                     "criteria": track_name + artist_criteria,
-                    "limit_total": 1,
+                    "limit_total": CONF_LIMIT_TOTAL_MINIMUM,
                     "include_external": "audio"
                 }
 
@@ -740,7 +741,7 @@ class SpotifyPlusSearchPlayControl_Handler(SpotifyPlusIntentHandler):
                 {
                     "entity_id": playerEntityState.entity_id,
                     "criteria": audiobook_name,
-                    "limit_total": 1,
+                    "limit_total": CONF_LIMIT_TOTAL_MINIMUM,
                     "include_external": "audio"
                 }
 
@@ -884,7 +885,7 @@ class SpotifyPlusSearchPlayControl_Handler(SpotifyPlusIntentHandler):
                 {
                     "entity_id": playerEntityState.entity_id,
                     "criteria": playlist_name,
-                    "limit_total": 1,
+                    "limit_total": CONF_LIMIT_TOTAL_MINIMUM,
                     "include_external": "audio"
                 }
 
@@ -1023,7 +1024,7 @@ class SpotifyPlusSearchPlayControl_Handler(SpotifyPlusIntentHandler):
                 {
                     "entity_id": playerEntityState.entity_id,
                     "criteria": podcast_name,
-                    "limit_total": 1,
+                    "limit_total": CONF_LIMIT_TOTAL_MINIMUM,
                     "include_external": "audio"
                 }
 
@@ -1059,103 +1060,104 @@ class SpotifyPlusSearchPlayControl_Handler(SpotifyPlusIntentHandler):
             intentObj.slots[SLOT_PODCAST_TITLE] = { CONF_VALUE: podcast_uri, CONF_TEXT: podcast_title }
             intentObj.slots[SLOT_PODCAST_URL] = { CONF_VALUE: podcast_url, CONF_TEXT: "Spotify" }
 
-            # are we playing the latest episode?  
-            # if so, then get the latest episode data.
-            # if not, then last played episode will resume where it left off.
-            if (latest_episode == "on"):
+            # # are we playing the latest episode?  
+            # # if so, then get the latest episode data.
+            # # if not, then last played episode will resume where it left off.
+            # if (latest_episode == "on"):
 
-                # trace.
-                self.logsi.LogVerbose("Playing latest podcast episode", colorValue=SIColors.Khaki)
+            #     # trace.
+            #     self.logsi.LogVerbose("Playing latest podcast episode", colorValue=SIColors.Khaki)
 
-                # set service name and build parameters.
-                svcName:str = SERVICE_SPOTIFY_GET_SHOW_EPISODES
-                svcData:dict = \
-                {
-                    "entity_id": playerEntityState.entity_id,
-                    "show_id": podcast_id,
-                    "limit_total": 1,
-                }
+            #     # set service name and build parameters.
+            #     svcName:str = SERVICE_SPOTIFY_GET_SHOW_EPISODES
+            #     svcData:dict = \
+            #     {
+            #         "entity_id": playerEntityState.entity_id,
+            #         "show_id": podcast_id,
+            #         "limit_total": 1,
+            #     }
 
-                # get latest podcast episode data.
-                self.logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (svcName, playerEntityState.entity_id), colorValue=SIColors.Khaki)
-                search_result:ServiceResponse = await intentObj.hass.services.async_call(
-                    DOMAIN,
-                    svcName,
-                    svcData,
-                    blocking=True,
-                    context=intentObj.context,
-                    return_response=True,
-                )
-                self.logsi.LogDictionary(SILevel.Verbose, "SERVICE_SPOTIFY_GET_SHOW_EPISODES result", search_result, prettyPrint=True, colorValue=SIColors.Khaki)
+            #     # get latest podcast episode data.
+            #     self.logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (svcName, playerEntityState.entity_id), colorValue=SIColors.Khaki)
+            #     search_result:ServiceResponse = await intentObj.hass.services.async_call(
+            #         DOMAIN,
+            #         svcName,
+            #         svcData,
+            #         blocking=True,
+            #         context=intentObj.context,
+            #         return_response=True,
+            #     )
+            #     self.logsi.LogDictionary(SILevel.Verbose, "SERVICE_SPOTIFY_GET_SHOW_EPISODES result", search_result, prettyPrint=True, colorValue=SIColors.Khaki)
 
-                # if no matching items, then return appropriate response.
-                items_count:int = search_result.get("result",{}).get("items_count", 0)
-                if (items_count == 0):
-                    return await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_SPOTIFY_SEARCH_NO_ITEMS_PODCAST_EPISODE)
+            #     # if no matching items, then return appropriate response.
+            #     items_count:int = search_result.get("result",{}).get("items_count", 0)
+            #     if (items_count == 0):
+            #         return await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_SPOTIFY_SEARCH_NO_ITEMS_PODCAST_EPISODE)
 
-                # load returned info that we care about.
-                episode_title:str = search_result.get("result",{}).get("items")[0].get("name", "unknown")
-                episode_uri:str = search_result.get("result",{}).get("items")[0].get("uri", "unknown")
-                episode_url:str = search_result.get("result",{}).get("items")[0].get("external_urls", {}).get("spotify", SPOTIFY_WEB_URL_PFX)
+            #     # load returned info that we care about.
+            #     episode_title:str = search_result.get("result",{}).get("items")[0].get("name", "unknown")
+            #     episode_uri:str = search_result.get("result",{}).get("items")[0].get("uri", "unknown")
+            #     episode_url:str = search_result.get("result",{}).get("items")[0].get("external_urls", {}).get("spotify", SPOTIFY_WEB_URL_PFX)
 
-                # update slots with returned info.
-                intentObj.slots[SLOT_EPISODE_TITLE] = { CONF_VALUE: episode_uri, CONF_TEXT: episode_title }
-                intentObj.slots[SLOT_EPISODE_URL] = { CONF_VALUE: episode_url, CONF_TEXT: "Spotify" }
+            #     # update slots with returned info.
+            #     intentObj.slots[SLOT_EPISODE_TITLE] = { CONF_VALUE: episode_uri, CONF_TEXT: episode_title }
+            #     intentObj.slots[SLOT_EPISODE_URL] = { CONF_VALUE: episode_url, CONF_TEXT: "Spotify" }
 
-                # set service name and build parameters.
-                svcName:str = SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS
-                svcData:dict = \
-                {
-                    "entity_id": playerEntityState.entity_id,
-                    "uris": episode_uri,
-                    "shuffle": True if player_shuffle_mode == "on" else False,
-                    "device_id": device_name,
-                    "delay": delay,
-                }
+            #     # set service name and build parameters.
+            #     svcName:str = SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACKS
+            #     svcData:dict = \
+            #     {
+            #         "entity_id": playerEntityState.entity_id,
+            #         "uris": episode_uri,
+            #         "shuffle": True if player_shuffle_mode == "on" else False,
+            #         "device_id": device_name,
+            #         "delay": delay,
+            #     }
 
-                # play the media.
-                self.logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (svcName, playerEntityState.entity_id), colorValue=SIColors.Khaki)
-                await intentObj.hass.services.async_call(
-                    DOMAIN,
-                    svcName,
-                    svcData,
-                    blocking=True,
-                    context=intentObj.context,
-                    return_response=False,
-                )
+            #     # play the media.
+            #     self.logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (svcName, playerEntityState.entity_id), colorValue=SIColors.Khaki)
+            #     await intentObj.hass.services.async_call(
+            #         DOMAIN,
+            #         svcName,
+            #         svcData,
+            #         blocking=True,
+            #         context=intentObj.context,
+            #         return_response=False,
+            #     )
            
-                # return intent response.
-                return await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_PLAY_PODCAST_EPISODE)
+            #     # return intent response.
+            #     return await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_PLAY_PODCAST_EPISODE)
 
-            else:
+            # else:
 
-                # trace.
-                self.logsi.LogVerbose("Resuming play of podcast episode last played", colorValue=SIColors.Khaki)
+            #     # trace.
+            #     self.logsi.LogVerbose("Resuming play of podcast episode last played", colorValue=SIColors.Khaki)
 
-                # set service name and build parameters.
-                svcName:str = SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT
-                svcData:dict = \
-                {
-                    "entity_id": playerEntityState.entity_id,
-                    "context_uri": podcast_uri,
-                    "shuffle": True if player_shuffle_mode == "on" else False,
-                    "device_id": device_name,
-                    "delay": delay,
-                }
+            # set service name and build parameters.
+            svcName:str = SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT
+            svcData:dict = \
+            {
+                "entity_id": playerEntityState.entity_id,
+                "context_uri": podcast_uri,
+                "shuffle": True if player_shuffle_mode == "on" else False,
+                "device_id": device_name,
+                "delay": delay,
+                "play_show_latest_episode": True if latest_episode == "on" else False,
+            }
 
-                # play the media.
-                self.logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (svcName, playerEntityState.entity_id), colorValue=SIColors.Khaki)
-                await intentObj.hass.services.async_call(
-                    DOMAIN,
-                    svcName,
-                    svcData,
-                    blocking=True,
-                    context=intentObj.context,
-                    return_response=False,
-                )
+            # play the media.
+            self.logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (svcName, playerEntityState.entity_id), colorValue=SIColors.Khaki)
+            await intentObj.hass.services.async_call(
+                DOMAIN,
+                svcName,
+                svcData,
+                blocking=True,
+                context=intentObj.context,
+                return_response=False,
+            )
            
-                # return intent response.
-                return await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_PLAY_PODCAST)
+            # return intent response.
+            return await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_PLAY_PODCAST)
 
         finally:
 
@@ -1247,7 +1249,7 @@ class SpotifyPlusSearchPlayControl_Handler(SpotifyPlusIntentHandler):
                 {
                     "entity_id": playerEntityState.entity_id,
                     "criteria": episode_name + podcast_criteria,
-                    "limit_total": 1,
+                    "limit_total": CONF_LIMIT_TOTAL_MINIMUM,
                     "include_external": "audio"
                 }
 
@@ -1427,7 +1429,7 @@ class SpotifyPlusSearchPlayControl_Handler(SpotifyPlusIntentHandler):
                 {
                     "entity_id": playerEntityState.entity_id,
                     "criteria": track_name,
-                    "limit_total": 1,
+                    "limit_total": CONF_LIMIT_TOTAL_MINIMUM,
                     "include_external": "audio"
                 }
 

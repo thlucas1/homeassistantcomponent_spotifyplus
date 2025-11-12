@@ -23,10 +23,10 @@ intents:
           # Diese Satzvorlage sollte verwendet werden, wenn einzelne Begriffe erforderlich sind.
           - "spotify spiele {spotifyplus_search_play_control_single}"
           - "spotify spiele {spotifyplus_search_play_control_single} von künstler {freeform:criteria_arg_1}"
-          - "spotify spiele {spotifyplus_search_play_control_single} {freeform:criteria_arg_1}"
+          - "spotify spiele {spotifyplus_search_play_control_single} {freeform:criteria_arg_1} [{latest_episode}]"
           - "spiele spotify {spotifyplus_search_play_control_single}"
           - "spiele spotify {spotifyplus_search_play_control_single} von künstler {freeform:criteria_arg_1}"
-          - "spiele spotify {spotifyplus_search_play_control_single} {freeform:criteria_arg_1}"
+          - "spiele spotify {spotifyplus_search_play_control_single} {freeform:criteria_arg_1} [{latest_episode}]"
 
             # Basissätze für diese Absicht.
             # Dieser Satz wird erkannt, wenn kein Name / Bereich im gesprochenen Befehl angegeben wird.
@@ -63,6 +63,8 @@ intents:
             # - "spiele spotify podcast Test Podcast List Entry"
             # - "spotify spiele podcast Armchair Expert with Dax Shepard"
             # - "spiele spotify podcast Armchair Expert with Dax Shepard"
+            # - "spotify spiele podcast Armchair Expert with Dax Shepard latest episode"
+            # - "spiele spotify podcast Armchair Expert with Dax Shepard latest episode"
 
             # - "spotify spiele titel Test Track List Entry"
             # - "spiele spotify titel Test Track List Entry"
@@ -74,7 +76,7 @@ intents:
           name: "Spotify Premium" # Standard-Mediaplayer-Alias.
           delay: 0.50
           device_name: "*"
-          latest_episode: "on"
+          latest_episode: "off"
           limit_total: 200
           player_shuffle_mode: "off"
 
@@ -91,10 +93,10 @@ intents:
           # Diese Satzvorlage sollte verwendet werden, wenn einzelne Begriffe erforderlich sind.
           - "spotify spiele {spotifyplus_search_play_control_single} <on_spotifyplus_player_name>"
           - "spotify spiele {spotifyplus_search_play_control_single} von künstler {freeform:criteria_arg_1} <on_spotifyplus_player_name>"
-          - "spotify spiele {spotifyplus_search_play_control_single} {freeform:criteria_arg_1} <on_spotifyplus_player_name>"
+          - "spotify spiele {spotifyplus_search_play_control_single} {freeform:criteria_arg_1} [{latest_episode}] <on_spotifyplus_player_name>"
           - "spiele spotify {spotifyplus_search_play_control_single} <on_spotifyplus_player_name>"
           - "spiele spotify {spotifyplus_search_play_control_single} von künstler {freeform:criteria_arg_1} <on_spotifyplus_player_name>"
-          - "spiele spotify {spotifyplus_search_play_control_single} {freeform:criteria_arg_1} <on_spotifyplus_player_name>"
+          - "spiele spotify {spotifyplus_search_play_control_single} {freeform:criteria_arg_1} [{latest_episode}] <on_spotifyplus_player_name>"
 
             # Dieser Satz wird erkannt, wenn ein Player-Name im gesprochenen
             # Befehl angegeben wird (z.B. "auf player Spotify Premium", "auf Todds player", etc).
@@ -110,7 +112,7 @@ intents:
           name: ""
           delay: 0.50
           device_name: "*"
-          latest_episode: "on"
+          latest_episode: "off"
           limit_total: 200
           player_shuffle_mode: "off"
 
@@ -127,10 +129,10 @@ intents:
           # Diese Satzvorlage sollte verwendet werden, wenn einzelne Begriffe erforderlich sind.
           - "spotify spiele {spotifyplus_search_play_control_single} <in_spotifyplus_player_area>"
           - "spotify spiele {spotifyplus_search_play_control_single} von künstler {freeform:criteria_arg_1} <in_spotifyplus_player_area>"
-          - "spotify spiele {spotifyplus_search_play_control_single} {freeform:criteria_arg_1} <in_spotifyplus_player_area>"
+          - "spotify spiele {spotifyplus_search_play_control_single} {freeform:criteria_arg_1} [{latest_episode}] <in_spotifyplus_player_area>"
           - "spiele spotify {spotifyplus_search_play_control_single} <in_spotifyplus_player_area>"
           - "spiele spotify {spotifyplus_search_play_control_single} von künstler {freeform:criteria_arg_1} <in_spotifyplus_player_area>"
-          - "spiele spotify {spotifyplus_search_play_control_single} {freeform:criteria_arg_1} <in_spotifyplus_player_area>"
+          - "spiele spotify {spotifyplus_search_play_control_single} {freeform:criteria_arg_1} [{latest_episode}] <in_spotifyplus_player_area>"
 
             # Dieser Satz wird erkannt, wenn ein Player-Bereich im gesprochenen
             # Befehl angegeben wird (z.B. "im Wohnzimmer bereich", "im Wohnzimmer", etc).
@@ -147,7 +149,7 @@ intents:
           name: ""
           delay: 0.50
           device_name: "*"
-          latest_episode: "on"
+          latest_episode: "off"
           limit_total: 200
           player_shuffle_mode: "off"
 

@@ -778,6 +778,7 @@ SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_CONTEXT_SCHEMA = vol.Schema(
         vol.Optional("device_id"): cv.string,
         vol.Optional("delay", default=0.50): vol.All(vol.Range(min=0,max=10.0)),
         vol.Optional("shuffle"): cv.boolean,
+        vol.Optional("play_show_latest_episode"): cv.boolean,
     }
 )
 
@@ -1396,8 +1397,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     device_id = service.data.get("device_id")
                     delay = service.data.get("delay")
                     shuffle = service.data.get("shuffle")
+                    play_show_latest_episode = service.data.get("play_show_latest_episode")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    await hass.async_add_executor_job(entity.service_spotify_player_media_play_context, context_uri, offset_uri, offset_position, position_ms, device_id, delay, shuffle)
+                    await hass.async_add_executor_job(entity.service_spotify_player_media_play_context, context_uri, offset_uri, offset_position, position_ms, device_id, delay, shuffle, play_show_latest_episode)
 
                 elif service.service == SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACK_FAVORITES:
 

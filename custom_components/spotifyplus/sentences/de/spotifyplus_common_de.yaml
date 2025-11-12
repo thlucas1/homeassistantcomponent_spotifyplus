@@ -180,6 +180,14 @@ lists:
       - in: "(entfernen|remove)"
         out: "remove"
 
+  latest_episode:
+    # out values must be English value.
+    values:
+      - in: "(latest|current) episode"
+        out: "on"
+      - in: ""
+        out: "off"
+
   player_repeat_mode:
     # out-Werte müssen englische Werte sein.
     values:
@@ -284,7 +292,7 @@ lists:
         out: "audiobook"
       - in: "playlist [{spotifyplus_playlist_names:criteria_arg_1}]"
         out: "playlist"
-      - in: "(podcast|show) [{spotifyplus_podcast_names:criteria_arg_1}]"
+      - in: "(podcast|show) [{spotifyplus_podcast_names:criteria_arg_1}] [{latest_episode}]"
         out: "podcast"
       - in: "(beliebte songs|beliebte lieder|Favoriten Titel)"
         out: "favorite_tracks"

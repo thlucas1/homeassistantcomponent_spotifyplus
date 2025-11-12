@@ -5893,6 +5893,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         deviceId:str=None, 
         delay:float=0.50,
         shuffle:bool=None,
+        playShowLatestEpisode:bool=None,
         ) -> None:
         """
         Start playing one or more tracks of the specified context on a Spotify Connect device.
@@ -5938,6 +5939,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 True to enable player shuffle mode; False to disable player shuffle mode; 
                 None to use current player shuffle mode.  
                 Default is None.  
+            playShowLatestEpisode (bool):
+                True to play the most current episode of a podcast show, starting at the beginning; 
+                otherwise, False to resume playing of the podcast episode that was previously played.  
+                Default is False.  
+                This argument is only considered for `show` contexts.
         """
         apiMethodName:str = 'service_spotify_player_media_play_context'
         apiMethodParms:SIMethodParmListContext = None
@@ -5953,13 +5959,14 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("deviceId", deviceId)
             apiMethodParms.AppendKeyValue("delay", delay)
             apiMethodParms.AppendKeyValue("shuffle", shuffle)
+            apiMethodParms.AppendKeyValue("playShowLatestEpisode", playShowLatestEpisode)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Player Media Play Context Service", apiMethodParms)
             
             # validations.
             delay = validateDelay(delay, 0.50, 10)
 
             # play one or more items of the specified context on a Spotify Connect device.
-            self.data.spotifyClient.PlayerMediaPlayContext(contextUri, offsetUri, offsetPosition, positionMS, deviceId, delay, None, shuffle)
+            self.data.spotifyClient.PlayerMediaPlayContext(contextUri, offsetUri, offsetPosition, positionMS, deviceId, delay, None, shuffle, playShowLatestEpisode)
 
             # check if we need to automatically power on the player.
             self._AutoPowerOnCheck()

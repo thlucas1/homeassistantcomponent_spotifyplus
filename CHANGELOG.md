@@ -6,6 +6,12 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.186 ] - 2025/11/11
+
+  * Updated `SpotifyPlusSearchPlayControl` intent handler `limit_total` values from 1 to 5 for all media search queries.  A value of 1 seems to cause Spotify to exclude playlist user favorite values.
+  * Updated service `player_media_play_context` to add the `play_show_latest_episode` argument, which if True can be used to play the most current episode of a podcast show, starting at the beginning; otherwise, False to resume playing of the podcast episode that was previously played. Default is False. This argument is only considered for 'show' contexts.
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.255`.
+
 ###### [ 1.0.185 ] - 2025/11/11
 
   * Updated German translation for new voice assist intent (thank you [brix29](https://github.com/brix29) for translating).

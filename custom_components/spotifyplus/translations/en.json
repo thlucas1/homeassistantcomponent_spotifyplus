@@ -1609,6 +1609,10 @@
         "shuffle": {
           "name": "Shuffle?",
           "description": "True to enable player shuffle mode; False to disable player shuffle mode; None to use current player shuffle mode. Default is None."
+        },
+        "play_show_latest_episode": {
+          "name": "Play Show Latest Episode?",
+          "description": "True to play the most current episode of a podcast show, starting at the beginning; otherwise, False to resume playing of the podcast episode that was previously played. Default is False. This argument is only considered for 'show' contexts."
         }
       }
     },

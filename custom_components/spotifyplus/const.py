@@ -212,6 +212,7 @@ CONF_ENTITY_ID = "entity_id"
 CONF_REMOVE = "remove"
 CONF_TEXT = "text"
 CONF_VALUE = "value"
+CONF_LIMIT_TOTAL_MINIMUM = 5  # ensure more than 1 so that user favorites are considered.
 
 # -----------------------------------------------------------------------------------
 # Slot Argument constants.
