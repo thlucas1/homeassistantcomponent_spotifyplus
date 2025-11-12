@@ -14,66 +14,67 @@ intents:
 
       - sentences:
 
-          # this sentence template should be used when multiple terms are required.
-          - "spotify play {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} (by|for) (podcast|pod cast|show) {freeform:criteria_arg_2}" 
-          - "spotify play {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} (by|for) artist {freeform:criteria_arg_2}"
-          - "play spotify {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} (by|for) (podcast|pod cast|show) {freeform:criteria_arg_2}" 
-          - "play spotify {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} (by|for) artist {freeform:criteria_arg_2}"
+          # Diese Satzvorlage sollte verwendet werden, wenn mehrere Begriffe erforderlich sind.
+          - "spotify spiele {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} von (podcast|show) {freeform:criteria_arg_2}"
+          - "spotify spiele {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} von künstler {freeform:criteria_arg_2}"
+          - "spiele spotify {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} von (podcast|show) {freeform:criteria_arg_2}"
+          - "spiele spotify {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} von künstler {freeform:criteria_arg_2}"
 
-          # this sentence template should be used when single terms are required.
-          - "spotify play {spotifyplus_search_play_control_single}"
-          - "spotify play {spotifyplus_search_play_control_single} (by|for) artist {freeform:criteria_arg_1}"
-          - "spotify play {spotifyplus_search_play_control_single} {freeform:criteria_arg_1}"
-          - "play spotify {spotifyplus_search_play_control_single}"
-          - "play spotify {spotifyplus_search_play_control_single} (by|for) artist {freeform:criteria_arg_1}"
-          - "play spotify {spotifyplus_search_play_control_single} {freeform:criteria_arg_1}"
+          # Diese Satzvorlage sollte verwendet werden, wenn einzelne Begriffe erforderlich sind.
+          - "spotify spiele {spotifyplus_search_play_control_single}"
+          - "spotify spiele {spotifyplus_search_play_control_single} von künstler {freeform:criteria_arg_1}"
+          - "spotify spiele {spotifyplus_search_play_control_single} {freeform:criteria_arg_1}"
+          - "spiele spotify {spotifyplus_search_play_control_single}"
+          - "spiele spotify {spotifyplus_search_play_control_single} von künstler {freeform:criteria_arg_1}"
+          - "spiele spotify {spotifyplus_search_play_control_single} {freeform:criteria_arg_1}"
 
-            # Base sentence phrases for this intent.
-            # This sentence is recognized when a name / area is NOT provided in the spoken command.  
-            # In this case, the first active SpotifyPlus media player is used.
+            # Basissätze für diese Absicht.
+            # Dieser Satz wird erkannt, wenn kein Name / Bereich im gesprochenen Befehl angegeben wird.
+            # In diesem Fall wird der erste aktive SpotifyPlus Media Player verwendet.
 
-            # __Example Phrases - Default Player__  
-            # - "spotify play artist album Take Everything by artist Seventh Day Slumber"
-            # - "play spotify artist album Take Everything by artist Seventh Day Slumber"
+            # __Beispielsätze - Standard-Player__
+            # - "spotify spiele künstler album Take Everything von künstler Seventh Day Slumber"
+            # - "spiele spotify künstler album Take Everything von künstler Seventh Day Slumber"
 
-            # - "spotify play artist track I Need You by artist Seventh Day Slumber"
-            # - "play spotify artist track I Need You by artist Seventh Day Slumber"
+            # - "spotify spiele künstler titel I Need You von künstler Seventh Day Slumber"
+            # - "spiele spotify künstler titel I Need You von künstler Seventh Day Slumber"
 
-            # - "spotify play episode Kurt Russell for podcast Armchair Expert with Dax Shepard"
-            # - "play spotify episode Kurt Russell for podcast Armchair Expert with Dax Shepard"
+            # - "spotify spiele episode Kurt Russell für podcast Armchair Expert with Dax Shepard"
+            # - "spiele spotify episode Kurt Russell für podcast Armchair Expert with Dax Shepard"
 
-            # - "spotify play favorite tracks for artist test artist list entry"
-            # - "play spotify favorite tracks for artist test artist list entry"
-            # - "spotify play favorite tracks for artist Jeremy Camp"
-            # - "play spotify favorite tracks for artist Jeremy Camp"
-            # - "spotify play favorite tracks"
-            # - "play spotify favorite tracks"
+            # - "spotify spiele beliebte songs von künstler test artist list entry"
+            # - "spiele spotify beliebte songs von künstler test artist list entry"
+            # - "spotify spiele favoriten titel von künstler Jeremy Camp"
+            # - "spiele spotify favoriten titel von künstler Jeremy Camp"
+            # - "spotify spiele lieblingslieder"
+            # - "spiele spotify lieblingslieder"
 
-            # - "spotify play audiobook Test Audiobook List Entry"
-            # - "play spotify audiobook Test Audiobook List Entry"
-            # - "spotify play audiobook The Elfstones of Shannara"
-            # - "play spotify audiobook The Elfstones of Shannara"
+            # - "spotify spiele hörbuch Test Audiobook List Entry"
+            # - "spiele spotify hörbuch Test Audiobook List Entry"
+            # - "spotify spiele hörbuch Die Elfensteine von Shannara"
+            # - "spiele spotify hörbuch Die Elfensteine von Shannara"
 
-            # - "spotify play playlist Test Playlist List Entry"
-            # - "play spotify playlist Test Playlist List Entry"
-            # - "spotify play playlist Old Christian Contemporary"
-            # - "play spotify playlist Old Christian Contemporary"
+            # - "spotify spiele playlist Test Playlist List Entry"
+            # - "spiele spotify playlist Test Playlist List Entry"
+            # - "spotify spiele playlist Old Christian Contemporary"
+            # - "spiele spotify playlist Old Christian Contemporary"
 
-            # - "spotify play podcast Test Podcast List Entry"
-            # - "play spotify podcast Test Podcast List Entry"
-            # - "spotify play podcast Armchair Expert with Dax Shepard"
-            # - "play spotify podcast Armchair Expert with Dax Shepard"
+            # - "spotify spiele podcast Test Podcast List Entry"
+            # - "spiele spotify podcast Test Podcast List Entry"
+            # - "spotify spiele podcast Armchair Expert with Dax Shepard"
+            # - "spiele spotify podcast Armchair Expert with Dax Shepard"
 
-            # - "spotify play track Test Track List Entry"
-            # - "play spotify track Test Track List Entry"
-            # - "spotify play track More Of You"
-            # - "play spotify track More Of You"
+            # - "spotify spiele titel Test Track List Entry"
+            # - "spiele spotify titel Test Track List Entry"
+            # - "spotify spiele titel More Of You"
+            # - "spiele spotify titel More Of You"
 
         slots:
 
-          name: "Spotify Premium" # default media player alias.
+          name: "Spotify Premium" # Standard-Mediaplayer-Alias.
           delay: 0.50
           device_name: "*"
+          latest_episode: "on"
           limit_total: 200
           player_shuffle_mode: "off"
 
@@ -81,34 +82,35 @@ intents:
 
       - sentences:
 
-          # this sentence template should be used when multiple terms are required.
-          - "spotify play {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} (by|for) (podcast|pod cast|show) {freeform:criteria_arg_2} <on_spotifyplus_player_name>" 
-          - "spotify play {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} (by|for) artist {freeform:criteria_arg_2} <on_spotifyplus_player_name>"
-          - "play spotify {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} (by|for) (podcast|pod cast|show) {freeform:criteria_arg_2} <on_spotifyplus_player_name>" 
-          - "play spotify {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} (by|for) artist {freeform:criteria_arg_2} <on_spotifyplus_player_name>"
+          # Diese Satzvorlage sollte verwendet werden, wenn mehrere Begriffe erforderlich sind.
+          - "spotify spiele {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} von (podcast|show) {freeform:criteria_arg_2} <on_spotifyplus_player_name>"
+          - "spotify spiele {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} von künstler {freeform:criteria_arg_2} <on_spotifyplus_player_name>"
+          - "spiele spotify {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} von (podcast|show) {freeform:criteria_arg_2} <on_spotifyplus_player_name>"
+          - "spiele spotify {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} von künstler {freeform:criteria_arg_2} <on_spotifyplus_player_name>"
 
-          # this sentence template should be used when single terms are required.
-          - "spotify play {spotifyplus_search_play_control_single} <on_spotifyplus_player_name>"
-          - "spotify play {spotifyplus_search_play_control_single} (by|for) artist {freeform:criteria_arg_1} <on_spotifyplus_player_name>"
-          - "spotify play {spotifyplus_search_play_control_single} {freeform:criteria_arg_1} <on_spotifyplus_player_name>"
-          - "play spotify {spotifyplus_search_play_control_single} <on_spotifyplus_player_name>"
-          - "play spotify {spotifyplus_search_play_control_single} (by|for) artist {freeform:criteria_arg_1} <on_spotifyplus_player_name>"
-          - "play spotify {spotifyplus_search_play_control_single} {freeform:criteria_arg_1} <on_spotifyplus_player_name>"
+          # Diese Satzvorlage sollte verwendet werden, wenn einzelne Begriffe erforderlich sind.
+          - "spotify spiele {spotifyplus_search_play_control_single} <on_spotifyplus_player_name>"
+          - "spotify spiele {spotifyplus_search_play_control_single} von künstler {freeform:criteria_arg_1} <on_spotifyplus_player_name>"
+          - "spotify spiele {spotifyplus_search_play_control_single} {freeform:criteria_arg_1} <on_spotifyplus_player_name>"
+          - "spiele spotify {spotifyplus_search_play_control_single} <on_spotifyplus_player_name>"
+          - "spiele spotify {spotifyplus_search_play_control_single} von künstler {freeform:criteria_arg_1} <on_spotifyplus_player_name>"
+          - "spiele spotify {spotifyplus_search_play_control_single} {freeform:criteria_arg_1} <on_spotifyplus_player_name>"
 
-            # This sentence is recognized when a player name is provided in the spoken 
-            # command (e.g. "on player Spotify Premium", "on Todds player", etc).  
-            # Supports the same base sentence phrases for this intent.
+            # Dieser Satz wird erkannt, wenn ein Player-Name im gesprochenen
+            # Befehl angegeben wird (z.B. "auf player Spotify Premium", "auf Todds player", etc).
+            # Unterstützt die gleichen Basissätze für diese Absicht.
 
-            # __Example Phrases - By Player Name__  
-            # - "spotify play artist track I Need You by artist Seventh Day Slumber on player spotify premium"
-            # - "spotify play track Test Track List Entry on player spotify premium"
-            # - "spotify play track More Of You on player spotify premium"
+            # __Beispielsätze - Nach Player-Name__
+            # - "spotify spiele künstler titel I Need You von künstler Seventh Day Slumber auf player spotify premium"
+            # - "spotify spiele titel Test Track List Entry auf player spotify premium"
+            # - "spotify spiele titel More Of You auf player spotify premium"
 
         slots:
 
           name: ""
           delay: 0.50
           device_name: "*"
+          latest_episode: "on"
           limit_total: 200
           player_shuffle_mode: "off"
 
@@ -116,28 +118,28 @@ intents:
 
       - sentences:
 
-          # this sentence template should be used when multiple terms are required.
-          - "spotify play {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} (by|for) (podcast|pod cast|show) {freeform:criteria_arg_2} <in_spotifyplus_player_area>" 
-          - "spotify play {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} (by|for) artist {freeform:criteria_arg_2} <in_spotifyplus_player_area>"
-          - "play spotify {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} (by|for) (podcast|pod cast|show) {freeform:criteria_arg_2} <in_spotifyplus_player_area>" 
-          - "play spotify {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} (by|for) artist {freeform:criteria_arg_2} <in_spotifyplus_player_area>"
+          # Diese Satzvorlage sollte verwendet werden, wenn mehrere Begriffe erforderlich sind.
+          - "spotify spiele {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} von (podcast|show) {freeform:criteria_arg_2} <in_spotifyplus_player_area>"
+          - "spotify spiele {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} von künstler {freeform:criteria_arg_2} <in_spotifyplus_player_area>"
+          - "spiele spotify {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} von (podcast|show) {freeform:criteria_arg_2} <in_spotifyplus_player_area>"
+          - "spiele spotify {spotifyplus_search_play_control_multi} {freeform:criteria_arg_1} von künstler {freeform:criteria_arg_2} <in_spotifyplus_player_area>"
 
-          # this sentence template should be used when single terms are required.
-          - "spotify play {spotifyplus_search_play_control_single} <in_spotifyplus_player_area>"
-          - "spotify play {spotifyplus_search_play_control_single} (by|for) artist {freeform:criteria_arg_1} <in_spotifyplus_player_area>"
-          - "spotify play {spotifyplus_search_play_control_single} {freeform:criteria_arg_1} <in_spotifyplus_player_area>"
-          - "play spotify {spotifyplus_search_play_control_single} <in_spotifyplus_player_area>"
-          - "play spotify {spotifyplus_search_play_control_single} (by|for) artist {freeform:criteria_arg_1} <in_spotifyplus_player_area>"
-          - "play spotify {spotifyplus_search_play_control_single} {freeform:criteria_arg_1} <in_spotifyplus_player_area>"
+          # Diese Satzvorlage sollte verwendet werden, wenn einzelne Begriffe erforderlich sind.
+          - "spotify spiele {spotifyplus_search_play_control_single} <in_spotifyplus_player_area>"
+          - "spotify spiele {spotifyplus_search_play_control_single} von künstler {freeform:criteria_arg_1} <in_spotifyplus_player_area>"
+          - "spotify spiele {spotifyplus_search_play_control_single} {freeform:criteria_arg_1} <in_spotifyplus_player_area>"
+          - "spiele spotify {spotifyplus_search_play_control_single} <in_spotifyplus_player_area>"
+          - "spiele spotify {spotifyplus_search_play_control_single} von künstler {freeform:criteria_arg_1} <in_spotifyplus_player_area>"
+          - "spiele spotify {spotifyplus_search_play_control_single} {freeform:criteria_arg_1} <in_spotifyplus_player_area>"
 
-            # This sentence is recognized when a player area is provided in the spoken 
-            # command (e.g. "in the Living Room area", "in the Living Room", etc).  
-            # Supports the same base sentence phrases for this intent.
+            # Dieser Satz wird erkannt, wenn ein Player-Bereich im gesprochenen
+            # Befehl angegeben wird (z.B. "im Wohnzimmer bereich", "im Wohnzimmer", etc).
+            # Unterstützt die gleichen Basissätze für diese Absicht.
 
-            # __Example Phrases - By Player Area__  
-            # - "spotify play artist track I Need You by artist Seventh Day Slumber in the Office area"
-            # - "spotify play track Test Track List Entry in the Office area"
-            # - "spotify play track More Of You in the Office area"
+            # __Beispielsätze - Nach Player-Bereich__
+            # - "spotify spiele künstler titel I Need You von künstler Seventh Day Slumber im Büro bereich"
+            # - "spotify spiele titel Test Track List Entry im Büro bereich"
+            # - "spotify spiele titel More Of You im Büro bereich"
 
         slots:
 
@@ -145,14 +147,15 @@ intents:
           name: ""
           delay: 0.50
           device_name: "*"
+          latest_episode: "on"
           limit_total: 200
           player_shuffle_mode: "off"
 
         response: default
 
 # ============================================================================
-# Benutzerdefinierte Antwortdefinitionen f�r DIESE Intent.
-# Hinweis - Geteilte Antworten f�r alle Intenten sind in der Common-Datei gespeichert.
+# Benutzerdefinierte Antwortdefinitionen für DIESE Intent.
+# Hinweis - Geteilte Antworten für alle Intenten sind in der Common-Datei gespeichert.
 # ============================================================================
 responses:
   intents:
