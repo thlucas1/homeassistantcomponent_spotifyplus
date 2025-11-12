@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.185 ] - 2025/11/11
+
+  * Updated German translation for new voice assist intent (thank you [brix29](https://github.com/brix29) for translating).
+
 ###### [ 1.0.184 ] - 2025/11/11
 
   * Added voice assist intent: `SpotifyPlusSearchPlayContent`.  This replaces 8 other intents (see below).
