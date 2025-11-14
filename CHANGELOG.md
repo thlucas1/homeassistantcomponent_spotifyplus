@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.187 ] - 2025/11/14
+
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.256`.
+
 ###### [ 1.0.186 ] - 2025/11/11
 
   * Updated `SpotifyPlusSearchPlayControl` intent handler `limit_total` values from 1 to 5 for all media search queries.  A value of 1 seems to cause Spotify to exclude playlist user favorite values.
