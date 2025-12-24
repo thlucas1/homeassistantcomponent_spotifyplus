@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.188 ] - 2025/12/24
+
+  * Updated `offset` max values from 500 to 10,000 in all services that support the `offset` argument.  Spotify limits the number of entries saved to 10,000 for most types, so it should be possible to use `offset: 10000, limit: 1` parameters to retrieve a specific value.
+
 ###### [ 1.0.187 ] - 2025/11/14
 
   * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.256`.

@@ -345,7 +345,7 @@ get_album_favorites:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     market:
       name: Market / Country Code
@@ -401,7 +401,7 @@ get_album_new_releases:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     country:
       name: Market / Country Code
@@ -464,7 +464,7 @@ get_album_tracks:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     market:
       name: Market / Country Code
@@ -548,7 +548,7 @@ get_artist_albums:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     market:
       name: Market / Country Code
@@ -769,7 +769,7 @@ get_audiobook_chapters:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     market:
       name: Market
@@ -818,7 +818,7 @@ get_audiobook_favorites:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     limit_total:
       name: Limit Total
@@ -909,7 +909,7 @@ get_category_playlists:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     country:
       name: Country
@@ -1049,7 +1049,7 @@ get_episode_favorites:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     limit_total:
       name: Limit Total
@@ -1098,7 +1098,7 @@ get_featured_playlists:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     country:
       name: Country
@@ -1528,7 +1528,7 @@ get_playlist_favorites:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     limit_total:
       name: Limit Total
@@ -1584,7 +1584,7 @@ get_playlist_items:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     market:
       name: Market
@@ -1654,7 +1654,7 @@ get_playlists_for_user:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     limit_total:
       name: Limit Total
@@ -1738,7 +1738,7 @@ get_show_episodes:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     market:
       name: Market
@@ -1787,7 +1787,7 @@ get_show_favorites:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     limit_total:
       name: Limit Total
@@ -1979,7 +1979,7 @@ get_track_favorites:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     market:
       name: Market / Country Code
@@ -2422,7 +2422,7 @@ get_users_top_artists:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     limit_total:
       name: Limit Total
@@ -2478,7 +2478,7 @@ get_users_top_tracks:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     limit_total:
       name: Limit Total
@@ -3690,7 +3690,7 @@ search_albums:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     market:
       name: Market / Country Code
@@ -3753,7 +3753,7 @@ search_artists:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     market:
       name: Market / Country Code
@@ -3816,7 +3816,7 @@ search_audiobooks:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     market:
       name: Market / Country Code
@@ -3879,7 +3879,7 @@ search_episodes:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     market:
       name: Market / Country Code
@@ -3942,7 +3942,7 @@ search_playlists:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     market:
       name: Market / Country Code
@@ -4005,7 +4005,7 @@ search_shows:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     market:
       name: Market / Country Code
@@ -4068,7 +4068,7 @@ search_tracks:
       selector:
         number:
           min: 1
-          max: 500
+          max: 10000
           mode: box
     market:
       name: Market / Country Code

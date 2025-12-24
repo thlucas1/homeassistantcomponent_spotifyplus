@@ -23,5 +23,5 @@
     "urllib3>=2.0",
     "zeroconf>=0.132.2"
   ],
-  "version": "1.0.187"
+  "version": "1.0.188"
 }
