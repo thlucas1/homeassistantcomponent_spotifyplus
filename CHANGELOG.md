@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.189 ] - 2026/01/04
+
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.258`.  This updates the `AuthTokenGenerator.py` sample code to account for changes to the Spotify Web API when using the Spotify Desktop Application client id.  As of around 2025/12/14, one can no longer retrieve user profile information when using the Spotify Desktop Application client id; trying to do so will result in a "429 - api rate limit exceeded" error message.
+
 ###### [ 1.0.188 ] - 2025/12/24
 
   * Updated `offset` max values from 500 to 10,000 in all services that support the `offset` argument.  Spotify limits the number of entries saved to 10,000 for most types, so it should be possible to use `offset: 10000, limit: 1` parameters to retrieve a specific value.
