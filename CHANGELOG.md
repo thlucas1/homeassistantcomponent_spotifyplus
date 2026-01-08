@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.190 ] - 2026/01/07
+
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.259`.  This changes encoding of Spotify Connect credentials to use UTF-8 encoding instead of ASCII encoding.  This was causing issues with authentication credetials that contain non-ascii characters.
+
 ###### [ 1.0.189 ] - 2026/01/04
 
   * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.258`.  This updates the `AuthTokenGenerator.py` sample code to account for changes to the Spotify Web API when using the Spotify Desktop Application client id.  As of around 2025/12/14, one can no longer retrieve user profile information when using the Spotify Desktop Application client id; trying to do so will result in a "429 - api rate limit exceeded" error message.
