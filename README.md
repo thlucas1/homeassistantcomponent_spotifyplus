@@ -42,6 +42,8 @@ Check out the [Services Provided wiki](https://github.com/thlucas1/homeassistant
 
 ## HACS Installation Instructions
 
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=thlucas1&repository=homeassistantcomponent_spotifyplus&category=Integration)
+
 - go to HACS main menu.
 - click on the 3-dot overflow menu in the upper right, and select `custom repositories` item.
 - copy / paste `https://github.com/thlucas1/homeassistantcomponent_spotifyplus` in the Repository textbox and select `Integration` for the category entry.
