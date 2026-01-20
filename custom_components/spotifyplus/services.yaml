@@ -4,7 +4,7 @@ add_player_queue_items:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -48,7 +48,7 @@ check_album_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -69,7 +69,7 @@ check_artists_following:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -90,7 +90,7 @@ check_audiobook_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -111,7 +111,7 @@ check_episode_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -132,7 +132,7 @@ check_playlist_followers:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -159,7 +159,7 @@ check_show_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -180,7 +180,7 @@ check_track_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -201,7 +201,7 @@ check_users_following:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -222,7 +222,7 @@ follow_artists:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -243,7 +243,7 @@ follow_playlist:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -271,7 +271,7 @@ follow_users:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -292,7 +292,7 @@ get_album:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -320,7 +320,7 @@ get_album_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -376,7 +376,7 @@ get_album_new_releases:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -432,7 +432,7 @@ get_album_tracks:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -488,7 +488,7 @@ get_artist:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -509,7 +509,7 @@ get_artist_albums:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -579,7 +579,7 @@ get_artist_info:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -600,7 +600,7 @@ get_artist_related_artists:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -628,7 +628,7 @@ get_artist_top_tracks:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -663,7 +663,7 @@ get_artists_followed:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -709,7 +709,7 @@ get_audiobook:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -737,7 +737,7 @@ get_audiobook_chapters:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -793,7 +793,7 @@ get_audiobook_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -842,7 +842,7 @@ get_browse_categorys_list:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -877,7 +877,7 @@ get_category_playlists:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -940,7 +940,7 @@ get_chapter:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -968,7 +968,7 @@ get_cover_image_file:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -996,7 +996,7 @@ get_episode:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1024,7 +1024,7 @@ get_episode_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1073,7 +1073,7 @@ get_featured_playlists:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1143,7 +1143,7 @@ get_id_from_uri:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1164,7 +1164,7 @@ get_image_palette_colors:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1235,7 +1235,7 @@ get_image_vibrant_colors:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1276,7 +1276,7 @@ get_player_devices:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1304,7 +1304,7 @@ get_player_last_played_info:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1318,7 +1318,7 @@ get_player_now_playing:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1346,7 +1346,7 @@ get_player_playback_state:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1374,7 +1374,7 @@ get_player_queue_info:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1388,7 +1388,7 @@ get_player_recent_tracks:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1440,7 +1440,7 @@ get_playlist:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1482,7 +1482,7 @@ get_playlist_cover_image:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1503,7 +1503,7 @@ get_playlist_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1552,7 +1552,7 @@ get_playlist_items:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1622,7 +1622,7 @@ get_playlists_for_user:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1678,7 +1678,7 @@ get_show:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1706,7 +1706,7 @@ get_show_episodes:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1762,7 +1762,7 @@ get_show_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1818,7 +1818,7 @@ get_spotify_connect_device:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1878,7 +1878,7 @@ get_spotify_connect_devices:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1905,7 +1905,7 @@ get_track:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1933,7 +1933,7 @@ get_track_audio_features:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -1954,7 +1954,7 @@ get_track_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -2022,7 +2022,7 @@ get_track_recommendations:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -2369,7 +2369,7 @@ get_tracks_audio_features:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -2390,7 +2390,7 @@ get_users_top_artists:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -2446,7 +2446,7 @@ get_users_top_tracks:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -2528,7 +2528,7 @@ player_media_pause:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -2559,7 +2559,7 @@ player_media_play_context:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -2638,7 +2638,7 @@ player_media_play_track_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -2702,7 +2702,7 @@ player_media_play_tracks:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -2757,7 +2757,7 @@ player_media_resume:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -2788,7 +2788,7 @@ player_media_seek:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -2839,7 +2839,7 @@ player_media_skip_next:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -2870,7 +2870,7 @@ player_media_skip_previous:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -2901,7 +2901,7 @@ player_set_repeat_mode:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -2944,7 +2944,7 @@ player_set_shuffle_mode:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -2982,7 +2982,7 @@ player_set_volume_level:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3023,7 +3023,7 @@ player_transfer_playback:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3081,7 +3081,7 @@ playlist_cover_image_add:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3109,7 +3109,7 @@ playlist_change:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3165,7 +3165,7 @@ playlist_create:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3221,7 +3221,7 @@ playlist_items_add:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3259,7 +3259,7 @@ playlist_items_clear:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3280,7 +3280,7 @@ playlist_items_remove:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3314,7 +3314,7 @@ playlist_items_reorder:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3371,7 +3371,7 @@ playlist_items_replace:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3398,7 +3398,7 @@ remove_album_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3419,7 +3419,7 @@ remove_audiobook_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3440,7 +3440,7 @@ remove_episode_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3461,7 +3461,7 @@ remove_show_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3482,7 +3482,7 @@ remove_track_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3503,7 +3503,7 @@ save_album_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3524,7 +3524,7 @@ save_audiobook_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3545,7 +3545,7 @@ save_episode_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3566,7 +3566,7 @@ save_show_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3587,7 +3587,7 @@ save_track_favorites:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3608,7 +3608,7 @@ search_all:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3658,7 +3658,7 @@ search_albums:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3721,7 +3721,7 @@ search_artists:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3784,7 +3784,7 @@ search_audiobooks:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3847,7 +3847,7 @@ search_episodes:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3910,7 +3910,7 @@ search_playlists:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -3973,7 +3973,7 @@ search_shows:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -4036,7 +4036,7 @@ search_tracks:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -4099,7 +4099,7 @@ trigger_scan_interval:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -4113,7 +4113,7 @@ unfollow_artists:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -4134,7 +4134,7 @@ unfollow_playlist:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -4155,7 +4155,7 @@ unfollow_users:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -4411,7 +4411,7 @@ test_token_expire:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:
@@ -4425,7 +4425,7 @@ volume_set_step:
   fields:
     entity_id:
       name: Entity ID
-      description: Entity ID of the SpotifyPlus device that will make the request to the Spotify Web API.
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
       example: "media_player.spotifyplus_username"
       required: true
       selector:

@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.191 ] - 2026/01/20
+
+  * Updated service descriptions for the `entity_id` argument to more clearly define what the argument is for.
+
 ###### [ 1.0.190 ] - 2026/01/07
 
   * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.259`.  This changes encoding of Spotify Connect credentials to use UTF-8 encoding instead of ASCII encoding.  This was causing issues with authentication credetials that contain non-ascii characters.
