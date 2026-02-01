@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.192 ] - 2026/02/01
+
+  * Updated strings.json (and translations) to remove http url references as examples.  This was causing HASSFest Validation errors in GitHub.
+
 ###### [ 1.0.191 ] - 2026/01/20
 
   * Updated service descriptions for the `entity_id` argument to more clearly define what the argument is for.
