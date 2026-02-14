@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.193 ] - 2026/02/13
+
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.260`.  
+  * This update fixes problems activating Google Chromecast groups that contain legacy devices (Google Mini, etc).  Note that it may take up to 30 seconds when transferring playback to some Google Cast Group devices.
+
 ###### [ 1.0.192 ] - 2026/02/01
 
   * Updated strings.json (and translations) to remove http url references as examples.  This was causing HASSFest Validation errors in GitHub.
