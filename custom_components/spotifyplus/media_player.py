@@ -1709,7 +1709,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             ids (str):  
                 A comma-separated list of the Spotify IDs for the albums.  
-                Maximum: 50 IDs.  
+                Maximum: 40 IDs.  
                 Example: `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`
                 If null, the currently playing track album uri id value is used.
                 
@@ -1762,7 +1762,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             ids (str):  
                 A comma-separated list of the Spotify IDs for the artists.  
-                Maximum: 50 IDs.  
+                Maximum: 40 IDs.  
                 Example: `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`
                 If null, the currently playing track artist uri id value is used.
                 
@@ -1815,7 +1815,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             ids (str):  
                 A comma-separated list of the Spotify IDs for the audiobooks.  
-                Maximum: 50 IDs.  
+                Maximum: 40 IDs.  
                 Example: `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`
                 If null, the currently playing audiobook uri id value is used.
                 
@@ -1868,7 +1868,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             ids (str):  
                 A comma-separated list of the Spotify IDs for the episodes.  
-                Maximum: 50 IDs.  
+                Maximum: 40 IDs.  
                 Example: `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`
                 If null, the currently playing episode uri id value is used.
                 
@@ -1982,7 +1982,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             ids (str):  
                 A comma-separated list of the Spotify IDs for the shows.  
-                Maximum: 50 IDs.  
+                Maximum: 40 IDs.  
                 Example: `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`
                 If null, the currently playing show uri id value is used.
                 
@@ -2035,7 +2035,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             ids (str):  
                 A comma-separated list of the Spotify IDs for the tracks.  
-                Maximum: 50 IDs.  
+                Maximum: 40 IDs.  
                 Example: `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`
                 If null, the currently playing context uri id value is used.
                 
@@ -2057,6 +2057,59 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # check Spotify track favorites.
             _logsi.LogVerbose("Check Spotify Track Favorites")
             result = self.data.spotifyClient.CheckTrackFavorites(ids)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_check_user_favorites(
+            self, 
+            uris:str=None, 
+            ) -> None:
+        """
+        Check if one or more items are already saved in the current user's library. 
+        Accepts Spotify URIs for tracks, albums, episodes, shows, audiobooks, artists, users, and playlists.
+        
+        Args:
+            uris (str):  
+                A comma-separated list of the Spotify URIs for the items.  
+                Maximum: 40 URIs.  
+                Example: `spotify:artist:6APm8EjxOHSYM5B4i3vT3q,spotify:album:6vc9OTcyd3hyzabCmsdnwE,spotify:track:1kWUud3vY5ij5r62zxpTRy`
+                If null, the currently playing item uri value is used.
+                
+        Returns:
+            A dictionary of the ids, along with a boolean status for each that indicates 
+            if the item is saved (True) in the users 'Your Library' or not (False).
+        """
+        apiMethodName:str = 'service_spotify_check_user_favorites'
+        apiMethodParms:SIMethodParmListContext = None
+        result:dict = {}
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("uris", uris)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Check User Favorites Service", apiMethodParms)
+                           
+            # check Spotify user favorites.
+            _logsi.LogVerbose("Check Spotify User Favorites")
+            result = self.data.spotifyClient.CheckUserFavorites(uris)
 
             # return the (partial) user profile that retrieved the result, as well as the result itself.
             return {
@@ -2138,7 +2191,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             ids (str):  
                 A comma-separated list of the Spotify IDs for the artists.  
-                Maximum: 50 IDs.  
+                Maximum: 40 IDs.  
                 Example: `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`
                 If null, the currently playing track artist uri id value is used.
         """
@@ -7293,7 +7346,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             ids (str):  
                 A comma-separated list of the Spotify IDs for the albums.  
-                Maximum: 50 IDs.  
+                Maximum: 40 IDs.  
                 Example: `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`
                 If null, the currently playing track album uri id value is used.
         """
@@ -7337,7 +7390,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             ids (str):  
                 A comma-separated list of the Spotify IDs for the audiobooks.  
-                Maximum: 50 IDs.  
+                Maximum: 40 IDs.  
                 Example: `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`
                 If null, the currently playing audiobook uri id value is used.
         """
@@ -7381,7 +7434,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             ids (str):  
                 A comma-separated list of the Spotify IDs for the episodes.  
-                Maximum: 50 IDs.  
+                Maximum: 40 IDs.  
                 Example: `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`
                 If null, the currently playing episode uri id value is used.
         """
@@ -7425,7 +7478,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             ids (str):  
                 A comma-separated list of the Spotify IDs for the shows.  
-                Maximum: 50 IDs.  
+                Maximum: 40 IDs.  
                 Example: `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`
                 If null, the currently playing show uri id value is used.
         """
@@ -7469,7 +7522,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             ids (str):  
                 A comma-separated list of the Spotify IDs for the tracks.  
-                Maximum: 50 IDs.  
+                Maximum: 40 IDs.  
                 Example: `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`
                 If null, the currently playing context uri id value is used.
         """
@@ -7503,6 +7556,51 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
+    def service_spotify_remove_user_favorites(
+            self, 
+            uris:str=None, 
+            ) -> None:
+        """
+        Remove one or more items from the current user's library.  
+        Accepts Spotify URIs for tracks, albums, episodes, shows, audiobooks, users, and playlists.
+        
+        Args:
+            uris (str):  
+                A comma-separated list of the Spotify URIs for the items.  
+                Maximum: 40 URIs.  
+                Example: `spotify:artist:6APm8EjxOHSYM5B4i3vT3q,spotify:album:6vc9OTcyd3hyzabCmsdnwE,spotify:track:1kWUud3vY5ij5r62zxpTRy`
+                If null, the currently playing item uri value is used.
+        """
+        apiMethodName:str = 'service_spotify_remove_user_favorites'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("uris", uris)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Remove User Favorites Service", apiMethodParms)
+                           
+            # remove items from Spotify track favorites.
+            _logsi.LogVerbose("Removing items(s) from Spotify User Favorites")
+            self.data.spotifyClient.RemoveUserFavorites(uris)
+
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
     def service_spotify_save_album_favorites(
             self, 
             ids:str=None, 
@@ -7513,7 +7611,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             ids (str):  
                 A comma-separated list of the Spotify IDs for the albums.  
-                Maximum: 50 IDs.  
+                Maximum: 40 IDs.  
                 Example: `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`
                 If null, the currently playing track album uri id value is used.
         """
@@ -7557,7 +7655,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             ids (str):  
                 A comma-separated list of the Spotify IDs for the audiobooks.  
-                Maximum: 50 IDs.  
+                Maximum: 40 IDs.  
                 Example: `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`
                 If null, the currently playing audiobook uri id value is used.
         """
@@ -7601,7 +7699,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             ids (str):  
                 A comma-separated list of the Spotify IDs for the episode.  
-                Maximum: 50 IDs.  
+                Maximum: 40 IDs.  
                 Example: `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`
                 If null, the currently playing episode uri id value is used.
         """
@@ -7645,7 +7743,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             ids (str):  
                 A comma-separated list of the Spotify IDs for the shows.  
-                Maximum: 50 IDs.  
+                Maximum: 40 IDs.  
                 Example: `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`
                 If null, the currently playing show uri id value is used.
         """
@@ -7689,7 +7787,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             ids (str):  
                 A comma-separated list of the Spotify IDs for the tracks.  
-                Maximum: 50 IDs.  
+                Maximum: 40 IDs.  
                 Example: `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`
                 If null, the currently playing context uri id value is used.
         """
@@ -7706,6 +7804,51 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # save items to Spotify track favorites.
             _logsi.LogVerbose("Saving items(s) to Spotify Track Favorites")
             self.data.spotifyClient.SaveTrackFavorites(ids)
+
+            # update ha state.
+            self.schedule_update_ha_state(force_refresh=False)
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
+    def service_spotify_save_user_favorites(
+            self, 
+            uris:str=None, 
+            ) -> None:
+        """
+        Add one or more items to the current user's library. 
+        Accepts Spotify URIs for tracks, albums, episodes, shows, audiobooks, users, and playlists.
+        
+        Args:
+            uris (str):  
+                A comma-separated list of the Spotify URIs for the items.  
+                Maximum: 40 URIs.  
+                Example: `spotify:artist:6APm8EjxOHSYM5B4i3vT3q,spotify:album:6vc9OTcyd3hyzabCmsdnwE,spotify:track:1kWUud3vY5ij5r62zxpTRy`
+                If null, the currently playing item uri value is used.
+        """
+        apiMethodName:str = 'service_spotify_save_user_favorites'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("uris", uris)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Save User Favorites Service", apiMethodParms)
+                           
+            # save items to Spotify user favorites.
+            _logsi.LogVerbose("Saving items(s) to Spotify User Favorites")
+            self.data.spotifyClient.SaveUserFavorites(uris)
 
             # update ha state.
             self.schedule_update_ha_state(force_refresh=False)
@@ -8540,7 +8683,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         Args:
             ids (str):  
                 A comma-separated list of the Spotify IDs for the artists.  
-                Maximum: 50 IDs.  
+                Maximum: 40 IDs.  
                 Example: `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`
                 If null, the currently playing track artist uri id value is used.
         """

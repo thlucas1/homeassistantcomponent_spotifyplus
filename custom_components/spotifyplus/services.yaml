@@ -57,7 +57,7 @@ check_album_favorites:
           domain: media_player
     ids:
       name: ID's
-      description: A comma-separated list of Spotify album id's (e.g. `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track album uri id value is used.
+      description: A comma-separated list of Spotify album id's (e.g. `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`).  A maximum of 40 id's may be specified.  If omitted, the currently playing track album uri id value is used.
       example: "6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX"
       required: false
       selector:
@@ -78,7 +78,7 @@ check_artists_following:
           domain: media_player
     ids:
       name: ID's
-      description: A comma-separated list of Spotify artist id's (e.g. `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track artist uri id value is used.
+      description: A comma-separated list of Spotify artist id's (e.g. `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`).  A maximum of 40 id's may be specified.  If omitted, the currently playing track artist uri id value is used.
       example: "2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk"
       required: false
       selector:
@@ -99,7 +99,7 @@ check_audiobook_favorites:
           domain: media_player
     ids:
       name: ID's
-      description: A comma-separated list of Spotify audiobook id's (e.g. `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`).  A maximum of 50 id's may be specified.  If omitted, the currently playing audiobook uri id value is used.
+      description: A comma-separated list of Spotify audiobook id's (e.g. `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`).  A maximum of 40 id's may be specified.  If omitted, the currently playing audiobook uri id value is used.
       example: "3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe"
       required: false
       selector:
@@ -120,7 +120,7 @@ check_episode_favorites:
           domain: media_player
     ids:
       name: ID's
-      description: A comma-separated list of Spotify episode id's (e.g. `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`).  A maximum of 50 id's may be specified.  If omitted, the currently playing episode uri id value is used.
+      description: A comma-separated list of Spotify episode id's (e.g. `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`).  A maximum of 40 id's may be specified.  If omitted, the currently playing episode uri id value is used.
       example: "3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4"
       required: false
       selector:
@@ -128,7 +128,7 @@ check_episode_favorites:
 
 check_playlist_followers:
   name: Check Playlist Followers
-  description: Check to see if the current user is following a specified playlist.
+  description: Check if one or more playlists (or the currently playing playlist) is followed in the current user's 'Your Library' favorites.
   fields:
     entity_id:
       name: Entity ID
@@ -140,15 +140,15 @@ check_playlist_followers:
           integration: spotifyplus
           domain: media_player
     playlist_id:
-      name: Playlist ID
-      description: The Spotify ID of the playlist (e.g. `3cEYpjA9oz9GiPac4AsH4n`).
+      name: Playlist ID's
+      description: A comma-separated list of Spotify playlist id's (e.g. `3cEYpjA9oz9GiPac4AsH4n`).  A maximum of 40 id's may be specified.  If omitted, the currently playing playlist uri id value is used.
       example: "3cEYpjA9oz9GiPac4AsH4n"
-      required: true
+      required: false
       selector:
         text:
     user_ids:
       name: User ID's
-      description: Deprecated - must contain the current user's Spotify Username; Maximum of 1 id.  Omit to default to current user name.
+      description: DEPRECATED - no longer used, but left here to maintain compatibility.
       required: false
       selector:
         text:
@@ -168,7 +168,7 @@ check_show_favorites:
           domain: media_player
     ids:
       name: ID's
-      description: A comma-separated list of Spotify show id's (e.g. `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing show uri id value is used.
+      description: A comma-separated list of Spotify show id's (e.g. `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`).  A maximum of 40 id's may be specified.  If omitted, the currently playing show uri id value is used.
       example: "6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk"
       required: false
       selector:
@@ -189,8 +189,29 @@ check_track_favorites:
           domain: media_player
     ids:
       name: ID's
-      description: A comma-separated list of Spotify track id's (e.g. `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`).  A maximum of 50 id's may be specified.  If omitted, the currently playing context uri id value is used.
+      description: A comma-separated list of Spotify track id's (e.g. `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`).  A maximum of 40 id's may be specified.  If omitted, the currently playing context uri id value is used.
       example: "1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK"
+      required: false
+      selector:
+        text:
+
+check_user_favorites:
+  name: Check User Favorites
+  description: Check if one or more items (or the currently playing item) exists in the current user's 'Your Library' favorites. Accepts Spotify URIs for tracks, albums, artists, episodes, shows, audiobooks, artists, users, and playlists.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    uris:
+      name: URI's
+      description: A comma-separated list of Spotify item uri's (e.g. `spotify:artist:6APm8EjxOHSYM5B4i3vT3q,spotify:track:1kWUud3vY5ij5r62zxpTRy`).  A maximum of 40 uri's may be specified.  If omitted, the currently playing item uri value is used.
+      example: "spotify:artist:6APm8EjxOHSYM5B4i3vT3q,spotify:album:6vc9OTcyd3hyzabCmsdnwE,spotify:track:1kWUud3vY5ij5r62zxpTRy"
       required: false
       selector:
         text:
@@ -231,7 +252,7 @@ follow_artists:
           domain: media_player
     ids:
       name: ID's
-      description: A comma-separated list of Spotify artist id's (e.g. `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track artist uri id value is used.
+      description: A comma-separated list of Spotify artist id's (e.g. `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`).  A maximum of 40 id's may be specified.  If omitted, the currently playing track artist uri id value is used.
       example: "2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk"
       required: false
       selector:
@@ -251,16 +272,15 @@ follow_playlist:
           integration: spotifyplus
           domain: media_player
     playlist_id:
-      name: Playlist ID
-      description: The Spotify ID of the playlist (e.g. `3cEYpjA9oz9GiPac4AsH4n`).  If omitted, the currently playing playlist uri id value is used.
+      name: Playlist ID's
+      description: A comma-separated list of Spotify playlist id's (e.g. `3cEYpjA9oz9GiPac4AsH4n`).  A maximum of 40 id's may be specified.  If omitted, the currently playing playlist uri id value is used.
       example: "3cEYpjA9oz9GiPac4AsH4n"
       required: false
       selector:
         text:
     public:
       name: Public?
-      description: If true the playlist will be included in user's public playlists, if false it will remain private. 
-      example: "True"
+      description: DEPRECATED - no longer used, but left here to maintain compatibility.
       required: false
       selector:
         boolean:
@@ -3174,8 +3194,7 @@ playlist_create:
           domain: media_player
     user_id:
       name: User ID
-      description: The user's Spotify user ID (e.g. 32k99y2kg5lnn3mxhtmd2bpdkjfu).  Omit this argument to use the Spotify User ID of the player entity_id.
-      example: "32k99y2kg5lnn3mxhtmd2bpdkjfu"
+      description: DEPRECATED - no longer used, but left here to maintain compatibility.
       required: false
       selector:
         text:
@@ -3407,7 +3426,7 @@ remove_album_favorites:
           domain: media_player
     ids:
       name: ID's
-      description: A comma-separated list of Spotify album id's (e.g. `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track album uri id value is used.
+      description: A comma-separated list of Spotify album id's (e.g. `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`).  A maximum of 40 id's may be specified.  If omitted, the currently playing track album uri id value is used.
       example: "6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX"
       required: false
       selector:
@@ -3428,7 +3447,7 @@ remove_audiobook_favorites:
           domain: media_player
     ids:
       name: ID's
-      description: A comma-separated list of Spotify audiobook id's (e.g. `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`).  A maximum of 50 id's may be specified.  If omitted, the currently playing audiobook uri id value is used.
+      description: A comma-separated list of Spotify audiobook id's (e.g. `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`).  A maximum of 40 id's may be specified.  If omitted, the currently playing audiobook uri id value is used.
       example: "3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe"
       required: false
       selector:
@@ -3449,7 +3468,7 @@ remove_episode_favorites:
           domain: media_player
     ids:
       name: ID's
-      description: A comma-separated list of Spotify episode id's (e.g. `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`).  A maximum of 50 id's may be specified.  If omitted, the currently playing episode uri id value is used.
+      description: A comma-separated list of Spotify episode id's (e.g. `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`).  A maximum of 40 id's may be specified.  If omitted, the currently playing episode uri id value is used.
       example: "3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4"
       required: false
       selector:
@@ -3470,7 +3489,7 @@ remove_show_favorites:
           domain: media_player
     ids:
       name: ID's
-      description: A comma-separated list of Spotify show id's (e.g. `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing show uri id value is used.
+      description: A comma-separated list of Spotify show id's (e.g. `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`).  A maximum of 40 id's may be specified.  If omitted, the currently playing show uri id value is used.
       example: "6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk"
       required: false
       selector:
@@ -3491,8 +3510,29 @@ remove_track_favorites:
           domain: media_player
     ids:
       name: ID's
-      description: A comma-separated list of Spotify track id's (e.g. `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`).  A maximum of 50 id's may be specified.  If omitted, the currently playing context uri id value is used.
+      description: A comma-separated list of Spotify track id's (e.g. `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`).  A maximum of 40 id's may be specified.  If omitted, the currently playing context uri id value is used.
       example: "1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK"
+      required: false
+      selector:
+        text:
+
+remove_user_favorites:
+  name: Remove User Favorites
+  description: Remove one or more items from the current user's 'Your Library'. Accepts Spotify URIs for tracks, albums, artists, episodes, shows, audiobooks, users, and playlists.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    uris:
+      name: URI's
+      description: A comma-separated list of Spotify item uri's (e.g. `spotify:artist:6APm8EjxOHSYM5B4i3vT3q,spotify:track:1kWUud3vY5ij5r62zxpTRy`).  A maximum of 40 uri's may be specified.  If omitted, the currently playing item uri value is used.
+      example: "spotify:artist:6APm8EjxOHSYM5B4i3vT3q,spotify:album:6vc9OTcyd3hyzabCmsdnwE,spotify:track:1kWUud3vY5ij5r62zxpTRy"
       required: false
       selector:
         text:
@@ -3512,7 +3552,7 @@ save_album_favorites:
           domain: media_player
     ids:
       name: ID's
-      description: A comma-separated list of Spotify album id's (e.g. `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track album uri id value is used.
+      description: A comma-separated list of Spotify album id's (e.g. `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`).  A maximum of 40 id's may be specified.  If omitted, the currently playing track album uri id value is used.
       example: "6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX"
       required: false
       selector:
@@ -3533,7 +3573,7 @@ save_audiobook_favorites:
           domain: media_player
     ids:
       name: ID's
-      description: A comma-separated list of Spotify audiobook id's (e.g. `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`).  A maximum of 50 id's may be specified.  If omitted, the currently playing audiobook uri id value is used.
+      description: A comma-separated list of Spotify audiobook id's (e.g. `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`).  A maximum of 40 id's may be specified.  If omitted, the currently playing audiobook uri id value is used.
       example: "3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe"
       required: false
       selector:
@@ -3554,7 +3594,7 @@ save_episode_favorites:
           domain: media_player
     ids:
       name: ID's
-      description: A comma-separated list of Spotify episode id's (e.g. `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`).  A maximum of 50 id's may be specified.  If omitted, the currently playing episode uri id value is used.
+      description: A comma-separated list of Spotify episode id's (e.g. `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`).  A maximum of 40 id's may be specified.  If omitted, the currently playing episode uri id value is used.
       example: "3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4"
       required: false
       selector:
@@ -3575,7 +3615,7 @@ save_show_favorites:
           domain: media_player
     ids:
       name: ID's
-      description: A comma-separated list of Spotify show id's (e.g. `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing show uri id value is used.
+      description: A comma-separated list of Spotify show id's (e.g. `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`).  A maximum of 40 id's may be specified.  If omitted, the currently playing show uri id value is used.
       example: "6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk"
       required: false
       selector:
@@ -3596,8 +3636,29 @@ save_track_favorites:
           domain: media_player
     ids:
       name: ID's
-      description: A comma-separated list of Spotify track id's (e.g. `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`).  A maximum of 50 id's may be specified.  If omitted, the currently playing context uri id value is used.
+      description: A comma-separated list of Spotify track id's (e.g. `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`).  A maximum of 40 id's may be specified.  If omitted, the currently playing context uri id value is used.
       example: "1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK"
+      required: false
+      selector:
+        text:
+
+save_user_favorites:
+  name: Save User Favorites
+  description: Save one or more items to the current user's 'Your Library'. Accepts Spotify URIs for tracks, albums, artists, episodes, shows, audiobooks, users, and playlists.
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API.
+      example: "media_player.spotifyplus_username"
+      required: true
+      selector:
+        entity:
+          integration: spotifyplus
+          domain: media_player
+    uris:
+      name: URI's
+      description: A comma-separated list of Spotify item uri's (e.g. `spotify:artist:6APm8EjxOHSYM5B4i3vT3q,spotify:track:1kWUud3vY5ij5r62zxpTRy`).  A maximum of 40 uri's may be specified.  If omitted, the currently playing item uri value is used.
+      example: "spotify:artist:6APm8EjxOHSYM5B4i3vT3q,spotify:album:6vc9OTcyd3hyzabCmsdnwE,spotify:track:1kWUud3vY5ij5r62zxpTRy"
       required: false
       selector:
         text:
@@ -3674,13 +3735,13 @@ search_albums:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
-      example: 20
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 5, Range is 1 to 10.  See the limit_total argument for automatic paging option.
+      example: 10
       required: false
       selector:
         number:
           min: 1
-          max: 50
+          max: 10
           mode: box
     offset:
       name: Offset
@@ -3737,13 +3798,13 @@ search_artists:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
-      example: 20
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 5, Range is 1 to 10.  See the limit_total argument for automatic paging option.
+      example: 10
       required: false
       selector:
         number:
           min: 1
-          max: 50
+          max: 10
           mode: box
     offset:
       name: Offset
@@ -3800,13 +3861,13 @@ search_audiobooks:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
-      example: 20
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 5, Range is 1 to 10.  See the limit_total argument for automatic paging option.
+      example: 10
       required: false
       selector:
         number:
           min: 1
-          max: 50
+          max: 10
           mode: box
     offset:
       name: Offset
@@ -3863,13 +3924,13 @@ search_episodes:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
-      example: 20
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 5, Range is 1 to 10.  See the limit_total argument for automatic paging option.
+      example: 10
       required: false
       selector:
         number:
           min: 1
-          max: 50
+          max: 10
           mode: box
     offset:
       name: Offset
@@ -3926,13 +3987,13 @@ search_playlists:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
-      example: 20
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 5, Range is 1 to 10.  See the limit_total argument for automatic paging option.
+      example: 10
       required: false
       selector:
         number:
           min: 1
-          max: 50
+          max: 10
           mode: box
     offset:
       name: Offset
@@ -3989,13 +4050,13 @@ search_shows:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
-      example: 20
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 5, Range is 1 to 10.  See the limit_total argument for automatic paging option.
+      example: 10
       required: false
       selector:
         number:
           min: 1
-          max: 50
+          max: 10
           mode: box
     offset:
       name: Offset
@@ -4052,13 +4113,13 @@ search_tracks:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
-      example: 20
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 5, Range is 1 to 10.  See the limit_total argument for automatic paging option.
+      example: 10
       required: false
       selector:
         number:
           min: 1
-          max: 50
+          max: 10
           mode: box
     offset:
       name: Offset
@@ -4122,7 +4183,7 @@ unfollow_artists:
           domain: media_player
     ids:
       name: ID's
-      description: A comma-separated list of Spotify artist id's (e.g. `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track artist uri id value is used.
+      description: A comma-separated list of Spotify artist id's (e.g. `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`).  A maximum of 40 id's may be specified.  If omitted, the currently playing track artist uri id value is used.
       example: "2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk"
       required: false
       selector:
@@ -4142,8 +4203,8 @@ unfollow_playlist:
           integration: spotifyplus
           domain: media_player
     playlist_id:
-      name: Playlist ID
-      description: The Spotify ID of the playlist (e.g. `3cEYpjA9oz9GiPac4AsH4n`).  If omitted, the currently playing playlist uri id value is used.
+      name: Playlist ID's
+      description: A comma-separated list of Spotify playlist id's (e.g. `3cEYpjA9oz9GiPac4AsH4n`).  A maximum of 40 id's may be specified.  If omitted, the currently playing playlist uri id value is used.
       example: "3cEYpjA9oz9GiPac4AsH4n"
       required: false
       selector:
@@ -4164,7 +4225,7 @@ unfollow_users:
           domain: media_player
     ids:
       name: ID's
-      description: A comma-separated list of Spotify user IDs (e.g. `smedjan,3758dfdsfjk435hjk6k79lm0n3c4`).  A maximum of 50 IDs can be sent in one request.
+      description: A comma-separated list of Spotify user IDs (e.g. `smedjan,3758dfdsfjk435hjk6k79lm0n3c4`).  A maximum of 40 IDs can be sent in one request.
       example: "smedjan,3758dfdsfjk435hjk6k79lm0n3c4"
       required: true
       selector:

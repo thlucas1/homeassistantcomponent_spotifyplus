@@ -6,6 +6,19 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.194 ] - 2026/02/16
+
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.262`.
+  * __Made numerous updates for the recent Spotify changes (2026/02/11) that removed functionality from their Spotify Web API.__
+  * Added `SpotifyClient.CheckUserFavorites` method to check if one or more items are already saved in the current user's library. Accepts Spotify URIs for tracks, albums, episodes, shows, audiobooks, artists, users, and playlists.
+  * Added `SpotifyClient.SaveUserFavorites` method to add one or more items to the current user's library. Accepts Spotify URIs for tracks, albums, episodes, shows, audiobooks, users, and playlists.
+  * Added `SpotifyClient.RemoveUserFavorites` method to remove one or more items from the current user's library. Accepts Spotify URIs for tracks, albums, episodes, shows, audiobooks, users, and playlists.
+  * Updated the following `SpotifyClient` methods to use the new `CheckUserFavorites` method: `CheckAlbumFavorites`, `CheckArtistsFollowing`, `CheckAudiobookFavorites`, `CheckEpisodeFavorites`, `CheckPlaylistFollowers`, `CheckShowFavorites`, `CheckTrackFavorites`, `CheckUsersFollowing`.
+  * Updated the following `SpotifyClient` methods to use the new `SaveUserFavorites` method: `SaveAlbumFavorites`, `SaveAudiobookFavorites`, `SaveEpisodeFavorites`, `SaveShowFavorites`, `SaveTrackFavorites`, `FollowArtists`, `FollowPlaylist`, `FollowUsers`.
+  * Updated the following `SpotifyClient` methods to use the new `RemoveUserFavorites` method: `RemoveAlbumFavorites`, `RemoveAudiobookFavorites`, `RemoveEpisodeFavorites`, `RemoveShowFavorites`, `RemoveTrackFavorites`, `UnfollowArtists`, `UnfollowPlaylist`, `UnfollowUsers`.
+  * Updated the following `SpotifyClient` methods to return a "deprecated" exception, as they are no longer supported by Spotify: `GetAlbumNewReleases`, `GetAlbums`, `GetArtists`, `GetArtistTopTracks`, `GetAudiobooks`, `GetBrowseCategory`, `GetBrowseCategorys`, `GetChapters`, `GetEpisodes`, `GetMarkets`, `GetPlaylistsForUser`, `GetShows`, `GetTracks`, `GetUsersPublicProfile`.
+  * Updated `SpotifyClient` search methods to limit parameter maximum / default values; maximum value has been reduced from 50 to 10, and the default value has been changed from 20 to 5.
+
 ###### [ 1.0.193 ] - 2026/02/13
 
   * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.260`.  

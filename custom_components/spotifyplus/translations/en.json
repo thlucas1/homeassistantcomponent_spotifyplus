@@ -122,7 +122,7 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify album id's (e.g. `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track album uri id value is used."
+          "description": "A comma-separated list of Spotify album id's (e.g. `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`).  A maximum of 40 id's may be specified.  If omitted, the currently playing track album uri id value is used."
         }
       }
     },
@@ -136,7 +136,7 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify artist id's (e.g. `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track artist uri id value is used."
+          "description": "A comma-separated list of Spotify artist id's (e.g. `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`).  A maximum of 40 id's may be specified.  If omitted, the currently playing track artist uri id value is used."
         }
       }
     },
@@ -150,7 +150,7 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify audiobook id's (e.g. `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`).  A maximum of 50 id's may be specified.  If omitted, the currently playing audiobook uri id value is used."
+          "description": "A comma-separated list of Spotify audiobook id's (e.g. `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`).  A maximum of 40 id's may be specified.  If omitted, the currently playing audiobook uri id value is used."
         }
       }
     },
@@ -164,13 +164,13 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify episode id's (e.g. `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`).  A maximum of 50 id's may be specified.  If omitted, the currently playing episode uri id value is used."
+          "description": "A comma-separated list of Spotify episode id's (e.g. `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`).  A maximum of 40 id's may be specified.  If omitted, the currently playing episode uri id value is used."
         }
       }
     },
     "check_playlist_followers": {
       "name": "Check Playlist Followers",
-      "description": "Check to see if the current user is following a specified playlist.",
+      "description": "Check if one or more playlists (or the currently playing playlist) is followed in the current user's 'Your Library' favorites.",
       "fields": {
         "entity_id": {
           "name": "Entity ID",
@@ -178,7 +178,7 @@
         },
         "playlist_id": {
           "name": "Playlist ID",
-          "description": "The Spotify ID of the playlist (e.g. `3cEYpjA9oz9GiPac4AsH4n`)."
+          "description": "A comma-separated list of Spotify playlist id's (e.g. `3cEYpjA9oz9GiPac4AsH4n`).  A maximum of 40 id's may be specified.  If omitted, the currently playing playlist uri id value is used."
         },
         "user_ids": {
           "name": "User ID's",
@@ -196,7 +196,7 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify show id's (e.g. `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing show uri id value is used."
+          "description": "A comma-separated list of Spotify show id's (e.g. `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`).  A maximum of 40 id's may be specified.  If omitted, the currently playing show uri id value is used."
         }
       }
     },
@@ -210,7 +210,21 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify track id's (e.g. `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`).  A maximum of 50 id's may be specified.  If omitted, the currently playing context uri id value is used."
+          "description": "A comma-separated list of Spotify track id's (e.g. `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`).  A maximum of 40 id's may be specified.  If omitted, the currently playing context uri id value is used."
+        }
+      }
+    },
+    "check_users_favorites": {
+      "name": "Check User Favorites",
+      "description": "Check if one or more items (or the currently playing item) exists in the current user's 'Your Library' favorites.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API."
+        },
+        "uris": {
+          "name": "URI's",
+          "description": "A comma-separated list of Spotify item uri's (e.g. `spotify:artist:6APm8EjxOHSYM5B4i3vT3q,spotify:track:1kWUud3vY5ij5r62zxpTRy`).  A maximum of 40 uri's may be specified.  If omitted, the currently playing item uri value is used."
         }
       }
     },
@@ -224,7 +238,7 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify user ID's to check (e.g. `smedjan, 7piUznRWxNyKpaPvmOSdiZ`).  A maximum of 50 ID's can be specified."
+          "description": "A comma-separated list of Spotify user ID's to check (e.g. `smedjan, 7piUznRWxNyKpaPvmOSdiZ`).  A maximum of 40 ID's can be specified."
         }
       }
     },
@@ -238,7 +252,7 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify artist id's (e.g. `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track artist uri id value is used."
+          "description": "A comma-separated list of Spotify artist id's (e.g. `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`).  A maximum of 40 id's may be specified.  If omitted, the currently playing track artist uri id value is used."
         }
       }
     },
@@ -270,7 +284,7 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of the Spotify user IDs (e.g. 'smedjan,3758dfdsfjk435hjk6k79lm0n3c4').  A maximum of 50 IDs can be sent in one request."
+          "description": "A comma-separated list of the Spotify user IDs (e.g. 'smedjan,3758dfdsfjk435hjk6k79lm0n3c4').  A maximum of 40 IDs can be sent in one request."
         }
       }
     },
@@ -2066,7 +2080,7 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify album id's (e.g. `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track album uri id value is used."
+          "description": "A comma-separated list of Spotify album id's (e.g. `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`).  A maximum of 40 id's may be specified.  If omitted, the currently playing track album uri id value is used."
         }
       }
     },
@@ -2080,7 +2094,7 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify audiobook id's (e.g. `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`).  A maximum of 50 id's may be specified.  If omitted, the currently playing audiobook uri id value is used."
+          "description": "A comma-separated list of Spotify audiobook id's (e.g. `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`).  A maximum of 40 id's may be specified.  If omitted, the currently playing audiobook uri id value is used."
         }
       }
     },
@@ -2094,7 +2108,7 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify episode id's (e.g. `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`).  A maximum of 50 id's may be specified.  If omitted, the currently playing episode uri id value is used."
+          "description": "A comma-separated list of Spotify episode id's (e.g. `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`).  A maximum of 40 id's may be specified.  If omitted, the currently playing episode uri id value is used."
         }
       }
     },
@@ -2108,7 +2122,7 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify show id's (e.g. `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing show uri id value is used."
+          "description": "A comma-separated list of Spotify show id's (e.g. `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`).  A maximum of 40 id's may be specified.  If omitted, the currently playing show uri id value is used."
         }
       }
     },
@@ -2122,7 +2136,21 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify track id's (e.g. `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`).  A maximum of 50 id's may be specified.  If omitted, the currently playing context uri id value is used."
+          "description": "A comma-separated list of Spotify track id's (e.g. `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`).  A maximum of 40 id's may be specified.  If omitted, the currently playing context uri id value is used."
+        }
+      }
+    },
+    "remove_user_favorites": {
+      "name": "Remove User Favorites",
+      "description": "Remove one or more items from the current user's 'Your Library'.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API."
+        },
+        "uris": {
+          "name": "URI's",
+          "description": "A comma-separated list of Spotify item uri's (e.g. `spotify:artist:6APm8EjxOHSYM5B4i3vT3q,spotify:track:1kWUud3vY5ij5r62zxpTRy`).  A maximum of 40 uri's may be specified.  If omitted, the currently playing item uri value is used."
         }
       }
     },
@@ -2136,7 +2164,7 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify album id's (e.g. `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track album uri id value is used."
+          "description": "A comma-separated list of Spotify album id's (e.g. `6vc9OTcyd3hyzabCmsdnwE,382ObEPsp2rxGrnsizN5TX`).  A maximum of 40 id's may be specified.  If omitted, the currently playing track album uri id value is used."
         }
       }
     },
@@ -2150,7 +2178,7 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify audiobook id's (e.g. `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`).  A maximum of 50 id's may be specified.  If omitted, the currently playing audiobook uri id value is used."
+          "description": "A comma-separated list of Spotify audiobook id's (e.g. `3PFyizE2tGCSRLusl2Qizf,7iHfbu1YPACw6oZPAFJtqe`).  A maximum of 40 id's may be specified.  If omitted, the currently playing audiobook uri id value is used."
         }
       }
     },
@@ -2164,7 +2192,7 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify episode id's (e.g. `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`).  A maximum of 50 id's may be specified.  If omitted, the currently playing episode uri id value is used."
+          "description": "A comma-separated list of Spotify episode id's (e.g. `3F97boSWlXi8OzuhWClZHQ,1hPX5WJY6ja6yopgVPBqm4`).  A maximum of 40 id's may be specified.  If omitted, the currently playing episode uri id value is used."
         }
       }
     },
@@ -2178,7 +2206,7 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify show id's (e.g. `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing show uri id value is used."
+          "description": "A comma-separated list of Spotify show id's (e.g. `6kAsbP8pxwaU2kPibKTuHE,4rOoJ6Egrf8K2IrywzwOMk`).  A maximum of 40 id's may be specified.  If omitted, the currently playing show uri id value is used."
         }
       }
     },
@@ -2190,9 +2218,23 @@
           "name": "Entity ID",
           "description": "Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API."
         },
+        "uris": {
+          "name": "URI's",
+          "description": "A comma-separated list of Spotify item uri's (e.g. `spotify:artist:6APm8EjxOHSYM5B4i3vT3q,spotify:track:1kWUud3vY5ij5r62zxpTRy`).  A maximum of 40 uri's may be specified.  If omitted, the currently playing item uri value is used."
+        }
+      }
+    },
+    "save_user_favorites": {
+      "name": "Save User Favorites",
+      "description": "Save one or more items to the current user's 'Your Library'.",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API."
+        },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify track id's (e.g. `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`).  A maximum of 50 id's may be specified.  If omitted, the currently playing context uri id value is used."
+          "description": "A comma-separated list of Spotify track id's (e.g. `1kWUud3vY5ij5r62zxpTRy,4eoYKv2kDwJS7gRGh5q6SK`).  A maximum of 40 id's may be specified.  If omitted, the currently playing context uri id value is used."
         }
       }
     },
@@ -2240,7 +2282,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 5, Range is 1 to 10.  See the limit_total argument for automatic paging option."
         },
         "offset": {
           "name": "Offset",
@@ -2274,7 +2316,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 5, Range is 1 to 10.  See the limit_total argument for automatic paging option."
         },
         "offset": {
           "name": "Offset",
@@ -2308,7 +2350,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 5, Range is 1 to 10.  See the limit_total argument for automatic paging option."
         },
         "offset": {
           "name": "Offset",
@@ -2342,7 +2384,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 5, Range is 1 to 10.  See the limit_total argument for automatic paging option."
         },
         "offset": {
           "name": "Offset",
@@ -2376,7 +2418,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 5, Range is 1 to 10.  See the limit_total argument for automatic paging option."
         },
         "offset": {
           "name": "Offset",
@@ -2410,7 +2452,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 5, Range is 1 to 10.  See the limit_total argument for automatic paging option."
         },
         "offset": {
           "name": "Offset",
@@ -2444,7 +2486,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 5, Range is 1 to 10.  See the limit_total argument for automatic paging option."
         },
         "offset": {
           "name": "Offset",
@@ -2484,21 +2526,21 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify artist id's (e.g. `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`).  A maximum of 50 id's may be specified.  If omitted, the currently playing track artist uri id value is used."
+          "description": "A comma-separated list of Spotify artist id's (e.g. `2CIMQHirSU0MQqyYHq0eOx,1IQ2e1buppatiN1bxUVkrk`).  A maximum of 40 id's may be specified.  If omitted, the currently playing track artist uri id value is used."
         }
       }
     },
     "unfollow_playlist": {
       "name": "Unfollow Playlist",
-      "description": "Remove the current user as a follower of a playlist.",
+      "description": "Remove the current user as a follower of one or more playlists.",
       "fields": {
         "entity_id": {
           "name": "Entity ID",
           "description": "Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API."
         },
         "playlist_id": {
-          "name": "Playlist ID",
-          "description": "The Spotify ID of the playlist (e.g. `3cEYpjA9oz9GiPac4AsH4n`).  If omitted, the currently playing playlist uri id value is used."
+          "name": "Playlist ID's",
+          "description": "A comma-separated list of Spotify playlist id's (e.g. `3cEYpjA9oz9GiPac4AsH4n`).  A maximum of 40 IDs can be sent in one request.  If omitted, the currently playing playlist uri id value is used."
         }
       }
     },
@@ -2512,7 +2554,7 @@
         },
         "ids": {
           "name": "ID's",
-          "description": "A comma-separated list of Spotify user IDs (e.g. `smedjan,3758dfdsfjk435hjk6k79lm0n3c4`).  A maximum of 50 IDs can be sent in one request."
+          "description": "A comma-separated list of Spotify user IDs (e.g. `smedjan,3758dfdsfjk435hjk6k79lm0n3c4`).  A maximum of 40 IDs can be sent in one request."
         }
       }
     },
