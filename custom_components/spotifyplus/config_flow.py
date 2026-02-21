@@ -16,9 +16,11 @@ dependencies and install the requirements of the component.
 """
 from __future__ import annotations
 from collections.abc import Mapping
-import logging
 from typing import Any
 import voluptuous as vol
+import ssl
+import socket
+import sys
 
 from spotifywebapipython import SpotifyClient
 from spotifywebapipython.models import Device, SpotifyConnectDevices
@@ -61,7 +63,7 @@ from .const import (
 from .instancedata_spotifyplus import InstanceDataSpotifyPlus
 
 # get smartinspect logger reference; create a new session for this module name.
-from smartinspectpython.siauto import SIAuto, SILevel, SISession, SIColors
+from smartinspectpython.siauto import SIAuto, SILevel, SISession, SIColors, SIMethodParmListContext
 import logging
 _logsi:SISession = SIAuto.Si.GetSession(__name__)
 if (_logsi == None):
@@ -103,6 +105,21 @@ class SpotifyPlusConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, 
         
         _logsi.LogDictionary(SILevel.Verbose, "Configure Component extra_authorize_data - data (dictionary)", data, colorValue=SIColors.Tan)
         return data
+
+
+    async def async_generate_authorize_url(self) -> str:
+        """
+        Generate a url for the user to authorize.
+        
+        Returns:
+            A string containing the authorization url used to authenticate the user.
+        """
+        # verify ssl / tls setup prior to authorizing, just in case the PyOpenSSL
+        # module is injected (causes Spotify authorization to fail).
+        self._ssl_verify()
+
+        # invoke base class method.
+        return await super().async_generate_authorize_url()
 
 
     async def async_oauth_create_entry(self, data:dict[str,Any]) -> ConfigFlowResult:
@@ -353,6 +370,123 @@ class SpotifyPlusConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, 
         details page of the UI.
         """
         return SpotifyPlusOptionsFlow(config_entry)
+
+
+    def _ssl_verify(self) -> None:
+        """
+        Check if pyopenssl was injected into urllib3 by the `requests` module initialization.
+
+        At this point, the integration has not been installed yet but is in the process of being installed.
+
+        If pyopenssl is injected then we will log a warning as Spotify authorization will probably 
+        fail with a `certificate verify failed` error when pyopenssl `do_handshake()` method is called.
+        """
+        apiMethodName:str = 'config_flow._ssl_verify'
+        apiMethodParms:SIMethodParmListContext = None
+
+        try:
+
+            # if pyopenssl is injected then we will log a warning as Spotify authorization will probably 
+            # fail with a `certificate verify failed` error when pyopenssl `do_handshake()` method is called.
+            # in this case, the certificate chain is valid and processing successfully, but the failure
+            # occurs during TLS Server Name Indication (SNI) processing.  the pyopenssl module does not
+            # support TLS SNI processing.  
+            
+            # this is usually caused by a conflicting custom integration that is installed in HA.
+            # the offending integration can usually be found by searching the HA /config/custom_components/
+            # folder (and all sub-folders) for these phrases: "urllib3", "pyopenssl".  
+
+            # try:
+            #     # TEST TODO force urllib3 to use PyOpenSSL for testing.
+            #     _logsi.LogWarning("TEST TODO forcing urllib3 to use PyOpenSSL for TLS verification testing", colorValue=SIColors.Red)
+            #     import urllib3.contrib.pyopenssl
+            #     urllib3.contrib.pyopenssl.inject_into_urllib3()
+            # except Exception as ex:
+            #     _logsi.LogException("TEST TODO Could not force urllib3 to use PyOpenSSL for TLS verification testing!", ex, logToSystemLogger=False, colorValue=SIColors.Red)
+
+            # force a reference to requests, which will call `inject_into_urllib3` method
+            # if the PyOpenSSL library is installed and HAS_SNI = False (SNI support disabled).
+            import requests
+
+            # is TLS SNI support enabled in Python?
+            has_sni:bool = getattr(ssl, "HAS_SNI", False)
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName, colorValue=SIColors.Tan)
+            apiMethodParms.AppendKeyValue("Python Version", sys.version)
+            apiMethodParms.AppendKeyValue("TLS SNI Support?", "ENABLED in Python" if has_sni else "DISABLED")
+            apiMethodParms.AppendKeyValue("OpenSSL Version", ssl.OPENSSL_VERSION)
+            apiMethodParms.AppendKeyValue("OpenSSL HAS_SNI", getattr(ssl, "HAS_SNI", False))
+            apiMethodParms.AppendKeyValue("OpenSSL Default Verify Paths", ssl.get_default_verify_paths())
+
+            is_pyopenssl:bool = False
+            try:
+                import urllib3.util.ssl_
+                is_pyopenssl = getattr(urllib3.util.ssl_, "IS_PYOPENSSL", False)
+                apiMethodParms.AppendKeyValue("urllib3 present?", "YES")
+                apiMethodParms.AppendKeyValue("urllib3 Using PyOpenSSL?", is_pyopenssl)
+            except Exception as e:
+                apiMethodParms.AppendKeyValue("urllib3 check failed", str(e))
+
+            try:
+                import cryptography
+                apiMethodParms.AppendKeyValue("Cryptography Version", cryptography.__version__)
+            except Exception:
+                apiMethodParms.AppendKeyValue("Cryptography", "NOT INSTALLED")
+
+            try:
+                import OpenSSL
+                apiMethodParms.AppendKeyValue("pyOpenSSL Version", OpenSSL.__version__)
+            except Exception:
+                apiMethodParms.AppendKeyValue("pyOpenSSL", "NOT INSTALLED")
+
+            # trace.
+            _logsi.LogMethodParmList(SILevel.Verbose, "Verifying TLS and SSL authorization environment parameters", apiMethodParms, colorValue=SIColors.Tan)
+            
+            # log various conditions that may cause Spotify OAuth2 to fail.
+            if has_sni == False:
+                _logsi.LogWarning("SSL TLS SNI support is DISABLED, which may cause Spotify OAuth to fail with `certificate verify failed` errors if pyopenssl is installed!")
+
+            if is_pyopenssl == True:
+
+                # The following will try to prevent PyOpenSSL from overriding the Python OpenSSL stack,
+                # which can be a problem when the `requests` and `urllib3` libraries are used together.
+                # The `requests.__init__` method overrides the standard Python OpenSSL library with the
+                # PyOpenSSL library if TLS SNI support is disabled AND the PyOpenSSL library is
+                # installed; it does this by calling the `pyopenssl.inject_into_urllib3()` method.
+                #
+                # To restore the standard Python OpenSSL library, the `pyopenssl.extract_from_urllib3()` 
+                # method can be called to remove the PyOpenSSL override.
+                #
+                # The PyOpenSSL library cannot be used with the Spotify Web API, as it causes all calls
+                # to fail with "certificate verify failed" exceptions.  Note that the SSL certificate
+                # validation works fine, but the surrounding TLS Server Name Indication is what fails.
+                #
+                # The standard Python OpenSSL library correctly handles the TLS SNI verification to the
+                # Spotify Web API.
+                try:
+
+                    _logsi.LogWarning("pyOpenSSL has been injected into URLLIB3 by another custom component!  This could cause SSL `certificate verify failed` errors to occur due to TLS handshake failures", colorValue=SIColors.Tan)
+                    _logsi.LogWarning("Extracting pyOpenSSL from URLLIB3, and restoring the standard Python OpenSSL library", colorValue=SIColors.Tan)
+
+                    # remove PyOpenSSL from urllib3, restoring the standard Python OpenSSL library.
+                    import urllib3.contrib.pyopenssl
+                    urllib3.contrib.pyopenssl.extract_from_urllib3()
+
+                except Exception as ex:
+
+                    _logsi.LogWarning("Could not restore the standard Python OpenSSL library!  This could cause SSL `certificate verify failed` errors to occur due to TLS handshake failures! Error: %s" % str(ex), colorValue=SIColors.Red)
+
+        except Exception as e:
+
+            # trace.
+            _logsi.LogVerbose("Could not determine OAuth2 SSL authorization environment parameters!  Error: %s" % str(e), colorValue=SIColors.Red)
+            # ignore exceptions here, as they will be handled if / when authorization fails.
+
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName, colorValue=SIColors.Tan)
 
 
 class SpotifyPlusOptionsFlow(OptionsFlow):

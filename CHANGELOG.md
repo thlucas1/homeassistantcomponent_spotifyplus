@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.195 ] - 2026/02/21
+
+  * Updated `config_flow` to verify that the PyOpenSSL module has not been injected into urllib3.  This was causing `certificate verify failed` errors to occur when trying to install the integration.  This can be caused by any custom component that injects the `pyopenssl` module into urllib3.
+
 ###### [ 1.0.194 ] - 2026/02/16
 
   * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.262`.
