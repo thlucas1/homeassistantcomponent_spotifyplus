@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.196 ] - 2026/02/22
+
+  * Added service `get_device_playback_state` to retrieve current playbck state for a specific device.
+
 ###### [ 1.0.195 ] - 2026/02/21
 
   * Updated `config_flow` to verify that the PyOpenSSL module has not been injected into urllib3.  This was causing `certificate verify failed` errors to occur when trying to install the integration.  This can be caused by any custom component that injects the `pyopenssl` module into urllib3.

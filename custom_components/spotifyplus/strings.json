@@ -178,7 +178,7 @@
         },
         "playlist_id": {
           "name": "Playlist ID",
-          "description": "A comma-separated list of Spotify playlist id's (e.g. `3cEYpjA9oz9GiPac4AsH4n`).  A maximum of 40 id's may be specified.  If omitted, the currently playing playlist uri id value is used.",
+          "description": "A comma-separated list of Spotify playlist id's (e.g. `3cEYpjA9oz9GiPac4AsH4n`).  A maximum of 40 id's may be specified.  If omitted, the currently playing playlist uri id value is used."
         },
         "user_ids": {
           "name": "User ID's",
@@ -691,6 +691,20 @@
         "output_path": {
           "name": "Output Path",
           "description": "Fully-qualified path to store the downloaded image to."
+        }
+      }
+    },
+    "get_device_playback_state": {
+      "name": "Get Device Playback State",
+      "description": "Get information about the current playback state, including track or episode, and progress. If the Spotify Web API reports nothing as playing, then the device-specific playback state is returned (if one exists).",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API."
+        },
+        "device_id": {
+          "name": "Device ID",
+          "description": "The id or name of the Spotify Connect Player device this command is targeting.  This could be an id, name, a default device indicator (e.g. \"*\"), or null to utilize the active player device."
         }
       }
     },

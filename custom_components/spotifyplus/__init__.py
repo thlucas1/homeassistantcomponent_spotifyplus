@@ -67,6 +67,7 @@ from .const import (
     SERVICE_SPOTIFY_GET_CATEGORY_PLAYLISTS,
     SERVICE_SPOTIFY_GET_CHAPTER,
     SERVICE_SPOTIFY_GET_COVER_IMAGE_FILE,
+    SERVICE_SPOTIFY_GET_DEVICE_PLAYBACK_STATE,
     SERVICE_SPOTIFY_GET_EPISODE,
     SERVICE_SPOTIFY_GET_EPISODE_FAVORITES,
     SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS, 
@@ -451,6 +452,13 @@ SERVICE_SPOTIFY_GET_COVER_IMAGE_FILE_SCHEMA = vol.Schema(
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("image_url"): cv.string,
         vol.Required("output_path"): cv.string,
+    }
+)
+
+SERVICE_SPOTIFY_GET_DEVICE_PLAYBACK_STATE_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("device_id"): cv.string,
     }
 )
 
@@ -1932,6 +1940,13 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
                     response = await hass.async_add_executor_job(entity.service_spotify_get_chapter, chapter_id, market)
 
+                elif service.service == SERVICE_SPOTIFY_GET_DEVICE_PLAYBACK_STATE:
+
+                    # get spotify device playback state.
+                    device_id = service.data.get("device_id")
+                    _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_device_playback_state, device_id)
+
                 elif service.service == SERVICE_SPOTIFY_GET_EPISODE:
 
                     # get spotify episode details.
@@ -3012,6 +3027,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             service_handle_spotify_command,
             schema=SERVICE_SPOTIFY_GET_COVER_IMAGE_FILE_SCHEMA,
             supports_response=SupportsResponse.NONE,
+        )
+
+        _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_DEVICE_PLAYBACK_STATE, SERVICE_SPOTIFY_GET_DEVICE_PLAYBACK_STATE_SCHEMA)
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SPOTIFY_GET_DEVICE_PLAYBACK_STATE,
+            service_handle_spotify_serviceresponse,
+            schema=SERVICE_SPOTIFY_GET_DEVICE_PLAYBACK_STATE_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
         )
 
         _logsi.LogObject(SILevel.Verbose, STAppMessages.MSG_SERVICE_REQUEST_REGISTER % SERVICE_SPOTIFY_GET_EPISODE, SERVICE_SPOTIFY_GET_EPISODE_SCHEMA)

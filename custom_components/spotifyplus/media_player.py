@@ -3521,6 +3521,64 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
 
 
+    def service_spotify_get_device_playback_state(
+            self, 
+            deviceId:str=None,
+            ) -> dict:
+        """
+        Get information about the current playback state, including track or episode, and progress. 
+        If the Spotify Web API reports nothing as playing, then the device-specific playback state
+        is returned (if one exists).  
+
+        This is not part of the Spotify Web API specification.
+       
+        Args:
+            deviceId (str | SpotifyConnectDevice) | None):
+                The target player device identifier.  
+                This could be an id, name, a default device indicator (e.g. "*"), or null to 
+                utilize the active player device.  
+                An exception will be raised if the argument value could not be resolved.  
+                Examples are `0d1841b0976bae2a3a310dd74c0f3df354899bc8`, `Office`, `*`, None.  
+                
+        Returns:
+            A dictionary that contains the following keys:
+            - user_profile: A (partial) user profile that retrieved the result.
+            - result: A `PlayerPlayState` object that contains the playback state details.
+        """
+        apiMethodName:str = 'service_spotify_get_device_playback_state'
+        apiMethodParms:SIMethodParmListContext = None
+        result:PlayerPlayState = None
+
+        try:
+
+            # trace.
+            apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("deviceId", deviceId)
+            _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Device Playback State Service", apiMethodParms)
+                
+            # request information from Spotify Web API.
+            _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
+            result = self.data.spotifyClient.GetDevicePlaybackState(deviceId)
+
+            # return the (partial) user profile that retrieved the result, as well as the result itself.
+            return {
+                "user_profile": self._GetUserProfilePartialDictionary(self.data.spotifyClient.UserProfile),
+                "result": result.ToDictionary()
+            }
+
+        # the following exceptions have already been logged, so we just need to
+        # pass them back to HA for display in the log (or service UI).
+        except SpotifyApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        except SpotifyWebApiError as ex:
+            raise ServiceValidationError(ex.Message)
+        
+        finally:
+        
+            # trace.
+            _logsi.LeaveMethod(SILevel.Debug, apiMethodName)
+
+
     def service_spotify_get_episode(
             self, 
             episodeId:str=None, 

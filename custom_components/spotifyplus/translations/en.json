@@ -694,6 +694,20 @@
         }
       }
     },
+    "get_device_playback_state": {
+      "name": "Get Device Playback State",
+      "description": "Get information about the current playback state, including track or episode, and progress. If the Spotify Web API reports nothing as playing, then the device-specific playback state is returned (if one exists).",
+      "fields": {
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API."
+        },
+        "device_id": {
+          "name": "Device ID",
+          "description": "The id or name of the Spotify Connect Player device this command is targeting.  This could be an id, name, a default device indicator (e.g. \"*\"), or null to utilize the active player device."
+        }
+      }
+    },
     "get_episode": {
       "name": "Get Episode",
       "description": "Get Spotify catalog information for a single episode.",
