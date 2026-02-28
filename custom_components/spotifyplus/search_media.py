@@ -69,21 +69,45 @@ def search_media_node(
         
         result:list[BrowseMedia] = []
 
-        # map MediaClass to SpotifyMediaTypes.
-        mapping = {
-            MediaClass.ARTIST: SpotifyMediaTypes.ARTIST.value,
-            MediaClass.ALBUM: SpotifyMediaTypes.ALBUM.value,
-            MediaClass.TRACK: SpotifyMediaTypes.TRACK.value,
-            MediaClass.MUSIC: SpotifyMediaTypes.TRACK.value,
-            MediaClass.PLAYLIST: SpotifyMediaTypes.PLAYLIST.value,
-            MediaClass.DIRECTORY: SpotifyMediaTypes.AUDIOBOOK.value,
-            MediaClass.PODCAST: SpotifyMediaTypes.SHOW.value,
-            MediaClass.EPISODE: SpotifyMediaTypes.EPISODE.value,
-        }
-        media_types = [
-            mapping[cls] for cls in query.media_filter_classes if cls in mapping
-        ]
-        criteriaType:str = ','.join(media_types)  # comma-delimited string of criteria types
+        # default search criteria type (comma-delimited string of criteria types).
+        criteriaType:str = None  # will default to "track"
+
+        # was query criteria specified?
+        if (query):
+        
+            # was media filter class(es) specified?
+            if (query.media_filter_classes):
+
+                _logsi.LogVerbose("'%s': Filtering by media filter class: \"%s\"" % (playerName, str(query.media_filter_classes)))
+
+                # create a comma-delimited string of criteria types.      
+                mapping = {
+                    MediaClass.ARTIST: SpotifyMediaTypes.ARTIST.value,
+                    MediaClass.ALBUM: SpotifyMediaTypes.ALBUM.value,
+                    MediaClass.TRACK: SpotifyMediaTypes.TRACK.value,
+                    MediaClass.MUSIC: SpotifyMediaTypes.TRACK.value,
+                    MediaClass.PLAYLIST: SpotifyMediaTypes.PLAYLIST.value,
+                    MediaClass.DIRECTORY: SpotifyMediaTypes.AUDIOBOOK.value,
+                    MediaClass.PODCAST: SpotifyMediaTypes.SHOW.value,
+                    MediaClass.EPISODE: SpotifyMediaTypes.EPISODE.value,
+                }
+                media_types = [
+                    mapping[cls] for cls in query.media_filter_classes if cls in mapping
+                ]
+                criteriaType = ','.join(media_types)  # comma-delimited string of criteria types
+
+            # was a media content type specified?
+            # note that this integration does not use media content type, but rather media filter classes.
+            # some generic media players use media content type though, so support it.
+            elif (query.media_content_type):
+
+                _logsi.LogVerbose("'%s': Filtering by media content type: \"%s\"" % (playerName, str(query.media_content_type)))
+                criteriaType = query.media_content_type
+                
+                # change default "music" to "track".
+                if (isinstance(criteriaType,str)):
+                    criteriaType = criteriaType.replace("music","track")
+                    criteriaType = criteriaType.replace("MUSIC","track")
 
         # search spotify.
         _logsi.LogVerbose("'%s': Searching for media: \"%s\"" % (playerName, query.search_query))

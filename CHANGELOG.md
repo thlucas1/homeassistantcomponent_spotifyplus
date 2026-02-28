@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.198 ] - 2026/02/28
+
+  * Modify service `search_media` to support searching using `media_content_type` as well as `media_filter_classes` when searching media.
+
 ###### [ 1.0.197 ] - 2026/02/22
 
   * Added service `get_device_playback_state` to retrieve current playbck state for a specific device.
