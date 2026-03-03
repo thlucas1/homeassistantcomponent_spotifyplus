@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.199 ] - 2026/03/02
+
+  * Added support for Spotify Audiobook favorites to the media browser.  The heading in the media browser details will say "App" since HA does not have a media class built for audio books, so I had to utilize the "App" class for Audiobook functionality.
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.264`.
+
 ###### [ 1.0.198 ] - 2026/02/28
 
   * Modify service `search_media` to support searching using `media_content_type` as well as `media_filter_classes` when searching media.

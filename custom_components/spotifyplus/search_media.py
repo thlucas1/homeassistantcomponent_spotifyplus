@@ -87,7 +87,7 @@ def search_media_node(
                     MediaClass.TRACK: SpotifyMediaTypes.TRACK.value,
                     MediaClass.MUSIC: SpotifyMediaTypes.TRACK.value,
                     MediaClass.PLAYLIST: SpotifyMediaTypes.PLAYLIST.value,
-                    MediaClass.DIRECTORY: SpotifyMediaTypes.AUDIOBOOK.value,
+                    MediaClass.APP: SpotifyMediaTypes.AUDIOBOOK.value,
                     MediaClass.PODCAST: SpotifyMediaTypes.SHOW.value,
                     MediaClass.EPISODE: SpotifyMediaTypes.EPISODE.value,
                 }
@@ -205,7 +205,7 @@ def _GetMediaClassFromSpotifyMediaType(media_type:str) -> MediaClass|None:
     elif (media_type == SpotifyMediaTypes.SHOW.value):
         result = MediaClass.PODCAST
     elif (media_type == SpotifyMediaTypes.AUDIOBOOK.value):
-        result = MediaClass.DIRECTORY
+        result = MediaClass.APP
     elif (media_type == SpotifyMediaTypes.EPISODE.value):
         result = MediaClass.EPISODE
     
@@ -223,9 +223,7 @@ def _GetSpotifyMediaTypeFromMediaClass(media_class:str|MediaClass) -> SpotifyMed
         result = SpotifyMediaTypes.ALBUM
     elif (media_class_str == MediaClass.ARTIST.value):
         result = SpotifyMediaTypes.ARTIST
-    elif (media_class_str == MediaClass.DIRECTORY.value):
-        result = SpotifyMediaTypes.AUDIOBOOK
-    elif (media_class_str == "audiobook"):
+    elif (media_class_str == MediaClass.APP.value):
         result = SpotifyMediaTypes.AUDIOBOOK
     elif (media_class_str == MediaClass.EPISODE.value):
         result = SpotifyMediaTypes.EPISODE.value

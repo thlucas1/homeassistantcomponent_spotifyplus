@@ -31,10 +31,6 @@ if (_logsi == None):
 _logsi.SystemLogger = logging.getLogger(__name__)
 
 
-MEDIA_TYPE_SHOW = "show"
-""" Spotify Show media type (aka PODCAST in HA) """
-
-
 class BrowsableMedia(StrEnum):
     """
     Enum of browsable media.
@@ -51,6 +47,7 @@ class BrowsableMedia(StrEnum):
     SPOTIFY_USER_PLAYLISTS = "spotify_user_playlists"
     SPOTIFY_USER_RECENTLY_PLAYED = "spotify_user_recently_played"
     SPOTIFY_USER_SAVED_ALBUMS = "spotify_user_saved_albums"
+    SPOTIFY_USER_SAVED_AUDIOBOOKS = "spotify_user_saved_audiobooks"
     SPOTIFY_USER_SAVED_SHOWS = "spotify_user_saved_shows"
     SPOTIFY_USER_SAVED_TRACKS = "spotify_user_saved_tracks"
     SPOTIFY_USER_TOP_ARTISTS = "spotify_user_top_artists"
@@ -101,6 +98,13 @@ SPOTIFY_LIBRARY_MAP = {
         "image": f"/local/images/{DOMAIN}_medialib_podcasts.png",
         "parent": MediaClass.DIRECTORY,
         "children": MediaClass.PODCAST,
+    },
+    BrowsableMedia.SPOTIFY_USER_SAVED_AUDIOBOOKS.value:  {
+        "title": "Audiobooks",
+        "title_node": "Spotify Audiobook Favorites",
+        "image": f"/local/images/{DOMAIN}_medialib_audiobooks.png",
+        "parent": MediaClass.DIRECTORY,
+        "children": MediaClass.APP,  # spotify audiobook support
     },
     BrowsableMedia.SPOTIFY_USER_TOP_ARTISTS.value:  {
         "title": "Top Artists",
@@ -171,6 +175,11 @@ SPOTIFY_LIBRARY_MAP = {
         "children": MediaClass.ALBUM,
         "is_index_item": False,
     },
+    MediaType.APP: {  # spotify audiobook support
+        "parent": MediaClass.APP, 
+        "children": MediaClass.TRACK,
+        "is_index_item": False,
+    },
     MediaType.EPISODE: {
         "parent": MediaClass.EPISODE, 
         "children": None,
@@ -187,11 +196,6 @@ SPOTIFY_LIBRARY_MAP = {
         "is_index_item": False,
     },
     MediaType.PODCAST: {
-        "parent": MediaClass.PODCAST, 
-        "children": MediaClass.EPISODE,
-        "is_index_item": False,
-    },
-    MEDIA_TYPE_SHOW: {
         "parent": MediaClass.PODCAST, 
         "children": MediaClass.EPISODE,
         "is_index_item": False,
@@ -223,9 +227,9 @@ PLAYABLE_MEDIA_TYPES = [
     MediaType.PLAYLIST,
     MediaType.ALBUM,
     MediaType.ARTIST,
+    MediaType.APP, # spotify audiobook support
     MediaType.EPISODE,
     MediaType.PODCAST,
-    MEDIA_TYPE_SHOW,
     MediaType.TRACK,
 ]
 """ Array of all media types that are playable. """
@@ -480,6 +484,11 @@ def browse_media_node(
             media:ShowPageSaved = client.GetShowFavorites(limitTotal=SPOTIFY_BROWSE_LIMIT_TOTAL)
             items = media.GetShows()
             
+        elif media_content_type == BrowsableMedia.SPOTIFY_USER_SAVED_AUDIOBOOKS:
+            _logsi.LogVerbose("Getting Spotify user Audiobook favorites")
+            media:AudiobookPageSimplified = client.GetAudiobookFavorites(limitTotal=SPOTIFY_BROWSE_LIMIT_TOTAL)
+            items = media.Items
+            
         elif media_content_type == BrowsableMedia.SPOTIFY_USER_RECENTLY_PLAYED:
             _logsi.LogVerbose("Getting Spotify user Recently Played Tracks")
             media:PlayHistoryPage = client.GetPlayerRecentTracks(limitTotal=SPOTIFY_BROWSE_LIMIT_TOTAL)
@@ -582,11 +591,19 @@ def browse_media_node(
             title = media.Name
             image = media.ImageUrl
 
-        elif media_content_type == MediaType.PODCAST or media_content_type == MEDIA_TYPE_SHOW:
+        elif media_content_type == MediaType.PODCAST:
             _logsi.LogVerbose("Getting Spotify Show / Podcast")
             spotifyId:str = SpotifyClient.GetIdFromUri(media_content_id)
             media:Show = client.GetShow(spotifyId)
             items = media.Episodes.Items
+            title = media.Name
+            image = media.ImageUrl
+                        
+        elif media_content_type == MediaType.APP:  # spotify audiobook support
+            _logsi.LogVerbose("Getting Spotify Audiobook")
+            spotifyId:str = SpotifyClient.GetIdFromUri(media_content_id)
+            media:Audiobook = client.GetAudiobook(spotifyId)
+            items = media.Chapters.Items
             title = media.Name
             image = media.ImageUrl
                         
@@ -668,7 +685,7 @@ def browse_media_node(
                 mediaId = "%s%s" % (CATEGORY_BASE64, serialize_object(item))
                 mediaType = BrowsableMedia.SPOTIFY_CATEGORY_PLAYLISTS.value
 
-            # build the chile node.
+            # build the child node.
             browseMediaChild:BrowseMedia = BrowseMedia(
                 can_expand=canExpand,
                 can_play=canPlay,
@@ -680,6 +697,13 @@ def browse_media_node(
                 thumbnail=item.ImageUrl,
                 title=item.Name,
                 )
+
+            # if parent is an audiobook and we are displaying its track items (e.g. chapters), then 
+            # remove child images as they are all the same.
+            if media_content_type == MediaType.APP and mediaType == MediaType.TRACK:
+                browseMediaChild.thumbnail = None
+
+            # add the child item to the list of children.
             browseMedia.children.append(browseMediaChild)
             _logsi.LogObject(SILevel.Verbose, "'%s': BrowseMedia Child Object: Type='%s', Id='%s', Title='%s'" % (playerName, browseMediaChild.media_content_type, browseMediaChild.media_content_id, browseMediaChild.title), browseMediaChild)
 
