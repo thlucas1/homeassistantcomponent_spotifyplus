@@ -600,8 +600,6 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
     def media_position_updated_at(self) -> dt.datetime | None:
         """ 
         When was the position of the current playing media valid.
-        
-        Returns value from homeassistant.util.dt.utcnow().
         """
         return self._attr_media_position_updated_at
 
@@ -790,8 +788,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
         _logsi.LogVerbose(STAppMessages.MSG_MEDIAPLAYER_SERVICE_WITH_PARMS, self.name, "media_seek", "position='%s'" % (position))
 
         # update ha state.
-        self._attr_media_position = position
-        self._attr_media_position_updated_at = utcnow()
+        self._attr_media_position = int(position)
+        self._attr_media_position_updated_at = utcnow().replace(microsecond=0)
         self.schedule_update_ha_state(force_refresh=False)
         
         # call Spotify Web API to process the request.
@@ -1243,7 +1241,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                         if (isinstance(self._attr_media_position_updated_at, datetime)):
                             # calculate play time remaining by subtracting current UTC time from 
                             # the last UTC time when the media_position was provided by Spotify player state.
-                            dtUtc:datetime = utcnow()
+                            dtUtc:datetime = utcnow().replace(microsecond=0)
                             timeDifference:timedelta = (dtUtc - self._attr_media_position_updated_at)
                             self._playTimeRemainingEst = int(self._attr_media_duration - self._attr_media_position - int(timeDifference.total_seconds()))
                             #_logsi.LogVerbose("'%s': Estimated time remaining (timeDifference) - media Duration=%d, Position=%s, Remaining=%d, TimeDiffSecs=%d, state=%s" % (self.name, int(self._attr_media_duration), int(self._attr_media_position), self._playTimeRemainingEst, timeDifference.total_seconds(), str(self._attr_state)))
@@ -1421,7 +1419,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                     
                 self._attr_media_content_id = item.Uri
                 self._attr_media_content_type = item.Type
-                self._attr_media_duration = item.DurationMS / 1000
+                self._attr_media_duration = int(item.DurationMS / 1000)
                 self._attr_media_title = item.Name
 
                 # update media album name attribute.
@@ -1487,8 +1485,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # update seek-related attributes.
             # also save currently playing track position in case we need to restore it later.
             if playerPlayState.ProgressMS is not None:
-                self._attr_media_position = playerPlayState.ProgressMS / 1000
-                self._attr_media_position_updated_at = utcnow()
+                self._attr_media_position = int(playerPlayState.ProgressMS / 1000)
+                self._attr_media_position_updated_at = utcnow().replace(microsecond=0)
                 self._lastMediaPlayedPosition = self._attr_media_position
         
             # calculate the time (in seconds) remaining on the playing track.

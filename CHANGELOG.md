@@ -6,6 +6,12 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.200 ] - 2026/03/16
+
+  * Added newer brand icons in support of HA 2026.03.0 release that supports custom component branding.
+  * Updated `_attr_media_position_updated_at` value to drop microseconds value; this avoids the progress "drift" when estimating the current progress position in front-end ui's.
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.266`.  This updates the following methods to support [Spotify Web API 2026/02 Migration Changes](https://developer.spotify.com/documentation/web-api/tutorials/february-2026-migration-guide) functionality:  `GetPlaylist`, `GetPlaylistItems`.
+
 ###### [ 1.0.199 ] - 2026/03/02
 
   * Added support for Spotify Audiobook favorites to the media browser.  The heading in the media browser details will say "App" since HA does not have a media class built for audio books, so I had to utilize the "App" class for Audiobook functionality.

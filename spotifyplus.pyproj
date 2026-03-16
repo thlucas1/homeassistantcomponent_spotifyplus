@@ -62,6 +62,7 @@
     <Folder Include="config\" />
     <Folder Include="custom_components\" />
     <Folder Include="custom_components\spotifyplus\" />
+    <Folder Include="custom_components\spotifyplus\brand\" />
     <Folder Include="custom_components\spotifyplus\intent_handlers\" />
     <Folder Include="custom_components\spotifyplus\automations\" />
     <Folder Include="custom_components\spotifyplus\sentences\" />
@@ -87,6 +88,11 @@
     <Content Include="config\configuration.yaml" />
     <Content Include="config\smartinspect.cfg" />
     <Content Include="custom_components\spotifyplus\automations\voice_assist_spotifyplus.yaml" />
+    <Content Include="custom_components\spotifyplus\brand\%40Logo-plus-icon.png" />
+    <Content Include="custom_components\spotifyplus\brand\icon%402x.png" />
+    <Content Include="custom_components\spotifyplus\brand\icon.png" />
+    <Content Include="custom_components\spotifyplus\brand\logo%402x.png" />
+    <Content Include="custom_components\spotifyplus\brand\logo.png" />
     <Content Include="custom_components\spotifyplus\manifest.json" />
     <Content Include="custom_components\spotifyplus\sentences\de\spotifyplus_common_de.yaml" />
     <Content Include="custom_components\spotifyplus\sentences\de\spotifyplus_FavoriteAddRemove_de.yaml" />
