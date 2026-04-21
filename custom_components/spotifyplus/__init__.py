@@ -21,7 +21,7 @@ from spotifywebapipython.const import VERSION as spotifywebapipython_VERSION
 from homeassistant.components import zeroconf
 from homeassistant.components.media_player import MediaPlayerEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform, CONF_ID
+from homeassistant.const import Platform, CONF_ID, EVENT_HOMEASSISTANT_STOP
 from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady, HomeAssistantError, IntegrationError, ServiceValidationError
 from homeassistant.helpers import config_validation as cv, entity_registry as er
@@ -3806,7 +3806,7 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
         _logsi.LogDictionary(SILevel.Verbose, "'%s': Component async_setup_entry OAuth2 session.token (dictionary)" % entry.title, session.token, prettyPrint=True)
         _logsi.LogVerbose("'%s': Component async_setup_entry is calling async_ensure_token_valid to ensure OAuth2 session is fully-established" % entry.title)
         await session.async_ensure_token_valid()
-            
+           
         # -----------------------------------------------------------------------------------
         # Define OAuth2 Session Token Updater.
         # -----------------------------------------------------------------------------------
@@ -3940,7 +3940,7 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
             entry.options.get(CONF_OPTION_DEVICE_PASSWORD, None),                   # spotifyConnectPassword:str=None,
             entry.options.get(CONF_OPTION_DEVICE_LOGINID, None),                    # spotifyConnectLoginId:str=None,
             2.0,                                                                    # spotifyConnectDiscoveryTimeout:float=2.0,   # 0 to disable Spotify Connect Zeroconf browsing features.
-            True,                                                                   # spotifyConnectDirectoryEnabled:bool=True,   # disable Spotify Connect Directory Task.
+            True,                                                                   # spotifyConnectDirectoryEnabled:bool=True,   # enable Spotify Connect Directory Task.
             None,                                                                   # spotifyWebPlayerCookieSpdc:str=None,
             None,                                                                   # spotifyWebPlayerCookieSpdc:str=None,
         )       
@@ -3955,10 +3955,51 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
             session.token, 
             tokenProfileId
         )
-        
+       
         # trace.
         _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry spotifyClient object (with AuthToken)" % entry.title, spotifyClient)
         _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry Spotify UserProfile object" % entry.title, spotifyClient.UserProfile)
+
+        # create runtime_data dictionary.
+        runtime_data:dict = {}
+
+        # -----------------------------------------------------------------------------------
+        # Method called when Home Assistant STOP event is detected.
+        # -----------------------------------------------------------------------------------
+        async def handle_ha_stop_event(event):
+
+            # trace.
+            _logsi.LogVerbose("'%s': ha_stop_event was detected" % entry.title)
+
+            # dispose of SpotifyClient resources (stops directory task, unwires events, etc).
+            if (spotifyClient is not None):
+                _logsi.LogVerbose("'%s': Component handle_ha_stop_event is disposing the SpotifyClient object" % entry.title)
+                await hass.async_add_executor_job(
+                    spotifyClient.Dispose
+                )
+
+        # hook into the HA stop event, so that we can cleanup resources properly.
+        # we add this here, as the `async_unload_entry` method does not get called
+        # when HA is stopped (or restarted). we want to make sure Dispose is called
+        # so that PlayerLastPlayedInfo is stored to disk.
+        # we will also save the returned value so that we can cancel the event handler 
+        # if the `async_unload_entry` method is called (on integration reload). 
+        _logsi.LogVerbose("'%s': Component async_setup_entry is registering handle_ha_stop_event task" % entry.title)
+        unsubscribe_event_ha_stop = hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, handle_ha_stop_event)
+        runtime_data["unsubscribe_event_ha_stop"] = unsubscribe_event_ha_stop
+
+        # create media player entity platform instance data.
+        _logsi.LogVerbose("'%s': Component async_setup_entry is creating the media player platform instance data object" % entry.title)
+        hass.data.setdefault(DOMAIN, {})
+        hass.data[DOMAIN][entry.entry_id] = InstanceDataSpotifyPlus(
+            session=session,
+            spotifyClient=spotifyClient,
+            media_player=None,
+            options=entry.options,
+            tokenUpdater_lock=TOKENUPDATER_LOCK,
+            runtime_data=runtime_data,
+        )
+        _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry media player platform instance data object" % entry.title, hass.data[DOMAIN][entry.entry_id])
 
         # ensure authentication token scopes have not changed.
         if not set(session.token["scope"].split(" ")).issuperset(SPOTIFY_SCOPES):
@@ -3980,23 +4021,6 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
         for scDevice in scDevices:
             isActive:str = " (active)" if (scDevice.IsActiveDevice) else ""
             _logsi.LogVerbose("'%s': Spotify Connect device: %s [%s]%s" % (entry.title, scDevice.Title, scDevice.DiscoveryResult.Description, isActive))
-
-        # create media player entity platform instance data.
-        _logsi.LogVerbose("'%s': Component async_setup_entry is creating the media player platform instance data object" % entry.title)
-        hass.data.setdefault(DOMAIN, {})
-        hass.data[DOMAIN][entry.entry_id] = InstanceDataSpotifyPlus(
-            session=session,
-            spotifyClient=spotifyClient,
-            media_player=None,
-            options=entry.options,
-            tokenUpdater_lock=TOKENUPDATER_LOCK,
-        )
-        _logsi.LogObject(SILevel.Verbose, "'%s': Component async_setup_entry media player platform instance data object" % entry.title, hass.data[DOMAIN][entry.entry_id])
-
-        # ensure session scope has not changed for the authorization token.
-        if not set(session.token["scope"].split(" ")).issuperset(SPOTIFY_SCOPES):
-            _logsi.LogVerbose("'%s': Component async_setup_entry detected a session scope change" % entry.title)
-            raise ConfigEntryAuthFailed
 
         # we are now ready for HA to create individual objects for each platform that
         # our device requires; in our case, it's just a media_player platform.
@@ -4087,8 +4111,19 @@ async def async_unload_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
             # dispose of SpotifyClient resources (stops directory task, unwires events, etc).
             if (data is not None):
                 if (data.spotifyClient is not None):
+
+                    # dispose of the spotifyClient object.
                     _logsi.LogVerbose("'%s': Component async_unload_entry is disposing the SpotifyClient object" % entry.title)
-                    data.spotifyClient.Dispose()
+                    await hass.async_add_executor_job(
+                        data.spotifyClient.Dispose
+                    )
+
+                    # if we tied into the HA stop event, then cancel it since we are handling it here.
+                    # if we don't cancel it here, then it will try to Dispose again in the HA stop event!
+                    unsubscribe_event_ha_stop = data.runtime_data.get("unsubscribe_event_ha_stop")
+                    if unsubscribe_event_ha_stop:
+                        _logsi.LogVerbose("'%s': Component async_unload_entry is deregistering handle_ha_stop_event task" % entry.title)
+                        unsubscribe_event_ha_stop()
 
             # a quick check to make sure all update listeners were removed (see method doc notes above).
             if len(entry.update_listeners) > 0:

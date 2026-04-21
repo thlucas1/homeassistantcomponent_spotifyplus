@@ -1505,7 +1505,7 @@ get_playlist:
     fields:
       name: Fields
       description: A comma-separated list of fields to return from the Spotify Web API. All fields are returned if omitted. Limiting fields results can improve performance.
-      example: "description,id,name,public,snapshot_id,type,uri,tracks(limit,next,offset,previous,total,items(track(id,name,track_number,type,uri,album(id,images,name,total_tracks,type,uri,artists(id,name,type,uri)))))"
+      example: "description,id,name,public,snapshot_id,type,uri,items(limit,next,offset,previous,total,items(item(id,name,track_number,type,uri,album(id,images,name,total_tracks,type,uri,artists(id,name,type,uri)))))"
       required: false
       selector:
         text:
@@ -1637,7 +1637,7 @@ get_playlist_items:
     fields:
       name: Fields
       description: Filters for the query; a comma-separated list of the fields to return. If omitted, all fields are returned. For example, specify 'items(track(name,uri))' to get just the playlist's track names and URIs.
-      example: "items(track(name,uri,album(name,uri)))"
+      example: "items(item(name,uri,album(name,uri)))"
       required: false
       selector:
         text:

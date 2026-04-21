@@ -61,6 +61,11 @@ class InstanceDataSpotifyPlus:
     """
     Thread Lock object used to lock token refresh updates.
     """
+
+    runtime_data: dict
+    """
+    Run-time data area used to store information for the life of the instance.
+    """
     
 
     @property

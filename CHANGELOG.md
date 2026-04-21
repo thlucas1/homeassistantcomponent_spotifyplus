@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.201 ] - 2026/04/21
+
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.270`.  This adds logic to persist the player last played information to disk, so that playback can be restored from the given point.  This replaces the behavior of always defaulting to favorite tracks play.  Note that player last played information is tracked on a "per-user" basis (e.g. user A cannot resume play where user B left off).
+
 ###### [ 1.0.200 ] - 2026/03/16
 
   * Added newer brand icons in support of HA 2026.03.0 release that supports custom component branding.
