@@ -17,6 +17,9 @@ DOMAIN_MEDIA_PLAYER = "media_player"
 
 SPOTIFY_WEB_URL_PFX = "https://open.spotify.com"
 
+TOKEN_EXPIRE_REASON:str = "token_expire_reason"
+""" Token expiration reason code. """
+
 LOGGER = logging.getLogger(__package__)
 
 CONF_OPTION_ALWAYS_ON = "always_on"

@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.202 ] - 2026/06/20
+
+  * Added support for new Spotify OAuth refresh token limitations.  The new logic will check for Spotify refresh token `invalid_grant errors`, as Spotify will deactivate refresh tokens after a 6 month period (starting 2026/07/20).  If found, it will place the integration into a "Reauthenticate" state, as well as create a new issue / persistent notification on how to re-authenticate the Spotify refresh token.  
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.271`.  
+
 ###### [ 1.0.201 ] - 2026/04/21
 
   * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.270`.  This adds logic to persist the player last played information to disk, so that playback can be restored from the given point.  This replaces the behavior of always defaulting to favorite tracks play.  Note that player last played information is tracked on a "per-user" basis (e.g. user A cannot resume play where user B left off).

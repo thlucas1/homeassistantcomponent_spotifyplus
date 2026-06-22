@@ -21,6 +21,7 @@ import voluptuous as vol
 import ssl
 import socket
 import sys
+import functools
 
 from spotifywebapipython import SpotifyClient
 from spotifywebapipython.models import Device, SpotifyConnectDevices
@@ -36,6 +37,7 @@ from homeassistant.const import CONF_DESCRIPTION, CONF_ID, CONF_NAME
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_entry_oauth2_flow, config_validation as cv, selector
+from homeassistant.helpers.issue_registry import async_delete_issue
 from homeassistant.helpers.selector import (
     SelectSelector,
     SelectSelectorConfig,
@@ -200,13 +202,38 @@ class SpotifyPlusConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, 
             _logsi.LogVerbose("ConfigFlow assigned unique_id of '%s' for Spotify UserProfile '%s'" % (self.unique_id, spotifyClient.UserProfile.DisplayName), colorValue=SIColors.Tan)
 
             # is this a reauthentication request?
-            # if so, then abort if the unique ID does not match the reauth / reconfigure context.
             if self.source == SOURCE_REAUTH:
+                
                 _logsi.LogVerbose("ConfigFlow re-auth source detected; checking for account mismatch using unique_id of '%s' for Spotify DisplayName '%s'" % (self.unique_id, spotifyClient.UserProfile.DisplayName), colorValue=SIColors.Tan)
+
+                # verify unique ID matches the reauth / reconfigure context.  
+                # we will return this result after removing any reauth issues.
+                # this will abort the flow if the config unique ID does not match the reauth context.
                 self._abort_if_unique_id_mismatch(reason="reauth_account_mismatch")
-                return self.async_update_reload_and_abort(
+                cfResult:ConfigFlowResult = self.async_update_reload_and_abort(
                     self._get_reauth_entry(), title=spotifyClient.UserProfile.DisplayName, data=data
                 )
+
+                _logsi.LogDictionary(SILevel.Verbose, "ConfigFlow re-auth ConfigFlowResult (dictionary)", cfResult, prettyPrint=True, colorValue=SIColors.Tan)
+
+                # if reauth successful, then remove any stale reauth-issues related to this configuration.
+                # this will allow future issues to be created when the Spotify reauth token expires in 6 months.
+                # if we don't do this, then any new reauth issues are not created for this config entry!
+                if (isinstance(cfResult,dict)) and (cfResult.get("reason","unknown") == "reauth_successful"):
+
+                    issue_id:str = "reauth_%s" % (self._reauth_config_entry_id or "unknown")
+                    _logsi.LogVerbose("ConfigFlow re-auth source updated; removing old reauth issues for this config entry (issue_id=\"%s\")" % (issue_id), colorValue=SIColors.Tan)
+                    self.hass.loop.call_soon_threadsafe(
+                        functools.partial(
+                            async_delete_issue,
+                            self.hass,
+                            DOMAIN,
+                            issue_id,
+                        )
+                    )
+
+                # return config flow result.
+                return cfResult
 
             # one final check to see if a configuration entry already exists for the unique id.
             # if it IS already configured, then we will display an "already_configured" message 
@@ -244,10 +271,6 @@ class SpotifyPlusConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, 
             raise
         
         finally:
-
-            # dispose of resources.
-            if (spotifyClient is not None):
-                spotifyClient.Dispose()
 
             # trace.
             _logsi.LeaveMethod(SILevel.Debug, colorValue=SIColors.Tan)
@@ -321,6 +344,9 @@ class SpotifyPlusConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, 
                 if (_logsi.IsOn(SILevel.Verbose)):
                     _logsi.LogObject(SILevel.Verbose, "ConfigFlow OAuth2 Re-Authentication flow - reauth_entry object", reauth_entry, colorValue=SIColors.Tan)
                     _logsi.LogDictionary(SILevel.Verbose, "ConfigFlow OAuth2 Re-Authentication flow - reauth_entry data", reauth_entry.data, prettyPrint=True, colorValue=SIColors.Tan)
+
+                # store temporary values on the flow instance.
+                self._reauth_config_entry_id = reauth_entry.entry_id
 
                 # default reauth account information details.
                 # note that there could be instances where the "id" and "name" attributes 

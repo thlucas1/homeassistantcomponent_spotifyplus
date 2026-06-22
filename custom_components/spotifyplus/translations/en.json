@@ -12,7 +12,7 @@
       },
       "reauth_confirm": {
         "title": "SpotifyPlus Re-Authentication Required",
-        "description": "The SpotifyPlus integration needs to re-authenticate with Spotify for user name \"{account_name}\", user-id \"{account_id}\"."
+        "description": "The SpotifyPlus integration needs to re-authenticate with Spotify for user name \"{account_name}\", user-id \"{account_id}\".  Note that this is a requirement from Spotify, in that refresh tokens are forced to expire every six months.  You will be prompted in the following screen(s) to login to Spotify and re-authorize the access for the Home Assistant SpotifyPlus Integration."
       }
     },
     "abort": {
@@ -83,6 +83,10 @@
     "removed_yaml": {
       "title": "The Spotify YAML configuration has been removed",
       "description": "Configuring Spotify using YAML has been removed.\n\nYour existing YAML configuration is not used by Home Assistant.\n\nRemove the YAML configuration from your configuration.yaml file and restart Home Assistant to fix this issue."
+    },
+    "reauth_required": {
+      "title": "SpotifyPlus Re-Authentication Required",
+      "description": "The SpotifyPlus authorization refresh token for user name \"{account_name}\" (OAuth client id \"{client_id}\") has expired due to Spotify regulations. Please re-authenticate to Spotify for this account via the \"Settings \\ Devices & Services\" UI, using the discovered \"SpotifyPlus Reconfigure\" option."
     }
   },
   "services": {
@@ -2711,6 +2715,10 @@
         "entity_id": {
           "name": "Entity ID",
           "description": "Entity ID of the SpotifyPlus service account that will make the request to the Spotify Web API."
+        },
+        "reason": {
+          "name": "Reason",
+          "description": "Reason code of why the token is being expired. 0 = simple expiration test where expire_at = current time minus 10 seconds. 1 = spotify invalid_grant test - will force an `invalid_grant` exception scenario when token is refreshed."
         }
       }
     },

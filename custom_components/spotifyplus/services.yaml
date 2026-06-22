@@ -4500,6 +4500,16 @@ test_token_expire:
         entity:
           integration: spotifyplus
           domain: media_player
+    reason:
+      name: Reason
+      description: Reason code of why the token is being expired. 0 = simple expiration test where expire_at = current time minus 10 seconds. 1 = spotify invalid_grant test - will force an `invalid_grant` exception scenario when token is refreshed.
+      example: "0"
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 10
+          mode: box
 
 volume_set_step:
   name: Volume Set Step Level

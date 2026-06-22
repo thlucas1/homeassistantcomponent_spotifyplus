@@ -125,6 +125,7 @@ from .const import (
     DOMAIN, 
     DOMAIN_SCRIPT,
     LOGGER,
+    TOKEN_EXPIRE_REASON,
 )
 from .utils import (
     passwordMaskString, 
@@ -9281,9 +9282,17 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
     def service_test_token_expire(
             self, 
+            reason:int=0, 
             ) -> None:
         """
         Forces Spotify authorization token to expire.
+
+        Args:
+            reason (int):
+                Reason code of why the token is being expired.  
+                0 = simple expiration test - expire_at set to current time minus 10 seconds.  
+                1 = spotify invalid_grant test - will force an `invalid_grant` exception scenario when token is refreshed.  
+                Default is 0.
 
         Note that this will only expire the `SpotifyClient.AuthToken` token;
         It will NOT expire the `session.token` token!
@@ -9295,8 +9304,16 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
 
             # trace.
             apiMethodParms = _logsi.EnterMethodParmList(SILevel.Debug, apiMethodName)
+            apiMethodParms.AppendKeyValue("reason", reason)
             _logsi.LogMethodParmList(SILevel.Verbose, "TEST-SERVICE - Token Expire Service", apiMethodParms)
+
+            # validation.
+            if (not isinstance(reason, int)):
+                reason = 0
             
+            # update runtime data with reason code, for processing later.
+            self.data.runtime_data[TOKEN_EXPIRE_REASON] = reason
+
             # force Spotify authentication token expiration.
             _logsi.LogWarning("'%s': Forcing token expiration for the next Spotify Web API call for testing purposes" % self.name, colorValue=SIColors.Red)
             unix_epoch = datetime(1970, 1, 1)
@@ -9308,7 +9325,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             # force OAuth2Session token expiration.
             self.data.spotifyClient._AuthClient.Session.token['expires_at'] = int((dtUtcNow - unix_epoch).total_seconds() - 10)  # -10 seconds from epoch, current date
             _logsi.LogDictionary(SILevel.Verbose, "'%s': OAuth2Session token dictionary (post-update)" % self.name, self.data.spotifyClient._AuthClient.Session.token, prettyPrint=True, colorValue=SIColors.Red)
-            _logsi.LogWarning("'%s': Token Expire Service complete; token should be refreshed on the next Spotify Web API call" % self.name, colorValue=SIColors.Red)
+            _logsi.LogDictionary(SILevel.Verbose, "'%s': OAuth2Session runtime_data (dictionary) (post-update)" % self.name, self.data.runtime_data, prettyPrint=True, colorValue=SIColors.Red)
+            _logsi.LogVerbose("'%s': Token Expire Service complete; token should be refreshed on the next Spotify Web API call" % self.name, colorValue=SIColors.Red)
 
         # the following exceptions have already been logged, so we just need to
         # pass them back to HA for display in the log (or service UI).

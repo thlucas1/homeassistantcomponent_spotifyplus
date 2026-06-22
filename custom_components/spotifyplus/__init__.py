@@ -148,6 +148,7 @@ from .const import (
     SERVICE_VOLUME_SET_STEP,
     SERVICE_LIST_APPLICATION_CREDENTIAL_MAPPPINGS,
     SERVICE_TEST_TOKEN_EXPIRE,
+    TOKEN_EXPIRE_REASON,
 )
 
 __all__ = [
@@ -156,8 +157,11 @@ __all__ = [
 
 _LOGGER = logging.getLogger(__name__)
 
-TOKEN_STATUS:str = 'status'
+TOKEN_STATUS:str = 'token_status'
+TOKEN_STATUS_ACCOUNT_NAME:str = 'token_account_name'
+TOKEN_STATUS_CLIENT_ID:str = 'token_client_id'
 TOKEN_STATUS_REFRESH_EVENT:str = 'TokenRefreshEvent'
+TOKEN_STATUS_REAUTH_EVENT:str = 'TokenReauthEvent'
 TOKENUPDATER_LOCK = threading.Lock()   # syncronous lock to sync access to token updates.
 
 REAUTH_TEST_FIRST_TIME:bool = None    # used when testing app creds reauth processing
@@ -1253,6 +1257,7 @@ SERVICE_LIST_APPLICATION_CREDENTIAL_MAPPPINGS_SCHEMA = vol.Schema(
 SERVICE_TEST_TOKEN_EXPIRE_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
+        vol.Optional("reason", default=0): vol.All(vol.Range(min=0,max=10)),
     }
 )
 
@@ -1665,7 +1670,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
                     # test token expiration.
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    await hass.async_add_executor_job(entity.service_test_token_expire)
+                    reason = service.data.get("reason")
+                    await hass.async_add_executor_job(entity.service_test_token_expire, reason)
 
                 elif service.service == SERVICE_VOLUME_SET_STEP:
 
@@ -3832,6 +3838,10 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
                 # trace.
                 _logsi.LogVerbose("'%s': TOKENUPDATER_LOCK is set for method _TokenUpdater" % entry.title, colorValue=SIColors.Gold)
 
+                reauth_account_name = "unknown"
+                reauth_client_id = "unknown"
+                reauth_token_expire_reason = 0
+
                 try:
 
                     # trace.
@@ -3859,15 +3869,31 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
                     _logsi.LogObject(SILevel.Debug, "'%s': Component OAuth2 implementation object" % entry.title, implementation, colorValue=SIColors.Gold)
                     _logsi.LogDictionary(SILevel.Verbose, "'%s': Component OAuth2 session.token (pre-update, dictionary)" % entry.title, session.token, prettyPrint=True, colorValue=SIColors.Gold)
 
-                    # get formatted token, to make expiration checks easier.
-                    formattedToken0:SpotifyAuthToken = SpotifyAuthToken("TokenRefreshAuthType", "TokenRefreshProfileId", root=session.token)
-                    _logsi.LogObject(SILevel.Verbose, "'%s': Component OAuth2 session token (pre-update, session.token)" % entry.title, formattedToken0, excludeNonPublic=True, colorValue=SIColors.Gold)
+                    # address configuration instance data area.
+                    data:InstanceDataSpotifyPlus = hass.data[DOMAIN].get(entry.entry_id, None)
+                    _logsi.LogDictionary(SILevel.Verbose, "'%s': Component runtime_data (dictionary)" % entry.title, data.runtime_data, prettyPrint=True, colorValue=SIColors.Gold)
+
+                    # get token reauthentication details.
+                    reauth_account_name = implementation.name
+                    reauth_client_id = (implementation.domain or "").replace(DOMAIN + "_","")
+                    reauth_token_expire_reason = data.runtime_data.pop(TOKEN_EXPIRE_REASON, None)
+                    _logsi.LogVerbose("'%s': Token refresh summary: AccountName=%s, ClientId=%s, ExpireReason=%s" % (entry.title, reauth_account_name, reauth_client_id, reauth_token_expire_reason), colorValue=SIColors.Gold)
+
+                    # create token object from token dictionary, to make expiration checks easier.
+                    tokenObj:SpotifyAuthToken = SpotifyAuthToken("TokenRefreshAuthType", "TokenRefreshProfileId", root=session.token)
+                    _logsi.LogObject(SILevel.Verbose, "'%s': Component OAuth2 session token (pre-update, SpotifyAuthToken object)" % entry.title, tokenObj, excludeNonPublic=True, colorValue=SIColors.Gold)
+
+                    # is this a forced token expire request?
+                    if (reauth_token_expire_reason == 1):  
+                        # used to test Spotify forced token expiration after 6 months.
+                        _logsi.LogVerbose("'%s': Testing token expired invalid_grant event" % entry.title, colorValue=SIColors.Red)
+                        raise Exception("TEST: Token refresh failed: invalid_grant: Token has been expired or revoked. TEST")
 
                     # a quick check to see if session token is expired.  the session token update may have already occured
                     # by another HA worker thread while we were waiting for the lock to free; if that is the case, then we 
                     # don't need to refresh the token since it was just refreshed by the other thread!
-                    if (not formattedToken0.IsExpired):
-                        _logsi.LogObject(SILevel.Verbose, "'%s': Component OAuth2 session.token was updated by another HA worker thread; refresh not necessary" % entry.title, formattedToken0, excludeNonPublic=True, colorValue=SIColors.Gold)
+                    if (not tokenObj.IsExpired):
+                        _logsi.LogObject(SILevel.Verbose, "'%s': Component OAuth2 session.token was updated by another HA worker thread; refresh not necessary" % entry.title, tokenObj, excludeNonPublic=True, colorValue=SIColors.Gold)
                         return session.token
 
                     # we will refresh the token from the `session.config_entry.data['token']` value (instead of
@@ -3880,29 +3906,92 @@ async def async_setup_entry(hass:HomeAssistant, entry:ConfigEntry) -> bool:
                         session.implementation.async_refresh_token(session.config_entry.data['token']), 
                         hass.loop
                     ).result()
-                    token[TOKEN_STATUS] = TOKEN_STATUS_REFRESH_EVENT
+
+                    # store token event details in our runtime data area.
+                    data.runtime_data[TOKEN_STATUS] = TOKEN_STATUS_REFRESH_EVENT
 
                     # update token value in configuration entry data.
                     # updating a config entry must be done in the event loop thread, as there is no sync API to update config entries!
                     # the "hass.add_job" method is used to schedule a function in the event loop that calls hass.config_entries.async_update_entry.
                     _logsi.LogDictionary(SILevel.Verbose, "'%s': Component is submitting add_job to call async_update_entry to update configuration entry data with refreshed token" % entry.title, token, prettyPrint=True, colorValue=SIColors.Gold)
-                    session.hass.add_job(
+                    hass.add_job(
                         functools.partial(
-                            session.hass.config_entries.async_update_entry,
+                            hass.config_entries.async_update_entry,
                             session.config_entry, 
-                            data={**session.config_entry.data, "token": token}
+                            data={**session.config_entry.data, 
+                                  "token": token
+                            }
                         )
                     )
                 
                     # trace.
                     _logsi.LogVerbose("'%s': Component OAuth2 session token refresh complete" % entry.title, colorValue=SIColors.Gold)
-                    formattedToken2:SpotifyAuthToken = SpotifyAuthToken("TokenRefreshAuthType", "TokenRefreshProfileId", root=token)
-                    _logsi.LogObject(SILevel.Verbose, "'%s': Component OAuth2 session token (post-update, token)" % entry.title, formattedToken2, excludeNonPublic=True, colorValue=SIColors.Gold)
+                    tokenObj:SpotifyAuthToken = SpotifyAuthToken("TokenRefreshAuthType", "TokenRefreshProfileId", root=token)
+                    _logsi.LogObject(SILevel.Verbose, "'%s': Component OAuth2 session token (post-update, token)" % entry.title, tokenObj, excludeNonPublic=True, colorValue=SIColors.Gold)
 
                     # return refreshed token to caller.
                     return token
 
                 except Exception as ex:
+
+                    # check for invalid grant error, as Spotify will deactivate refresh tokens
+                    # after a 6 month period (starting 2026/07/20).
+                    if "invalid_grant" in str(ex).lower():
+
+                        # trace.
+                        _logsi.LogWarning("The SpotifyPlus authorization refresh token for user name \"%s\" (OAuth client id \"%s\") has expired due to Spotify regulations. Please re-authenticate to Spotify for this account via the \"Settings \\ Devices & Services\" UI, using the discovered \"SpotifyPlus Reconfigure\" option" % (reauth_account_name, reauth_client_id), colorValue=SIColors.Gold)
+
+                        # force user to reauth application credentials (done via the event thread).
+                        _logsi.LogVerbose("'%s': Component is calling async_create_task to reauthorize Spotify application credentials" % entry.title, colorValue=SIColors.Gold)
+                        hass.loop.call_soon_threadsafe(
+                            functools.partial(
+                                hass.async_create_task,
+                                hass.config_entries.flow.async_init(
+                                    DOMAIN,
+                                    context={
+                                        "source": "reauth",
+                                        "entry_id": entry.entry_id,
+                                    },
+                                    data=entry.data,
+                                ),
+                            )
+                        )
+
+                        # create an issue / persistent notification (done via the event thread).
+                        _logsi.LogVerbose("'%s': Component is calling async_create_issue to create a new issue for Spotify token reauthorization" % entry.title, colorValue=SIColors.Gold)
+                        hass.loop.call_soon_threadsafe(
+                            functools.partial(
+                                async_create_issue,
+                                hass,
+                                DOMAIN,
+                                f"reauth_{entry.entry_id}",
+                                is_fixable=False,
+                                severity=IssueSeverity.WARNING,
+                                learn_more_url="https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Frequently-Asked-Questions#why-do-i-have-to-reauthenticate-to-spotify-every-six-months",
+                                translation_key="reauth_required",
+                                translation_placeholders={
+                                    "account_name": reauth_account_name,
+                                    "client_id": reauth_client_id,
+                                },
+                            )
+                        )
+
+                        # TEST TODO - we may need to add something here to runtime_data, then check for it
+                        # in the media_player update() method to prevent further calls to the Spotify
+                        # Web API until the user reauthenticates the application credentials!
+
+                        # # address configuration instance data area.
+                        # # store token event details in our runtime data area.
+                        # data:InstanceDataSpotifyPlus = hass.data[DOMAIN].get(entry.entry_id)
+                        # data.runtime_data[TOKEN_STATUS] = TOKEN_STATUS_REAUTH_EVENT
+                        # data.runtime_data[TOKEN_STATUS_ACCOUNT_NAME] = reauth_account_name
+                        # data.runtime_data[TOKEN_STATUS_CLIENT_ID] = reauth_client_id
+
+                        # )
+                
+                        # return original (expired) token, as we will generate an exception in 
+                        # the `async_update_entry` method.
+                        return session.config_entry.data['token']
 
                     # trace.
                     _logsi.LogException("'%s': Component OAuth2 session token refresh exception: %s" % (entry.title, str(ex)), ex, colorValue=SIColors.Gold)
@@ -4216,17 +4305,25 @@ async def options_update_listener(hass:HomeAssistant, entry:ConfigEntry) -> None
         shouldReload:bool = True
         _logsi.LogVerbose("'%s': Component options_update_listener is checking for authentication token refresh event" % entry.title)
         if (entry.data is not None):
+
+            # get and trace token data.
             token:dict = entry.data.get('token', None)
             if (token is not None):
                 _logsi.LogDictionary(SILevel.Verbose, "'%s': Component options_update_listener token data" % entry.title, token)
-                status = token.get(TOKEN_STATUS, None)
-                if (status == TOKEN_STATUS_REFRESH_EVENT):
-                    # token refresh detected; indicate configuration should not be reloaded, and remove
-                    # the token status key so it's not saved with the configuration data.
-                    shouldReload = False
-                    entry.data['token'].pop(TOKEN_STATUS, None)
-                    _logsi.LogVerbose("'%s': Component options_update_listener detected authentication token refresh; configuration will NOT be reloaded" % entry.title)
-        
+
+            # address configuration instance data area.
+            data:InstanceDataSpotifyPlus = hass.data[DOMAIN].get(entry.entry_id, None)
+            _logsi.LogDictionary(SILevel.Verbose, "'%s': Component options_update_listener runtime_data (dictionary)" % entry.title, data.runtime_data, prettyPrint=True)
+
+            # process the current token status.
+            status:str = data.runtime_data.pop(TOKEN_STATUS, None)
+
+            if (status == TOKEN_STATUS_REFRESH_EVENT):
+                # token refresh detected; indicate configuration should not be reloaded, and remove
+                # the token status key so it's not saved with the configuration data.
+                shouldReload = False
+                _logsi.LogVerbose("'%s': Component options_update_listener detected authentication token refresh; configuration will NOT be reloaded" % entry.title)
+       
         # reload the configuration entry (if necessary).
         if shouldReload:
 
