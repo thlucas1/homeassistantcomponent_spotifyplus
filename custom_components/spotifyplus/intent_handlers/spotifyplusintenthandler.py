@@ -53,12 +53,8 @@ from ..intent_loader import (
 import logging
 _LOGGER = logging.getLogger(__name__)
 
-# get smartinspect logger reference; create a new session for this module name.
-from smartinspectpython.siauto import SIAuto, SILevel, SISession, SIMethodParmListContext, SIColors
-_logsi:SISession = SIAuto.Si.GetSession(__name__)
-if (_logsi == None):
-    _logsi = SIAuto.Si.AddSession(__name__, True)
-_logsi.SystemLogger = _LOGGER
+# smartinspect logging.
+from smartinspectpython.siauto import SILevel, SISession, SIMethodParmListContext, SIColors
 
 
 class SpotifyPlusIntentHandler(IntentHandler):
@@ -77,7 +73,7 @@ class SpotifyPlusIntentHandler(IntentHandler):
                 A IntentLoader instance that loads our platform intents from custom_sentences.
         """
         # set trace reference.
-        self.logsi = _logsi
+        self.logsi = intentLoader.logsi
 
         # store intent loader reference.
         self._IntentLoader = intentLoader
@@ -206,14 +202,14 @@ class SpotifyPlusIntentHandler(IntentHandler):
         try:
 
             # trace.
-            methodParms = _logsi.EnterMethodParmList(SILevel.Debug, colorValue=SIColors.Khaki)
+            methodParms = self.logsi.EnterMethodParmList(SILevel.Debug, colorValue=SIColors.Khaki)
             methodParms.AppendKeyValue("intent_type", intentObj.intent_type)
             methodParms.AppendKeyValue("language", intentObj.language)
             methodParms.AppendKeyValue("desiredFeatures", desiredFeatures)
             methodParms.AppendKeyValue("desiredStates", desiredStates)
             methodParms.AppendKeyValue("desiredStateResponseKey", desiredStateResponseKey)
             methodParms.AppendKeyValue("requiresSpotifyPremium", requiresSpotifyPremium)
-            _logsi.LogMethodParmList(SILevel.Verbose, "Resolving matching player state for intent: \"%s\"" % (intentObj.intent_type), methodParms, colorValue=SIColors.Khaki)
+            self.logsi.LogMethodParmList(SILevel.Verbose, "Resolving matching player state for intent: \"%s\"" % (intentObj.intent_type), methodParms, colorValue=SIColors.Khaki)
 
             # validate slot arguments.
             if (self.logsi.IsOn(SILevel.Verbose)):
@@ -272,7 +268,7 @@ class SpotifyPlusIntentHandler(IntentHandler):
                 # yes - let's verify the matched entity is an active spotifyplus media player.
                 # the HA matching engine is not great at matching by platform!
                 playerEntityState = matchResult.states[0]
-                playerEntity = get_registry_entry_media_player(intentObj, platform=PLATFORM_SPOTIFYPLUS, entity_id=playerEntityState.entity_id)
+                playerEntity = get_registry_entry_media_player(intentObj, platform=PLATFORM_SPOTIFYPLUS, entity_id=playerEntityState.entity_id, logsi=self.logsi)
                 resolvedDesc = "MatchTargetsResult"
 
             else:
@@ -301,7 +297,7 @@ class SpotifyPlusIntentHandler(IntentHandler):
                     # if multiple targets matched, then loop through them to find the
                     # first SpotifyPlus platform.
                     for stateEntry in matchResult.states:
-                        playerEntity = get_registry_entry_media_player(intentObj, platform=PLATFORM_SPOTIFYPLUS, entity_id=stateEntry.entity_id)
+                        playerEntity = get_registry_entry_media_player(intentObj, platform=PLATFORM_SPOTIFYPLUS, entity_id=stateEntry.entity_id, logsi=self.logsi)
                         if (playerEntity):
                             playerEntityState = stateEntry
                             resolvedDesc = "MatchTargetsResult (First of Multiple)"
@@ -310,7 +306,7 @@ class SpotifyPlusIntentHandler(IntentHandler):
                 else:
 
                     # no - search for the first active spotifyplus media player entity.
-                    playerEntity = get_registry_entry_media_player(intentObj, platform=PLATFORM_SPOTIFYPLUS)
+                    playerEntity = get_registry_entry_media_player(intentObj, platform=PLATFORM_SPOTIFYPLUS, logsi=self.logsi)
                     if (playerEntity):
                         playerEntityState = intentObj.hass.states.get(playerEntity.entity_id)
                         resolvedDesc = "RegistryEntry"
@@ -471,11 +467,11 @@ class SpotifyPlusIntentHandler(IntentHandler):
         try:
 
             # trace.
-            methodParms = _logsi.EnterMethodParmList(SILevel.Debug, colorValue=SIColors.Khaki)
+            methodParms = self.logsi.EnterMethodParmList(SILevel.Debug, colorValue=SIColors.Khaki)
             methodParms.AppendKeyValue("responseKey", responseKey)
             methodParms.AppendKeyValue("intent_type", intentObj.intent_type)
             methodParms.AppendKeyValue("language", intentObj.language)
-            _logsi.LogMethodParmList(SILevel.Verbose, "Loading response text for response key: \"%s\" (language=%s)" % (responseKey, intentObj.language), methodParms, colorValue=SIColors.Khaki)
+            self.logsi.LogMethodParmList(SILevel.Verbose, "Loading response text for response key: \"%s\" (language=%s)" % (responseKey, intentObj.language), methodParms, colorValue=SIColors.Khaki)
 
             # validations.
             language = intentObj.language
@@ -505,26 +501,26 @@ class SpotifyPlusIntentHandler(IntentHandler):
             if intent_type in intents_block:
                 intent_dict = intents_block[intent_type] or {}
                 if responseKey in intent_dict:
-                    _logsi.LogDebug("Found candidate for response key (intent-response) \"%s\": \"%s\"" % (responseKey, intent_dict[responseKey]), colorValue=SIColors.Khaki)
+                    self.logsi.LogDebug("Found candidate for response key (intent-response) \"%s\": \"%s\"" % (responseKey, intent_dict[responseKey]), colorValue=SIColors.Khaki)
                     candidates.append(intent_dict[responseKey])
 
             # check for response key message by platform (platform-response).
             if responseKey in platform_block:
-                _logsi.LogDebug("Found candidate for response key (platform-response) \"%s\": \"%s\"" % (responseKey, platform_block[responseKey]), colorValue=SIColors.Khaki)
+                self.logsi.LogDebug("Found candidate for response key (platform-response) \"%s\": \"%s\"" % (responseKey, platform_block[responseKey]), colorValue=SIColors.Khaki)
                 candidates.append(platform_block[responseKey])
 
             # check for response key message in response errors (error-response):
             if responseKey in error_block:
-                _logsi.LogDebug("Found candidate for response key (error-response) \"%s\": \"%s\"" % (responseKey, error_block[responseKey]), colorValue=SIColors.Khaki)
+                self.logsi.LogDebug("Found candidate for response key (error-response) \"%s\": \"%s\"" % (responseKey, error_block[responseKey]), colorValue=SIColors.Khaki)
                 candidates.append(error_block[responseKey])
 
             # check for response key message by simple lookup under responses (generic-response):
             if responseKey in generic_block and isinstance(generic_block[responseKey], str):
-                _logsi.LogDebug("Found candidate for response key (generic-response) \"%s\": \"%s\"" % (responseKey, generic_block[responseKey]), colorValue=SIColors.Khaki)
+                self.logsi.LogDebug("Found candidate for response key (generic-response) \"%s\": \"%s\"" % (responseKey, generic_block[responseKey]), colorValue=SIColors.Khaki)
                 candidates.append(generic_block[responseKey])
 
             # trace.
-            _logsi.LogDictionary(SILevel.Verbose,"Responses candidates dictionary", candidates, prettyPrint=True, colorValue=SIColors.Khaki)
+            self.logsi.LogDictionary(SILevel.Verbose,"Responses candidates dictionary", candidates, prettyPrint=True, colorValue=SIColors.Khaki)
 
             # did we find any matching candidates?
             if candidates:
@@ -545,7 +541,7 @@ class SpotifyPlusIntentHandler(IntentHandler):
                 except Exception as ex:
 
                     # trace.
-                    _logsi.LogException("Intent handler GetIntentResponseByKey template render exception: %s" % (str(ex)), ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
+                    self.logsi.LogException("Intent handler GetIntentResponseByKey template render exception: %s" % (str(ex)), ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
 
                     # ignore template render exceptions.
                     # we will use the resource message as-is, and let the user figure it out.
@@ -553,13 +549,13 @@ class SpotifyPlusIntentHandler(IntentHandler):
                     result = template_text
 
             # return result text.
-            _logsi.LogText(SILevel.Verbose,"Response text for response key \"%s\": \"%s\"" % (responseKey, result), result, colorValue=SIColors.Khaki)
+            self.logsi.LogText(SILevel.Verbose,"Response text for response key \"%s\": \"%s\"" % (responseKey, result), result, colorValue=SIColors.Khaki)
             return result
 
         except Exception as ex:
             
             # trace.
-            _logsi.LogException("Intent handler GetIntentResponseByKey exception: %s" % (str(ex)), ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
+            self.logsi.LogException("Intent handler GetIntentResponseByKey exception: %s" % (str(ex)), ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
 
             # ignore exceptions
             return "Could not find intent resource message for response key \"%s\" (language=\"%s\", platform=\"%s\")." % (responseKey, intentObj.language, self._IntentLoader._Platform)
@@ -567,7 +563,7 @@ class SpotifyPlusIntentHandler(IntentHandler):
         finally:
 
             # trace.
-            _logsi.LeaveMethod(SILevel.Debug, colorValue=SIColors.Khaki)
+            self.logsi.LeaveMethod(SILevel.Debug, colorValue=SIColors.Khaki)
 
 
     async def GetTextSlotListInValue(
@@ -603,11 +599,11 @@ class SpotifyPlusIntentHandler(IntentHandler):
         try:
 
             # trace.
-            methodParms = _logsi.EnterMethodParmList(SILevel.Debug, colorValue=SIColors.Khaki)
+            methodParms = self.logsi.EnterMethodParmList(SILevel.Debug, colorValue=SIColors.Khaki)
             methodParms.AppendKeyValue("listName", listName)
             methodParms.AppendKeyValue("outValue", outValue)
             methodParms.AppendKeyValue("defaultValue", defaultValue)
-            _logsi.LogMethodParmList(SILevel.Verbose, "Querying TextSlotList IN value for OUT value key: \"%s\"" % (outValue), methodParms, colorValue=SIColors.Khaki)
+            self.logsi.LogMethodParmList(SILevel.Verbose, "Querying TextSlotList IN value for OUT value key: \"%s\"" % (outValue), methodParms, colorValue=SIColors.Khaki)
 
             # validations.
             if (not isinstance(intentObj, Intent)):
@@ -666,7 +662,7 @@ class SpotifyPlusIntentHandler(IntentHandler):
         except Exception as ex:
             
             # trace.
-            _logsi.LogException("Intent handler GetTextSlotListInValue exception: %s" % (str(ex)), ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
+            self.logsi.LogException("Intent handler GetTextSlotListInValue exception: %s" % (str(ex)), ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
 
             # ignore exceptions.
             return result
@@ -674,13 +670,14 @@ class SpotifyPlusIntentHandler(IntentHandler):
         finally:
 
             # trace.
-            _logsi.LeaveMethod(SILevel.Debug, colorValue=SIColors.Khaki)
+            self.logsi.LeaveMethod(SILevel.Debug, colorValue=SIColors.Khaki)
 
 
 def get_registry_entry_media_player(
     intentObj:Intent,
     platform:str=None,
     entity_id:str=None,
+    logsi:SISession=None,
     ) -> RegistryEntry | None:
     """
     Retrieves a registry entry for the specified media player criteria.
@@ -702,7 +699,7 @@ def get_registry_entry_media_player(
     result:RegistryEntry = None
 
     # trace.
-    _logsi.LogVerbose("Searching HA entity registry for active media player platform \"%s\", entity id: \"%s\"" % (platform, entity_id or "*any*"), colorValue=SIColors.Khaki)
+    logsi.LogVerbose("Searching HA entity registry for active media player platform \"%s\", entity id: \"%s\"" % (platform, entity_id or "*any*"), colorValue=SIColors.Khaki)
 
     # was a specific entity supplied?
     if (entity_id):
@@ -714,7 +711,7 @@ def get_registry_entry_media_player(
                 result = entityObj
 
         if (result is None):
-            _logsi.LogVerbose("No active HA entity registry entry found for media player platform \"%s\", entity id: \"%s\"" % (platform, entity_id), colorValue=SIColors.Khaki)
+            logsi.LogVerbose("No active HA entity registry entry found for media player platform \"%s\", entity id: \"%s\"" % (platform, entity_id), colorValue=SIColors.Khaki)
             #No active HA entity registry entry found for "spotifyplus" media player entity id: "media_player.sonos_01"
 
             return result
@@ -729,11 +726,11 @@ def get_registry_entry_media_player(
         if entities:
             result = entities[0]
         if (result is None):
-            _logsi.LogObject("No active HA entity registry entries were found for media player platform \"%s\"" % (platform), colorValue=SIColors.Khaki)
+            logsi.LogObject("No active HA entity registry entries were found for media player platform \"%s\"" % (platform), colorValue=SIColors.Khaki)
             return result
 
     # trace.
-    _logsi.LogObject(SILevel.Verbose, "Found HA entity registry for active media player platform \"%s\", entity id: \"%s\"" % (platform, result.entity_id), result, colorValue=SIColors.Khaki)
+    logsi.LogObject(SILevel.Verbose, "Found HA entity registry for active media player platform \"%s\", entity id: \"%s\"" % (platform, result.entity_id), result, colorValue=SIColors.Khaki)
 
     # return to caller.
     return result

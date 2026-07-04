@@ -18,24 +18,22 @@ from hassil.intents import (
 )
 from hassil.util import merge_dict
 
-from homeassistant.const import EVENT_CALL_SERVICE
+from homeassistant.const import (
+    EVENT_CALL_SERVICE, 
+    SERVICE_RELOAD as CONVERSATION_SERVICE_RELOAD
+)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.util import language as language_util
 from homeassistant.util.json import JsonObjectType, json_loads_object
 from homeassistant.components.conversation.const import (
-    SERVICE_RELOAD as CONVERSATION_SERVICE_RELOAD, 
     DOMAIN as DOMAIN_CONVERSATION,
 )
 
-import logging
-_LOGGER = logging.getLogger(__name__)
+#import logging
+#_LOGGER = logging.getLogger(__name__)
 
-# get smartinspect logger reference; create a new session for this module name.
-from smartinspectpython.siauto import SIAuto, SILevel, SISession, SIMethodParmListContext, SIColors
-_logsi:SISession = SIAuto.Si.GetSession(__name__)
-if (_logsi == None):
-    _logsi = SIAuto.Si.AddSession(__name__, True)
-_logsi.SystemLogger = _LOGGER
+# smartinspect logging.
+from smartinspectpython.siauto import SILevel, SISession, SIMethodParmListContext, SIColors
 
 ERROR_SENTINEL = object()
 METADATA_CUSTOM_SENTENCE = "hass_custom_sentence"
@@ -68,6 +66,7 @@ class IntentLoader():
         self, 
         hass:HomeAssistant,
         platform:str=None,
+        traceSession:SISession=None,
         ) -> None:
         """
         Initialize a new instance of the class.
@@ -78,8 +77,11 @@ class IntentLoader():
             platform (str):
                 Specify a platform prefix to only load `custom_sentences` files that
                 begin with the specified platform name.
+            traceSession (SISession):
+                SmartInspect trace session object.
         """
         self.hass = hass
+        self.logsi = traceSession
         self._LangIntents:dict[str, LanguageIntents | object] = {}
         self._LoadIntentsLock = asyncio.Lock()
         self._Platform:str = platform
@@ -102,24 +104,24 @@ class IntentLoader():
 
             # anything in the cache? if not, then there's nothing to do.
             if (self._LangIntents == {}):
-                _logsi.LogVerbose("Intent cache is already empty; nothing to do", colorValue=SIColors.Khaki)
+                self.logsi.LogVerbose("Intent cache is already empty; nothing to do", colorValue=SIColors.Khaki)
                 return
 
             # let's prepare to load the intent data;
             # set a lock in case we get multiple requests at the same time.
-            _logsi.LogVerbose("Acquiring lock prior to clearing cache", colorValue=SIColors.Khaki)
+            self.logsi.LogVerbose("Acquiring lock prior to clearing cache", colorValue=SIColors.Khaki)
             async with self._LoadIntentsLock:
 
                 # clear the cache.
                 self._LangIntents.clear()
 
                 # trace.
-                _logsi.LogVerbose("Intent cache has been cleared", colorValue=SIColors.Khaki)
+                self.logsi.LogVerbose("Intent cache has been cleared", colorValue=SIColors.Khaki)
 
         except Exception as ex:
 
             # log exception, but not to system logger as HA will take care of it.
-            _logsi.LogException("Component async_clear_cache exception", ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
+            self.logsi.LogException("Component async_clear_cache exception", ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
             raise
 
 
@@ -159,11 +161,11 @@ class IntentLoader():
                 return cast(LanguageIntents, lang_intents)
 
             # trace.
-            _logsi.LogVerbose("Intents first-time load detected; calling load intents (language=%s)" % (language), colorValue=SIColors.Khaki)
+            self.logsi.LogVerbose("Intents first-time load detected; calling load intents (language=%s)" % (language), colorValue=SIColors.Khaki)
 
             # let's prepare to load the intent data;
             # set a lock in case we get multiple requests at the same time.
-            _logsi.LogVerbose("Acquiring lock prior to loading intents", colorValue=SIColors.Khaki)
+            self.logsi.LogVerbose("Acquiring lock prior to loading intents", colorValue=SIColors.Khaki)
             async with self._LoadIntentsLock:
 
                 # was another request waiting while we were loading?
@@ -191,7 +193,7 @@ class IntentLoader():
                     self._LangIntents[language] = result
 
                 # trace.
-                _logsi.LogVerbose("Full intent load completed (language=%s) in %.2f seconds" % (language, (time.monotonic() - start)), colorValue=SIColors.Khaki)
+                self.logsi.LogVerbose("Full intent load completed (language=%s) in %.2f seconds" % (language, (time.monotonic() - start)), colorValue=SIColors.Khaki)
 
                 # return result.
                 return result
@@ -199,7 +201,7 @@ class IntentLoader():
         except Exception as ex:
 
             # log exception, but not to system logger as HA will take care of it.
-            _logsi.LogException("Component async_get_or_load_intents exception", ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
+            self.logsi.LogException("Component async_get_or_load_intents exception", ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
             raise
 
 
@@ -237,7 +239,7 @@ class IntentLoader():
         except Exception as ex:
 
             # log exception, but not to system logger as HA will take care of it.
-            _logsi.LogException("Component async_get_intent_list exception", ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
+            self.logsi.LogException("Component async_get_intent_list exception", ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
             raise
 
 
@@ -269,10 +271,10 @@ class IntentLoader():
         try:
 
             # trace.
-            methodParms = _logsi.EnterMethodParmList(SILevel.Debug, colorValue=SIColors.Khaki)
+            methodParms = self.logsi.EnterMethodParmList(SILevel.Debug, colorValue=SIColors.Khaki)
             methodParms.AppendKeyValue("language", str(language))
             methodParms.AppendKeyValue("platform", self._Platform)
-            _logsi.LogMethodParmList(SILevel.Verbose, "Component _load_intent_definitions starting", methodParms, colorValue=SIColors.Khaki)
+            self.logsi.LogMethodParmList(SILevel.Verbose, "Component _load_intent_definitions starting", methodParms, colorValue=SIColors.Khaki)
 
             intents_dict: dict[str, Any] = {}
             supported_langs = set(get_languages())
@@ -280,7 +282,7 @@ class IntentLoader():
             # choose a language variant upfront and commit to it.
             lang_matches = language_util.matches(language, supported_langs)
             if not lang_matches:
-                _logsi.LogWarning("Unable to find supported language variant for \"%s\"" % language)
+                self.logsi.LogWarning("Unable to find supported language variant for \"%s\"" % language)
                 return None
 
             language_variant = lang_matches[0]
@@ -303,7 +305,7 @@ class IntentLoader():
             custom_sentences_dir = Path(
                 self.hass.config.path("custom_sentences", language_variant)
             )
-            _logsi.LogVerbose("Checking custom_sentences directory: \"%s\"" % custom_sentences_dir, colorValue=SIColors.Khaki)
+            self.logsi.LogVerbose("Checking custom_sentences directory: \"%s\"" % custom_sentences_dir, colorValue=SIColors.Khaki)
 
             # is this a directory?
             if custom_sentences_dir.is_dir():
@@ -312,11 +314,11 @@ class IntentLoader():
                 platformPfx = ""
                 if self._Platform is not None:
                     platformPfx = f"{self._Platform}_"
-                    _logsi.LogVerbose("Limiting custom_sentences files by platform prefix: \"%s\"" % platformPfx, colorValue=SIColors.Khaki)
+                    self.logsi.LogVerbose("Limiting custom_sentences files by platform prefix: \"%s\"" % platformPfx, colorValue=SIColors.Khaki)
 
                 # create file search pattern.
                 fileSearchPattern = f"{platformPfx}*.yaml"
-                _logsi.LogVerbose("Searching custom_sentences directory (and sub-directories) for this file pattern: \"%s\"" % fileSearchPattern, colorValue=SIColors.Khaki)
+                self.logsi.LogVerbose("Searching custom_sentences directory (and sub-directories) for this file pattern: \"%s\"" % fileSearchPattern, colorValue=SIColors.Khaki)
 
                 # process all found files in the directory, including sub-directories.
                 for custom_sentences_path in sorted(custom_sentences_dir.rglob(fileSearchPattern)):
@@ -326,11 +328,11 @@ class IntentLoader():
                     # TODO should not need this, as the rglob takes care of filtering out unwanted files!
                     #fnameCompare = custom_sentences_path.name.lower()
                     # if (self._Platform is not None) and (not fnameCompare.startswith(self._Platform)):
-                    #     _logsi.LogDebug("Discarding non-platform custom_sentences file: %s" % custom_sentences_path, colorValue=SIColors.Khaki)
+                    #     self.logsi.LogDebug("Discarding non-platform custom_sentences file: %s" % custom_sentences_path, colorValue=SIColors.Khaki)
                     #     continue
 
                     # process the file.
-                    _logsi.LogVerbose("Loading custom_sentences file: %s" % custom_sentences_path, colorValue=SIColors.Khaki)
+                    self.logsi.LogVerbose("Loading custom_sentences file: %s" % custom_sentences_path, colorValue=SIColors.Khaki)
                     with custom_sentences_path.open(encoding="utf-8") as custom_sentences_file:
 
                         # merge custom sentences.
@@ -338,7 +340,7 @@ class IntentLoader():
                             custom_sentences_yaml := yaml.safe_load(custom_sentences_file),
                             dict,
                         ):
-                            _logsi.LogWarning("Custom sentences file does not match expected format: \"%s\"" % custom_sentences_file.name)
+                            self.logsi.LogWarning("Custom sentences file does not match expected format: \"%s\"" % custom_sentences_file.name)
                             continue
 
                         # add metadata so we can identify custom sentences in the debugger.
@@ -360,7 +362,7 @@ class IntentLoader():
 
             # if no custom sentences defined then we are done.
             if not intents_dict:
-                _logsi.LogVerbose("Could not find custom_sentences files for language=\"%s\", platform=\"%s\"" % (language, self._Platform), colorValue=SIColors.Khaki)
+                self.logsi.LogVerbose("Could not find custom_sentences files for language=\"%s\", platform=\"%s\"" % (language, self._Platform), colorValue=SIColors.Khaki)
                 return None
 
             # load intent objects from dictionary format.
@@ -378,16 +380,16 @@ class IntentLoader():
                 del generic_responses[key]
 
             # trace.
-            if (_logsi.IsOn(SILevel.Verbose)):
-                _logsi.LogDictionary(SILevel.Verbose, "Component intents information: %s (%s) - all (dictionary)" % (self._Platform, language_variant), intents_dict, prettyPrint=True, colorValue=SIColors.Khaki)
-                _logsi.LogDictionary(SILevel.Verbose, "Component intents information: %s (%s) - responses (dictionary)" % (self._Platform, language_variant), responses_dict, prettyPrint=True, colorValue=SIColors.Khaki)
-                _logsi.LogDictionary(SILevel.Verbose, "Component intents information: %s (%s) - intent_responses (dictionary)" % (self._Platform, language_variant), intent_responses, prettyPrint=True, colorValue=SIColors.Khaki)
-                _logsi.LogDictionary(SILevel.Verbose, "Component intents information: %s (%s) - platform_responses (dictionary)" % (self._Platform, language_variant), platform_responses, prettyPrint=True, colorValue=SIColors.Khaki)
-                _logsi.LogDictionary(SILevel.Verbose, "Component intents information: %s (%s) - error_responses (dictionary)" % (self._Platform, language_variant), error_responses, prettyPrint=True, colorValue=SIColors.Khaki)
-                _logsi.LogDictionary(SILevel.Verbose, "Component intents information: %s (%s) - generic_responses (dictionary)" % (self._Platform, language_variant), generic_responses, prettyPrint=True, colorValue=SIColors.Khaki)
-                _logsi.LogDictionary(SILevel.Verbose, "Component intents information: %s (%s) - intents slot_lists (dictionary)" % (self._Platform, language_variant), intents.slot_lists, prettyPrint=True, colorValue=SIColors.Khaki)
-                _logsi.LogDictionary(SILevel.Verbose, "Component intents information: %s (%s) - intents expansion_rules (dictionary)" % (self._Platform, language_variant), intents.expansion_rules, prettyPrint=True, colorValue=SIColors.Khaki)
-                _logsi.LogDictionary(SILevel.Verbose, "Component intents information: %s (%s) - intents skip_words (dictionary)" % (self._Platform, language_variant), intents.skip_words, prettyPrint=True, colorValue=SIColors.Khaki)
+            if (self.logsi.IsOn(SILevel.Verbose)):
+                self.logsi.LogDictionary(SILevel.Verbose, "Component intents information: %s (%s) - all (dictionary)" % (self._Platform, language_variant), intents_dict, prettyPrint=True, colorValue=SIColors.Khaki)
+                self.logsi.LogDictionary(SILevel.Verbose, "Component intents information: %s (%s) - responses (dictionary)" % (self._Platform, language_variant), responses_dict, prettyPrint=True, colorValue=SIColors.Khaki)
+                self.logsi.LogDictionary(SILevel.Verbose, "Component intents information: %s (%s) - intent_responses (dictionary)" % (self._Platform, language_variant), intent_responses, prettyPrint=True, colorValue=SIColors.Khaki)
+                self.logsi.LogDictionary(SILevel.Verbose, "Component intents information: %s (%s) - platform_responses (dictionary)" % (self._Platform, language_variant), platform_responses, prettyPrint=True, colorValue=SIColors.Khaki)
+                self.logsi.LogDictionary(SILevel.Verbose, "Component intents information: %s (%s) - error_responses (dictionary)" % (self._Platform, language_variant), error_responses, prettyPrint=True, colorValue=SIColors.Khaki)
+                self.logsi.LogDictionary(SILevel.Verbose, "Component intents information: %s (%s) - generic_responses (dictionary)" % (self._Platform, language_variant), generic_responses, prettyPrint=True, colorValue=SIColors.Khaki)
+                self.logsi.LogDictionary(SILevel.Verbose, "Component intents information: %s (%s) - intents slot_lists (dictionary)" % (self._Platform, language_variant), intents.slot_lists, prettyPrint=True, colorValue=SIColors.Khaki)
+                self.logsi.LogDictionary(SILevel.Verbose, "Component intents information: %s (%s) - intents expansion_rules (dictionary)" % (self._Platform, language_variant), intents.expansion_rules, prettyPrint=True, colorValue=SIColors.Khaki)
+                self.logsi.LogDictionary(SILevel.Verbose, "Component intents information: %s (%s) - intents skip_words (dictionary)" % (self._Platform, language_variant), intents.skip_words, prettyPrint=True, colorValue=SIColors.Khaki)
 
             # return results.
             result = LanguageIntents(
@@ -401,19 +403,19 @@ class IntentLoader():
             )
 
             # trace.
-            _logsi.LogVerbose("Component _load_intent_definitions complete", colorValue=SIColors.Khaki)
+            self.logsi.LogVerbose("Component _load_intent_definitions complete", colorValue=SIColors.Khaki)
             return result
 
         except Exception as ex:
 
             # log exception, but not to system logger as HA will take care of it.
-            _logsi.LogException("Component _load_intent_definitions exception", ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
+            self.logsi.LogException("Component _load_intent_definitions exception", ex, logToSystemLogger=False, colorValue=SIColors.Khaki)
             raise
 
         finally:
 
             # trace.
-            _logsi.LeaveMethod(SILevel.Debug, colorValue=SIColors.Khaki)
+            self.logsi.LeaveMethod(SILevel.Debug, colorValue=SIColors.Khaki)
 
 
     async def async_register_cache_reload_listener(
@@ -434,12 +436,12 @@ class IntentLoader():
             service = data.get("service")
 
             # trace.
-            #_logsi.LogDictionary(SILevel.Verbose, "Call Service detected: domain=\"%s\", service=\"%s\"" % (domain, service), event, prettyPrint=True, colorValue=SIColors.Red)
+            #self.logsi.LogDictionary(SILevel.Verbose, "Call Service detected: domain=\"%s\", service=\"%s\"" % (domain, service), event, prettyPrint=True, colorValue=SIColors.Red)
 
             # was the "conversation.reload" service called?
             if domain == DOMAIN_CONVERSATION and service == CONVERSATION_SERVICE_RELOAD:
 
-                _logsi.LogDictionary(SILevel.Verbose, "Intent Loader detected a Conversation integration Reload event", event, prettyPrint=True, colorValue=SIColors.Khaki)
+                self.logsi.LogDictionary(SILevel.Verbose, "Intent Loader detected a Conversation integration Reload event", event, prettyPrint=True, colorValue=SIColors.Khaki)
 
                 # clear our intent cache, so it will be reloaded next time.
                 await self.async_clear_cache()
@@ -448,7 +450,7 @@ class IntentLoader():
         self.unsubscribe_event = self.hass.bus.async_listen(EVENT_CALL_SERVICE, _handle_call_service_event)
 
         # trace.
-        _logsi.LogVerbose("Intent Loader registered the conversation reload event listener", colorValue=SIColors.Khaki)
+        self.logsi.LogVerbose("Intent Loader registered the conversation reload event listener", colorValue=SIColors.Khaki)
 
 
     async def async_unregister_cache_reload_listener(
@@ -460,4 +462,4 @@ class IntentLoader():
         # did we register an event listener? if so, then call it's unregister function.
         if self.unsubscribe_event:
             self.unsubscribe_event()  # <-- stop listening
-            _logsi.LogVerbose("Unregistered the conversation reload event listener", colorValue=SIColors.Khaki)
+            self.logsi.LogVerbose("Unregistered the conversation reload event listener", colorValue=SIColors.Khaki)

@@ -1,38 +1,32 @@
 """Intents for the spotifyplus integration."""
-from typing import IO
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.intent import (
     IntentHandler, 
     async_register as intent_async_register,
 )
-from homeassistant.util.json import JsonObjectType, json_loads_object
-
-from home_assistant_intents import (
-    _DATA_DIR as HA_BUILT_IN_INTENTS_DATA_DIR, 
-    get_intents,
-)
 
 from custom_components.spotifyplus.const import PLATFORM_SPOTIFYPLUS
 
 from .appmessages import STAppMessages
-from .intent_handlers import *
-from .intent_loader import IntentLoader
 
 import logging
 _LOGGER = logging.getLogger(__name__)
 
-# get smartinspect logger reference; create a new session for this module name.
+# smartinspect logging.
 from smartinspectpython.siauto import SIAuto, SILevel, SISession, SIMethodParmListContext, SIColors
-_logsi:SISession = SIAuto.Si.GetSession(__name__)
-if (_logsi == None):
-    _logsi = SIAuto.Si.AddSession(__name__, True)
-_logsi.SystemLogger = _LOGGER
+_logsi:SISession | None = None
 
+# from typing import IO
+# from homeassistant.util.json import JsonObjectType, json_loads_object
+# from home_assistant_intents import (
+#     _DATA_DIR as HA_BUILT_IN_INTENTS_DATA_DIR, 
+#     get_intents,
+# )
 
-def json_load(fp: IO[str]) -> JsonObjectType:
-    """Wrap json_loads for get_intents."""
-    return json_loads_object(fp.read())
+# def json_load(fp: IO[str]) -> JsonObjectType:
+#     """Wrap json_loads for get_intents."""
+#     return json_loads_object(fp.read())
 
 
 async def async_setup_intents(hass: HomeAssistant) -> None:
@@ -47,16 +41,43 @@ async def async_setup_intents(hass: HomeAssistant) -> None:
     """
     try:
 
+        global _logsi
+
+        # initialize trace object at run-time (rather than at initialization time).
+        if _logsi is None:
+            _logsi = SIAuto.Si.GetSession(__name__)
+            if _logsi is None:
+                _logsi = SIAuto.Si.AddSession(__name__, True)
+            _logsi.SystemLogger = _LOGGER
+
         # trace.
         _logsi.EnterMethod(SILevel.Debug, colorValue=SIColors.Khaki)
         _logsi.LogVerbose("Component async_setup_intents starting", colorValue=SIColors.Khaki)
-        
+
+        # import the following when the `async_setup_intents` method is executed, which will
+        # delay loading the intent handlers until AFTER initial startup.  this will avoid delaying 
+        # the initialization of the module, which causes a `Detected blocking call to import_module`
+        # error to be raised starting with the HA 2027.07.0 release.
+        from .intent_loader import IntentLoader
+        from .intent_handlers import (
+            SpotifyPlusFavoriteAddRemove_Handler,
+            SpotifyPlusGetInfoArtistBio_Handler,
+            SpotifyPlusGetNowPlayingInfo_Handler,
+            SpotifyPlusPlayerDeckControl_Handler,
+            SpotifyPlusPlayerSetRepeatMode_Handler,
+            SpotifyPlusPlayerSetShuffleMode_Handler,
+            SpotifyPlusPlayerTransferPlayback_Handler,
+            SpotifyPlusPlayerVolumeControl_Handler,
+            SpotifyPlusPlaylistCreate_Handler,
+            SpotifyPlusSearchPlayControl_Handler,
+        )
+
         # get slot list of spotifyplus media player names and any defined aliases.
         #player_name_list = await async_get_slot_list_player_name(hass)
 
         # create intent loader instance.
         # in our case, we will only load OUR platform intent data.
-        intentLoader:IntentLoader = IntentLoader(hass, PLATFORM_SPOTIFYPLUS)
+        intentLoader:IntentLoader = IntentLoader(hass, PLATFORM_SPOTIFYPLUS, _logsi)
                    
         # register all intents this component provides.
         register_intent_handler(hass, SpotifyPlusFavoriteAddRemove_Handler(intentLoader))
