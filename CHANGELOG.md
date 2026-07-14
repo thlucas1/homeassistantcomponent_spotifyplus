@@ -6,6 +6,14 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.205 ] - 2026/07/14
+
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.274`.
+
+###### [ 1.0.204 ] - 2026/07/13
+
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.272`.  This updates configuration data read / write to be thread safe.  This was causing issues in Home Assistant where multiple service definitions were defined that were overwriting configurations.
+
 ###### [ 1.0.203 ] - 2026/07/04
 
   * Updated Voice Assist intent imports to delay loading until after initial startup.  This was causing `Detected blocking call to import_module with args ('custom_components.spotifyplus.intent')` exceptions starting with HA 2027.07.0 release.
