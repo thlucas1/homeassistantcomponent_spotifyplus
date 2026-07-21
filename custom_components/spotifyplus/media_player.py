@@ -1291,14 +1291,14 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                     # is a Spotify-owned "algorithmic" playlist (e.g. various "Made For You" content, etc).
                     try:
                         
-                        _logsi.LogVerbose("'%s': Retrieving playlist for context uri '%s'" % (self.name, context.Uri))
+                        _logsi.LogVerbose("'%s': Retrieving basic playlist details for context uri '%s'" % (self.name, context.Uri))
                         spotifyId:str = SpotifyClient.GetIdFromUri(context.Uri)
-                        self._playlist = self.data.spotifyClient.GetPlaylist(spotifyId)
+                        self._playlist = self.data.spotifyClient.GetPlaylist(spotifyId, excludeItems=True)
                         
                     except Exception as ex:
                         
                         #_logsi.LogException("Unable to get playlist data for context '%s'. Continuing without playlist data" % context.Uri, ex, logToSystemLogger=False)
-                        _logsi.LogWarning("'%s': Unable to get playlist data for context '%s'. Continuing without playlist data. GetPlaylist response: %s" % (self.name, context.Uri, str(ex)), logToSystemLogger=False)
+                        _logsi.LogWarning("'%s': Unable to get basic playlist data for context '%s'. Continuing without playlist data. GetPlaylist response: %s" % (self.name, context.Uri, str(ex)), logToSystemLogger=False)
 
                         # if we could not get the current playlist info, then build a "dummy" playlist so that
                         # information is still conveyed in the extended attributes.
@@ -4403,7 +4403,8 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             playlistId:str=None, 
             market:str=None,
             fields:str=None,
-            additionalTypes:str=None
+            additionalTypes:str=None,
+            excludeItems:str=None,
             ) -> dict:
         """
         Get a playlist owned by a Spotify user.
@@ -4425,6 +4426,11 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             additionalTypes (str):
                 A comma-separated list of item types that your client supports besides the default track type.  
                 Valid types are: track and episode.  
+            excludeItems (bool):
+                True to return only the basic fields of the playlist; the items collection will not be included in the returned object.  
+                The `fields` argument will be overridden to specify the fields to return.  
+                If False (or omitted, default), then playlist items will be included in the returned object.  
+                This argument is not part of the Spotify Web API specification.  
                 
         Returns:
             A dictionary that contains the following keys:
@@ -4443,11 +4449,12 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             apiMethodParms.AppendKeyValue("market", market)
             apiMethodParms.AppendKeyValue("fields", fields)
             apiMethodParms.AppendKeyValue("additionalTypes", additionalTypes)
+            apiMethodParms.AppendKeyValue("excludeItems", excludeItems)
             _logsi.LogMethodParmList(SILevel.Verbose, "Spotify Get Playlist Service", apiMethodParms)
                 
             # request information from Spotify Web API.
             _logsi.LogVerbose(STAppMessages.MSG_SERVICE_QUERY_WEB_API)
-            result = self.data.spotifyClient.GetPlaylist(playlistId, market, fields, additionalTypes)
+            result = self.data.spotifyClient.GetPlaylist(playlistId, market, fields, additionalTypes, excludeItems)
 
             # return the (partial) user profile that retrieved the result, as well as the result itself.
             return {

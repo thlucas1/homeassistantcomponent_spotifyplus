@@ -578,6 +578,7 @@ SERVICE_SPOTIFY_GET_PLAYLIST_SCHEMA = vol.Schema(
         vol.Optional("market"): cv.string,
         vol.Optional("fields"): cv.string,
         vol.Optional("additional_types"): cv.string,
+        vol.Optional("exclude_items"): cv.boolean,
     }
 )
 
@@ -2065,8 +2066,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     market = service.data.get("market")
                     fields = service.data.get("fields")
                     additional_types = service.data.get("additional_types")
+                    exclude_items = service.data.get("exclude_items")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_playlist, playlist_id, market, fields, additional_types)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_playlist, playlist_id, market, fields, additional_types, exclude_items)
 
                 elif service.service == SERVICE_SPOTIFY_GET_PLAYLIST_COVER_IMAGE:
 

@@ -1516,6 +1516,13 @@ get_playlist:
       required: false
       selector:
         text:
+    exclude_items:
+      name: Exclude Items?
+      description: True to return only the basic fields of the playlist - the items collection will NOT be included in the returned object. otherwise, False (or omitted, default) to include the items collection in the returned object.  If True, the `fields` argument will be overridden to specify the fields to return.
+      example: "False"
+      required: false
+      selector:
+        boolean:
 
 get_playlist_cover_image:
   name: Get Playlist Cover Image

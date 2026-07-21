@@ -973,6 +973,10 @@
         "additional_types": {
           "name": "Additional Types",
           "description": "A comma-separated list of item types that your client supports besides the default track type. Valid types are 'track' and 'episode'."
+        },
+        "exclude_items": {
+          "name": "Exclude Items?",
+          "description": "True to return only the basic fields of the playlist - the items collection will NOT be included in the returned object. otherwise, False (or omitted) to include the items collection in the returned object.  If True, the `fields` argument will be overridden to specify the fields to return."
         }
       }
     },
