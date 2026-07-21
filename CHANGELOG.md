@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.207 ] - 2026/07/21
+
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.277`.  Updated `MakeRequest` logic to check for `403 - Player command failed: Premium required` errors in the Spotify Web API response.  Spotify made some sort of change in their API that is not recognizing a valid access token that is passed!  The same request can be passed through after a slight delay successfully, which indicates it's a problem on the Spotify side.  This logic will retry the request a few times in a row, before giving up.
+
 ###### [ 1.0.206 ] - 2026/07/21
 
   * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.276`.  Updated `MakeRequest` logic to check for `401 - Access token missing` errors in the Spotify Web API response.  Spotify made some sort of change in their API that is not recognizing a valid access token that is passed!  The same request can be passed through after a slight delay successfully, which indicates it's a problem on the Spotify side.  This logic will retry the request a few times in a row, before giving up.
