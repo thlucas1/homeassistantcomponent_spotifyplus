@@ -6,6 +6,12 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.211 ] - 2026/07/28
+
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.283`.  
+  * This updates configuration data read / write to be thread safe.  This was causing issues in Home Assistant where multiple service definitions were defined that were overwriting configurations.  
+  * Updated the following `spotifywebapipython.SpotifyClient` methods to remove the "deprecated" exception, as they can still be used by older authorization access tokens; note that new Spotify authorization access tokens (as of 2024/11/27 and later) will return a `deprecated` exception for these methods if the Spotify Web API returns a `404 - Not Found` status.  The methods restored were: `GetAlbumNewReleases`, `GetArtistRelatedArtists`, `GetArtistTopTracks`, `GetBrowseCategory`, `GetBrowseCategorys`, `GetCategoryPlaylists`, `GetFeaturedPlaylists`, `GetGenres`, `GetMarkets`, `GetPlaylistsForUser`, `GetTrackAudioFeatures`, `GetTracksAudioFeatures`, `GetTrackRecommendations`, `GetUsersPublicProfile`.  
+
 ###### [ 1.0.210 ] - 2026/07/27
 
   * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.282`.
