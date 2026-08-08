@@ -1,7 +1,6 @@
 """Support for Spotify media browsing."""
 from __future__ import annotations
 from functools import partial
-from enum import StrEnum
 import logging
 import base64
 import os
@@ -20,7 +19,11 @@ from homeassistant.components.media_player import (
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import IntegrationError
 
-from .const import DOMAIN
+from .const import (
+    DOMAIN, 
+    BrowsableMedia, 
+    SPOTIFY_BROWSE_LIMIT_TOTAL,
+)
 
 # get smartinspect logger reference; create a new session for this module name.
 from smartinspectpython.siauto import SIAuto, SILevel, SISession, SIMethodParmListContext
@@ -29,29 +32,6 @@ _logsi:SISession = SIAuto.Si.GetSession(__name__)
 if (_logsi == None):
     _logsi = SIAuto.Si.AddSession(__name__, True)
 _logsi.SystemLogger = logging.getLogger(__name__)
-
-
-class BrowsableMedia(StrEnum):
-    """
-    Enum of browsable media.
-    Contains the library root node key value definitions.
-    """
-    # library custom root node title definitions.
-    SPOTIFY_LIBRARY_INDEX = "spotify_library_index"
-    SPOTIFY_CATEGORY_PLAYLISTS = "spotify_category_playlists"
-    SPOTIFY_CATEGORY_PLAYLISTS_MADEFORYOU = "spotify_category_playlists_madeforyou"
-    SPOTIFY_CATEGORYS = "spotify_categorys"
-    SPOTIFY_FEATURED_PLAYLISTS = "spotify_featured_playlists"
-    SPOTIFY_NEW_RELEASES = "spotify_new_releases"
-    SPOTIFY_USER_FOLLOWED_ARTISTS = "spotify_user_followed_artists"
-    SPOTIFY_USER_PLAYLISTS = "spotify_user_playlists"
-    SPOTIFY_USER_RECENTLY_PLAYED = "spotify_user_recently_played"
-    SPOTIFY_USER_SAVED_ALBUMS = "spotify_user_saved_albums"
-    SPOTIFY_USER_SAVED_AUDIOBOOKS = "spotify_user_saved_audiobooks"
-    SPOTIFY_USER_SAVED_SHOWS = "spotify_user_saved_shows"
-    SPOTIFY_USER_SAVED_TRACKS = "spotify_user_saved_tracks"
-    SPOTIFY_USER_TOP_ARTISTS = "spotify_user_top_artists"
-    SPOTIFY_USER_TOP_TRACKS = "spotify_user_top_tracks"
 
 
 # Spotify Library index definitions, containing media attributes that control content display.
@@ -63,62 +43,71 @@ SPOTIFY_LIBRARY_MAP = {
         "parent": MediaClass.DIRECTORY,
         "children": MediaClass.DIRECTORY,
         "is_index_item": False,
+        "can_search": False,
     },
     BrowsableMedia.SPOTIFY_USER_PLAYLISTS.value: {
-        "title": "Playlists",
+        "title": "Favorite Playlists",
         "title_node": "Spotify Playlist Favorites",
         "image": f"/local/images/{DOMAIN}_medialib_playlists.png",
         "parent": MediaClass.DIRECTORY,
         "children": MediaClass.PLAYLIST,
+        "can_search": True,
     },
     BrowsableMedia.SPOTIFY_USER_FOLLOWED_ARTISTS.value:  {
-        "title": "Artists",
+        "title": "Favorite Artists",
         "title_node": "Spotify Artists Followed",
         "image": f"/local/images/{DOMAIN}_medialib_artists.png",
         "parent": MediaClass.DIRECTORY,
         "children": MediaClass.ARTIST,
+        "can_search": True,
     },
     BrowsableMedia.SPOTIFY_USER_SAVED_ALBUMS.value:  {
-        "title": "Albums",
+        "title": "Favorite Albums",
         "title_node": "Spotify Album Favorites",
         "image": f"/local/images/{DOMAIN}_medialib_albums.png",
         "parent": MediaClass.DIRECTORY,
         "children": MediaClass.ALBUM,
+        "can_search": True,
     },
     BrowsableMedia.SPOTIFY_USER_SAVED_TRACKS.value:  {
-        "title": "Tracks",
+        "title": "Favorite Tracks",
         "title_node": "Spotify Track Favorites",
         "image": f"/local/images/{DOMAIN}_medialib_tracks.png",
         "parent": MediaClass.DIRECTORY,
         "children": MediaClass.TRACK,
+        "can_search": True,
     },
     BrowsableMedia.SPOTIFY_USER_SAVED_SHOWS.value:  {
-        "title": "Podcasts",
+        "title": "Favorite Podcasts",
         "title_node": "Spotify Podcast Favorites",
         "image": f"/local/images/{DOMAIN}_medialib_podcasts.png",
         "parent": MediaClass.DIRECTORY,
         "children": MediaClass.PODCAST,
+        "can_search": True,
     },
     BrowsableMedia.SPOTIFY_USER_SAVED_AUDIOBOOKS.value:  {
-        "title": "Audiobooks",
+        "title": "Favorite Audiobooks",
         "title_node": "Spotify Audiobook Favorites",
         "image": f"/local/images/{DOMAIN}_medialib_audiobooks.png",
         "parent": MediaClass.DIRECTORY,
         "children": MediaClass.APP,  # spotify audiobook support
+        "can_search": True,
     },
     BrowsableMedia.SPOTIFY_USER_TOP_ARTISTS.value:  {
-        "title": "Top Artists",
-        "title_node": "Spotify Top Artists",
+        "title": "My Top Artists",
+        "title_node": "My Spotify Top Artists",
         "image": f"/local/images/{DOMAIN}_medialib_top_artists.png",
         "parent": MediaClass.DIRECTORY,
         "children": MediaClass.ARTIST,
+        "can_search": True,
     },
     BrowsableMedia.SPOTIFY_USER_TOP_TRACKS.value:  {
-        "title": "Top Tracks",
-        "title_node": "Spotify Top Tracks",
+        "title": "My Top Tracks",
+        "title_node": "My Spotify Top Tracks",
         "image": f"/local/images/{DOMAIN}_medialib_top_tracks.png",
         "parent": MediaClass.DIRECTORY,
         "children": MediaClass.TRACK,
+        "can_search": True,
     },
     BrowsableMedia.SPOTIFY_FEATURED_PLAYLISTS.value:  {
         "title": "Featured Playlists",
@@ -126,6 +115,7 @@ SPOTIFY_LIBRARY_MAP = {
         "image": f"/local/images/{DOMAIN}_medialib_featured_playlists.png",
         "parent": MediaClass.DIRECTORY,
         "children": MediaClass.PLAYLIST,
+        "can_search": True,
     },
     BrowsableMedia.SPOTIFY_NEW_RELEASES.value:  {
         "title": "New Releases",
@@ -133,6 +123,7 @@ SPOTIFY_LIBRARY_MAP = {
         "image": f"/local/images/{DOMAIN}_medialib_new_releases.png",
         "parent": MediaClass.DIRECTORY,
         "children": MediaClass.ALBUM,
+        "can_search": True,
     },
     BrowsableMedia.SPOTIFY_CATEGORYS.value:  {
         "title": "Categories",
@@ -140,6 +131,7 @@ SPOTIFY_LIBRARY_MAP = {
         "image": f"/local/images/{DOMAIN}_medialib_categorys.png",
         "parent": MediaClass.DIRECTORY,
         "children": MediaClass.GENRE,
+        "can_search": False,
     },
     BrowsableMedia.SPOTIFY_CATEGORY_PLAYLISTS.value:  {
         "title": "Category Playlists",
@@ -148,6 +140,7 @@ SPOTIFY_LIBRARY_MAP = {
         "parent": MediaClass.DIRECTORY,
         "children": MediaClass.PLAYLIST,
         "is_index_item": False,
+        "can_search": False,
     },
     BrowsableMedia.SPOTIFY_CATEGORY_PLAYLISTS_MADEFORYOU.value:  {
         "title": "Made For You",
@@ -155,6 +148,7 @@ SPOTIFY_LIBRARY_MAP = {
         "image": f"/local/images/{DOMAIN}_medialib_spotify_category_playlists_made_for_you.png",
         "parent": MediaClass.DIRECTORY,
         "children": MediaClass.PLAYLIST,
+        "can_search": False,
     },
     BrowsableMedia.SPOTIFY_USER_RECENTLY_PLAYED.value:  {
         "title": "Recently Played",
@@ -162,6 +156,55 @@ SPOTIFY_LIBRARY_MAP = {
         "image": f"/local/images/{DOMAIN}_medialib_recently_played.png",
         "parent": MediaClass.DIRECTORY,
         "children": MediaClass.TRACK,
+        "can_search": True,
+    },
+    BrowsableMedia.SPOTIFY_SEARCH_PLAYLISTS.value: {
+        "title": "Search Playlists",
+        "title_node": "Search Spotify Playlists",
+        "image": f"/local/images/{DOMAIN}_medialib_playlists_search.png",
+        "parent": MediaClass.DIRECTORY,
+        "children": MediaClass.PLAYLIST,
+        "can_search": True,
+    },
+    BrowsableMedia.SPOTIFY_SEARCH_ARTISTS.value:  {
+        "title": "Search Artists",
+        "title_node": "Search Spotify Artists",
+        "image": f"/local/images/{DOMAIN}_medialib_artists_search.png",
+        "parent": MediaClass.DIRECTORY,
+        "children": MediaClass.ARTIST,
+        "can_search": True,
+    },
+    BrowsableMedia.SPOTIFY_SEARCH_ALBUMS.value:  {
+        "title": "Search Albums",
+        "title_node": "Search Spotify Albums",
+        "image": f"/local/images/{DOMAIN}_medialib_albums_search.png",
+        "parent": MediaClass.DIRECTORY,
+        "children": MediaClass.ALBUM,
+        "can_search": True,
+    },
+    BrowsableMedia.SPOTIFY_SEARCH_TRACKS.value:  {
+        "title": "Search Tracks",
+        "title_node": "Search Spotify Tracks",
+        "image": f"/local/images/{DOMAIN}_medialib_tracks_search.png",
+        "parent": MediaClass.DIRECTORY,
+        "children": MediaClass.TRACK,
+        "can_search": True,
+    },
+    BrowsableMedia.SPOTIFY_SEARCH_SHOWS.value:  {
+        "title": "Search Podcasts",
+        "title_node": "Search Spotify Podcasts",
+        "image": f"/local/images/{DOMAIN}_medialib_podcasts_search.png",
+        "parent": MediaClass.DIRECTORY,
+        "children": MediaClass.PODCAST,
+        "can_search": True,
+    },
+    BrowsableMedia.SPOTIFY_SEARCH_AUDIOBOOKS.value:  {
+        "title": "Search Audiobooks",
+        "title_node": "Search Spotify Audiobooks",
+        "image": f"/local/images/{DOMAIN}_medialib_audiobooks_search.png",
+        "parent": MediaClass.DIRECTORY,
+        "children": MediaClass.APP,  # spotify audiobook support
+        "can_search": True,
     },
     # the following are HA media types, and will not be displayed in the library index.
     # they are required for playing base-level types of media for this library index.
@@ -213,9 +256,6 @@ SPOTIFY_LIBRARY_MAP = {
 
 BROWSE_LIMIT = 50
 """ Max number of items to return from a Spotify Web API query. """
-
-SPOTIFY_BROWSE_LIMIT_TOTAL = 100
-""" Max number of items to return from a SpotifyPlus integration request that supports paging. """
 
 CATEGORY_BASE64:str = "category_base64::"
 """ Eye-catcher used to denote a serialized ContentItem. """
@@ -335,10 +375,14 @@ async def async_browse_media_library_index(
         parentAttrs:dict[str, Any] = libraryMap.get(libraryIndex.value, None)
         _logsi.LogDictionary(SILevel.Verbose, "'%s': BrowseMedia attributes for parent media content type: '%s'" % (playerName, libraryIndex.value), parentAttrs)
 
+        # get searchable attribute.
+        canSearch = parentAttrs.get("can_search", False)
+
         # create the index.
         browseMedia:BrowseMedia = BrowseMedia(
             can_expand=True,
             can_play=False,
+            can_search=canSearch,
             children=[],
             children_media_class=parentAttrs["children"],
             media_class=parentAttrs["parent"],
@@ -359,6 +403,9 @@ async def async_browse_media_library_index(
             # trace.
             #_logsi.LogDictionary(SILevel.Verbose, "'%s': BrowseMedia attributes for child media content type: '%s'" % (playerName, mediaType), childAttrs)
 
+            # get searchable attribute.
+            canSearch = childAttrs.get("can_search", False)
+
             # if a LOCAL index image was specified, then ensure it exists.
             # otherwise, default to null.
             image:str = childAttrs.get("image", None)
@@ -371,6 +418,7 @@ async def async_browse_media_library_index(
             browseMediaChild:BrowseMedia = BrowseMedia(
                 can_expand=True,
                 can_play=False,
+                can_search=canSearch,
                 children=None,
                 children_media_class=childAttrs["children"],
                 media_class=childAttrs["parent"],
@@ -607,6 +655,41 @@ def browse_media_node(
             title = media.Name
             image = media.ImageUrl
                         
+        # when searching Spotify, display user favorites initially.
+        # we have to display something in the media browser before search is allowed.
+
+        # TODO - maybe display a blank screen instead to make it faster?
+
+        elif media_content_type == BrowsableMedia.SPOTIFY_SEARCH_ALBUMS:
+            _logsi.LogVerbose("Getting Spotify user Album favorites")
+            media = {} # media browser will display no items initially when searching
+            items = []
+            
+        elif media_content_type == BrowsableMedia.SPOTIFY_SEARCH_ARTISTS:
+            _logsi.LogVerbose("'%s': querying spotify for Artists Followed" % playerName)
+            media = {} # media browser will display no items initially when searching
+            items = []
+            
+        elif media_content_type == BrowsableMedia.SPOTIFY_SEARCH_AUDIOBOOKS:
+            _logsi.LogVerbose("Getting Spotify user Audiobook favorites")
+            media = {} # media browser will display no items initially when searching
+            items = []
+            
+        elif media_content_type == BrowsableMedia.SPOTIFY_SEARCH_PLAYLISTS:
+            _logsi.LogVerbose("'%s': querying spotify for Playlist Favorites" % playerName)
+            media = {} # media browser will display no items initially when searching
+            items = []
+            
+        elif media_content_type == BrowsableMedia.SPOTIFY_SEARCH_SHOWS:
+            _logsi.LogVerbose("Getting Spotify user Show favorites")
+            media = {} # media browser will display no items initially when searching
+            items = []
+            
+        elif media_content_type == BrowsableMedia.SPOTIFY_SEARCH_TRACKS:
+            _logsi.LogVerbose("Getting Spotify user Track favorites")
+            media = {} # media browser will display no items initially when searching
+            items = []
+            
         # if media was not set then we are done.
         if media is None:
             raise ValueError("'%s': could not find media items for content type '%s'" % (playerName, media_content_type))
@@ -636,10 +719,14 @@ def browse_media_node(
         if title is None:
             title = parentAttrs.get("title_node", media_content_id)
 
+        # get searchable attribute.
+        canSearch = parentAttrs.get("can_search", False)
+
         # create the index.
         browseMedia:BrowseMedia = BrowseMedia(
             can_expand=canExpand,
             can_play=canPlay,
+            can_search=canSearch,
             children=[],
             children_media_class=parentAttrs["children"],
             media_class=parentAttrs["parent"],
@@ -669,6 +756,9 @@ def browse_media_node(
                 MediaType.EPISODE,
             ]
 
+            # get searchable attribute.
+            canSearch = childAttrs.get("can_search", False)
+
             # resolve media content id.
             # default the value to the media type.
             mediaId:str = mediaType
@@ -689,6 +779,7 @@ def browse_media_node(
             browseMediaChild:BrowseMedia = BrowseMedia(
                 can_expand=canExpand,
                 can_play=canPlay,
+                can_search=canSearch,
                 children=None,
                 children_media_class=childAttrs["children"],
                 media_class=childAttrs["parent"],

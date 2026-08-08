@@ -337,6 +337,10 @@
         "sort_result": {
           "name": "Sort Result?",
           "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
+        },
+        "filter_criteria": {
+          "name": "Filter Criteria",
+          "description": "Filter returned entries by an album name.  Value can be the full name of the album (e.g. \"Carried Me\"), or a partial name (e.g. \"Carried\")."
         }
       }
     },
@@ -367,6 +371,10 @@
         "sort_result": {
           "name": "Sort Result?",
           "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
+        },
+        "filter_criteria": {
+          "name": "Filter By Artist",
+          "description": "Filter returned entries by an album name.  Value can be the full name of the album (e.g. \"Carried Me\"), or a partial name (e.g. \"Carried\")."
         }
       }
     },
@@ -529,6 +537,10 @@
         "sort_result": {
           "name": "Sort Result?",
           "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
+        },
+        "filter_criteria": {
+          "name": "Filter Criteria",
+          "description": "Filter returned entries by an artist name.  Value can be the full name of the artist (e.g. \"Jeremy Camp\"), or a partial name (e.g. \"Camp\")."
         }
       }
     },
@@ -603,6 +615,10 @@
         "sort_result": {
           "name": "Sort Result?",
           "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
+        },
+        "filter_criteria": {
+          "name": "Filter Criteria",
+          "description": "Filter returned entries by an audiobook.  Value can be the full name of the ausiobook (e.g. \"Elfstones of Shannara\"), or a partial name (e.g. \"Elfstones\")."
         }
       }
     },
@@ -753,6 +769,10 @@
         "sort_result": {
           "name": "Sort Result?",
           "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
+        },
+        "filter_criteria": {
+          "name": "Filter Criteria",
+          "description": "Filter returned entries by an episode name.  Value can be the full name of the episode (e.g. \"My Podcast Episode\"), or a partial name (e.g. \"Episode\")."
         }
       }
     },
@@ -947,6 +967,10 @@
         "limit_total": {
           "name": "Limit Total",
           "description": "The maximum number of items to return for the request.  If specified, this argument overrides the limit and offset argument values and paging is automatically used to retrieve all available items up to the specified limit total."
+        },
+        "filter_criteria": {
+          "name": "Filter By Artist",
+          "description": "Filter returned entries by a track name.  Value can be the full name of the track (e.g. \"Beautiful One\"), or a partial name (e.g. \"Beautiful\")."
         }
       }
     },
@@ -976,7 +1000,7 @@
         },
         "exclude_items": {
           "name": "Exclude Items?",
-          "description": "True to return only the basic fields of the playlist - the items collection will NOT be included in the returned object. otherwise, False (or omitted) to include the items collection in the returned object.  If True, the `fields` argument will be overridden to specify the fields to return."
+          "description": "True to return only the basic fields of the playlist - the items collection will NOT be included in the returned object. otherwise, False (or omitted, default) to include the items collection in the returned object.  If True, the `fields` argument will be overridden to specify the fields to return."
         }
       }
     },
@@ -1017,6 +1041,10 @@
         "sort_result": {
           "name": "Sort Result?",
           "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
+        },
+        "filter_criteria": {
+          "name": "Filter Criteria",
+          "description": "Filter returned entries by a playlist name.  Value can be the full name of the playlist (e.g. \"My Playlist\"), or a partial name (e.g. \"My\")."
         }
       }
     },
@@ -1163,6 +1191,10 @@
         "exclude_audiobooks": {
           "name": "Exclude Audiobooks?",
           "description": "True (default) to exclude audiobook shows from the returned list, leaving only podcast shows; otherwise, False to include all results returned by the Spotify Web API."
+        },
+        "filter_criteria": {
+          "name": "Filter Criteria",
+          "description": "Filter returned entries by a show name.  Value can be the full name of the show (e.g. \"My Podcast Name\"), or a partial name (e.g. \"Podcast\")."
         }
       }
     },
@@ -1285,6 +1317,10 @@
         "filter_album": {
           "name": "Filter By Album",
           "description": "Filter returned entries by an album name.  Value can be the full name of the album (e.g. \"Carried Me\"), or a partial name (e.g. \"Carried\")."
+        },
+        "filter_criteria": {
+          "name": "Filter By Track",
+          "description": "Filter returned entries by a track name.  Value can be the full name of the track (e.g. \"Beautiful One\"), or a partial name (e.g. \"Beautiful\")."
         }
       }
     },
@@ -1541,6 +1577,10 @@
         "sort_result": {
           "name": "Sort Result?",
           "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
+        },
+        "filter_criteria": {
+          "name": "Filter By Artist",
+          "description": "Filter returned entries by an artist name.  Value can be the full name of the artist (e.g. \"Jeremy Camp\"), or a partial name (e.g. \"Camp\")."
         }
       }
     },
@@ -1571,6 +1611,18 @@
         "sort_result": {
           "name": "Sort Result?",
           "description": "True to sort result items by name prior to returning to the caller; otherwise, False to return results in the order that the Spotify Web API returned them."
+        },
+        "filter_artist": {
+          "name": "Filter By Artist",
+          "description": "Filter returned entries by an artist name.  Value can be the full name of the artist (e.g. \"Jeremy Camp\"), or a partial name (e.g. \"Camp\")."
+        },
+        "filter_album": {
+          "name": "Filter By Album",
+          "description": "Filter returned entries by an album name.  Value can be the full name of the album (e.g. \"Carried Me\"), or a partial name (e.g. \"Carried\")."
+        },
+        "filter_criteria": {
+          "name": "Filter By Track",
+          "description": "Filter returned entries by an track name.  Value can be the full name of the track (e.g. \"Beautiful One\"), or a partial name (e.g. \"Beautiful\")."
         }
       }
     },

@@ -6,6 +6,23 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.213 ] - 2026/08/07
+
+  * Added HA Media Browser UI search functionality.  The UI is limited, in that a limited number of search results can be displayed (no paging).
+  * Updated service `get_users_top_tracks` to add the following arguments: `filter_artist`, `filter_album`, `filter_criteria`.
+  * Updated service `get_users_top_artists` to add the following arguments: `filter_criteria`.
+  * Updated service `get_album_new_releases` to add the following arguments: `filter_criteria`.
+  * Updated service `get_artists_followed` to add the following arguments: `filter_criteria`.
+  * Updated service `get_player_recent_tracks` to add the following arguments: `filter_criteria`.
+  * Updated service `get_album_favorites` to add the following arguments: `filter_criteria`.
+  * Updated service `get_audiobook_favorites` to add the following arguments: `filter_criteria`.
+  * Updated service `get_episode_favorites` to add the following arguments: `filter_criteria`.
+  * Updated service `get_playlist_favorites` to add the following arguments: `filter_criteria`.
+  * Updated service `get_show_favorites` to add the following arguments: `filter_criteria`.
+  * Updated service `get_track_favorites` to add the following arguments: `filter_criteria`.
+  * Corrected various `services.yaml` entries (that contain integer arguments) to match service registration schema values in `__init.py__`.
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.287`.  
+
 ###### [ 1.0.212 ] - 2026/07/28
 
   * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.284`.  

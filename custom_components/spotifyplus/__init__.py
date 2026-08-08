@@ -309,22 +309,24 @@ SERVICE_SPOTIFY_GET_ALBUM_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_GET_ALBUM_FAVORITES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
         vol.Optional("sort_result"): cv.boolean,
+        vol.Optional("filter_criteria"): cv.string,
     }
 )
 
 SERVICE_SPOTIFY_GET_ALBUM_NEW_RELEASES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("country"): cv.string,
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
         vol.Optional("sort_result"): cv.boolean,
+        vol.Optional("filter_criteria"): cv.string,
     }
 )
 
@@ -332,10 +334,10 @@ SERVICE_SPOTIFY_GET_ALBUM_TRACKS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("album_id"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
     }
 )
 
@@ -351,10 +353,10 @@ SERVICE_SPOTIFY_GET_ARTIST_ALBUMS_SCHEMA = vol.Schema(
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("artist_id"): cv.string,
         vol.Optional("include_groups"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
         vol.Optional("sort_result"): cv.boolean,
     }
 )
@@ -387,9 +389,10 @@ SERVICE_SPOTIFY_GET_ARTISTS_FOLLOWED_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("after"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
         vol.Optional("sort_result"): cv.boolean,
+        vol.Optional("filter_criteria"): cv.string,
     }
 )
 
@@ -405,20 +408,21 @@ SERVICE_SPOTIFY_GET_AUDIOBOOK_CHAPTERS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("audiobook_id"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
     }
 )
 
 SERVICE_SPOTIFY_GET_AUDIOBOOK_FAVORITES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
         vol.Optional("sort_result"): cv.boolean,
+        vol.Optional("filter_criteria"): cv.string,
     }
 )
 
@@ -435,10 +439,10 @@ SERVICE_SPOTIFY_GET_CATEGORY_PLAYLISTS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("category_id"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("country"): cv.string,
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
         vol.Optional("sort_result"): cv.boolean,
     }
 )
@@ -477,22 +481,23 @@ SERVICE_SPOTIFY_GET_EPISODE_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_GET_EPISODE_FAVORITES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
         vol.Optional("sort_result"): cv.boolean,
+        vol.Optional("filter_criteria"): cv.string,
     }
 )
 
 SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("country"): cv.string,
         vol.Optional("locale"): cv.string,
         vol.Optional("timestamp"): cv.string,
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
         vol.Optional("sort_result"): cv.boolean,
     }
 )
@@ -564,10 +569,11 @@ SERVICE_SPOTIFY_GET_PLAYER_QUEUE_INFO_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_GET_PLAYER_RECENT_TRACKS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
         vol.Optional("after", default=0): vol.All(vol.Range(min=0,max=99999999999999)),
         vol.Optional("before", default=0): vol.All(vol.Range(min=0,max=99999999999999)),
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))), 
+        vol.Optional("filter_criteria"): cv.string, 
     }
 )
 
@@ -592,10 +598,11 @@ SERVICE_SPOTIFY_GET_PLAYLIST_COVER_IMAGE_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_GET_PLAYLIST_FAVORITES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
         vol.Optional("sort_result"): cv.boolean,
+        vol.Optional("filter_criteria"): cv.string,
     }
 )
 
@@ -603,12 +610,12 @@ SERVICE_SPOTIFY_GET_PLAYLIST_ITEMS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("playlist_id"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
         vol.Optional("fields"): cv.string,
         vol.Optional("additional_types"): cv.string,
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
     }
 )
 
@@ -616,9 +623,9 @@ SERVICE_SPOTIFY_GET_PLAYLISTS_FOR_USER_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("user_id"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
         vol.Optional("sort_result"): cv.boolean,
     }
 )
@@ -635,21 +642,22 @@ SERVICE_SPOTIFY_GET_SHOW_EPISODES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("show_id"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
     }
 )
 
 SERVICE_SPOTIFY_GET_SHOW_FAVORITES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
         vol.Optional("sort_result"): cv.boolean,
         vol.Optional("exclude_audiobooks"): cv.boolean,
+        vol.Optional("filter_criteria"): cv.string,
     }
 )
 
@@ -691,13 +699,14 @@ SERVICE_SPOTIFY_GET_TRACK_AUDIO_FEATURES_SCHEMA = vol.Schema(
 SERVICE_SPOTIFY_GET_TRACK_FAVORITES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
         vol.Optional("sort_result"): cv.boolean,
         vol.Optional("filter_artist"): cv.string,
         vol.Optional("filter_album"): cv.string,
+        vol.Optional("filter_criteria"): cv.string,
     }
 )
 
@@ -765,10 +774,11 @@ SERVICE_SPOTIFY_GET_USERS_TOP_ARTISTS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("time_range"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
         vol.Optional("sort_result"): cv.boolean,
+        vol.Optional("filter_criteria"): cv.string,
     }
 )
 
@@ -776,10 +786,13 @@ SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("time_range"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
         vol.Optional("sort_result"): cv.boolean,
+        vol.Optional("filter_artist"): cv.string,
+        vol.Optional("filter_album"): cv.string,
+        vol.Optional("filter_criteria"): cv.string,
     }
 )
 
@@ -812,7 +825,7 @@ SERVICE_SPOTIFY_PLAYER_MEDIA_PLAY_TRACK_FAVORITES_SCHEMA = vol.Schema(
         vol.Optional("shuffle"): cv.boolean,
         vol.Optional("delay", default=0.50): vol.All(vol.Range(min=0,max=10.0)),
         vol.Optional("resolve_device_id"): cv.boolean,
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=999999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=999999))),
         vol.Optional("filter_artist"): cv.string,
         vol.Optional("filter_album"): cv.string,
     }
@@ -1069,7 +1082,7 @@ SERVICE_SPOTIFY_SEARCH_ALL_SCHEMA = vol.Schema(
         vol.Optional("criteria_type"): cv.string,
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
     }
 )
 
@@ -1077,11 +1090,11 @@ SERVICE_SPOTIFY_SEARCH_ALBUMS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
     }
 )
 
@@ -1089,11 +1102,11 @@ SERVICE_SPOTIFY_SEARCH_ARTISTS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
     }
 )
 
@@ -1101,11 +1114,11 @@ SERVICE_SPOTIFY_SEARCH_AUDIOBOOKS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
     }
 )
 
@@ -1113,11 +1126,11 @@ SERVICE_SPOTIFY_SEARCH_EPISODES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
     }
 )
 
@@ -1125,11 +1138,11 @@ SERVICE_SPOTIFY_SEARCH_PLAYLISTS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
     }
 )
 
@@ -1137,11 +1150,11 @@ SERVICE_SPOTIFY_SEARCH_SHOWS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
     }
 )
 
@@ -1149,11 +1162,11 @@ SERVICE_SPOTIFY_SEARCH_TRACKS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.All(vol.Range(min=0,max=50)),
-        vol.Optional("offset", default=0): vol.All(vol.Range(min=0,max=10000)),
+        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
-        vol.Optional("limit_total", default=0): vol.All(vol.Range(min=0,max=9999)),
+        vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
     }
 )
 
@@ -1810,8 +1823,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     market = service.data.get("market")
                     limit_total = service.data.get("limit_total")
                     sort_result = service.data.get("sort_result")
+                    filter_criteria = service.data.get("filter_criteria")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_album_favorites, limit, offset, market, limit_total, sort_result)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_album_favorites, limit, offset, market, limit_total, sort_result, filter_criteria)
 
                 elif service.service == SERVICE_SPOTIFY_GET_ALBUM_NEW_RELEASES:
 
@@ -1821,8 +1835,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     country = service.data.get("country")
                     limit_total = service.data.get("limit_total")
                     sort_result = service.data.get("sort_result")
+                    filter_criteria = service.data.get("filter_criteria")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_album_new_releases, limit, offset, country, limit_total, sort_result)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_album_new_releases, limit, offset, country, limit_total, sort_result, filter_criteria)
 
                 elif service.service == SERVICE_SPOTIFY_GET_ALBUM_TRACKS:
 
@@ -1886,8 +1901,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     limit = service.data.get("limit")
                     limit_total = service.data.get("limit_total")
                     sort_result = service.data.get("sort_result")
+                    filter_criteria = service.data.get("filter_criteria")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_artists_followed, after, limit, limit_total, sort_result)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_artists_followed, after, limit, limit_total, sort_result, filter_criteria)
 
                 elif service.service == SERVICE_SPOTIFY_GET_AUDIOBOOK:
 
@@ -1915,8 +1931,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     offset = service.data.get("offset")
                     limit_total = service.data.get("limit_total")
                     sort_result = service.data.get("sort_result")
+                    filter_criteria = service.data.get("filter_criteria")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_audiobook_favorites, limit, offset, limit_total, sort_result)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_audiobook_favorites, limit, offset, limit_total, sort_result, filter_criteria)
 
                 elif service.service == SERVICE_SPOTIFY_GET_BROWSE_CATEGORYS_LIST:
 
@@ -1969,8 +1986,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     offset = service.data.get("offset")
                     limit_total = service.data.get("limit_total")
                     sort_result = service.data.get("sort_result")
+                    filter_criteria = service.data.get("filter_criteria")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_episode_favorites, limit, offset, limit_total, sort_result)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_episode_favorites, limit, offset, limit_total, sort_result, filter_criteria)
 
                 elif service.service == SERVICE_SPOTIFY_GET_FEATURED_PLAYLISTS:
 
@@ -2056,8 +2074,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     after = service.data.get("after")
                     before = service.data.get("before")
                     limit_total = service.data.get("limit_total")
+                    filter_criteria = service.data.get("filter_criteria")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_player_recent_tracks, limit, after, before, limit_total)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_player_recent_tracks, limit, after, before, limit_total, filter_criteria)
 
                 elif service.service == SERVICE_SPOTIFY_GET_PLAYLIST:
 
@@ -2084,8 +2103,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     offset = service.data.get("offset")
                     limit_total = service.data.get("limit_total")
                     sort_result = service.data.get("sort_result")
+                    filter_criteria = service.data.get("filter_criteria")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_playlist_favorites, limit, offset, limit_total, sort_result)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_playlist_favorites, limit, offset, limit_total, sort_result, filter_criteria)
 
                 elif service.service == SERVICE_SPOTIFY_GET_PLAYLIST_ITEMS:
 
@@ -2138,8 +2158,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     limit_total = service.data.get("limit_total")
                     sort_result = service.data.get("sort_result")
                     exclude_audiobooks = service.data.get("exclude_audiobooks")
+                    filter_criteria = service.data.get("filter_criteria")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_show_favorites, limit, offset, limit_total, sort_result, exclude_audiobooks)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_show_favorites, limit, offset, limit_total, sort_result, exclude_audiobooks, filter_criteria)
 
                 elif service.service == SERVICE_SPOTIFY_GET_SPOTIFY_CONNECT_DEVICE:
 
@@ -2187,8 +2208,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     sort_result = service.data.get("sort_result")
                     filter_artist = service.data.get("filter_artist")
                     filter_album = service.data.get("filter_album")
+                    filter_criteria = service.data.get("filter_criteria")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_track_favorites, limit, offset, market, limit_total, sort_result, filter_artist, filter_album)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_track_favorites, limit, offset, market, limit_total, sort_result, filter_artist, filter_album, filter_criteria)
 
                 elif service.service == SERVICE_SPOTIFY_GET_TRACK_RECOMMENDATIONS:
 
@@ -2276,8 +2298,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     offset = service.data.get("offset")
                     limit_total = service.data.get("limit_total")
                     sort_result = service.data.get("sort_result")
+                    filter_criteria = service.data.get("filter_criteria")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_users_top_artists, time_range, limit, offset, limit_total, sort_result)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_users_top_artists, time_range, limit, offset, limit_total, sort_result, filter_criteria)
 
                 elif service.service == SERVICE_SPOTIFY_GET_USERS_TOP_TRACKS:
 
@@ -2287,8 +2310,11 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     offset = service.data.get("offset")
                     limit_total = service.data.get("limit_total")
                     sort_result = service.data.get("sort_result")
+                    filter_artist = service.data.get("filter_artist")
+                    filter_album = service.data.get("filter_album")
+                    filter_criteria = service.data.get("filter_criteria")
                     _logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (service.service, entity.name))
-                    response = await hass.async_add_executor_job(entity.service_spotify_get_users_top_tracks, time_range, limit, offset, limit_total, sort_result)
+                    response = await hass.async_add_executor_job(entity.service_spotify_get_users_top_tracks, time_range, limit, offset, limit_total, sort_result, filter_artist, filter_album, filter_criteria)
 
                 elif service.service == SERVICE_SPOTIFY_PLAYLIST_ITEMS_ADD:
 

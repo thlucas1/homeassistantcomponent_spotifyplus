@@ -354,7 +354,7 @@ get_album_favorites:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     offset:
@@ -364,7 +364,7 @@ get_album_favorites:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     market:
@@ -389,6 +389,12 @@ get_album_favorites:
       required: false
       selector:
         boolean:
+    filter_criteria:
+      name: Filter Criteria
+      description: Filter returned entries by an album name.  Value can be the full name of the album (e.g. "Carry Me"), or a partial name (e.g. "Carry").
+      required: false
+      selector:
+        text:
 
 get_album_new_releases:
   name: Get Album New Releases
@@ -410,7 +416,7 @@ get_album_new_releases:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     offset:
@@ -420,7 +426,7 @@ get_album_new_releases:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     country:
@@ -445,6 +451,12 @@ get_album_new_releases:
       required: false
       selector:
         boolean:
+    filter_criteria:
+      name: Filter Criteria
+      description: Filter returned entries by an album name.  Value can be the full name of the album (e.g. "Carried Me"), or a partial name (e.g. "Carried").
+      required: false
+      selector:
+        text:
 
 get_album_tracks:
   name: Get Album Tracks
@@ -473,7 +485,7 @@ get_album_tracks:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     offset:
@@ -483,7 +495,7 @@ get_album_tracks:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     market:
@@ -557,7 +569,7 @@ get_artist_albums:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     offset:
@@ -567,7 +579,7 @@ get_artist_albums:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     market:
@@ -704,7 +716,7 @@ get_artists_followed:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     limit_total:
@@ -722,6 +734,12 @@ get_artists_followed:
       required: false
       selector:
         boolean:
+    filter_criteria:
+      name: Filter Criteria
+      description: Filter returned entries by an artist name.  Value can be the full name of the artist (e.g. "Jeremy Camp"), or a partial name (e.g. "Camp").
+      required: false
+      selector:
+        text:
 
 get_audiobook:
   name: Get Audiobook
@@ -778,7 +796,7 @@ get_audiobook_chapters:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     offset:
@@ -788,7 +806,7 @@ get_audiobook_chapters:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     market:
@@ -827,7 +845,7 @@ get_audiobook_favorites:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     offset:
@@ -837,7 +855,7 @@ get_audiobook_favorites:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     limit_total:
@@ -855,6 +873,12 @@ get_audiobook_favorites:
       required: false
       selector:
         boolean:
+    filter_criteria:
+      name: Filter Criteria
+      description: Filter returned entries by an audiobook name.  Value can be the full name of the audiobook (e.g. "Elfstones of Shannara"), or a partial name (e.g. "Elfstones").
+      required: false
+      selector:
+        text:
 
 get_browse_categorys_list:
   name: Get Browse Categorys List
@@ -918,7 +942,7 @@ get_category_playlists:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     offset:
@@ -928,7 +952,7 @@ get_category_playlists:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     country:
@@ -1079,7 +1103,7 @@ get_episode_favorites:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     offset:
@@ -1089,7 +1113,7 @@ get_episode_favorites:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     limit_total:
@@ -1107,6 +1131,12 @@ get_episode_favorites:
       required: false
       selector:
         boolean:
+    filter_criteria:
+      name: Filter Criteria
+      description: Filter returned entries by an episode name.  Value can be the full name of the episode (e.g. "My Episode Name"), or a partial name (e.g. "Episode").
+      required: false
+      selector:
+        text:
 
 get_featured_playlists:
   name: Get Featured Playlists
@@ -1128,7 +1158,7 @@ get_featured_playlists:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     offset:
@@ -1138,7 +1168,7 @@ get_featured_playlists:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     country:
@@ -1443,7 +1473,7 @@ get_player_recent_tracks:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     after:
@@ -1474,6 +1504,12 @@ get_player_recent_tracks:
       selector:
         number:
           mode: box
+    filter_criteria:
+      name: Filter Criteria
+      description: Filter returned entries by a track name.  Value can be the full name of the track (e.g. "Beautiful One"), or a partial name (e.g. "Beautiful").
+      required: false
+      selector:
+        text:
 
 get_playlist:
   name: Get Playlist 
@@ -1565,7 +1601,7 @@ get_playlist_favorites:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     offset:
@@ -1575,7 +1611,7 @@ get_playlist_favorites:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     limit_total:
@@ -1593,6 +1629,12 @@ get_playlist_favorites:
       required: false
       selector:
         boolean:
+    filter_criteria:
+      name: Filter Criteria
+      description: Filter returned entries by a playlist name.  Value can be the full name of the playlist (e.g. "My Playlist"), or a partial name (e.g. "My").
+      required: false
+      selector:
+        text:
 
 get_playlist_items:
   name: Get Playlist Items
@@ -1621,7 +1663,7 @@ get_playlist_items:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     offset:
@@ -1631,7 +1673,7 @@ get_playlist_items:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     market:
@@ -1691,7 +1733,7 @@ get_playlists_for_user:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     offset:
@@ -1701,7 +1743,7 @@ get_playlists_for_user:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     limit_total:
@@ -1775,7 +1817,7 @@ get_show_episodes:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     offset:
@@ -1785,7 +1827,7 @@ get_show_episodes:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     market:
@@ -1824,7 +1866,7 @@ get_show_favorites:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     offset:
@@ -1834,7 +1876,7 @@ get_show_favorites:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     limit_total:
@@ -1859,6 +1901,12 @@ get_show_favorites:
       required: false
       selector:
         boolean:
+    filter_criteria:
+      name: Filter Criteria
+      description: Filter returned entries by an Show name.  Value can be the full name of the show (e.g. "My Podcast"), or a partial name (e.g. "Podcast").
+      required: false
+      selector:
+        text:
 
 get_spotify_connect_device:
   name: Get Spotify Connect Device
@@ -2016,7 +2064,7 @@ get_track_favorites:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     offset:
@@ -2026,7 +2074,7 @@ get_track_favorites:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     market:
@@ -2063,6 +2111,12 @@ get_track_favorites:
       required: false
       selector:
         text:
+    filter_criteria:
+      name: Filter Criteria
+      description: Filter returned entries by a track name.  Value can be the full name of the track (e.g. "Beautiful One"), or a partial name (e.g. "Beautiful").
+      required: false
+      selector:
+        text:
 
 get_track_recommendations:
   name: Get Track Recommendations
@@ -2084,7 +2138,7 @@ get_track_recommendations:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     market:
@@ -2459,7 +2513,7 @@ get_users_top_artists:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     offset:
@@ -2469,7 +2523,7 @@ get_users_top_artists:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     limit_total:
@@ -2487,6 +2541,12 @@ get_users_top_artists:
       required: false
       selector:
         boolean:
+    filter_criteria:
+      name: Filter Criteria
+      description: Filter returned entries by an artist name.  Value can be the full name of the artist (e.g. "Jeremy Camp"), or a partial name (e.g. "Camp").
+      required: false
+      selector:
+        text:
 
 get_users_top_tracks:
   name: Get Users Top Tracks
@@ -2515,7 +2575,7 @@ get_users_top_tracks:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 50
           mode: box
     offset:
@@ -2525,7 +2585,7 @@ get_users_top_tracks:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     limit_total:
@@ -2543,6 +2603,24 @@ get_users_top_tracks:
       required: false
       selector:
         boolean:
+    filter_artist:
+      name: Filter By Artist
+      description: Filter returned entries by an artist name.  Value can be the full name of the artist (e.g. "Jeremy Camp"), or a partial name (e.g. "Camp").
+      required: false
+      selector:
+        text:
+    filter_album:
+      name: Filter By Album
+      description: Filter returned entries by an album name.  Value can be the full name of the album (e.g. "Carried Me"), or a partial name (e.g. "Carried").
+      required: false
+      selector:
+        text:
+    filter_criteria:
+      name: Filter By Track
+      description: Filter returned entries by a track name.  Value can be the full name of the track (e.g. "Beautiful One"), or a partial name (e.g. "Beaut").
+      required: false
+      selector:
+        text:
 
 list_application_credential_mappings:
   name: List Application Credential Mappings
@@ -3768,7 +3846,7 @@ search_albums:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10
           mode: box
     offset:
@@ -3778,7 +3856,7 @@ search_albums:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     market:
@@ -3831,7 +3909,7 @@ search_artists:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10
           mode: box
     offset:
@@ -3841,7 +3919,7 @@ search_artists:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     market:
@@ -3894,7 +3972,7 @@ search_audiobooks:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10
           mode: box
     offset:
@@ -3904,7 +3982,7 @@ search_audiobooks:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     market:
@@ -3957,7 +4035,7 @@ search_episodes:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10
           mode: box
     offset:
@@ -3967,7 +4045,7 @@ search_episodes:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     market:
@@ -4020,7 +4098,7 @@ search_playlists:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10
           mode: box
     offset:
@@ -4030,7 +4108,7 @@ search_playlists:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     market:
@@ -4083,7 +4161,7 @@ search_shows:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10
           mode: box
     offset:
@@ -4093,7 +4171,7 @@ search_shows:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     market:
@@ -4146,7 +4224,7 @@ search_tracks:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10
           mode: box
     offset:
@@ -4156,7 +4234,7 @@ search_tracks:
       required: false
       selector:
         number:
-          min: 1
+          min: 0
           max: 10000
           mode: box
     market:
