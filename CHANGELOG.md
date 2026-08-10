@@ -6,6 +6,10 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.214 ] - 2026/08/10
+
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.288`.  
+
 ###### [ 1.0.213 ] - 2026/08/07
 
   * Added HA Media Browser UI search functionality.  The UI is limited, in that a limited number of search results can be displayed (no paging).
