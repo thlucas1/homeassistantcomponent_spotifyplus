@@ -6,6 +6,12 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.215 ] - 2026/08/21
+
+  * Updated service `get_artists_albums` definition to change the `limit` argument max value from 50 to 10 due to Spotify 2026 July changes.  This also corrects a bug with Sonos devices that utilize `player_media_play_context` to play an artist context.
+  * Updated service definitions to change the `limit` argument max value from 50 to 10 for the following services: `search_albums`, `search_artists`, `search_audiobooks`, `search_episodes`, `search_playlists`, `search_shows`, `search_tracks`.
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.290`.  
+
 ###### [ 1.0.214 ] - 2026/08/10
 
   * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.288`.  

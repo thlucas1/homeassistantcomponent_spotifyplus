@@ -353,7 +353,7 @@ SERVICE_SPOTIFY_GET_ARTIST_ALBUMS_SCHEMA = vol.Schema(
         vol.Required("entity_id"): cv.entity_id,
         vol.Optional("artist_id"): cv.string,
         vol.Optional("include_groups"): cv.string,
-        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("limit", default=10): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10))),
         vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
         vol.Optional("limit_total", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0,max=9999))),
@@ -1090,7 +1090,7 @@ SERVICE_SPOTIFY_SEARCH_ALBUMS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("limit", default=10): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10))),
         vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
@@ -1102,7 +1102,7 @@ SERVICE_SPOTIFY_SEARCH_ARTISTS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("limit", default=10): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10))),
         vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
@@ -1114,7 +1114,7 @@ SERVICE_SPOTIFY_SEARCH_AUDIOBOOKS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("limit", default=10): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10))),
         vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
@@ -1126,7 +1126,7 @@ SERVICE_SPOTIFY_SEARCH_EPISODES_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("limit", default=10): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10))),
         vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
@@ -1138,7 +1138,7 @@ SERVICE_SPOTIFY_SEARCH_PLAYLISTS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("limit", default=10): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10))),
         vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
@@ -1150,7 +1150,7 @@ SERVICE_SPOTIFY_SEARCH_SHOWS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("limit", default=10): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10))),
         vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,
@@ -1162,7 +1162,7 @@ SERVICE_SPOTIFY_SEARCH_TRACKS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("criteria"): cv.string,
-        vol.Optional("limit", default=50): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=50))),
+        vol.Optional("limit", default=10): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10))),
         vol.Optional("offset", default=0): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=10000))),
         vol.Optional("market"): cv.string,
         vol.Optional("include_external"): cv.string,

@@ -564,13 +564,13 @@ get_artist_albums:
         text:
     limit:
       name: Limit
-      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option.
-      example: 20
+      description: The maximum number of items to return in a page of items when manual paging is used.  Default is 10, Range is 1 to 10.  See the limit_total argument for automatic paging option.
+      example: 10
       required: false
       selector:
         number:
           min: 0
-          max: 50
+          max: 10
           mode: box
     offset:
       name: Offset

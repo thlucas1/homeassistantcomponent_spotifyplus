@@ -2678,7 +2678,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             self, 
             artistId:str, 
             include_groups:str='album', 
-            limit:int=20, 
+            limit:int=10, 
             offset:int=0,
             market:str=None,
             limitTotal:int=None,
@@ -2699,7 +2699,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
                 Example: `single,appears_on`
             limit (int):  
                 The maximum number of items to return in a page of items.  
-                Default: 20, Range: 1 to 50.  
+                Default: 10, Range: 1 to 10.  
             offset (int):  
                 The index of the first item to return; use with limit to get the next set of items.  
                 Default: 0 (the first item).  

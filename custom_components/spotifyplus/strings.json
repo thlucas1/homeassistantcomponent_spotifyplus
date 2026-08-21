@@ -440,7 +440,7 @@
         },
         "limit": {
           "name": "Limit",
-          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 20, Range is 1 to 50.  See the limit_total argument for automatic paging option."
+          "description": "The maximum number of items to return in a page of items when manual paging is used.  Default is 10, Range is 1 to 10.  See the limit_total argument for automatic paging option."
         },
         "offset": {
           "name": "Offset",
