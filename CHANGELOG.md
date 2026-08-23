@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.216 ] - 2026/08/23
+
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.291`.  
+  * This updates Spotify Connect Zeroconf processing for devices that utilize the Spotify Connect token type of `accesstoken`.  These devices must now authenticate using an OAuth access token, and can no longer use Spotify Username / Password credentials.  You may need to complete the [Spotify Desktop Player Authentication Configuration](https://github.com/thlucas1/homeassistantcomponent_spotifyplus/wiki/Device-Configuration-Options#spotify-desktop-player-authentication-configuration) setup in order to get your devices to support this.  Note that if you have Google Chromecast or Sonos devices, then you probably already have this set up and there should not be any impact.  This is due to the recent July 2026 Spotify developer changes to various authentication processes in their Spotify Web API backend.
+
 ###### [ 1.0.215 ] - 2026/08/21
 
   * Updated service `get_artists_albums` definition to change the `limit` argument max value from 50 to 10 due to Spotify 2026 July changes.  This also corrects a bug with Sonos devices that utilize `player_media_play_context` to play an artist context.
