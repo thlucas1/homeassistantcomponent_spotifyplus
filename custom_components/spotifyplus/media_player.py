@@ -1269,14 +1269,22 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             if self._commandScanInterval > 0:
                 self._commandScanInterval = self._commandScanInterval - 1
 
+            # reset the scan interval for next time.
+            # this needs to happen BEFORE we make any calls to the Spotify Web API, as it could return an
+            # error and cause the `update` method to re-query Spotify for status every second (not good).
+            # by resetting the scan interval here, we force the next re-query of Spotify for status to
+            # be at the polling interval (default 30 seconds).
+            self._currentScanInterval = self._spotifyScanInterval
+
             # get now playing status.
             _logsi.LogVerbose("'%s': update method - getting Spotify Connect device player state" % self.name)
             self._playerState = self.data.spotifyClient.GetDevicePlaybackState(deviceId=self._attr_source)
             self._UpdateHAFromPlayerPlayState(self._playerState)
             _logsi.WatchDateTime(SILevel.Debug, "HASpotifyPlaystateLastUpdate", datetime.now())
             
-            # update the scan interval for next time.
-            self._currentScanInterval = self._spotifyScanInterval
+            # # TEST TODO - simulate Spotify Web API rate limit error.
+            # if self.media_content_id == "spotify:track:6zd8T1PBe9JFHmuVnurdRp": # Seventh Day Slumber, I Need You
+            #     raise Exception("TEST TODO REMOVEME - simulate Spotify Web API rate limit error (for GetDevicePlaybackState method) in update method")
 
             # did the now playing context change?
             context:Context = self._playerState.Context
@@ -1316,7 +1324,7 @@ class SpotifyMediaPlayer(MediaPlayerEntity):
             elif (context is None):
                 
                 self._playlist = None
-                    
+                  
         except SpotifyWebApiError as ex:
             
             _logsi.LogException(None, ex)
