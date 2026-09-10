@@ -6,6 +6,11 @@ Change are listed in reverse chronological order (newest to oldest).
 
 <span class="changelog">
 
+###### [ 1.0.219 ] - 2026/09/10
+
+  * Updated voice assist intent: `SpotifyPlusPlayerDeckControl`.  Added media player turn off / turn on voice support.  You will need to manually update your `custom_sentences\<language>` folder with these changes in order for the voice commands to be recognized.
+  * Updated `spotifywebapipython` package requirement to `spotifywebapipython>=1.0.293`.  
+
 ###### [ 1.0.218 ] - 2026/09/01
 
   * Updated `media_player.update` method to account for possible rate limit exceptions when calling the Spotify Web API.  This was causing the scan interval to stay at zero and the next update interval to re-query immediately until the Spotify Web API was successful.

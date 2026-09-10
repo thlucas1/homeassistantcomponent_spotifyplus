@@ -241,6 +241,8 @@ SERVICE_SPOTIFY_ZEROCONF_DISCOVER_DEVICES = 'zeroconf_discover_devices'
 # Custom Service Schemas - MediaPlayerEntity enhancements.
 # -----------------------------------------------------------------------------------
 SERVICE_VOLUME_SET_STEP = 'volume_set_step'
+SERVICE_MEDIAPLAYER_TURN_OFF = 'turn_off'
+SERVICE_MEDIAPLAYER_TURN_ON = 'turn_on'
 
 # -----------------------------------------------------------------------------------
 # Custom Service Schemas - non-Spotify Web API related.
@@ -393,6 +395,8 @@ RESPONSE_PLAYER_NOT_MATCHED = "player_not_matched"
 RESPONSE_PLAYER_NOT_MATCHED_AREA = "player_not_matched_area"
 RESPONSE_PLAYER_NOT_PLAYING_MEDIA = "player_not_playing_media"
 RESPONSE_PLAYER_NOT_SPOTIFYPLUS = "player_not_spotifyplus"
+RESPONSE_PLAYER_POWER_TURN_OFF = "player_power_turn_off"
+RESPONSE_PLAYER_POWER_TURN_ON = "player_power_turn_on"
 RESPONSE_PLAYER_VOLUME_CONTROL_DOWN = "player_volume_control_down"
 RESPONSE_PLAYER_VOLUME_CONTROL_MUTE = "player_volume_control_mute"
 RESPONSE_PLAYER_VOLUME_CONTROL_SET_LEVEL = "player_volume_control_set_level"

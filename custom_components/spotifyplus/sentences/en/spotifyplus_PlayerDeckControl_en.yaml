@@ -44,6 +44,8 @@ intents:
             # - "spotify skip to previous track"
             # - "spotify restart track"
             # - "spotify skip to start of track"
+            # - "spotify power off"
+            # - "spotify power on"
 
         slots:
 
@@ -63,6 +65,8 @@ intents:
             # __Example Phrases - By Player Name__  
             # - "spotify pause track on player spotify premium"
             # - "spotify pause track on spotify premium player"
+            # - "spotify power off player spotify premium"
+            # - "spotify power on player spotify premium"
 
         slots:
 
@@ -82,6 +86,8 @@ intents:
             # __Example Phrases - By Player Area__  
             # - "spotify pause track in the Office area"
             # - "spotify pause track in the Office"
+            # - "spotify power off in the Office"
+            # - "spotify power on in the Office"
 
         slots:
 

@@ -24,6 +24,7 @@ from ..intent_loader import IntentLoader
 from ..const import (
     CONF_VALUE,
     DOMAIN,
+    DOMAIN_MEDIA_PLAYER,
     INTENT_PLAYER_DECK_CONTROL,
     PLATFORM_SPOTIFYPLUS,
     RESPONSE_ERROR_PLAYER_DECK_CONTROL_INVALID,
@@ -34,6 +35,10 @@ from ..const import (
     RESPONSE_PLAYER_DECK_CONTROL_SKIP_NEXT,
     RESPONSE_PLAYER_DECK_CONTROL_SKIP_PREVIOUS,
     RESPONSE_PLAYER_NOT_PLAYING_MEDIA,
+    RESPONSE_PLAYER_POWER_TURN_OFF,
+    RESPONSE_PLAYER_POWER_TURN_ON,
+    SERVICE_MEDIAPLAYER_TURN_OFF,
+    SERVICE_MEDIAPLAYER_TURN_ON,
     SERVICE_SPOTIFY_PLAYER_MEDIA_PAUSE,
     SERVICE_SPOTIFY_PLAYER_MEDIA_RESUME,
     SERVICE_SPOTIFY_PLAYER_MEDIA_SEEK,
@@ -122,6 +127,12 @@ class SpotifyPlusPlayerDeckControl_Handler(SpotifyPlusIntentHandler):
 
         elif (player_deck_control == "skip_next"):
             return await self.async_ProcessSkipNext(intentObj, intentResponse)
+
+        elif (player_deck_control == "power_turn_off"):
+            return await self.async_PowerTurnOff(intentObj, intentResponse)
+
+        elif (player_deck_control == "power_turn_on"):
+            return await self.async_PowerTurnOn(intentObj, intentResponse)
 
         else:
             return await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_ERROR_PLAYER_DECK_CONTROL_INVALID, IntentResponseErrorCode.FAILED_TO_HANDLE)
@@ -470,3 +481,131 @@ class SpotifyPlusPlayerDeckControl_Handler(SpotifyPlusIntentHandler):
 
             # trace.
             self.logsi.LeaveMethod(SILevel.Debug, colorValue=SIColors.Khaki)
+
+
+    async def async_PowerTurnOff(
+        self, 
+        intentObj: Intent, 
+        intentResponse: IntentResponse,
+        ) -> IntentResponse:
+        """
+        Handles the intent.
+
+        Args:
+            intentObj (Intent):
+                Intent object.
+            intentResponse (IntentResponse)
+                Intent response object.
+
+        Returns:
+            An IntentResponse object.
+        """
+        try:
+
+            # trace.
+            self.logsi.EnterMethod(SILevel.Debug, colorValue=SIColors.Khaki)
+
+            # invoke base class method to resolve the player entity and its state.
+            playerEntityState:State = await super().async_GetMatchingPlayerState(
+                intentObj,
+                intentResponse,
+                desiredFeatures=MediaPlayerEntityFeature.TURN_OFF,
+                desiredStates=None,
+                desiredStateResponseKey=None,
+                requiresSpotifyPremium=True,
+            )
+
+            # if media player was not resolved, then we are done;
+            # note that the base class method above already called `async_set_speech` with a response.
+            if playerEntityState is None:
+                return intentResponse
+            
+            # set service name and build parameters.
+            svcName:str = SERVICE_MEDIAPLAYER_TURN_OFF
+            svcData:dict = \
+            {
+                "entity_id": playerEntityState.entity_id,
+            }
+
+            # call integration service for this intent.
+            self.logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (svcName, playerEntityState.entity_id), colorValue=SIColors.Khaki)
+            await intentObj.hass.services.async_call(
+                DOMAIN_MEDIA_PLAYER,
+                svcName,
+                svcData,
+                blocking=True,
+                context=intentObj.context,
+            )
+           
+            # return intent response.
+            return await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_PLAYER_POWER_TURN_OFF)
+
+        finally:
+
+            # trace.
+            self.logsi.LeaveMethod(SILevel.Debug, colorValue=SIColors.Khaki)
+
+
+    async def async_PowerTurnOn(
+        self, 
+        intentObj: Intent, 
+        intentResponse: IntentResponse,
+        ) -> IntentResponse:
+        """
+        Handles the intent.
+
+        Args:
+            intentObj (Intent):
+                Intent object.
+            intentResponse (IntentResponse)
+                Intent response object.
+
+        Returns:
+            An IntentResponse object.
+        """
+        try:
+
+            # trace.
+            self.logsi.EnterMethod(SILevel.Debug, colorValue=SIColors.Khaki)
+
+            # invoke base class method to resolve the player entity and its state.
+            playerEntityState:State = await super().async_GetMatchingPlayerState(
+                intentObj,
+                intentResponse,
+                desiredFeatures=MediaPlayerEntityFeature.TURN_ON,
+                desiredStates=None,
+                desiredStateResponseKey=None,
+                requiresSpotifyPremium=True,
+            )
+
+            # if media player was not resolved, then we are done;
+            # note that the base class method above already called `async_set_speech` with a response.
+            if playerEntityState is None:
+                return intentResponse
+            
+            # set service name and build parameters.
+            svcName:str = SERVICE_MEDIAPLAYER_TURN_ON
+            svcData:dict = \
+            {
+                "entity_id": playerEntityState.entity_id,
+            }
+
+            # call integration service for this intent.
+            self.logsi.LogVerbose(STAppMessages.MSG_SERVICE_EXECUTE % (svcName, playerEntityState.entity_id), colorValue=SIColors.Khaki)
+            await intentObj.hass.services.async_call(
+                DOMAIN_MEDIA_PLAYER,
+                svcName,
+                svcData,
+                blocking=True,
+                context=intentObj.context,
+            )
+           
+            # return intent response.
+            return await self.ReturnResponseByKey(intentObj, intentResponse, RESPONSE_PLAYER_POWER_TURN_ON)
+
+        finally:
+
+            # trace.
+            self.logsi.LeaveMethod(SILevel.Debug, colorValue=SIColors.Khaki)
+
+

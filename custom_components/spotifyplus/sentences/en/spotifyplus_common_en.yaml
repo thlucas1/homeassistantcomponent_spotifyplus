@@ -78,6 +78,8 @@ responses:
     player_not_matched_area: "SpotifyPlus media player could not be resolved for the \"{{ slots.area.text }}\" area."
     player_not_playing_media: "Media player \"{{ slots.target_player.text }}\" is currently not playing media."
     player_not_spotifyplus: "Resolved media player \"{{ slots.target_player.text }}\" is not a SpotifyPlus media player."
+    player_power_turn_off: "Okay, Spotify player was powered off."
+    player_power_turn_on: "Okay, Spotify player was powered on."
     player_volume_control_down: "Okay, Spotify volume level was decreased by {{ slots.player_volume_step_pct.text }} percent."
     player_volume_control_mute: "Okay, Spotify volume level was muted."
     player_volume_control_set_step_level: "Okay, Spotify volume step level is {{ slots.player_volume_step_pct.text }} percent."
@@ -262,6 +264,10 @@ lists:
         out: "skip_next"
       - in: "([play] [<the>] previous|skip|skip (to|2) [<the>] previous) (track|song)"
         out: "skip_previous"
+      - in: "[player] (power|turn) (off)"
+        out: "power_turn_off"
+      - in: "[player] (power|turn) (on)"
+        out: "power_turn_on"
 
   spotifyplus_player_volume_control:
     # out values must be English value.

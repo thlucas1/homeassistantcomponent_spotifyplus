@@ -78,6 +78,8 @@ responses:
     player_not_matched_area: "SpotifyPlus Media Player konnte für den Bereich \"{{ slots.area.text }}\" nicht gefunden werden."
     player_not_playing_media: "Media Player \"{{ slots.target_player.text }}\" spielt derzeit keine Medien ab."
     player_not_spotifyplus: "Der gefundene Media Player \"{{ slots.target_player.text }}\" ist kein SpotifyPlus Media Player."
+    player_power_turn_off: "Okay, Spotify-afspilleren var slukket."
+    player_power_turn_on: "Okay, Spotify-afspilleren var tændt."
     player_volume_control_down: "Okay, die Spotify-Lautstärke wurde um {{ slots.player_volume_step_pct.text }} Prozent verringert."
     player_volume_control_mute: "Okay, die Spotify-Lautstärke wurde stummgeschaltet."
     player_volume_control_set_step_level: "Okay, die Spotify-Lautstärkeschrittweite ist {{ slots.player_volume_step_pct.text }} Prozent."
@@ -256,6 +258,10 @@ lists:
         out: "skip_next"
       - in: "(vorheriger|zurück)"
         out: "skip_previous"
+      - in: "(magt|tur) (slukket)"
+        out: "power_turn_off"
+      - in: "(magt|tur) (på)"
+        out: "power_turn_on"
 
   spotifyplus_player_volume_control:
     # out-Werte müssen englische Werte sein.
