@@ -3,8 +3,8 @@ from __future__ import annotations
 from functools import partial
 import logging
 import base64
+import json
 import os
-import pickle
 from typing import Any
 
 from spotifywebapipython import SpotifyClient
@@ -283,36 +283,42 @@ class UnknownMediaType(BrowseError):
     """Unknown media type."""
 
 
-def deserialize_object(txt:str) -> object:
+def deserialize_object(txt:str) -> Category:
     """
-    Deserialize an object from a plain text string.
+    Deserialize a Category object from a plain text string.
     
     Args:
         txt (str):
             The serialized version of the object in the form of a string.
             
     Returns:
-        An object that was deserialized from a base64 string representation.
+        A Category object that was deserialized from a base64 string representation.
+
+    The string comes back from the media browser as a `media_content_id` value, so it is
+    treated as untrusted input:  it is decoded as JSON data (never with `pickle`, which can
+    execute code while loading) and only used to load a new Category instance.
     """
     base64_bytes = txt.encode('ascii')
     message_bytes = base64.b64decode(base64_bytes)
-    obj = pickle.loads(message_bytes)
-    return obj
+    root = json.loads(message_bytes.decode('utf-8'))
+    if not isinstance(root, dict):
+        raise ValueError("Serialized Category object is not a JSON object")
+    return Category(root=root)
 
 
 @staticmethod
-def serialize_object(obj:object) -> str:
+def serialize_object(obj:Category) -> str:
     """
-    Serialize an object into a plain text string.
+    Serialize a Category object into a plain text string.
     
     Args:
-        obj (object):
+        obj (Category):
             The object to serialize.
             
     Returns:
         A serialized base64 string representation of the object.
     """
-    message_bytes = pickle.dumps(obj)
+    message_bytes = json.dumps(obj.ToDictionary()).encode('utf-8')
     base64_bytes = base64.b64encode(message_bytes)
     txt = base64_bytes.decode('ascii')
     return txt
